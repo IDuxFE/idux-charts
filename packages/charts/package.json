@@ -26,21 +26,23 @@
   "unpkg": "./dist/index.umd.js",
   "jsdelivr": "./dist/index.umd.js",
   "sideEffects": false,
+  "files": [
+    "/dist"
+  ],
   "scripts": {
+    "clean": "rimraf dist node_modules",
     "build": "rimraf dist && vite build"
   },
   "dependencies": {
     "@idux/charts-core": "workspace:*",
     "@idux/charts-plots": "workspace:*"
   },
-  "devDependencies": {
-    "npm-run-all": "^4.1.0",
-    "rimraf": "^4.4.0"
-  },
   "peerDependencies": {
     "@vue/composition-api": "^1.7.0",
     "echarts": "^5.4.0",
-    "vue": "^2.6.0 || ^3.2.0"
+    "lodash-es": "^4.17.0",
+    "vue": "^2.6.0 || ^3.2.0",
+    "vue-demi": "^0.13.0"
   },
   "peerDependenciesMeta": {
     "@vue/composition-api": {

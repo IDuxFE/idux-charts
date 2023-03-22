@@ -3,13 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "clean": "pnpm -r --stream --filter=./packages/* run clean && rimraf dist node_modules",
     "start": "pnpm -r --stream --filter=./packages/site run start",
     "build": "pnpm -r --stream --filter=!./packages/site run build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "format": "prettier --write src/",
     "version": "pnpm changeset version",
     "changelog": "pnpm changeset"
   },
