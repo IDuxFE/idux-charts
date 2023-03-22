@@ -10,6 +10,11 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
     },
+    {
+      path: '/pie',
+      name: 'pie',
+      component: () => import('../views/DemoPie.vue'),
+    },
   ],
 })
 
