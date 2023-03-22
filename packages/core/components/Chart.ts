@@ -1,4 +1,12 @@
-import { defineComponent, computed, type HTMLAttributes, type InjectionKey, inject } from 'vue-demi'
+import {
+  defineComponent,
+  computed,
+  type HTMLAttributes,
+  type InjectionKey,
+  inject,
+  h,
+  isVue2,
+} from 'vue-demi'
 
 import { useChart } from '../composables'
 import { type ChartOption, type AdditionalChartOption } from '../types'
@@ -23,9 +31,15 @@ export default defineComponent<IChartProps>({
 
     const { containerRef } = useChart(mergedProps)
 
-    return () => {
-      const { class: className, style } = mergedProps.value as unknown as HTMLAttributes
-      return <div ref={containerRef} class={className} style={style}></div>
-    }
+    return { containerRef, mergedProps }
+  },
+  render() {
+    const { class: className, style } = this.mergedProps as unknown as HTMLAttributes
+
+    const attrs = isVue2
+      ? { ref: 'containerRef', attrs: { class: className, style } }
+      : { ref: 'containerRef', class: className, style }
+
+    return h('div', attrs)
   },
 })

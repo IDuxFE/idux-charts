@@ -1,4 +1,4 @@
-import { defineComponent, type HTMLAttributes } from 'vue-demi'
+import { defineComponent, type HTMLAttributes, h, isVue2 } from 'vue-demi'
 
 import { type PieSeriesOption } from 'echarts/charts'
 
@@ -14,6 +14,6 @@ export default defineComponent<IPieChartProps>({
   props: pieChartProps as any,
   setup(props, { attrs }) {
     const mergedProps = usePieOption(props as PieSeriesOption, attrs)
-    return () => <IxChart {...mergedProps.value} />
+    return () => h(IxChart, isVue2 ? { attrs: mergedProps.value } : mergedProps.value)
   },
 })

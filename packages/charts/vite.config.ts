@@ -1,24 +1,24 @@
 import { resolve } from 'path'
 
 import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
 import { mergeConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 import pkg from './package.json'
 import viteConfig from '../../vite.config'
 
-const externalDeps = ['echarts', 'lodash-es', 'vue-demi', '@idux']
+const externalDeps = ['echarts', 'lodash-es', 'vue', 'vue-demi', '@idux']
 
 const globalsMap: Record<string, string> = {
   '@idux/charts-core': 'IduxChartsCore',
   '@idux/charts-plots': 'IduxChartsPlots',
   'lodash-es': '_',
+  vue: 'Vue',
   'vue-demi': 'VueDemi',
 }
 
 export default mergeConfig(viteConfig, {
-  plugins: [dts(), vue(), vueJsx()],
+  plugins: [dts(), vue()],
   build: {
     lib: {
       entry: resolve(__dirname, 'index.ts'),

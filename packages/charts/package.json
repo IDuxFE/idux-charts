@@ -1,6 +1,6 @@
 {
   "name": "@idux/charts",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A UI Component Development Kit for Vue 3.x",
   "keywords": [
     "vue",
@@ -34,15 +34,14 @@
     "build": "rimraf dist && vite build"
   },
   "dependencies": {
-    "@idux/charts-core": "workspace:*",
-    "@idux/charts-plots": "workspace:*"
+    "@idux/charts-core": "^0.0.4",
+    "@idux/charts-plots": "^0.0.4"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.7.0",
     "echarts": "^5.4.0",
     "lodash-es": "^4.17.0",
-    "vue": "^2.6.0 || ^3.2.0",
-    "vue-demi": "^0.13.0"
+    "vue": "^2.6.0 || ^3.2.0"
   },
   "peerDependenciesMeta": {
     "@vue/composition-api": {

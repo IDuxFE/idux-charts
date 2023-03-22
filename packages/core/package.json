@@ -1,6 +1,6 @@
 {
   "name": "@idux/charts-core",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "A UI Component Development Kit for Vue 3.x",
   "keywords": [
     "vue",
@@ -39,6 +39,7 @@
     "vue-demi": "^0.13.0"
   },
   "peerDependencies": {
+    "@vue/composition-api": "^1.7.0",
     "vue": "^2.6.0 || ^3.2.0"
   },
   "peerDependenciesMeta": {
