@@ -10,8 +10,9 @@
     "test:unit": "vitest",
     "test:e2e": "playwright test",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "version": "pnpm changeset version",
-    "changelog": "pnpm changeset"
+    "ci:changelog": "pnpm changeset",
+    "ci:version": "pnpm changeset version",
+    "ci:publish": "pnpm publish -r"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.0",
