@@ -1,0 +1,50 @@
+{
+  "name": "@idux/charts-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A UI Component Development Kit for Vue 3.x",
+  "keywords": [
+    "vue",
+    "vue3",
+    "vue 3.x",
+    "chart",
+    "charts"
+  ],
+  "homepage": "https://github.com/IDuxFE/idux-charts#readme",
+  "bugs": {
+    "url": "https://github.com/IDuxFE/idux-charts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IDuxFE/idux-charts",
+    "directory": "packages/core"
+  },
+  "license": "MIT",
+  "author": "IDuxFE<idux.feteam@gmail.com>",
+  "main": "./index.js",
+  "module": "./index.js",
+  "typings": "./index.d.ts",
+  "unpkg": "./index.full.js",
+  "jsdelivr": "./index.full.js",
+  "sideEffects": false,
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@idux/cdk": "^1.5.0",
+    "@idux/components": "^1.5.0",
+    "@idux/pro": "^1.5.0",
+    "@idux/charts": "workspace:*",
+    "echarts": "^5.4.0",
+    "lodash-es": "^4.17.0",
+    "vue": "^3.2.0",
+    "vue-router": "^4.1.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.0",
+    "rimraf": "^4.4.0",
+    "vite": "^4.1.4"
+  }
+}

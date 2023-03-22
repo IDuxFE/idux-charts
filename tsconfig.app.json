@@ -1,0 +1,15 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": ["env.d.ts", "packages/**/*", "packages/**/*.vue"],
+  "exclude": ["packages/**/__tests__/*"],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "importsNotUsedAsValues": "remove",
+    "paths": {
+      "@idux/charts": ["./package/charts"],
+      "@idux/charts-core": ["./package/core"],
+      "@idux/charts-plots": ["./package/plots"]
+    }
+  }
+}
