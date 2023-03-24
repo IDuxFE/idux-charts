@@ -20,15 +20,12 @@
   },
   "license": "MIT",
   "author": "IDuxFE<idux.feteam@gmail.com>",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "typings": "./dist/index.d.ts",
-  "unpkg": "./dist/index.umd.js",
-  "jsdelivr": "./dist/index.umd.js",
+  "main": "./index.js",
+  "module": "./index.js",
+  "typings": "./index.d.ts",
+  "unpkg": "./index.umd.js",
+  "jsdelivr": "./index.umd.js",
   "sideEffects": false,
-  "files": [
-    "/dist"
-  ],
   "scripts": {
     "clean": "rimraf dist node_modules",
     "build": "rimraf dist && vite build"

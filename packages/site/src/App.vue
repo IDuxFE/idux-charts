@@ -6,11 +6,14 @@ import { RouterLink, RouterView } from 'vue-router'
   <header>
     <nav>
       <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/bar">柱状图</RouterLink>
       <RouterLink to="/pie">饼图</RouterLink>
     </nav>
   </header>
 
-  <RouterView />
+  <div style="width: 800px; padding: 0 25%">
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>

@@ -1,5 +1,8 @@
 import type { BarSeriesOption, LineSeriesOption, PieSeriesOption } from 'echarts/charts'
 import type {
+  DatasetComponentOption,
+  DataZoomComponentOption,
+  GridComponentOption,
   LegendComponentOption,
   TitleComponentOption,
   TooltipComponentOption,
@@ -53,13 +56,20 @@ interface ComponentOption {
 }
 
 export type BaseChartOption<T extends ComponentOption> = ComposeOption<
-  LegendComponentOption | TitleComponentOption | TooltipComponentOption | T
+  | DatasetComponentOption
+  | DataZoomComponentOption
+  | GridComponentOption
+  | LegendComponentOption
+  | TitleComponentOption
+  | TooltipComponentOption
+  | T
 >
 
 export type ChartOption = ComposeOption<
   | BarSeriesOption
   | PieSeriesOption
   | LineSeriesOption
+  | GridComponentOption
   | LegendComponentOption
   | TitleComponentOption
   | TooltipComponentOption

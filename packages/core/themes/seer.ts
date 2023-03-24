@@ -42,6 +42,8 @@ export const seerTheme = {
     fontSize: '12px',
   },
 
+  bar: {},
+
   pie: {
     avoidLabelOverlap: false,
     center: ['25%', '50%'],
@@ -67,7 +69,8 @@ export const seerTheme = {
     itemGap: 4,
     textStyle: {
       color: '#2F3540',
-      fontSize: '30px',
+      fontSize: '14px',
+      fontWeight: 500,
     },
     subtextStyle: {
       color: '#6F7785',
@@ -78,5 +81,68 @@ export const seerTheme = {
   tooltip: {
     borderWidth: 0,
     padding: 12,
+    textStyle: {
+      color: '#2F3540',
+    },
+    axisPointer: {
+      z: -100,
+      lineStyle: {
+        type: 'solid',
+        color: '#E1E5EB',
+      },
+    },
+  },
+
+  categoryAxis: {
+    axisLine: {
+      show: true,
+      lineStyle: {
+        color: '#EDF1F7',
+      },
+    },
+    axisTick: {
+      show: true,
+      alignWithLabel: true,
+      lineStyle: {
+        color: '#EDF1F7',
+      },
+    },
+    axisLabel: {
+      color: '#6F7785',
+    },
+    splitLine: {
+      show: false,
+    },
+    splitArea: {
+      show: false,
+    },
+  },
+
+  valueAxis: {
+    axisLine: {
+      show: false,
+    },
+    axisTick: {
+      show: false,
+    },
+    axisLabel: {
+      color: '#6F7785',
+    },
+    splitLine: {
+      lineStyle: {
+        color: '#EDF1F7',
+      },
+    },
+    splitArea: {
+      show: false,
+    },
+    nameTextStyle: {
+      color: '#6F7785',
+      padding: [0, 30, -4, 0],
+    },
+  },
+
+  dataZoom: {
+    height: 20,
   },
 }

@@ -11,6 +11,11 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: '/bar',
+      name: 'bar',
+      component: () => import('../views/DemoBar.vue'),
+    },
+    {
       path: '/pie',
       name: 'pie',
       component: () => import('../views/DemoPie.vue'),

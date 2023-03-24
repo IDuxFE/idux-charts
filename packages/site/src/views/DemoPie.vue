@@ -5,13 +5,13 @@ const data = [
   { value: 145, name: '图例A' },
   { value: 124, name: '图例B' },
   { value: 118, name: '图例C' },
-  { value: 118, name: '图例D' },
-  { value: 118, name: '图例E' },
+  { value: 110, name: '图as例D' },
+  { value: 104, name: '图例sdE' },
   { value: 92, name: '图例F' },
-  { value: 54, name: '图例G' },
-  { value: 45, name: '图例H' },
-  { value: 34, name: '图例I' },
-  { value: 22, name: '图例J' },
+  { value: 80, name: '图例G' },
+  { value: 72, name: '图例H' },
+  { value: 60, name: '图例I' },
+  { value: 52, name: '图例J' },
 ]
 
 const pieOption: PieChartProps = {
@@ -23,14 +23,10 @@ const pieOption: PieChartProps = {
   legend: {
     height: 100,
     top: 72,
-    textStyle: {
-      width: '120px',
-    },
   },
 }
 const pie2Option: PieChartProps = {
-  name: '资产总数',
-  radius: ['50%', '80%'],
+  radius: ['70%', '80%'],
   title: {
     subtext: '资产总数',
     top: '40%',
@@ -59,7 +55,7 @@ const pie3Option: PieChartProps = {
 <template>
   <IxPieChart :data="data" v-bind="pieOption" />
 
-  <IxPieChart :data="data" v-bind="pie2Option" />
+  <IxPieChart :data="data" name="资产总数" v-bind="pie2Option" />
 
   <IxPieChart :data="data" v-bind="pie3Option" />
 </template>

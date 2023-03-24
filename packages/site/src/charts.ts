@@ -1,4 +1,4 @@
-import { PieChart } from 'echarts/charts'
+import { BarChart, PieChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
@@ -6,6 +6,7 @@ import {
   DatasetComponent,
   TransformComponent,
   LegendComponent,
+  DataZoomComponent,
 } from 'echarts/components'
 import { use, registerTheme } from 'echarts/core'
 import { LabelLayout, UniversalTransition } from 'echarts/features'
@@ -19,12 +20,14 @@ use([
   TooltipComponent,
   GridComponent,
   DatasetComponent,
+  DataZoomComponent,
   LegendComponent,
   TransformComponent,
   LabelLayout,
   UniversalTransition,
   CanvasRenderer,
   PieChart,
+  BarChart,
 ])
 
 registerTheme('seer', seerTheme)
