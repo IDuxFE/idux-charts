@@ -56,5 +56,14 @@ module.exports = {
         pathGroupsExcludedImportTypes: ['builtin'],
       },
     ],
+
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        args: 'after-used',
+        argsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      },
+    ],
   },
 }

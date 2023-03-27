@@ -5,7 +5,6 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
   <header>
     <nav>
-      <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/bar">柱状图</RouterLink>
       <RouterLink to="/pie">饼图</RouterLink>
     </nav>

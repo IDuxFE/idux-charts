@@ -31,7 +31,7 @@
     "build": "rimraf dist && vite build"
   },
   "dependencies": {
-    "@idux/charts-core": "^0.1.0",
+    "@idux/charts-core": "workspace:*",
     "echarts": "^5.4.0",
     "lodash-es": "^4.17.0",
     "vue-demi": "^0.13.0"

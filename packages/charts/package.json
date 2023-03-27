@@ -31,8 +31,8 @@
     "build": "rimraf dist && vite build"
   },
   "dependencies": {
-    "@idux/charts-core": "^0.1.0",
-    "@idux/charts-plots": "^0.1.0"
+    "@idux/charts-core": "workspace:*",
+    "@idux/charts-plots": "workspace:*"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.7.0",

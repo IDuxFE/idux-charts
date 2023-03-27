@@ -1,3 +1,5 @@
+import type { App } from 'vue'
+
 import { BarChart, PieChart } from 'echarts/charts'
 import {
   TitleComponent,
@@ -14,20 +16,27 @@ import { CanvasRenderer } from 'echarts/renderers'
 
 import { seerTheme } from '@idux/charts'
 
-// 注册必须的组件
-use([
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  DatasetComponent,
-  DataZoomComponent,
-  LegendComponent,
-  TransformComponent,
-  LabelLayout,
-  UniversalTransition,
-  CanvasRenderer,
-  PieChart,
-  BarChart,
-])
+const install = (_: App) => {
+  // 注册必须的组件
+  use([
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    DatasetComponent,
+    DataZoomComponent,
+    LegendComponent,
+    TransformComponent,
+    LabelLayout,
+    UniversalTransition,
+    CanvasRenderer,
+    PieChart,
+    BarChart,
+  ])
 
-registerTheme('seer', seerTheme)
+  // 主题 seer 主题
+  registerTheme('seer', seerTheme)
+}
+
+export const chart = {
+  install,
+}

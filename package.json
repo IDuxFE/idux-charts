@@ -5,7 +5,9 @@
   "scripts": {
     "clean": "pnpm -r --stream --filter=./packages/* run clean && rimraf dist node_modules",
     "start": "pnpm -r --stream --filter=./packages/site run start",
-    "build": "pnpm -r --stream --filter=!./packages/site run build",
+    "build": "run-s build:lib build:site",
+    "build:lib": "pnpm -r --stream --filter=!./packages/site run build",
+    "build:site": "pnpm -r --stream --filter=./packages/site run build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
