@@ -6,6 +6,7 @@ import { RouterLink, RouterView } from 'vue-router'
   <header>
     <nav>
       <RouterLink to="/bar">柱状图</RouterLink>
+      <RouterLink to="/line">折线图</RouterLink>
       <RouterLink to="/pie">饼图</RouterLink>
     </nav>
   </header>

@@ -1,6 +1,6 @@
 import type { App } from 'vue'
 
-import { BarChart, PieChart } from 'echarts/charts'
+import { BarChart, PieChart, LineChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
@@ -12,7 +12,7 @@ import {
 } from 'echarts/components'
 import { use, registerTheme } from 'echarts/core'
 import { LabelLayout, UniversalTransition } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
+import { SVGRenderer } from 'echarts/renderers'
 
 import { seerTheme } from '@idux/charts'
 
@@ -28,9 +28,10 @@ const install = (_: App) => {
     TransformComponent,
     LabelLayout,
     UniversalTransition,
-    CanvasRenderer,
     PieChart,
     BarChart,
+    LineChart,
+    SVGRenderer,
   ])
 
   // 主题 seer 主题

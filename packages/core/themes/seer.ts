@@ -42,7 +42,19 @@ export const seerTheme = {
     fontSize: '12px',
   },
 
-  bar: {},
+  bar: {
+    label: {
+      color: '#6F7785',
+      position: 'top',
+    },
+  },
+
+  line: {
+    label: {
+      color: '#6F7785',
+      position: 'top',
+    },
+  },
 
   pie: {
     avoidLabelOverlap: false,
@@ -53,12 +65,15 @@ export const seerTheme = {
     },
     label: {
       show: false,
+      color: '#2F3540',
       formatter: '{c}',
       position: 'inside',
     },
   },
 
   legend: {
+    itemWidth: 12,
+    itemHeight: 12,
     textStyle: {
       color: '#2F3540',
       fontSize: '12px',

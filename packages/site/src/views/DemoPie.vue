@@ -18,10 +18,10 @@ const pieOption: PieChartProps = {
   title: {
     subtext: '资产总数',
     top: 16,
-    right: 88,
+    right: 72,
   },
   legend: {
-    height: 100,
+    height: 120,
     top: 72,
   },
 }
@@ -29,11 +29,11 @@ const pie2Option: PieChartProps = {
   radius: ['70%', '80%'],
   title: {
     subtext: '资产总数',
-    top: '40%',
-    left: '17%',
+    top: '38%',
+    left: '17.5%',
   },
   legend: {
-    height: 100,
+    height: 120,
     top: 72,
   },
 }
@@ -44,10 +44,10 @@ const pie3Option: PieChartProps = {
   title: {
     subtext: '资产总数',
     top: 16,
-    right: 88,
+    right: 72,
   },
   legend: {
-    height: 100,
+    height: 120,
     top: 72,
   },
 }
