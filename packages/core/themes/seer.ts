@@ -1,4 +1,4 @@
-export const seerColors10 = [
+export const seerColors = [
   '#458FFF',
   '#45D9A3',
   '#FFC145',
@@ -9,9 +9,10 @@ export const seerColors10 = [
   '#FF9245',
   '#F587B3',
   '#8352CC',
+  '#65779B',
 ]
 
-export const seerColors20 = [
+export const seerColorsMore = [
   '#458FFF',
   '#C8DEFF',
   '#45D9A3',
@@ -32,10 +33,12 @@ export const seerColors20 = [
   '#FCDBE8',
   '#8352CC',
   '#FCDBE8',
+  '#65779B',
+  '#65779B',
 ]
 
 export const seerTheme = {
-  color: seerColors10,
+  color: seerColors,
 
   textStyle: {
     color: '#2F3540',

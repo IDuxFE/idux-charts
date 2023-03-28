@@ -1,4 +1,10 @@
+import { BarChart } from 'echarts/charts'
+
+import { createInstall } from '@idux/charts-core'
+
 import Bar from './src/Bar'
+
+createInstall(Bar, [BarChart])
 
 const IxBarChart = Bar
 
