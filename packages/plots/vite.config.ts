@@ -15,10 +15,8 @@ const globalsMap: Record<string, string> = {
 }
 
 export default defineConfig({
-  plugins: [dts({ outputDir: resolve(__dirname, '../../dist') }), vue()],
+  plugins: [dts(), vue()],
   build: {
-    outDir: resolve(__dirname, '../../dist/plots'),
-    emptyOutDir: true,
     lib: {
       entry: resolve(__dirname, 'index.ts'),
       name: 'IduxChartsPlots',

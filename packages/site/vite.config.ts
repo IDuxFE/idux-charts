@@ -10,11 +10,13 @@ export default defineConfig(({ command }) => {
   return {
     plugins: [vue()],
     resolve: {
-      alias: [],
+      alias: [
+        { find: '@idux/charts', replacement: resolve(__dirname, '../charts/index.ts') },
+        { find: '@idux/charts-core', replacement: resolve(__dirname, '../core/index.ts') },
+        { find: '@idux/charts-plots', replacement: resolve(__dirname, '../plots/index.ts') },
+      ],
     },
     build: {
-      outDir: resolve(__dirname, '../../dist/site'),
-      emptyOutDir: true,
       target: ['chrome79', 'edge79', 'firefox72', 'safari13'],
     },
     define: {

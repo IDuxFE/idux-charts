@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "clean": "pnpm -r --stream --filter=./packages/* run clean && rimraf dist node_modules",
     "start": "pnpm -r --stream --filter=./packages/site run start",
     "build": "run-s build:lib build:site",
@@ -12,9 +13,9 @@
     "test:unit": "vitest",
     "test:e2e": "playwright test",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "ci:changelog": "pnpm changeset",
-    "ci:version": "pnpm changeset version",
-    "ci:publish": "pnpm publish -r"
+    "changelog": "pnpm changeset",
+    "version": "pnpm changeset version",
+    "publish": "pnpm changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.0",
