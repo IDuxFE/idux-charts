@@ -1,6 +1,9 @@
-import { isVue2 } from 'vue-demi'
+import { type App, isVue2 } from 'vue-demi'
 
+import { registerTheme, use } from 'echarts/core'
 import { isNil } from 'lodash-es'
+
+import { seerTheme } from '../themes'
 
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
@@ -29,4 +32,17 @@ export function convertArray<T>(value: T | T[]): T[] {
     return []
   }
   return Array.isArray(value) ? value : [value]
+}
+
+export function createInstall(Chart: any, ext: Parameters<typeof use>[0]) {
+  use(ext)
+
+  // 主题 seer 主题
+  registerTheme('seer', seerTheme)
+
+  const install = (app: App) => {
+    app.component(Chart.name, Chart)
+  }
+
+  Chart.install = install
 }

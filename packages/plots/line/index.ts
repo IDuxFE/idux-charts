@@ -1,4 +1,10 @@
+import { LineChart } from 'echarts/charts'
+
+import { createInstall } from '@idux/charts-core'
+
 import Line from './src/Line'
+
+createInstall(Line, [LineChart])
 
 const IxLineChart = Line
 

@@ -1,4 +1,10 @@
+import { PieChart } from 'echarts/charts'
+
+import { createInstall } from '@idux/charts-core'
+
 import Pie from './src/Pie'
+
+createInstall(Pie, [PieChart])
 
 const IxPieChart = Pie
 
