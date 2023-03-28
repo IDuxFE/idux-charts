@@ -19,10 +19,8 @@ const globalsMap: Record<string, string> = {
 export default defineConfig(({ command }) => {
   const isBuild = command === 'build'
   return {
-    plugins: [dts({ outputDir: resolve(__dirname, '../../dist') }), vue()],
+    plugins: [dts(), vue()],
     build: {
-      outDir: resolve(__dirname, '../../dist/charts'),
-      emptyOutDir: true,
       lib: {
         entry: resolve(__dirname, 'index.ts'),
         name: 'IduxCharts',

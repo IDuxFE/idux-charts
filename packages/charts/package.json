@@ -1,6 +1,6 @@
 {
   "name": "@idux/charts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A UI Component Development Kit for Vue 3.x",
   "keywords": [
     "vue",
@@ -21,11 +21,15 @@
   "license": "MIT",
   "author": "IDuxFE<idux.feteam@gmail.com>",
   "type": "module",
-  "main": "./index.umd.cjs",
-  "module": "./index.js",
-  "typings": "./index.d.ts",
-  "unpkg": "./index.umd.cjs",
-  "jsdelivr": "./index.umd.cjs",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "unpkg": "./dist/index.umd.cjs",
+  "jsdelivr": "./dist/index.umd.cjs",
+  "files": [
+    "dist",
+    "*.md"
+  ],
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist node_modules",
