@@ -5,14 +5,12 @@ import { merge, get, set, cloneDeep } from 'lodash-es'
 
 import { convertArray, type AdditionalChartOption, type BaseChartOption } from '@idux/charts-core'
 
-export interface PieChartProps extends BaseChartOption<PieSeriesOption>, AdditionalChartOption {
-  data?: PieSeriesOption['data']
-  name?: PieSeriesOption['name']
-  radius?: PieSeriesOption['radius']
-  roseType?: PieSeriesOption['roseType']
-}
+export const pieChartProps = ['data', 'label', 'markArea', 'name', 'radius', 'roseType'] as const
 
-export const pieChartProps = ['data', 'name', 'radius', 'roseType'] as const
+export interface PieChartProps
+  extends BaseChartOption<PieSeriesOption>,
+    AdditionalChartOption,
+    Pick<PieSeriesOption, (typeof pieChartProps)[number]> {}
 
 export const PIE_CHART_TOKEN: InjectionKey<PieChartProps> = Symbol('PIE_CHART_TOKEN')
 
@@ -20,7 +18,7 @@ const defaultProps: PieChartProps = {
   style: 'width:400px; height:200px;',
   legend: {
     orient: 'vertical',
-    itemGap: 4,
+    itemGap: 8,
     right: 16,
   },
   title: {

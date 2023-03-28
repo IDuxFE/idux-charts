@@ -1,6 +1,6 @@
 import { type InjectionKey, computed, inject } from 'vue-demi'
 
-import { type BarSeriesOption } from 'echarts/charts'
+import { type LineSeriesOption } from 'echarts/charts'
 import { cloneDeep, get, merge, set } from 'lodash-es'
 
 import {
@@ -10,16 +10,16 @@ import {
   convertArray,
 } from '@idux/charts-core'
 
-export const barChartProps = ['data', 'label', 'markArea', 'name', 'barGap', 'barWidth'] as const
+export const lineChartProps = ['data', 'name', 'label', 'markArea', 'smooth'] as const
 
-export interface BarChartProps
-  extends BaseChartOption<BarSeriesOption>,
+export interface LineChartProps
+  extends BaseChartOption<LineSeriesOption>,
     AdditionalChartOption,
-    Pick<BarSeriesOption, (typeof barChartProps)[number]> {}
+    Pick<LineSeriesOption, (typeof lineChartProps)[number]> {}
 
-export const BAR_CHART_TOKEN: InjectionKey<BarChartProps> = Symbol('BAR_CHART_TOKEN')
+export const LINE_CHART_TOKEN: InjectionKey<LineChartProps> = Symbol('LINE_CHART_TOKEN')
 
-const defaultProps: BarChartProps = {
+const defaultProps: LineChartProps = {
   style: 'width:100%; height:300px;',
   grid: {
     top: 32,
@@ -37,9 +37,6 @@ const defaultProps: BarChartProps = {
   },
 }
 
-const defaultBarGap = 0.2
-const defaultBarWidth = 10
-
 const defaultCategoryAxis = {
   type: 'category',
 }
@@ -48,17 +45,18 @@ const defaultValueAxis = {
   type: 'value',
 }
 
-export function useBarOption(props: BarSeriesOption, attrs: BarChartProps) {
-  const injectProps = inject(BAR_CHART_TOKEN, null)
+export function useLineOption(props: LineSeriesOption, attrs: LineChartProps) {
+  const injectProps = inject(LINE_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
-  const mergedSeriesOption = computed<BarSeriesOption>(() => {
-    const { data = [], barGap = defaultBarGap, barWidth = defaultBarWidth } = props
-    return { ...props, type: 'bar', data, barGap, barWidth }
+  const mergedSeriesOption = computed<LineSeriesOption>(() => {
+    const { data = [] } = props
+    return { ...props, type: 'line', data }
   })
 
   const mergedOption = computed(() => {
     const option = merge(mergedDefaultProps, attrs)
+
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
       // 如果有 title, 额外增加 24px
       const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
@@ -75,12 +73,7 @@ export function useBarOption(props: BarSeriesOption, attrs: BarChartProps) {
     if (legend === false || series.length <= 1) {
       set(option, ['legend'], undefined)
     }
-    if (!get(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'])) {
-      // 当 series 为空时，默认为 1
-      const seriesLength = convertArray(attrs.series).length || 1
-      const axisPointerWidth = seriesLength * defaultBarWidth * (1 + defaultBarGap) + 8
-      set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
-    }
+
     return option
   })
 

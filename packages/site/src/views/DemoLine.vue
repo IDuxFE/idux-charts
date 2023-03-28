@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { IxBarChart, type BarChartProps } from '@idux/charts'
+import { IxLineChart, type LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 const axis = { data: ['星期一', '星期二', '星期三', '星期四', '星期五'] }
 
-const barOption: BarChartProps = {
+const lineOption: LineChartProps = {
   xAxis: axis,
   yAxis: { name: '次' },
   title: {
@@ -15,11 +15,7 @@ const barOption: BarChartProps = {
   },
 }
 
-const bar2Option: BarChartProps = {
-  yAxis: axis,
-}
-
-const bar3Option: BarChartProps = {
+const line3Option: LineChartProps = {
   xAxis: axis,
   yAxis: { name: '次' },
   series: [
@@ -45,9 +41,9 @@ const bar3Option: BarChartProps = {
 }
 </script>
 <template>
-  <IxBarChart :data="data" name="日志数量" v-bind="barOption" />
+  <IxLineChart :data="data" name="日志数量" v-bind="lineOption" />
 
-  <IxBarChart :data="data" v-bind="bar2Option" />
+  <IxLineChart :data="data" :smooth="true" v-bind="lineOption" />
 
-  <IxBarChart :data="data" v-bind="bar3Option" />
+  <IxLineChart :data="data" v-bind="line3Option" />
 </template>
