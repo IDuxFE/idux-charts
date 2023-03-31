@@ -66,11 +66,15 @@ export type BaseChartOption<T extends ComponentOption> = ComposeOption<
 >
 
 export type ChartOption = ComposeOption<
-  | BarSeriesOption
-  | PieSeriesOption
-  | LineSeriesOption
+  | DatasetComponentOption
+  | DataZoomComponentOption
   | GridComponentOption
   | LegendComponentOption
   | TitleComponentOption
   | TooltipComponentOption
+  | BarSeriesOption
+  | PieSeriesOption
+  | LineSeriesOption
 >
+
+export interface ChartProps extends ChartOption, AdditionalChartOption {}

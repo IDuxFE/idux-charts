@@ -1,16 +1,25 @@
-import { type InjectionKey, computed, inject } from 'vue-demi'
+import { type ComputedRef, type InjectionKey, computed, inject } from 'vue-demi'
 
 import { type BarSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, merge, set } from 'lodash-es'
+import { cloneDeep, get, set, merge } from 'lodash-es'
 
 import {
   type AdditionalChartOption,
   type BaseChartOption,
   isVertical,
   convertArray,
+  filterEmptyProps,
 } from '@idux/charts-core'
 
-export const barChartProps = ['data', 'label', 'markArea', 'name', 'barGap', 'barWidth'] as const
+export const barChartProps = [
+  'data',
+  'barGap',
+  'barWidth',
+  'label',
+  'name',
+  'markArea',
+  'stack',
+] as const
 
 export interface BarChartProps
   extends BaseChartOption<BarSeriesOption>,
@@ -48,17 +57,21 @@ const defaultValueAxis = {
   type: 'value',
 }
 
-export function useBarOption(props: BarSeriesOption, attrs: BarChartProps) {
+export function useBarOption(
+  props: BarSeriesOption,
+  attrs: BarChartProps,
+): ComputedRef<BarChartProps> {
   const injectProps = inject(BAR_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
   const mergedSeriesOption = computed<BarSeriesOption>(() => {
-    const { data = [], barGap = defaultBarGap, barWidth = defaultBarWidth } = props
-    return { ...props, type: 'bar', data, barGap, barWidth }
+    const option = filterEmptyProps(props)
+    option.type = 'bar'
+    return option
   })
 
   const mergedOption = computed(() => {
-    const option = merge(mergedDefaultProps, attrs)
+    const option = merge({}, mergedDefaultProps, attrs)
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
       // 如果有 title, 额外增加 24px
       const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
@@ -85,7 +98,7 @@ export function useBarOption(props: BarSeriesOption, attrs: BarChartProps) {
   })
 
   return computed(() => {
-    const option = mergedOption.value
+    const option = { ...mergedOption.value }
     const seriesOption = mergedSeriesOption.value
 
     const { xAxis, yAxis, series } = option

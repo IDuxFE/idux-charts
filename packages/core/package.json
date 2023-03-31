@@ -28,7 +28,8 @@
   "jsdelivr": "./dist/index.umd.cjs",
   "files": [
     "dist",
-    "*.md"
+    "*.md",
+    "*.d.ts"
   ],
   "sideEffects": false,
   "scripts": {

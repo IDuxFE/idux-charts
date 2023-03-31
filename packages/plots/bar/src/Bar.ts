@@ -6,9 +6,8 @@ import { IxChart, mergeAttrs } from '@idux/charts-core'
 
 import { barChartProps, useBarOption, type BarChartProps } from './useBarOption'
 
-type IBarChartProps = Omit<HTMLAttributes, keyof BarChartProps> & BarChartProps
 
-export default defineComponent<IBarChartProps>({
+export default defineComponent<Omit<HTMLAttributes, keyof BarChartProps> & BarChartProps>({
   name: 'IxBarChart',
   inheritAttrs: false,
   props: barChartProps as any,
