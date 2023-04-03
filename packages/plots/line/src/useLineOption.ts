@@ -1,4 +1,4 @@
-import { type InjectionKey, computed, inject } from 'vue-demi'
+import { type ComputedRef, type InjectionKey, computed, inject } from 'vue-demi'
 
 import { type LineSeriesOption } from 'echarts/charts'
 import { cloneDeep, get, merge, set } from 'lodash-es'
@@ -8,9 +8,18 @@ import {
   type BaseChartOption,
   isVertical,
   convertArray,
+  filterEmptyProps,
 } from '@idux/charts-core'
 
-export const lineChartProps = ['data', 'name', 'label', 'markArea', 'smooth'] as const
+export const lineChartProps = [
+  'data',
+  'areaStyle',
+  'label',
+  'name',
+  'markArea',
+  'smooth',
+  'stack',
+] as const
 
 export interface LineChartProps
   extends BaseChartOption<LineSeriesOption>,
@@ -45,17 +54,21 @@ const defaultValueAxis = {
   type: 'value',
 }
 
-export function useLineOption(props: LineSeriesOption, attrs: LineChartProps) {
+export function useLineOption(
+  props: LineSeriesOption,
+  attrs: LineChartProps,
+): ComputedRef<LineChartProps> {
   const injectProps = inject(LINE_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
   const mergedSeriesOption = computed<LineSeriesOption>(() => {
-    const { data = [] } = props
-    return { ...props, type: 'line', data }
+    const option = filterEmptyProps(props)
+    option.type = 'line'
+    return option
   })
 
   const mergedOption = computed(() => {
-    const option = merge(mergedDefaultProps, attrs)
+    const option = merge({}, mergedDefaultProps, attrs)
 
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
       // 如果有 title, 额外增加 24px
@@ -78,18 +91,15 @@ export function useLineOption(props: LineSeriesOption, attrs: LineChartProps) {
   })
 
   return computed(() => {
-    const option = mergedOption.value
+    const option = { ...mergedOption.value }
     const seriesOption = mergedSeriesOption.value
-
     const { xAxis, yAxis, series } = option
-
     const [defaultXAxis, defaultYAxis] = isVertical(option)
       ? [defaultCategoryAxis, defaultValueAxis]
       : [defaultValueAxis, defaultCategoryAxis]
 
     option.xAxis = merge(cloneDeep(defaultXAxis), xAxis)
     option.yAxis = merge(cloneDeep(defaultYAxis), yAxis)
-
     if (!series) {
       option.series = [seriesOption]
     } else {

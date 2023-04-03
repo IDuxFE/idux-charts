@@ -3,20 +3,23 @@ import {
   watch,
   onMounted,
   onBeforeUnmount,
-  type ComputedRef,
+  type Ref,
   type ShallowRef,
   computed,
   watchEffect,
+  unref,
 } from 'vue-demi'
 
 import { init, type EChartsType } from 'echarts/core'
 import { isEqual, cloneDeep, isObject } from 'lodash-es'
 
 import { useResizeObserver } from './useResizeObserver'
-import { type ChartProps } from '../components'
+import { type ChartProps } from '../types'
+
+export type MaybeRef<T> = T | Ref<T>
 
 export function useChart<U extends ChartProps>(
-  options: ComputedRef<U>,
+  options: MaybeRef<U>,
 ): {
   containerRef: ShallowRef<HTMLDivElement | undefined>
   chartRef: ShallowRef<EChartsType | undefined>
@@ -25,12 +28,12 @@ export function useChart<U extends ChartProps>(
   const chartRef = shallowRef<EChartsType>()
   const prevRestOptions = shallowRef<U>()
 
-  const mergedAutoResize = computed(() => options.value.autoResize ?? true)
-  const mergedGroup = computed(() => options.value.group)
-  const mergedInitOption = computed(() => options.value.initOption)
-  const mergedLoading = computed(() => options.value.loading)
-  const mergedSetOptionOpts = computed(() => options.value.setOptionOpts)
-  const mergedTheme = computed(() => options.value.theme)
+  const mergedAutoResize = computed(() => unref(options).autoResize ?? true)
+  const mergedGroup = computed(() => unref(options).group)
+  const mergedInitOption = computed(() => unref(options).initOption)
+  const mergedLoading = computed(() => unref(options).loading)
+  const mergedSetOptionOpts = computed(() => unref(options).setOptionOpts)
+  const mergedTheme = computed(() => unref(options).theme ?? 'seer')
 
   const initChat = () => {
     const container = containerRef.value
@@ -40,7 +43,7 @@ export function useChart<U extends ChartProps>(
 
     const instance = init(container, mergedTheme.value, mergedInitOption.value)
 
-    const currOptions = options.value
+    const currOptions = unref(options)
     const { restOptions, events } = processOptions(currOptions, false)
 
     instance.setOption(restOptions, mergedSetOptionOpts.value)
@@ -75,15 +78,13 @@ export function useChart<U extends ChartProps>(
   onBeforeUnmount(() => destroyChart())
 
   watch(
-    options,
+    () => unref(options),
     currOptions => {
       const instance = chartRef.value
       if (!instance) {
         return
       }
 
-      // 需要判断一下是否存在 data, percent 之外的数据变化
-      // 如果存在就直接调用 update， 不存在只需要调用 changeData
       const { restOptions } = processOptions(currOptions)
 
       if (!isEqual(restOptions, prevRestOptions.value)) {
@@ -96,16 +97,10 @@ export function useChart<U extends ChartProps>(
     },
   )
 
-  watch(
-    [mergedTheme, mergedInitOption],
-    () => {
-      destroyChart()
-      initChat()
-    },
-    {
-      deep: true,
-    },
-  )
+  watch([mergedTheme, mergedInitOption], () => {
+    destroyChart()
+    initChat()
+  })
 
   watchEffect(() => {
     const group = mergedGroup.value

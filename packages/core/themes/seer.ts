@@ -46,6 +46,8 @@ export const seerTheme = {
   },
 
   bar: {
+    barGap: 0.2,
+    barWidth: 10,
     label: {
       color: '#6F7785',
       position: 'top',
@@ -62,6 +64,7 @@ export const seerTheme = {
   pie: {
     avoidLabelOverlap: false,
     center: ['25%', '50%'],
+    radius: ['70%', '80%'],
     itemStyle: {
       borderWidth: 1,
       borderColor: '#fff',

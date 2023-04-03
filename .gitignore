@@ -33,3 +33,6 @@ pnpm-lock.yaml
 
 test-results/
 playwright-report/
+
+
+packages/site/components.d.ts

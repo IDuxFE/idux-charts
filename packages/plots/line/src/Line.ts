@@ -6,14 +6,15 @@ import { IxChart, mergeAttrs } from '@idux/charts-core'
 
 import { lineChartProps, useLineOption, type LineChartProps } from './useLineOption'
 
-type ILineChartProps = Omit<HTMLAttributes, keyof LineChartProps> & LineChartProps
-
-export default defineComponent<ILineChartProps>({
+export default defineComponent<Omit<HTMLAttributes, keyof LineChartProps> & LineChartProps>({
   name: 'IxLineChart',
   inheritAttrs: false,
   props: lineChartProps as any,
   setup(props, { attrs }) {
     const mergedProps = useLineOption(props as LineSeriesOption, attrs)
-    return () => h(IxChart, mergeAttrs(mergedProps.value))
+
+    return () => {
+      return h(IxChart, mergeAttrs(mergedProps.value))
+    }
   },
 })

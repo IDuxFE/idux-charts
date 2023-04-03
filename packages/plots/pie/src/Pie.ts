@@ -6,9 +6,7 @@ import { IxChart, mergeAttrs } from '@idux/charts-core'
 
 import { pieChartProps, usePieOption, type PieChartProps } from './usePieOption'
 
-type IPieChartProps = Omit<HTMLAttributes, keyof PieChartProps> & PieChartProps
-
-export default defineComponent<IPieChartProps>({
+export default defineComponent<Omit<HTMLAttributes, keyof PieChartProps> & PieChartProps>({
   name: 'IxPieChart',
   inheritAttrs: false,
   props: pieChartProps as any,
