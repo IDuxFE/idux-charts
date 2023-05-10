@@ -26,10 +26,10 @@ const option: ChartProps = {
   },
   legend: {
     orient: 'vertical',
-    itemGap: 8,
-    top: '50%',
-    right: '25%',
-    height: 120,
+    itemGap: 16,
+    bottom: '8%',
+    right: '20%',
+    height: '80%',
   },
   tooltip: { trigger: 'item' },
   series: [
@@ -41,7 +41,7 @@ const option: ChartProps = {
 }
 </script>
 <template>
-  <IxChart style="width: 100%; height: 300px" v-bind="option" />
+  <IxChart style="height: 300px" v-bind="option" />
 </template>
 
 <archive-meta lang="json">

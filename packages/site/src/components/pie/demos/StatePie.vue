@@ -23,7 +23,13 @@ const loading = ref(true)
 <template>
   <IxSpace block vertical :size="24">
     <IxSwitch v-model:checked="loading"></IxSwitch>
-    <IxPieChart :data="data" :loading="loading" name="环形饼图" v-bind="pieOption" />
+    <IxPieChart
+      style="width: 600px; height: 300px"
+      :data="data"
+      :loading="loading"
+      name="环形饼图"
+      v-bind="pieOption"
+    />
   </IxSpace>
 </template>
 

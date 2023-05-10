@@ -20,7 +20,7 @@ const loading = ref(true)
 <template>
   <IxSpace block vertical :size="24">
     <IxSwitch v-model:checked="loading"></IxSwitch>
-    <IxBarChart :data="data" :loading="loading" v-bind="barOption" />
+    <IxBarChart style="height: 300px" :data="data" :loading="loading" v-bind="barOption" />
   </IxSpace>
 </template>
 

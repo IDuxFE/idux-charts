@@ -1,4 +1,4 @@
-import { defineComponent, type HTMLAttributes, h } from 'vue-demi'
+import { defineComponent, type HTMLAttributes, h, normalizeStyle } from 'vue-demi'
 
 import { useChart } from '../composables'
 import { type ChartProps } from '../types'
@@ -13,7 +13,14 @@ export default defineComponent<Omit<HTMLAttributes, keyof ChartProps> & ChartPro
   },
   render() {
     const { class: className, style } = this.$attrs
-    const attrs = mergeAttrs({ class: className, style })
+    const attrs = mergeAttrs({
+      class: className,
+      style: normalizeStyle({
+        width: '100%',
+        height: '100%',
+        ...(style as any),
+      }),
+    })
     return h('div', { ref: 'containerRef', ...attrs })
   },
 })

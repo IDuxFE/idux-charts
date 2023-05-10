@@ -23,8 +23,8 @@
   "author": "IDuxFE<idux.feteam@gmail.com>",
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "start": "idux-archive dev",
-    "build": "idux-archive build"
+    "start": "archive dev",
+    "build": "archive build"
   },
   "dependencies": {
     "@idux/archive-app": "^0.3.1",

@@ -29,12 +29,11 @@ export interface LineChartProps
 export const LINE_CHART_TOKEN: InjectionKey<LineChartProps> = Symbol('LINE_CHART_TOKEN')
 
 const defaultProps: LineChartProps = {
-  style: 'width:100%; height:300px;',
   grid: {
     top: 32,
     bottom: 32,
-    left: 24,
-    right: 24,
+    left: 32,
+    right: 32,
     containLabel: true,
   },
   legend: {

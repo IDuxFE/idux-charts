@@ -12,7 +12,7 @@ export const seerColors = [
   '#65779B',
 ]
 
-export const seerColorsMore = [
+export const seerColorsForMore = [
   '#458FFF',
   '#C8DEFF',
   '#45D9A3',
@@ -35,6 +35,16 @@ export const seerColorsMore = [
   '#FCDBE8',
   '#65779B',
   '#65779B',
+]
+
+export const seerColorsForRisk = [
+  '#8C1604',
+  '#DB4C35',
+  '#FF9245',
+  '#FFC145',
+  '#689FFF',
+  '#45D9A3',
+  '#99ACD1',
 ]
 
 export const seerTheme = {
@@ -63,7 +73,6 @@ export const seerTheme = {
 
   pie: {
     avoidLabelOverlap: false,
-    center: ['25%', '50%'],
     radius: ['70%', '80%'],
     itemStyle: {
       borderWidth: 1,
@@ -81,7 +90,7 @@ export const seerTheme = {
     itemWidth: 12,
     itemHeight: 12,
     textStyle: {
-      color: '#2F3540',
+      color: '#6F7785',
       fontSize: '12px',
     },
   },
@@ -90,7 +99,7 @@ export const seerTheme = {
     itemGap: 4,
     textStyle: {
       color: '#2F3540',
-      fontSize: '14px',
+      fontSize: '12px',
       fontWeight: 500,
     },
     subtextStyle: {
@@ -106,7 +115,7 @@ export const seerTheme = {
       color: '#2F3540',
     },
     axisPointer: {
-      z: -100,
+      z: 1,
       lineStyle: {
         type: 'solid',
         color: '#E1E5EB',
@@ -164,6 +173,6 @@ export const seerTheme = {
   },
 
   dataZoom: {
-    height: 20,
+    height: 16,
   },
 }

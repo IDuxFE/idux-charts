@@ -20,7 +20,7 @@ const option: ChartProps = {
 }
 </script>
 <template>
-  <IxChart style="width: 100%; height: 300px" v-bind="option" />
+  <IxChart style="height: 300px" v-bind="option" />
 </template>
 
 <archive-meta lang="json">

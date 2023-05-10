@@ -17,7 +17,7 @@ const data = [
 const pieOption: PieChartProps = {}
 </script>
 <template>
-  <IxPieChart :data="data" name="环形饼图" v-bind="pieOption" />
+  <IxPieChart style="width: 600px; height: 300px" :data="data" name="环形饼图" v-bind="pieOption" />
 </template>
 
 <archive-meta lang="json">
