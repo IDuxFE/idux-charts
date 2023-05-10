@@ -14,7 +14,7 @@ const barOption: BarChartProps = {
 }
 </script>
 <template>
-  <IxBarChart :data="data" v-bind="barOption" />
+  <IxBarChart style="height: 300px" :data="data" v-bind="barOption" />
 </template>
 
 <archive-meta lang="json">

@@ -11,12 +11,14 @@ import {
 } from 'vue-demi'
 
 import { init, type EChartsType } from 'echarts/core'
-import { isEqual, cloneDeep, isObject } from 'lodash-es'
+import { isEqual, cloneDeep, isObject, isBoolean } from 'lodash-es'
 
 import { useResizeObserver } from './useResizeObserver'
 import { type ChartProps } from '../types'
 
 export type MaybeRef<T> = T | Ref<T>
+
+const defaultLoading = { text: '加载中...' }
 
 export function useChart<U extends ChartProps>(
   options: MaybeRef<U>,
@@ -118,7 +120,7 @@ export function useChart<U extends ChartProps>(
     const loading = mergedLoading.value
 
     if (loading) {
-      instance.showLoading(isObject(loading) ? loading : undefined)
+      instance.showLoading(isBoolean(loading) ? defaultLoading : { ...defaultLoading, ...loading })
     } else {
       instance.hideLoading()
     }

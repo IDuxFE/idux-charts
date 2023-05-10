@@ -37,7 +37,7 @@ const lineOption: LineChartProps = {
 }
 </script>
 <template>
-  <IxLineChart v-bind="lineOption" style="width: 100%; height: 600px" />
+  <IxLineChart style="width: 100%; height: 600px" v-bind="lineOption" />
 </template>
 
 <archive-meta lang="json">

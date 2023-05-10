@@ -28,20 +28,19 @@ export interface PieChartProps
 export const PIE_CHART_TOKEN: InjectionKey<PieChartProps> = Symbol('PIE_CHART_TOKEN')
 
 const defaultProps: PieChartProps = {
-  style: 'width:400px; height:200px;',
   legend: {
     orient: 'vertical',
     itemGap: 16,
-    top: 28,
-    left: '50%',
+    right: '0',
+    bottom: '8%',
+    height: '80%',
   },
   title: {
     textStyle: {
       fontSize: '30px',
     },
-    top: '35%',
-    left: '18%',
-    itemGap: 8,
+    top: 'center',
+    left: 'center',
   },
   tooltip: { trigger: 'item' },
 }

@@ -1,22 +1,11 @@
 <script setup lang="ts">
-import { graphic } from 'echarts/core'
-
-import { type LineChartProps } from '@idux/charts'
+import { type LineChartProps, useLinearGradient } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
   areaStyle: {
-    color: new graphic.LinearGradient(0, 0, 0, 1, [
-      {
-        offset: 0,
-        color: '#458FFF',
-      },
-      {
-        offset: 1,
-        color: 'rgba(69,143,255,0.00)',
-      },
-    ]),
+    color: useLinearGradient(),
   },
   stack: 'Total',
   title: { text: '面积图标题' },
@@ -30,7 +19,7 @@ const lineOption: LineChartProps = {
 }
 </script>
 <template>
-  <IxLineChart :data="data" v-bind="lineOption" />
+  <IxLineChart style="height: 300px" :data="data" v-bind="lineOption" />
 </template>
 
 <archive-meta lang="json">

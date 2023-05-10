@@ -1,10 +1,7 @@
 import { type App, type Plugin } from 'vue'
 
-// eslint-disable-next-line import/no-unassigned-import
 import '@idux/cdk/index.css'
-// eslint-disable-next-line import/no-unassigned-import
 import '@idux/components/style/core/reset.default.css'
-// eslint-disable-next-line import/no-unassigned-import
 import '@idux/components/style/core/reset-scroll.default.css'
 
 import { type ArchiveLoaderVueSetup } from '@idux/archive-loader-vue'

@@ -14,17 +14,17 @@ const pieOption: PieChartProps = {
   name: '基础饼图',
   radius: '80%',
   title: {
-    top: 16,
-    left: '50%',
+    top: '8%',
+    left: '80%',
   },
   legend: {
-    height: 100,
-    top: 80,
+    top: '30%',
+    left: '80%',
   },
 }
 </script>
 <template>
-  <IxPieChart :data="data" v-bind="pieOption" />
+  <IxPieChart style="width: 600px; height: 300px" :data="data" v-bind="pieOption" />
 </template>
 
 <archive-meta lang="json">

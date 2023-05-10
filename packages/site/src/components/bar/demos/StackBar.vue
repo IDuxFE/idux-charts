@@ -23,7 +23,7 @@ const barOption: BarChartProps = {
 }
 </script>
 <template>
-  <IxBarChart v-bind="barOption" />
+  <IxBarChart style="height: 300px" v-bind="barOption" />
 </template>
 
 <archive-meta lang="json">

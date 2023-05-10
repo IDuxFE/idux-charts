@@ -15,7 +15,7 @@ const lineOption: LineChartProps = {
 }
 </script>
 <template>
-  <IxLineChart :data="data" v-bind="lineOption" />
+  <IxLineChart style="height: 300px" :data="data" v-bind="lineOption" />
 </template>
 
 <archive-meta lang="json">
