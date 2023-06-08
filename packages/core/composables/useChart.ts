@@ -8,10 +8,11 @@ import {
   computed,
   watchEffect,
   unref,
+  isVue2,
 } from 'vue-demi'
 
 import { init, type EChartsType } from 'echarts/core'
-import { isEqual, cloneDeep, isObject, isBoolean } from 'lodash-es'
+import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
 
 import { useResizeObserver } from './useResizeObserver'
 import { type ChartProps } from '../types'
@@ -22,6 +23,7 @@ const defaultLoading = { text: '加载中...' }
 
 export function useChart<U extends ChartProps>(
   options: MaybeRef<U>,
+  listeners?: Record<string, Function>,
 ): {
   containerRef: ShallowRef<HTMLDivElement | undefined>
   chartRef: ShallowRef<EChartsType | undefined>
@@ -46,7 +48,7 @@ export function useChart<U extends ChartProps>(
     const instance = init(container, mergedTheme.value, mergedInitOption.value)
 
     const currOptions = unref(options)
-    const { restOptions, events } = processOptions(currOptions, false)
+    const { restOptions, events } = processOptions(currOptions, listeners, false)
 
     instance.setOption(restOptions, mergedSetOptionOpts.value)
     prevRestOptions.value = cloneDeep(restOptions) as U
@@ -62,8 +64,9 @@ export function useChart<U extends ChartProps>(
       instance.on(eventName, mergedHandler)
     })
 
-    if (currOptions.onReady) {
-      currOptions.onReady(instance)
+    const onReady = currOptions.onReady || listeners?.ready
+    if (onReady) {
+      onReady(instance)
     }
 
     chartRef.value = instance
@@ -146,7 +149,11 @@ const ignoreOptions = [
   'onReady',
 ]
 
-function processOptions(options: ChartProps, isIgnoreEvent = true) {
+function processOptions(
+  options: ChartProps,
+  listeners: Record<string, Function> = {},
+  isIgnoreEvent = true,
+) {
   const restOptions: ChartProps = {}
   const events: [string, Function, boolean][] = []
   Object.keys(options).forEach(key => {
@@ -171,5 +178,22 @@ function processOptions(options: ChartProps, isIgnoreEvent = true) {
     restOptions[key] = options[key]
   })
 
+  if (isVue2 && !isIgnoreEvent) {
+    Object.keys(listeners).forEach(key => {
+      if (key !== 'ready') {
+        return
+      }
+
+      const handler = listeners[key] as Function
+      if (handler) {
+        const isOnce = key.startsWith('~')
+        // click => click
+        // ~click => click
+        const startIndex = isOnce ? 1 : 0
+        const eventName = key.substring(startIndex)
+        events.push([eventName, handler, isOnce])
+      }
+    })
+  }
   return { restOptions, events }
 }

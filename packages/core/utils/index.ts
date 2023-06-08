@@ -11,16 +11,11 @@ export function isVertical(option: any): boolean {
   return !!(option && option.xAxis && option.xAxis.data)
 }
 
-export function mergeAttrs(props: any, attrs?: any): any {
-  const mergedAttrs = {
-    ...props,
-    ...attrs,
-  }
-
+export function mergeAttrs(props: any, listeners?: Record<string, Function>): any {
   if (isVue2) {
-    return { attrs: mergedAttrs }
+    return { attrs: { ...props }, on: { ...listeners } }
   } else {
-    return mergedAttrs
+    return { ...props }
   }
 }
 
