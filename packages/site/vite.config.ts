@@ -10,6 +10,7 @@ export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build'
 
   return {
+    base: isBuild ? '/common/idux-charts/' : '/',
     plugins: [
       vue({ include: [/\.(vue|md)$/] }),
       Components({
