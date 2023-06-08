@@ -1,5 +1,13 @@
 # @idux/charts-plots
 
+## 0.4.1
+
+### Patch Changes
+
+- 84c8aeb: the listeners not work in vue2.x
+- Updated dependencies [84c8aeb]
+  - @idux/charts-core@0.4.1
+
 ## 0.4.0
 
 ### Minor Changes
