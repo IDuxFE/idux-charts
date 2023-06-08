@@ -10,11 +10,9 @@ export default defineComponent<Omit<HTMLAttributes, keyof LineChartProps> & Line
   name: 'IxLineChart',
   inheritAttrs: false,
   props: lineChartProps as any,
-  setup(props, { attrs }) {
+  // @ts-ignore
+  setup(props, { attrs, listeners }) {
     const mergedProps = useLineOption(props as LineSeriesOption, attrs)
-
-    return () => {
-      return h(IxChart, mergeAttrs(mergedProps.value))
-    }
+    return () => h(IxChart, mergeAttrs(mergedProps.value, listeners))
   },
 })

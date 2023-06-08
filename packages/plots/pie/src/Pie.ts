@@ -10,8 +10,9 @@ export default defineComponent<Omit<HTMLAttributes, keyof PieChartProps> & PieCh
   name: 'IxPieChart',
   inheritAttrs: false,
   props: pieChartProps as any,
-  setup(props, { attrs }) {
+  // @ts-ignore
+  setup(props, { attrs, listeners }) {
     const mergedProps = usePieOption(props as PieSeriesOption, attrs)
-    return () => h(IxChart, mergeAttrs(mergedProps.value))
+    return () => h(IxChart, mergeAttrs(mergedProps.value, listeners))
   },
 })

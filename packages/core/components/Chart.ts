@@ -1,26 +1,28 @@
-import { defineComponent, type HTMLAttributes, h, normalizeStyle } from 'vue-demi'
+import { defineComponent, type HTMLAttributes, h } from 'vue-demi'
 
 import { useChart } from '../composables'
 import { type ChartProps } from '../types'
-import { mergeAttrs } from '../utils'
 
 export default defineComponent<Omit<HTMLAttributes, keyof ChartProps> & ChartProps>({
   name: 'IxChart',
   inheritAttrs: false,
-  setup(_, { attrs }) {
-    const { containerRef } = useChart(attrs)
+  // @ts-ignore
+  setup(_, { attrs, listeners }) {
+    const { containerRef } = useChart(attrs, listeners)
+
     return { containerRef }
   },
   render() {
     const { class: className, style } = this.$attrs
-    const attrs = mergeAttrs({
+
+    return h('div', {
+      ref: 'containerRef',
       class: className,
-      style: normalizeStyle({
+      style: {
         width: '100%',
         height: '100%',
         ...(style as any),
-      }),
+      },
     })
-    return h('div', { ref: 'containerRef', ...attrs })
   },
 })

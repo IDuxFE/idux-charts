@@ -1,6 +1,6 @@
-import { graphic } from 'echarts/core'
+import { graphic, LinearGradientObject } from 'echarts/core'
 
-export function useLinearGradient() {
+export function useLinearGradient(): LinearGradientObject {
   return new graphic.LinearGradient(0, 0, 0, 1, [
     {
       offset: 0,
