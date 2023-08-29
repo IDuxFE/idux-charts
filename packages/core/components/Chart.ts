@@ -2,6 +2,7 @@ import { defineComponent, type HTMLAttributes, h } from 'vue-demi'
 
 import { useChart } from '../composables'
 import { type ChartProps } from '../types'
+import './chart.less'
 
 export default defineComponent<Omit<HTMLAttributes, keyof ChartProps> & ChartProps>({
   name: 'IxChart',

@@ -9,6 +9,7 @@ import {
   isVertical,
   convertArray,
   filterEmptyProps,
+  useTooltipsFormatter,
 } from '@idux/charts-core'
 
 export const barChartProps = [
@@ -42,6 +43,9 @@ const defaultProps: BarChartProps = {
   },
   tooltip: {
     trigger: 'axis',
+    axisPointer: {
+      type: 'cross',
+    },
   },
 }
 
@@ -93,6 +97,29 @@ export function useBarOption(
       const axisPointerWidth = seriesLength * defaultBarWidth * (1 + defaultBarGap) + 8
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
     }
+
+    const tooltipFormatter = get(option, ['tooltip', 'formatter'])
+    if (!tooltipFormatter) {
+      // 如果有配置坐标轴名称，则自动补到 tooltips 中。
+      const AxisName = get(option, ['yAxis', 'name']) || get(option, ['xAxis', 'name'])
+      set(option, ['tooltip', 'formatter'], params => {
+        if (!params?.length) {
+          return '';
+        }
+
+        const title = params[0].name
+        const list = params.map(param => {
+          return {
+            name: param.seriesName,
+            value: AxisName ? `${param.value} ${AxisName}` : param.value,
+            color: param.color,
+          }
+        })
+
+        return useTooltipsFormatter(title, list);
+      });
+    }
+
     return option
   })
 

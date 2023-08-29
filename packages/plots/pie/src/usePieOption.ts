@@ -8,6 +8,7 @@ import {
   type BaseChartOption,
   convertArray,
   filterEmptyProps,
+  useTooltipsFormatter,
 } from '@idux/charts-core'
 
 export const pieChartProps = [
@@ -42,7 +43,19 @@ const defaultProps: PieChartProps = {
     top: 'center',
     left: 'center',
   },
-  tooltip: { trigger: 'item' },
+  tooltip: { 
+    trigger: 'item',
+    formatter: params => {
+      const title = params.name
+      const list = [{
+        name: params.seriesName,
+        value: params.value,
+        color: params.color,
+      }];
+
+      return useTooltipsFormatter(title, list);
+    },
+  },
 }
 
 export function usePieOption(

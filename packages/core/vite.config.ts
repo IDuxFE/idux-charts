@@ -15,6 +15,13 @@ const globalsMap: Record<string, string> = {
 }
 export default defineConfig({
   plugins: [dts(), vue()],
+  css: {
+    preprocessorOptions: {
+      less: {
+        javascriptEnabled: true,
+      },
+    },
+  },
   build: {
     lib: {
       entry: resolve(__dirname, 'index.ts'),
