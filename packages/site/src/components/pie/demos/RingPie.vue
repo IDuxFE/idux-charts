@@ -157,8 +157,6 @@ const pieOption: PieChartProps = {
   <IxPieChart
     style="width: 600px; height: 300px"
     name="风险用户数"
-    :data="[]"
-    :label="[]"
     v-bind="pieOption"
   />
 </template>
