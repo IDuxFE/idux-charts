@@ -9,6 +9,7 @@ import {
   isVertical,
   convertArray,
   filterEmptyProps,
+  useTooltipsFormatter,
 } from '@idux/charts-core'
 
 export const lineChartProps = [
@@ -42,6 +43,10 @@ const defaultProps: LineChartProps = {
   },
   tooltip: {
     trigger: 'axis',
+    backgroundColor: '#FBFDFF',
+    axisPointer: {
+      type: 'cross',
+    },
   },
 }
 
@@ -84,6 +89,28 @@ export function useLineOption(
     // @ts-ignore
     if (legend === false || series.length <= 1) {
       set(option, ['legend'], undefined)
+    }
+
+    const tooltipFormatter = get(option, ['tooltip', 'formatter'])
+    if (!tooltipFormatter) {
+      // 如果没有有配置 tooltipFormatter，则使用默认 tooltips formatter。
+      const yAxisName = get(option, ['yAxis', 'name'])
+      set(option, ['tooltip', 'formatter'], params => {
+        if (!params?.length) {
+          return '';
+        }
+
+        const title = params[0].name
+        const list = params.map(param => {
+          return {
+            name: param.seriesName,
+            value: yAxisName ? `${param.value} ${yAxisName}` : param.value,
+            color: param.color,
+          }
+        })
+
+        return useTooltipsFormatter(title, list);
+      });
     }
 
     return option
