@@ -1,5 +1,11 @@
 # @idux/charts-core
 
+## 0.5.0
+
+### Minor Changes
+
+- feat(core): add useTooltipsFormatter (#12)
+
 ## 0.4.1
 
 ### Patch Changes
