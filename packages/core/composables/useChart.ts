@@ -11,8 +11,12 @@ import {
   isVue2,
 } from 'vue-demi'
 
-import { init, type EChartsType } from 'echarts/core'
+import { init, type EChartsType, use } from 'echarts/core'
 import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
+import { PictorialBarChart } from 'echarts/charts'
+
+// 这个图形需要单独注册
+use([PictorialBarChart])
 
 import { useResizeObserver } from './useResizeObserver'
 import { type ChartProps } from '../types'
