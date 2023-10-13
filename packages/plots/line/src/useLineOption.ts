@@ -1,7 +1,7 @@
 import { type ComputedRef, type InjectionKey, computed, inject } from 'vue-demi'
 
 import { type LineSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, merge, set } from 'lodash-es'
+import { cloneDeep, get, merge, set, isFunction } from 'lodash-es'
 
 import {
   type AdditionalChartOption,
@@ -92,8 +92,10 @@ export function useLineOption(
     }
 
     const tooltipFormatter = get(option, ['tooltip', 'formatter'])
+    // 如果没有配置tooltip.formatter，则给个默认的
     if (!tooltipFormatter) {
-      // 如果没有有配置 tooltipFormatter，则使用默认 tooltips formatter。
+      // value的处理：如果有配置valueFormatter，优先使用valueFormatter，然后是坐标轴名称
+      const valueFormatter = get(option, ['tooltip', 'valueFormatter'])
       const yAxisName = get(option, ['yAxis', 'name'])
       set(option, ['tooltip', 'formatter'], params => {
         if (!params?.length) {
@@ -104,7 +106,7 @@ export function useLineOption(
         const list = params.map(param => {
           return {
             name: param.seriesName,
-            value: yAxisName ? `${param.value} ${yAxisName}` : param.value,
+            value: isFunction(valueFormatter) ? valueFormatter(param.value) : (yAxisName ? `${param.value} ${yAxisName}` : param.value),
             color: param.color,
           }
         })
@@ -127,7 +129,7 @@ export function useLineOption(
     option.xAxis = merge(cloneDeep(defaultXAxis), xAxis)
     option.yAxis = merge(cloneDeep(defaultYAxis), yAxis)
     if (!series) {
-      option.series = [seriesOption]
+      option.series = seriesOption ? [seriesOption] : []
     } else {
       option.series = convertArray(series).map(item => merge({}, seriesOption, item))
     }
