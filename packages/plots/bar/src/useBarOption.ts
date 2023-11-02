@@ -46,6 +46,9 @@ const defaultProps: BarChartProps = {
     backgroundColor: '#FBFDFF',
     axisPointer: {
       type: 'cross',
+      label: {
+        backgroundColor: '#6F7785'
+      },
     },
   },
 }
