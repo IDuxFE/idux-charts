@@ -1,5 +1,5 @@
 import { type App, isVue2 } from 'vue-demi'
-
+import { TinyColor } from '@ctrl/tinycolor'
 import { registerTheme, use } from 'echarts/core'
 import { isNil } from 'lodash-es'
 
@@ -36,6 +36,10 @@ export function convertArray<T>(value: T | T[]): T[] {
   }
   return Array.isArray(value) ? value : [value]
 }
+
+export const getAlphaColor = (baseColor: string, alpha: number) => {
+    return new TinyColor(baseColor).setAlpha(alpha).toRgbString()
+};
 
 export function createInstall(Chart: any, ext: Parameters<typeof use>[0]) {
   use(ext)

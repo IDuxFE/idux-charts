@@ -39,7 +39,8 @@
   "dependencies": {
     "echarts": "^5.4.0",
     "lodash-es": "^4.17.0",
-    "vue-demi": "^0.13.0"
+    "vue-demi": "^0.13.0",
+    "@ctrl/tinycolor": "^3.6.0"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.7.0",
