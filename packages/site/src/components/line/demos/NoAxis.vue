@@ -1,14 +1,10 @@
 <script setup lang="ts">
-import { type LineChartProps, useLinearGradient } from '@idux/charts'
+import { type LineChartProps, useLinearGradient, useLineStyleColor, getAlphaColor } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
   smooth: true,
-  lineStyle: {
-    shadowColor: 'rgba(69, 143, 255, 0.8)',
-    shadowBlur: 10,
-  },
   areaStyle: {
     color: useLinearGradient(),
   },
@@ -21,6 +17,17 @@ const lineOption: LineChartProps = {
     show: false,
     name: '次',
   },
+  series: [
+    {
+      data: [123, 324, 156, 244, 188],
+      showSymbol: false,
+      lineStyle: { // 实现连线上的阴影效果
+        shadowColor: getAlphaColor('#458FFF', 0.9),
+        shadowBlur: 8,
+        color: useLineStyleColor('#1c6eff'),
+      },
+    }
+  ]
 }
 </script>
 <template>
@@ -29,8 +36,8 @@ const lineOption: LineChartProps = {
 
 <archive-meta lang="json">
 {
-  "title": "无坐标轴",
+  "title": "无坐标轴+阴影效果",
   "description": "",
-  "index": 9
+  "index": 5
 }
 </archive-meta>

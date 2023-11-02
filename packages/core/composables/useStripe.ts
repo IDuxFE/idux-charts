@@ -99,9 +99,8 @@ export function useStripeBarSeries({
   return [
     {
       type: 'bar',
-      name: series.name,
-      data: series.data,
       z: 0,
+      ...series,
     },
     useStripe({
       data: series.data,
@@ -111,4 +110,24 @@ export function useStripeBarSeries({
       size,
     }),
   ]
+}
+
+export function useStripeArea() {
+  return {
+    aria: {
+      enabled: true,
+      decal: {
+        show: true,
+        decals: [
+          {
+            color: 'white',
+            dashArrayX: [1, 0], // 这个一般不用调增
+            dashArrayY: [6, 0], // 调整 [x, y] 中 x 的值可以调整条纹的密度
+            symbolSize: 0.5, // 这个值越大，白色条纹就越宽。0.5 的时候则是平均分
+            rotation: Math.PI / 2 // 这个让条纹保持竖向
+          }
+        ]
+      }
+    },
+  }
 }

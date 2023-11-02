@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { type LineChartProps, useLinearGradient } from '@idux/charts'
+import { type LineChartProps, useLinearGradient, getAlphaColor } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
   smooth: true,
-  lineStyle: {
-    shadowColor: 'rgba(69, 143, 255, 0.35)',
-    shadowBlur: 10,
+  lineStyle: { // 实现连线上的阴影效果
+    shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
+    shadowBlur: 8,
   },
   areaStyle: {
     color: useLinearGradient(),
@@ -18,9 +18,6 @@ const lineOption: LineChartProps = {
   },
   yAxis: {
     name: '次',
-  },
-  onReady (echartsInstance) {
-    console.log('图彪实例：', echartsInstance);
   }
 }
 
@@ -31,8 +28,8 @@ const lineOption: LineChartProps = {
 
 <archive-meta lang="json">
 {
-  "title": "平滑面积图",
+  "title": "平滑面积图+阴影效果",
   "description": "",
-  "index": 9
+  "index": 4
 }
 </archive-meta>

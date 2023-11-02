@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { type LineChartProps } from '@idux/charts'
+import { type LineChartProps, useLineStyleColor, getAlphaColor } from '@idux/charts'
 
 const lineOption: LineChartProps = {
+  // smooth: true,
   title: { text: '折线图标题' },
   xAxis: {
     data: ['星期一', '星期二', '星期三', '星期四', '星期五'],
@@ -13,10 +14,20 @@ const lineOption: LineChartProps = {
     {
       data: [100, 150, 300, 88, 200],
       name: '到店靓仔',
+      showSymbol: false,
+      lineStyle: {
+        color: useLineStyleColor('#1c6eff')
+      },
     },
     {
       data: [55, 88, 150, 120, 65],
       name: '到店靓女',
+      showSymbol: false,
+      lineStyle: {
+        shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
+        shadowBlur: 8,
+        color: useLineStyleColor('#20cc94')
+      }
     },
   ],
 }
@@ -29,6 +40,6 @@ const lineOption: LineChartProps = {
 {
   "title": "双轴折线图",
   "description": "",
-  "index": 3
+  "index": 2
 }
 </archive-meta>
