@@ -1,6 +1,6 @@
 {
   "name": "@idux/charts",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "A UI Component Development Kit for Vue 3.x",
   "keywords": [
     "vue",
