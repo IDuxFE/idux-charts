@@ -1,5 +1,11 @@
 # @idux/charts-core
 
+## 0.6.0
+
+### Minor Changes
+
+- 0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
