@@ -1,6 +1,6 @@
 import { _ as _export_sfc, o as openBlock, b as createElementBlock, e as createStaticVNode, U as Ui } from "./_plugin-vue_export-helper-918196f7.js";
-const _imports_0 = "/assets/1-61a6bf80.png";
-const _imports_1 = "/assets/2-ee9f887f.png";
+const _imports_0 = "/common/idux-charts/assets/1-61a6bf80.png";
+const _imports_1 = "/common/idux-charts/assets/2-ee9f887f.png";
 JSON.parse('{"title":"指南","description":"","frontmatter":{"title":"指南"},"headers":[{"level":3,"title":"使用场景","slug":"使用场景","link":"#使用场景","children":[]},{"level":3,"title":"组件构成","slug":"组件构成","link":"#组件构成","children":[]},{"level":3,"title":"组件类型","slug":"组件类型","link":"#组件类型","children":[]},{"level":3,"title":"与其他图表的对比","slug":"与其他图表的对比","link":"#与其他图表的对比","children":[]}],"relativePath":"src/components/bar/Design.md"}');
 const _sfc_main = { name: "Design.md" };
 const _hoisted_1 = { class: "archive-md" };
