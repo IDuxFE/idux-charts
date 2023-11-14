@@ -51,7 +51,7 @@ export const seerTheme = {
   color: seerColors,
 
   textStyle: {
-    color: '#2F3540',
+    color: '#6F7785',
     fontSize: '12px',
   },
 
@@ -89,6 +89,7 @@ export const seerTheme = {
   legend: {
     itemWidth: 12,
     itemHeight: 12,
+    inactiveColor: '#BEC3CC',
     textStyle: {
       color: '#6F7785',
       fontSize: '12px',

@@ -43,13 +43,7 @@ const defaultProps: BarChartProps = {
   },
   tooltip: {
     trigger: 'axis',
-    backgroundColor: '#FBFDFF',
-    axisPointer: {
-      type: 'cross',
-      label: {
-        backgroundColor: '#6F7785'
-      },
-    },
+    backgroundColor: 'rgba(251, 253, 255, 0.88)',
   },
 }
 
@@ -74,6 +68,14 @@ export function useBarOption(
   const mergedSeriesOption = computed<BarSeriesOption>(() => {
     const option = filterEmptyProps(props)
     option.type = 'bar'
+
+    // 这是为了让鼠标悬浮到 bar 上时不要出现高亮，设计师要求 
+    if (!option.emphasis) {
+      option.emphasis = {
+        disabled: true
+      };
+    }
+
     return option
   })
 

@@ -7,9 +7,6 @@ const barOption: BarChartProps = {
   tooltip: {
     trigger: 'axis',
     backgroundColor: '#FBFDFF',
-    axisPointer: {
-      type: 'cross',
-    },
     formatter (params: any) {
       if (!params?.length) {
         return '';

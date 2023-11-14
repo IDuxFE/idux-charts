@@ -45,7 +45,7 @@ const defaultProps: PieChartProps = {
   },
   tooltip: { 
     trigger: 'item',
-    backgroundColor: '#FBFDFF',
+    backgroundColor: 'rgba(251, 253, 255, 0.88)',
     formatter: params => {
       const title = params.name
       const list = [{
