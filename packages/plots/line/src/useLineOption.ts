@@ -43,12 +43,12 @@ const defaultProps: LineChartProps = {
   },
   tooltip: {
     trigger: 'axis',
-    backgroundColor: '#FBFDFF',
+    backgroundColor: 'rgba(251, 253, 255, 0.88)',
     axisPointer: {
-      type: 'cross',
-      label: {
-        backgroundColor: '#6F7785'
-      }
+      lineStyle: {
+        type: 'dashed',
+        color: '#D3D7DE',
+      },
     },
   },
 }

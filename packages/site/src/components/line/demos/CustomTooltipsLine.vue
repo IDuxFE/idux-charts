@@ -8,7 +8,10 @@ const lineOption: LineChartProps = {
     trigger: 'axis',
     backgroundColor: '#FBFDFF',
     axisPointer: {
-      type: 'cross',
+      lineStyle: {
+        type: 'dashed',
+        color: '#D3D7DE',
+      },
     },
     formatter (params: any) {
       if (!params?.length) {

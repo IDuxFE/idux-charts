@@ -16,7 +16,9 @@ const lineOption: LineChartProps = {
       name: '到店靓仔',
       showSymbol: false,
       lineStyle: {
-        color: useLineStyleColor('#1c6eff')
+        shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
+        shadowBlur: 8,
+        color: useLineStyleColor('#458FFF'),
       },
     },
     {
@@ -24,7 +26,7 @@ const lineOption: LineChartProps = {
       name: '到店靓女',
       showSymbol: false,
       lineStyle: {
-        shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
+        shadowColor: getAlphaColor('#20cc94', 0.9), // 等同 rgba(69, 143, 255, 0.9)
         shadowBlur: 8,
         color: useLineStyleColor('#20cc94')
       }
