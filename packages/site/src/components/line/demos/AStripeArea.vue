@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { 
-  type LineChartProps,
-   useLinearGradient,
-   useLineStyleColor,
-   useStripeArea,
-   getAlphaColor
-  } from '@idux/charts'
-import { use } from 'echarts/core'
+import { computed, ref } from 'vue';
+
 import { AriaComponent } from 'echarts/components'
+import { use } from 'echarts/core'
+
+import {
+  type LineChartProps,
+  useLineStyleColor,
+  useLineChartAreaStripe,
+  getAlphaColor,
+} from '@idux/charts'
 
 use(AriaComponent)
 
@@ -18,8 +20,11 @@ use(AriaComponent)
  * 3.区域渐变函数： series.areaStyle.color => useLinearGradient
 */
 
-const lineOption: LineChartProps = {
-  ...useStripeArea(), // 配置区域图的条纹效果。如果没有区域，则此项不生效。
+const chartRef = ref()
+
+const { lineChartAreaStripeConfig } = useLineChartAreaStripe(chartRef)
+
+const lineOption = computed<LineChartProps>(() => ({
   xAxis: {
     boundaryGap: false,
     data: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期天'],
@@ -29,6 +34,7 @@ const lineOption: LineChartProps = {
   },
   series: [
     {
+      ...lineChartAreaStripeConfig.value, // 配置区域图的条纹效果。
       showSymbol: false,
       smooth: true,
       lineStyle: { // 实现连线上的阴影效果 shadowColor + shadowBlur
@@ -36,16 +42,13 @@ const lineOption: LineChartProps = {
         shadowBlur: 8,
         color: useLineStyleColor('#458FFF'), // 配置折线图的两边逐渐透明的效果。
       },
-      areaStyle: {
-        color: useLinearGradient('#458FFF'), // 区域面积图的渐变效果
-      },
       data: [1, 30, 35, 65, 80, 70, 100]
     },
   ]
-}
+}))
 </script>
 <template>
-  <IxLineChart style="height: 300px" v-bind="lineOption" />
+  <IxLineChart ref="chartRef" style="height: 300px" v-bind="lineOption" />
 </template>
 
 <archive-meta lang="json">
