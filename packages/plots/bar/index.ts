@@ -10,3 +10,5 @@ const IxBarChart = Bar
 
 export { IxBarChart }
 export { useBarOption, BAR_CHART_TOKEN, type BarChartProps } from './src/useBarOption'
+
+export { getBarLinearColors } from './src/getBarLinearColors';
