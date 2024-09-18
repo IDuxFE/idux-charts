@@ -25,7 +25,7 @@ const seerLinearGradientColors: [string, string][] = [
     ['#F5654F', '#FF957B'], // 红
     ['#6A6AFD', '#9B9BFF'], // 钻蓝
     ['#6ED1FF', '#9EE0FF'], // 湖蓝
-    ['#008787', '#008787'], // 墨绿
+    ['#008787', '#10BBBB'], // 墨绿
     ['#FF9245', '#FFB783'], // 橘黄
     ['#F587B3', '#F7B1CD'], // 粉
     ['#8352CC', '#A77BEA'], // 紫
