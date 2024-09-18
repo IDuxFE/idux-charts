@@ -34,10 +34,16 @@ const barOption: BarChartProps = {
     {
       data: [100, 150, 300, 88, 200],
       name: '到店靓仔',
+      itemStyle: {
+        borderRadius: [1, 1, 0, 0],
+      },
     },
     {
       data: [55, 88, 150, 120, 65],
       name: '到店靓女',
+      itemStyle: {
+        borderRadius: [1, 1, 0, 0],
+      },
     },
   ],
 }

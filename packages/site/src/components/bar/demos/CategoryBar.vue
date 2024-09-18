@@ -7,6 +7,11 @@ const barOption: BarChartProps = {
   title: { text: '柱状图标题' },
   xAxis: {
     name: '次',
+    nameGap: 20,
+    nameTextStyle: {
+      verticalAlign: 'top',
+      lineHeight: 26,
+    },
   },
   yAxis: {
     data: ['星期一', '星期二', '星期三', '星期四', '星期五'],
