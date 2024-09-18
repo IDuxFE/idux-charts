@@ -1,9 +1,9 @@
 import { _ as _export_sfc, o as openBlock, b as createElementBlock, e as createStaticVNode, U as Ui } from "./_plugin-vue_export-helper-ea9817b5.js";
-const _imports_0 = "/common/idux-charts/assets/1-0c85e225.png";
-const _imports_1 = "/common/idux-charts/assets/2-56c4169e.png";
-const _imports_2 = "/common/idux-charts/assets/3-2b9c1951.png";
-const _imports_3 = "/common/idux-charts/assets/4-281ef779.png";
-const _imports_4 = "/common/idux-charts/assets/6-a599aacd.png";
+const _imports_0 = "/assets/1-0c85e225.png";
+const _imports_1 = "/assets/2-56c4169e.png";
+const _imports_2 = "/assets/3-2b9c1951.png";
+const _imports_3 = "/assets/4-281ef779.png";
+const _imports_4 = "/assets/6-a599aacd.png";
 JSON.parse('{"title":"指南","description":"","frontmatter":{"title":"指南"},"headers":[{"level":3,"title":"使用场景","slug":"使用场景","link":"#使用场景","children":[]},{"level":3,"title":"组件构成","slug":"组件构成","link":"#组件构成","children":[]},{"level":3,"title":"组件类型","slug":"组件类型","link":"#组件类型","children":[]},{"level":3,"title":"语义色板","slug":"语义色板","link":"#语义色板","children":[]},{"level":3,"title":"与其他图表的对比","slug":"与其他图表的对比","link":"#与其他图表的对比","children":[]}],"relativePath":"src/components/pie/Design.md"}');
 const _sfc_main = { name: "Design.md" };
 const _hoisted_1 = { class: "archive-md" };

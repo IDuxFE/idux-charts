@@ -1,5 +1,5 @@
 import { _ as _export_sfc, o as openBlock, b as createElementBlock, e as createStaticVNode, U as Ui } from "./_plugin-vue_export-helper-ea9817b5.js";
-const _imports_0 = "/common/idux-charts/images/charts.png";
+const _imports_0 = "/images/charts.png";
 JSON.parse('{"title":"简介","description":"","frontmatter":{"index":0,"title":"简介","type":"page"},"headers":[{"level":2,"title":"特性","slug":"特性","link":"#特性","children":[]}],"relativePath":"src/0-guide/Introdoction.page.md"}');
 const _sfc_main = { name: "Introdoction.page.md" };
 const _hoisted_1 = { class: "archive-md" };
