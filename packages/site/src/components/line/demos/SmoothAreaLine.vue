@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { type LineChartProps, useLinearGradient, getAlphaColor } from '@idux/charts'
+import { IxLineChart, useLinearGradient, getAlphaColor } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
   smooth: true,
-  lineStyle: { // 实现连线上的阴影效果
+  lineStyle: {
+    // 实现连线上的阴影效果
     shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
     shadowBlur: 8,
   },
@@ -18,9 +20,8 @@ const lineOption: LineChartProps = {
   },
   yAxis: {
     name: '次',
-  }
+  },
 }
-
 </script>
 <template>
   <IxLineChart style="height: 300px" :data="data" v-bind="lineOption" />
@@ -29,7 +30,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "平滑面积图+阴影效果",
-  "description": "",
+  "description": "平滑面积图+阴影效果的配置与使用示例。",
   "index": 4
 }
 </archive-meta>

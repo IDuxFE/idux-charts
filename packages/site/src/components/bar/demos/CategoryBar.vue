@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type BarChartProps } from '@idux/charts'
+import { IxBarChart } from '@idux/charts'
+import type { BarChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -25,7 +26,7 @@ const barOption: BarChartProps = {
 <archive-meta lang="json">
 {
   "title": "横向柱状图",
-  "description": "",
+  "description": "横向柱状图的配置与使用示例。",
   "index": 3
 }
 </archive-meta>

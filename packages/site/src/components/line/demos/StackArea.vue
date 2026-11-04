@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type LineChartProps } from '@idux/charts'
+import { IxLineChart } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const lineOption: LineChartProps = {
   areaStyle: {},
@@ -17,35 +18,35 @@ const lineOption: LineChartProps = {
       name: 'Email',
       data: [120, 132, 101, 134, 90, 230, 210],
       areaStyle: {
-        opacity: 0.3
+        opacity: 0.3,
       },
     },
     {
       name: 'Union Ads',
       data: [220, 182, 191, 234, 290, 330, 310],
       areaStyle: {
-        opacity: 0.3
+        opacity: 0.3,
       },
     },
     {
       name: 'Video Ads',
       data: [150, 232, 201, 154, 190, 330, 410],
       areaStyle: {
-        opacity: 0.3
+        opacity: 0.3,
       },
     },
     {
       name: 'Direct',
       data: [320, 332, 301, 334, 390, 330, 320],
       areaStyle: {
-        opacity: 0.3
+        opacity: 0.3,
       },
     },
     {
       name: 'Search Engine',
       data: [820, 932, 901, 934, 1290, 1330, 1320],
       areaStyle: {
-        opacity: 0.3
+        opacity: 0.3,
       },
     },
   ],
@@ -58,7 +59,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "堆叠面积图",
-  "description": "",
+  "description": "堆叠面积图的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

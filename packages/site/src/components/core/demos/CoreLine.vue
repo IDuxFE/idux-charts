@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type ChartProps } from '@idux/charts'
+import { IxChart } from '@idux/charts'
+import type { ChartProps } from '@idux/charts'
 
 const option: ChartProps = {
   title: { text: '折线图标题' },
@@ -26,7 +27,7 @@ const option: ChartProps = {
 <archive-meta lang="json">
 {
   "title": "折线图",
-  "description": "",
+  "description": "折线图的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

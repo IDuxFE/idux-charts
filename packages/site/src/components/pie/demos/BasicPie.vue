@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type PieChartProps } from '@idux/charts'
+import { IxPieChart } from '@idux/charts'
+import type { PieChartProps } from '@idux/charts'
 
 const data = [
   { value: 145, name: '图例A' },
@@ -23,7 +24,7 @@ const pieOption: PieChartProps = {}
 <archive-meta lang="json">
 {
   "title": "环形饼图",
-  "description": "",
+  "description": "环形饼图的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

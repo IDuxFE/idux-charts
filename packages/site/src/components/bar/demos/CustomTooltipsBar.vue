@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type BarChartProps, useTooltipsFormatter } from '@idux/charts'
+import { IxBarChart, useTooltipsFormatter } from '@idux/charts'
+import type { BarChartProps } from '@idux/charts'
 
 const barOption: BarChartProps = {
   title: { text: '自定义 tooltips' },
@@ -7,21 +8,21 @@ const barOption: BarChartProps = {
   tooltip: {
     trigger: 'axis',
     backgroundColor: '#FBFDFF',
-    formatter (params: any) {
-      if (!params?.length) {
-        return '';
+    formatter(params) {
+      if (!Array.isArray(params) || !params.length) {
+        return ''
       }
 
       const title = params[0].name
       const list = params.map(param => {
         return {
-          name: param.seriesName,
+          name: param.seriesName ?? '',
           value: `${param.value} 个`,
-          color: param.color,
+          color: typeof param.color === 'string' ? param.color : '#458FFF',
         }
       })
 
-      return useTooltipsFormatter(title, list);
+      return useTooltipsFormatter(title, list)
     },
   },
   xAxis: {
@@ -55,7 +56,7 @@ const barOption: BarChartProps = {
 <archive-meta lang="json">
 {
   "title": "自定义 tooltips",
-  "description": "",
+  "description": "自定义 tooltips的配置与使用示例。",
   "index": 13
 }
 </archive-meta>

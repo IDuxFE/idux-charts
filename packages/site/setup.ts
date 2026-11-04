@@ -1,10 +1,13 @@
-import { type App, type Plugin } from 'vue'
+import type { App, Plugin } from 'vue'
 
 import '@idux/cdk/index.css'
-import '@idux/components/style/core/reset.default.css'
-import '@idux/components/style/core/reset-scroll.default.css'
+import '@idux/components/default.css'
+import '@idux/components/switch/theme/default.css'
+import '@idux/components/switch/style/index.css'
+import '@idux/components/style/core/reset.css'
+import '@idux/components/style/core/reset-scroll.css'
 
-import { type ArchiveLoaderVueSetup } from '@idux/archive-loader-vue'
+import type { ArchiveLoaderVueSetup } from '@idux/archive-loader-vue'
 import { IxBarChart, IxChart, IxLineChart, IxPieChart } from '@idux/charts'
 
 const plugins = [IxChart, IxBarChart, IxLineChart, IxPieChart] as unknown as Plugin[]

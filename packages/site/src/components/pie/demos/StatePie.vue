@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { IxSpace } from '@idux/components/space'
+import { IxSwitch } from '@idux/components/switch'
+import { IxPieChart } from '@idux/charts'
+import type { PieChartProps } from '@idux/charts'
 import { ref } from 'vue'
-
-import { type PieChartProps } from '@idux/charts'
 
 const data = [
   { value: 145, name: '图例A' },
@@ -36,7 +38,7 @@ const loading = ref(true)
 <archive-meta lang="json">
 {
   "title": "加载中状态",
-  "description": "",
+  "description": "加载中状态的配置与使用示例。",
   "index": 10
 }
 </archive-meta>

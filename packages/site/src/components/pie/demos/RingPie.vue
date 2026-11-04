@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { type PieChartProps } from '@idux/charts'
+import { IxPieChart } from '@idux/charts'
+import type { PieChartProps } from '@idux/charts'
 import { graphic } from 'echarts/core'
-import { PieSeriesOption } from 'echarts/charts'
+import type { PieSeriesOption } from 'echarts/charts'
 
 type DataItem = PieSeriesOption['data']
 
@@ -21,7 +22,7 @@ const getLinearGradient = (start: string, end: string) => {
 const getDotData = () => {
   const dataArr: DataItem = []
 
-  for (var i = 0; i < 100; i++) {
+  for (let i = 0; i < 100; i++) {
     if (i % 2 === 0) {
       dataArr.push({
         name: (i + 1).toString(),
@@ -152,11 +153,11 @@ const pieOption: PieChartProps = {
   ],
 }
 </script>
-
 <template>
   <IxPieChart
     style="width: 600px; height: 300px"
     name="风险用户数"
+    :data="data"
     v-bind="pieOption"
   />
 </template>
@@ -164,7 +165,7 @@ const pieOption: PieChartProps = {
 <archive-meta lang="json">
 {
   "title": "风险用户数",
-  "description": "",
+  "description": "风险用户数的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

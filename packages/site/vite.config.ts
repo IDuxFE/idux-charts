@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 import { resolve } from 'path'
 
 import vue from '@vitejs/plugin-vue'
@@ -6,11 +5,13 @@ import { IduxResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 
-export default defineConfig(({ command, mode }) => {
+import { siteDeploymentBase } from './deployment'
+
+export default defineConfig(({ command, isPreview }) => {
   const isBuild = command === 'build'
 
   return {
-    base: isBuild ? '/common/idux-charts/' : '/',
+    base: isBuild || isPreview ? siteDeploymentBase : '/',
     plugins: [
       vue({ include: [/\.(vue|md)$/] }),
       Components({
@@ -28,9 +29,15 @@ export default defineConfig(({ command, mode }) => {
     ],
     resolve: {
       alias: [
-        { find: '@idux/charts', replacement: resolve(__dirname, '../charts/index.ts') },
-        { find: '@idux/charts-core', replacement: resolve(__dirname, '../core/index.ts') },
-        { find: '@idux/charts-plots', replacement: resolve(__dirname, '../plots/index.ts') },
+        { find: '@idux/charts', replacement: resolve(import.meta.dirname, '../charts/index.ts') },
+        {
+          find: '@idux/charts-core',
+          replacement: resolve(import.meta.dirname, '../core/index.ts'),
+        },
+        {
+          find: '@idux/charts-plots',
+          replacement: resolve(import.meta.dirname, '../plots/index.ts'),
+        },
       ],
     },
     build: {
