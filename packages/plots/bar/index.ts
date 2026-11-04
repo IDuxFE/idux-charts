@@ -4,11 +4,14 @@ import { createInstall } from '@idux/charts-core'
 
 import Bar from './src/Bar'
 
-createInstall(Bar, [BarChart])
-
-const IxBarChart = Bar
+const IxBarChart = createInstall(Bar, [BarChart])
 
 export { IxBarChart }
-export { useBarOption, BAR_CHART_TOKEN, type BarChartProps } from './src/useBarOption'
+export {
+  useBarOption,
+  BAR_CHART_TOKEN,
+  type BarChartProps,
+  type BarChartPublicProps,
+} from './src/useBarOption'
 
-export { getBarLinearColors } from './src/getBarLinearColors';
+export { getBarLinearColors } from './src/getBarLinearColors'

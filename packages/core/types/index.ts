@@ -8,10 +8,14 @@ import type {
   TooltipComponentOption,
 } from 'echarts/components'
 import type { ComposeOption, EChartsType, init, SetOptionOpts } from 'echarts/core'
-
 export type ChartInitParameters = Parameters<typeof init>
 export type ChartTheme = NonNullable<ChartInitParameters[1]>
 export type ChartInitOption = NonNullable<ChartInitParameters[2]>
+
+/** Retain declared properties and their modifiers without broad index signatures. */
+export type KnownProps<Props> = {
+  [Key in keyof Props as string extends Key ? never : number extends Key ? never : Key]: Props[Key]
+}
 
 export interface AdditionalChartOption<T extends EChartsType = EChartsType> {
   /**
@@ -78,3 +82,6 @@ export type ChartOption = ComposeOption<
 >
 
 export interface ChartProps extends ChartOption, AdditionalChartOption {}
+
+/** Named caller-facing props for component declarations; defaults are not resolved. */
+export type ChartPublicProps = KnownProps<ChartProps>

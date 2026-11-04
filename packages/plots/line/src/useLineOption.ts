@@ -1,16 +1,13 @@
-import { type ComputedRef, type InjectionKey, computed, inject } from 'vue-demi'
+import { computed, inject, unref } from 'vue-demi'
+import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
-import { type LineSeriesOption } from 'echarts/charts'
+import type { DefaultLabelFormatterCallbackParams } from 'echarts'
+
+import type { LineSeriesOption } from 'echarts/charts'
 import { cloneDeep, get, merge, set, isFunction } from 'lodash-es'
 
-import {
-  type AdditionalChartOption,
-  type BaseChartOption,
-  isVertical,
-  convertArray,
-  filterEmptyProps,
-  useTooltipsFormatter,
-} from '@idux/charts-core'
+import { isVertical, convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/charts-core'
+import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const lineChartProps = [
   'data',
@@ -23,9 +20,13 @@ export const lineChartProps = [
 ] as const
 
 export interface LineChartProps
-  extends BaseChartOption<LineSeriesOption>,
+  extends
+    BaseChartOption<LineSeriesOption>,
     AdditionalChartOption,
     Pick<LineSeriesOption, (typeof lineChartProps)[number]> {}
+
+/** Named caller-facing props for component declarations; defaults are not resolved. */
+export type LineChartPublicProps = KnownProps<LineChartProps>
 
 export const LINE_CHART_TOKEN: InjectionKey<LineChartProps> = Symbol('LINE_CHART_TOKEN')
 
@@ -63,7 +64,7 @@ const defaultValueAxis = {
 
 export function useLineOption(
   props: LineSeriesOption,
-  attrs: LineChartProps,
+  attrsInput: LineChartProps | ShallowRef<LineChartProps>,
 ): ComputedRef<LineChartProps> {
   const injectProps = inject(LINE_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
@@ -75,6 +76,7 @@ export function useLineOption(
   })
 
   const mergedOption = computed(() => {
+    const attrs = unref(attrsInput)
     const option = merge({}, mergedDefaultProps, attrs)
 
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
@@ -100,22 +102,26 @@ export function useLineOption(
       // value的处理：如果有配置valueFormatter，优先使用valueFormatter，然后是坐标轴名称
       const valueFormatter = get(option, ['tooltip', 'valueFormatter'])
       const yAxisName = get(option, ['yAxis', 'name'])
-      set(option, ['tooltip', 'formatter'], params => {
+      set(option, ['tooltip', 'formatter'], (params: DefaultLabelFormatterCallbackParams[]) => {
         if (!params?.length) {
-          return '';
+          return ''
         }
 
-        const title = params[0].name
+        const title = params[0]!.name
         const list = params.map(param => {
           return {
-            name: param.seriesName,
-            value: isFunction(valueFormatter) ? valueFormatter(param.value) : (yAxisName ? `${param.value} ${yAxisName}` : param.value),
-            color: param.color,
+            name: param.seriesName ?? '',
+            value: isFunction(valueFormatter)
+              ? valueFormatter(param.value)
+              : yAxisName
+                ? `${param.value} ${yAxisName}`
+                : param.value,
+            color: typeof param.color === 'string' ? param.color : undefined,
           }
         })
 
-        return useTooltipsFormatter(title, list);
-      });
+        return useTooltipsFormatter(title, list)
+      })
     }
 
     return option

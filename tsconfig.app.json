@@ -1,10 +1,17 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.web.json",
-  "include": ["typings/*", "packages/**/*", "packages/**/*.vue"],
-  "exclude": ["packages/**/__tests__/*", "packages/**/dist/*", "dist/**"],
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "include": ["typings/**/*.d.ts", "packages/**/*.ts", "packages/**/*.tsx", "packages/**/*.vue"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "packages/**/__tests__/**",
+    "packages/**/*.spec.*",
+    "packages/**/*.test.*",
+    "packages/**/vite.config.*",
+    "packages/site/deployment.ts"
+  ],
   "compilerOptions": {
     "composite": true,
-    "baseUrl": ".",
-    "importsNotUsedAsValues": "remove"
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
   }
 }

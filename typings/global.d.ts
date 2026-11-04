@@ -5,8 +5,8 @@ declare global {
   const __VERSION__: string
   const __BASE_URL__: string
 
-  function setInterval(handler: TimerHandler, timeout?: number, ...arguments: any[]): number
-  function setTimeout(handler: TimerHandler, timeout?: number, ...arguments: any[]): number
+  function setInterval(handler: TimerHandler, timeout?: number, ...args: any[]): number
+  function setTimeout(handler: TimerHandler, timeout?: number, ...args: any[]): number
   function clearInterval(handle?: number): void
   function clearTimeout(handle?: number): void
 }

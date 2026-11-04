@@ -1,2 +1,7 @@
 packages:
   - 'packages/**'
+  - '!playgrounds/**'
+allowBuilds:
+  esbuild: true
+  vue-demi: true
+strictPeerDependencies: false

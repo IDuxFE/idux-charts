@@ -1,4 +1,5 @@
-import { type Component, computed, unref, ref, watch, type Ref, type UnwrapRef } from 'vue-demi'
+import { computed, unref, ref, watch } from 'vue-demi'
+import type { Component, ComputedRef, Ref, UnwrapRef } from 'vue-demi'
 
 import { getAlphaColor } from '@idux/charts-core'
 
@@ -6,17 +7,22 @@ type MaybeRef<T> = UnwrapRef<T> | Ref<UnwrapRef<T>>
 
 export interface LineChartAreaStripeOption {
   /** 条纹颜色 */
-  color?: string;
+  color?: string
   /** 条纹宽度 */
-  width?: number;
+  width?: number
   /** 条纹高度 */
-  height?: number;
+  height?: number
 }
 
-export function useLineChartAreaStripe(el: MaybeRef<HTMLElement | Component | undefined>, color?: MaybeRef<LineChartAreaStripeOption['color']>) {
+export function useLineChartAreaStripe(
+  el: MaybeRef<HTMLElement | Component | undefined>,
+  color?: MaybeRef<LineChartAreaStripeOption['color']>,
+): {
+  lineChartAreaStripeConfig: ComputedRef<{
+    areaStyle: { color: { image: HTMLImageElement; repeat: 'repeat-x' } }
+  }>
+} {
   const options = ref<LineChartAreaStripeOption>({})
-
-  const disposes: (() => void)[] = []
 
   const elRef = computed(() => {
     const elIns = unref(el)
@@ -35,18 +41,17 @@ export function useLineChartAreaStripe(el: MaybeRef<HTMLElement | Component | un
     options.value = getOptionsByDOM(unref(elRef), unref(color))
   })
 
-  watch(elRef, () => {
-    disposes.forEach(cb => cb())
-
-    const el = unref(elRef)
-
-    options.value = getOptionsByDOM(el, unref(color))
-
-    if (el) {
-      observer.observe(el)
-      disposes.push(observer.disconnect)
-    }
-  })
+  watch(
+    [elRef, () => unref(color)],
+    ([el, currentColor], _, cleanup) => {
+      options.value = getOptionsByDOM(el, currentColor)
+      if (el) {
+        observer.observe(el)
+        cleanup(() => observer.disconnect())
+      }
+    },
+    { immediate: true },
+  )
 
   const lineChartAreaStripeConfig = computed(() => ({
     areaStyle: {
@@ -73,16 +78,13 @@ function getOptionsByDOM(el?: HTMLElement, color?: LineChartAreaStripeOption['co
  * 生成条纹 area 背景图
  */
 export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption = {}) {
-  const {
-    color = '#458FFF',
-    width: stripeWidth = 2,
-    height: imgHeight = 90,
-  } = options
+  const { color = '#458FFF', width: stripeWidth = 2, height: imgHeight = 90 } = options
 
   const imgEl = document.createElement('img')
   const imgWidth = stripeWidth * 2
 
-  imgEl.src = encodeSvg(`
+  imgEl.src = encodeSvg(
+    `
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="${imgWidth}" height="${imgHeight}" viewBox="0 0 ${imgWidth} ${imgHeight}">
   <defs>
     <linearGradient id="color" gradientTransform="rotate(90)">
@@ -96,7 +98,8 @@ export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption =
     <rect x="${stripeWidth}" y="0" width="${stripeWidth}" height="${imgHeight}" rx="0" fill="transparent"/>
   </g>
 </svg>
-`.trim())
+`.trim(),
+  )
 
   return imgEl
 }
@@ -107,12 +110,12 @@ export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption =
 function encodeSvg(svgStr: string) {
   const encodedSvg = svgStr
     .replace(/"/g, "'")
-    .replace(/%/g, "%25")
-    .replace(/#/g, "%23")
-    .replace(/{/g, "%7B")
-    .replace(/}/g, "%7D")
-    .replace(/</g, "%3C")
-    .replace(/>/g, "%3E")
+    .replace(/%/g, '%25')
+    .replace(/#/g, '%23')
+    .replace(/{/g, '%7B')
+    .replace(/}/g, '%7D')
+    .replace(/</g, '%3C')
+    .replace(/>/g, '%3E')
 
   return `data:image/svg+xml,${encodedSvg}`
-};
+}
