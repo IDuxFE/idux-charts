@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-
+import { IxLineChart, useLineStyleColor, useLineChartAreaStripe, getAlphaColor } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
+import { computed, ref } from 'vue'
 import { AriaComponent } from 'echarts/components'
 import { use } from 'echarts/core'
-
-import {
-  type LineChartProps,
-  useLineStyleColor,
-  useLineChartAreaStripe,
-  getAlphaColor,
-} from '@idux/charts'
 
 use(AriaComponent)
 
@@ -18,7 +12,7 @@ use(AriaComponent)
  * 1.条纹效果：按需引入无障碍插件来实现条纹效果：use(AriaComponent) + 内置配置：useStripeArea
  * 2.线条两边透明中间不透明函数：series.lineStyle.color =>  useLineStyleColor
  * 3.区域渐变函数： series.areaStyle.color => useLinearGradient
-*/
+ */
 
 const chartRef = ref()
 
@@ -37,14 +31,15 @@ const lineOption = computed<LineChartProps>(() => ({
       ...lineChartAreaStripeConfig.value, // 配置区域图的条纹效果。
       showSymbol: false,
       smooth: true,
-      lineStyle: { // 实现连线上的阴影效果 shadowColor + shadowBlur
+      lineStyle: {
+        // 实现连线上的阴影效果 shadowColor + shadowBlur
         shadowColor: getAlphaColor('#458FFF', 0.9), // 等同 rgba(69, 143, 255, 0.9)
         shadowBlur: 8,
         color: useLineStyleColor('#458FFF'), // 配置折线图的两边逐渐透明的效果。
       },
-      data: [1, 30, 35, 65, 80, 70, 100]
+      data: [1, 30, 35, 65, 80, 70, 100],
     },
-  ]
+  ],
 }))
 </script>
 <template>
@@ -54,7 +49,7 @@ const lineOption = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "条纹面积图",
-  "description": "",
+  "description": "条纹面积图的配置与使用示例。",
   "index": 6
 }
 </archive-meta>

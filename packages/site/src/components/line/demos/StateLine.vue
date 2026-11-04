@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { IxSpace } from '@idux/components/space'
+import { IxSwitch } from '@idux/components/switch'
+import { IxLineChart } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 import { ref } from 'vue'
-
-import { type LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -27,7 +29,7 @@ const loading = ref(true)
 <archive-meta lang="json">
 {
   "title": "加载中状态",
-  "description": "",
+  "description": "加载中状态的配置与使用示例。",
   "index": 12
 }
 </archive-meta>

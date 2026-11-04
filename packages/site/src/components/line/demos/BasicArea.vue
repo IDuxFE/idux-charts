@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type LineChartProps, useLinearGradient } from '@idux/charts'
+import { IxLineChart, useLinearGradient } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -25,7 +26,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "基础面积图",
-  "description": "",
+  "description": "基础面积图的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

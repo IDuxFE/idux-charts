@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { seerColorsForRisk, useTooltipsFormatter, type PieChartProps } from '@idux/charts'
+import { IxPieChart, seerColorsForRisk, useTooltipsFormatter } from '@idux/charts'
+import type { PieChartProps } from '@idux/charts'
 
 const data = [
   { value: 30, name: '严重' },
@@ -14,18 +15,22 @@ const data = [
 const pieOption: PieChartProps = {
   color: seerColorsForRisk,
   name: '风险总数',
-  tooltip: { 
+  tooltip: {
     trigger: 'item',
     backgroundColor: '#FBFDFF',
     formatter: params => {
-      const title = params.name
-      const list = [{
-        name: params.seriesName,
-        value: params.value,
-        color: params.color,
-      }];
+      const item = Array.isArray(params) ? params[0] : params
+      if (!item) return ''
+      const title = item.name
+      const list = [
+        {
+          name: item.seriesName ?? '',
+          value: String(item.value),
+          color: typeof item.color === 'string' ? item.color : '#458FFF',
+        },
+      ]
 
-      return useTooltipsFormatter(title, list);
+      return useTooltipsFormatter(title, list)
     },
   },
 }
@@ -37,7 +42,7 @@ const pieOption: PieChartProps = {
 <archive-meta lang="json">
 {
   "title": "自定义 tooltips",
-  "description": "",
+  "description": "自定义 tooltips的配置与使用示例。",
   "index": 13
 }
 </archive-meta>

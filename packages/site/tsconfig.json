@@ -1,4 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {}
+  "extends": "../../tsconfig.app.json",
+  "compilerOptions": {
+    "composite": false
+  },
+  "include": ["../../typings/**/*.d.ts", "**/*.ts", "**/*.vue"],
+  "exclude": ["node_modules", "dist", "**/__tests__/**", "vite.config.ts", "deployment.ts"]
 }

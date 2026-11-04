@@ -10,6 +10,8 @@
 npm install echarts @idux/charts
 ```
 
+支持 Vue `^2.6.0 || ^3.2.5` 和 ECharts `^5.4.3 || ^6.0.0`。Vue 2.6 还需要安装 `@vue/composition-api >=1.6.2`；Vue 2.7 和 Vue 3 无需安装此插件。
+
 如果在 Vue 2.x(< 2.7) 中使用，需要确认 `@vue/composition-api` 已经被安装
 
 ```sh
@@ -47,15 +49,39 @@ const lineOption: LineChartProps = {
 
 参考[快速上手](https://idux.site/docs/getting-started/zh)以了解更多。
 
+### TypeScript 属性类型
+
+`ChartPublicProps`、`BarChartPublicProps`、`LineChartPublicProps`、`PieChartPublicProps` 专供 Vue 2.6 项目的组件类型适配声明使用，可从 `@idux/charts` 导入：
+
+```ts
+import type { LineChartPublicProps } from '@idux/charts'
+
+const lineProps: LineChartPublicProps = {
+  autoResize: true,
+  smooth: true,
+  data: [123, 324, 156],
+}
+```
+
+现有的 `*ChartProps` 继续允许扩展配置字段。`*ChartPublicProps` 从对应类型推导，去掉宽泛索引签名，保留具名属性的类型及可选性；不会补齐默认值，也不包含 HTML 属性。这是配置类型与具名公开属性的区分，不是 Vue 内部已解析 Props 与外部可选 Props 的区分。
+
+默认组件声明保留 `vue-demi` 引用及原有配置属性类型；`*ChartPublicProps` 独立提供给 Vue 2.6 适配层，不替换默认组件声明。Vue 2.6 项目可在现有的 `DefineComponent` 适配声明中使用 `*ChartPublicProps`，无需自行实现索引签名过滤。
+
+默认组件声明面向 Vue 2.7 和 Vue 3，保留事件、带参数插槽及实例成员的自动推导。Vue 2.7 的插槽函数位于 `$scopedSlots`，Vue 3 位于 `$slots`。Vue 2.6 适配层保留自己的组件声明和 `skipLibCheck: true` 配置；属性别名不会把默认组件声明转换成 Vue 2.6 原生组件声明。
+
 ## ⌨️ 开发
 
-```bash
-npm install
+开发环境要求：Node.js 22.14+（22.x）、24.x 或 26+，以及 pnpm 10+。CI 使用 Node.js 22.14.0 和 pnpm 11.8.0。
 
-npm start
+```bash
+pnpm install
+
+pnpm start
 ```
 
 使用浏览器访问：`http://localhost:8080/`
+
+CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/RELEASING.md)。
 
 ## 🤝 如何贡献
 

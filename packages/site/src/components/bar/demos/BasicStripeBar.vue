@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import {
-  type BarChartProps,
-  seerColors,
-  useStripeBarSeries,
-  useStripeBarTooltip,
-} from '@idux/charts'
+import { IxBarChart, seerColors, useStripeBarSeries, useStripeBarTooltip } from '@idux/charts'
+import type { BarChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -37,7 +33,7 @@ const barOption: BarChartProps = {
 <archive-meta lang="json">
 {
   "title": "简单的鼠标经过显示条纹",
-  "description": "",
+  "description": "简单的鼠标经过显示条纹的配置与使用示例。",
   "index": 1
 }
 </archive-meta>

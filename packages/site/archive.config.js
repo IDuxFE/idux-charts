@@ -16,7 +16,8 @@ export default defineConfig({
   theme: {
     themeStyle: 'default',
     logo: {
-      image: '/favicon.ico',
+      // An inline logo works under both the dev root and the deployed subpath.
+      image: `data:image/x-icon;base64,${readFileSync(resolve(__dirname, './public/favicon.ico')).toString('base64')}`,
       title: 'iDux Charts',
     },
     layout: {
@@ -93,7 +94,7 @@ export default defineConfig({
           const files = readdirSync(file)
 
           tabs = files
-            .filter(file => /\.md$/.test(file))
+            .filter(file => file.endsWith('.md'))
             .map(tab => {
               const src = resolve(file, tab)
               const meta = _getMdMeta(src)

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type ChartProps } from '@idux/charts'
+import { IxChart } from '@idux/charts'
+import type { ChartProps } from '@idux/charts'
 
 const data = [
   { value: 145, name: '图例A' },
@@ -19,7 +20,7 @@ const option: ChartProps = {
     text: `${data.reduce((curr, next) => curr + next.value, 0)}`,
     subtext: '统计数量',
     textStyle: {
-      fontSize: '30px',
+      fontSize: 30,
     },
     top: 'center',
     left: 'center',
@@ -47,7 +48,7 @@ const option: ChartProps = {
 <archive-meta lang="json">
 {
   "title": "饼图",
-  "description": "",
+  "description": "饼图的配置与使用示例。",
   "index": 7
 }
 </archive-meta>

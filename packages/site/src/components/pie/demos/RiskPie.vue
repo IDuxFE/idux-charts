@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { seerColorsForRisk, type PieChartProps } from '@idux/charts'
+import { IxPieChart, seerColorsForRisk } from '@idux/charts'
+import type { PieChartProps } from '@idux/charts'
 
 const data = [
   { value: 30, name: '严重' },
@@ -23,7 +24,7 @@ const pieOption: PieChartProps = {
 <archive-meta lang="json">
 {
   "title": "风险等级颜色",
-  "description": "",
+  "description": "风险等级颜色的配置与使用示例。",
   "index": 8
 }
 </archive-meta>

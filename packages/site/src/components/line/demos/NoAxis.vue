@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type LineChartProps, useLinearGradient, useLineStyleColor, getAlphaColor } from '@idux/charts'
+import { IxLineChart, useLinearGradient, useLineStyleColor, getAlphaColor } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -21,13 +22,14 @@ const lineOption: LineChartProps = {
     {
       data: [123, 324, 156, 244, 188],
       showSymbol: false,
-      lineStyle: { // 实现连线上的阴影效果
+      lineStyle: {
+        // 实现连线上的阴影效果
         shadowColor: getAlphaColor('#458FFF', 0.9),
         shadowBlur: 8,
         color: useLineStyleColor('#1c6eff'),
       },
-    }
-  ]
+    },
+  ],
 }
 </script>
 <template>
@@ -37,7 +39,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "无坐标轴+阴影效果",
-  "description": "",
+  "description": "无坐标轴+阴影效果的配置与使用示例。",
   "index": 5
 }
 </archive-meta>

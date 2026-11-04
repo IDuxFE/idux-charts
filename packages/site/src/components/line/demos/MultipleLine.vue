@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type LineChartProps, useLineStyleColor, getAlphaColor } from '@idux/charts'
+import { IxLineChart, useLineStyleColor, getAlphaColor } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const lineOption: LineChartProps = {
   // smooth: true,
@@ -28,8 +29,8 @@ const lineOption: LineChartProps = {
       lineStyle: {
         shadowColor: getAlphaColor('#20cc94', 0.9), // 等同 rgba(69, 143, 255, 0.9)
         shadowBlur: 8,
-        color: useLineStyleColor('#20cc94')
-      }
+        color: useLineStyleColor('#20cc94'),
+      },
     },
   ],
 }
@@ -41,7 +42,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "双轴折线图",
-  "description": "",
+  "description": "双轴折线图的配置与使用示例。",
   "index": 2
 }
 </archive-meta>

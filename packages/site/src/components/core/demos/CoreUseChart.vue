@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { useChart, type ChartProps } from '@idux/charts'
+import { onUnmounted } from 'vue'
+import { useChart } from '@idux/charts'
+import type { ChartProps } from '@idux/charts'
 
 const option: ChartProps = {
   title: { text: '柱状图标题' },
@@ -17,11 +19,14 @@ const option: ChartProps = {
     },
   ],
 }
+
 const { containerRef, chartRef } = useChart(option)
 
-setTimeout(() => {
+const timer = setTimeout(() => {
   chartRef.value?.setOption({ title: { text: '修改后的标题' } })
 }, 3000)
+
+onUnmounted(() => clearTimeout(timer))
 </script>
 <template>
   <div ref="containerRef" style="width: 100%; height: 300px" />
@@ -30,7 +35,7 @@ setTimeout(() => {
 <archive-meta lang="json">
 {
   "title": "函数用法",
-  "description": "",
+  "description": "函数用法的配置与使用示例。",
   "index": 11
 }
 </archive-meta>

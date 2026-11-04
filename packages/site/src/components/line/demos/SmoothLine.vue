@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type LineChartProps } from '@idux/charts'
+import { IxLineChart } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]
 
@@ -21,7 +22,7 @@ const lineOption: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "平滑折线图",
-  "description": "",
+  "description": "平滑折线图的配置与使用示例。",
   "index": 9
 }
 </archive-meta>

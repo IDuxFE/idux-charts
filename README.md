@@ -10,6 +10,8 @@ English | [简体中文](README.zh.md)
 npm install echarts @idux/charts
 ```
 
+Requires Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.0.0`. Vue 2.6 additionally requires `@vue/composition-api >=1.6.2`; Vue 2.7 and Vue 3 do not require this plugin.
+
 To make `@idux/charts` work for Vue 2.x(< 2.7), you need to have `@vue/composition-api` installed:
 
 ```sh
@@ -47,7 +49,29 @@ const lineOption: LineChartProps = {
 
 See [Getting Started](https://idux.site/guide/getting-started/en) for more details.
 
+### TypeScript prop types
+
+For Vue 2.6 component type adapters, import `ChartPublicProps`, `BarChartPublicProps`, `LineChartPublicProps`, and `PieChartPublicProps` from `@idux/charts`:
+
+```ts
+import type { LineChartPublicProps } from '@idux/charts'
+
+const lineProps: LineChartPublicProps = {
+  autoResize: true,
+  smooth: true,
+  data: [123, 324, 156],
+}
+```
+
+The existing `*ChartProps` types continue to accept extension fields. Each `*ChartPublicProps` type derives from its corresponding configuration type, removes broad index signatures, and preserves named property types and optionality. It does not resolve defaults or include HTML attributes. This distinction describes open configuration versus named public props, rather than Vue's resolved internal props versus caller-facing props.
+
+Default component declarations retain `vue-demi` imports and the existing configuration prop types. The `*ChartPublicProps` aliases are provided separately for Vue 2.6 adapters; they do not replace the default component declarations. Vue 2.6 projects can use them in their existing `DefineComponent` adapters without implementing index-signature filtering themselves.
+
+Default component declarations target Vue 2.7 and Vue 3 and preserve inferred events, scoped slots, and instance bindings. Vue 2.7 exposes scoped slot functions through `$scopedSlots`; Vue 3 uses `$slots`. Vue 2.6 adapters retain their own component declarations and `skipLibCheck: true`; the prop aliases do not make the default component declarations native Vue 2.6 declarations.
+
 ## ⌨️ Development
+
+Requires Node.js 22.14+ (22.x), 24.x or 26+, and pnpm 10+. CI uses Node.js 22.14.0 and pnpm 11.8.0.
 
 ```bash
 pnpm install
@@ -56,6 +80,8 @@ pnpm start
 ```
 
 Open a browser: `http://localhost:8080/`
+
+See [CI and releases](.github/RELEASING.md) for checks, changesets, and automated npm publishing.
 
 ## 🤝 Contributing
 
