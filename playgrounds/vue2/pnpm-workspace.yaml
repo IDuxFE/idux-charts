@@ -1,0 +1,11 @@
+packages:
+  - '.'
+autoInstallPeers: false
+strictPeerDependencies: true
+allowBuilds:
+  esbuild: true
+  vue-demi: true
+overrides:
+  '@idux/charts>@idux/charts-core': file:vendor/idux-charts-core.tgz
+  '@idux/charts>@idux/charts-plots': file:vendor/idux-charts-plots.tgz
+  '@idux/charts-plots>@idux/charts-core': file:vendor/idux-charts-core.tgz

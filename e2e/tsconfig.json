@@ -1,4 +1,14 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.node.json",
-  "include": ["./**/*"]
+  "extends": "@vue/tsconfig/tsconfig.lib.json",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "types": ["node"],
+    "paths": {
+      "@idux/charts": ["../packages/charts/index.ts"],
+      "@idux/charts-core": ["../packages/core/index.ts"],
+      "@idux/charts-plots": ["../packages/plots/index.ts"],
+      "echarts": ["../packages/core/node_modules/echarts"],
+      "echarts/*": ["../packages/core/node_modules/echarts/*"]
+    }
+  }
 }

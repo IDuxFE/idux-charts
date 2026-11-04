@@ -1,0 +1,40 @@
+body {
+  margin: 24px;
+  font: 15px/20px system-ui;
+  background: #f4f6fa;
+  color: #182438;
+}
+/* Keep chart origins on whole pixels for stable SVG screenshots. */
+h1 {
+  margin: 20px 0;
+  font-size: 30px;
+  line-height: 40px;
+}
+h2 {
+  margin: 16px 0;
+  font-size: 22px;
+  line-height: 30px;
+}
+p {
+  margin: 16px 0;
+}
+button {
+  font: inherit;
+  vertical-align: top;
+  margin: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.charts {
+  max-width: 1100px;
+}
+section {
+  background: white;
+  margin: 16px 0;
+  padding: 16px;
+  border-radius: 8px;
+}
+.chart {
+  height: 280px;
+  width: 100%;
+}

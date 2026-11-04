@@ -1,0 +1,353 @@
+import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import ts from 'typescript'
+import { chromium, expect } from '@playwright/test'
+import { build, preview } from 'vite'
+
+import { normalizeChartDeclarations } from '../build/declarations.ts'
+
+const root = fileURLToPath(new URL('..', import.meta.url))
+const work = mkdtempSync(join(tmpdir(), 'idux-chart-declarations-'))
+console.log(`Declaration consumer fixtures: ${work}`)
+const run = (args, cwd = root) => execFileSync('pnpm', args, { cwd, stdio: 'inherit' })
+const options = {
+  strict: true,
+  skipLibCheck: false,
+  esModuleInterop: true,
+  types: [],
+  target: ts.ScriptTarget.ESNext,
+  module: ts.ModuleKind.Preserve,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+}
+function check(program) {
+  const diagnostics = ts.getPreEmitDiagnostics(program)
+  assert.equal(
+    diagnostics.length,
+    0,
+    ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+      getCurrentDirectory: () => root,
+      getCanonicalFileName: file => file,
+      getNewLine: () => '\n',
+    }),
+  )
+}
+
+// Compile a representative component with the same compiler and declaration
+// normalizer as the library. Its inferred contracts are consumed in every runtime.
+const fixturePath = join(root, 'packages/plots/.declaration-fixture.ts')
+const fixtureSource = `
+import { defineComponent } from 'vue';
+import type { SlotsType, VNode } from 'vue';
+import { withChartProps } from '@idux/charts-core';
+export default withChartProps<{ autoResize?: boolean }>()(defineComponent({
+  props: { label: { type: String, required: true } },
+  emits: { change: (value: number) => Number.isFinite(value) },
+  slots: Object as SlotsType<{ default: (props: { value: number }) => VNode[] }>,
+  setup: () => ({ focus: () => 42 as const }),
+  data: () => ({ count: 0 }),
+  computed: { doubled() { return this.count * 2 } },
+  methods: { increment(delta: number) { this.count += delta } },
+}));
+`
+const emitOptions = { ...options, declaration: true, emitDeclarationOnly: true }
+const host = ts.createCompilerHost(emitOptions)
+const getSourceFile = host.getSourceFile.bind(host)
+host.getSourceFile = (file, ...args) =>
+  file === fixturePath
+    ? ts.createSourceFile(file, fixtureSource, ts.ScriptTarget.Latest, true)
+    : getSourceFile(file, ...args)
+const fixtureProgram = ts.createProgram([fixturePath], emitOptions, host)
+check(fixtureProgram)
+let fixtureDeclaration
+fixtureProgram.emit(undefined, (file, text) => {
+  if (file.endsWith('.d.ts')) {
+    writeFileSync(join(work, 'inferred-source.d.ts'), text)
+    fixtureDeclaration = normalizeChartDeclarations(text, file)
+  }
+})
+assert.ok(fixtureDeclaration, 'The inference fixture must emit a declaration')
+
+const tarballs = {}
+for (const name of ['core', 'plots', 'charts']) {
+  const tarball = join(work, `${name}.tgz`)
+  run(['pack', '--out', tarball], join(root, 'packages', name))
+  tarballs[name] = `file:${tarball}`
+}
+async function smokeRuntime(app) {
+  writeFileSync(
+    join(app, 'index.html'),
+    '<div id="app"></div><script type="module" src="/main.js"></script>',
+  )
+  writeFileSync(
+    join(app, 'main.js'),
+    `
+import { createApp, h, ref, isVue2 } from 'vue-demi';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart } from '@idux/charts';
+import { getInstanceByDom } from 'echarts/core';
+const revision = ref(0), dark = ref(false), mounted = ref(true);
+const instances = [];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['pie', IxPieChart]];
+const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
+createApp({setup() { return () => h('main', {}, [
+  button('update', () => revision.value++),
+  button('theme', () => { dark.value = !dark.value }),
+  button('mount', () => { mounted.value = !mounted.value }),
+  ...(mounted.value ? kinds.map(([kind, component]) => {
+    const data = [10 + revision.value, 20, 30];
+    const props = {
+      title: {text: kind + ' ' + revision.value}, animation: false, autoResize: true,
+      initOption: {renderer: 'svg', width: 400, height: 240}, setOptionOpts: {notMerge: true},
+      theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
+      ...(kind === 'core' ? {xAxis: {type: 'category', data: ['A', 'B', 'C']}, yAxis: {type: 'value'}, series: [{type: 'bar', data}]} :
+        kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} : {data, xAxis: {data: ['A', 'B', 'C']}}),
+    };
+    return h('section', isVue2 ? {attrs: {'data-kind': kind}, style: {width: '400px', height: '240px'}} : {'data-kind': kind, style: {width: '400px', height: '240px'}},
+      [h(component, isVue2 ? {attrs: props} : props)]);
+  }) : []),
+]) }}).mount('#app');
+window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
+  const el = section.querySelector('[_echarts_instance_]');
+  const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
+  return {id: chart?.id, title: option?.title?.[0]?.text, value: typeof data === 'object' ? data.value : data, paths: el?.querySelectorAll('svg path').length || 0};
+});
+window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
+`,
+  )
+  await build({ root: app, configFile: false, logLevel: 'error' })
+  const server = await preview({
+    root: app,
+    configFile: false,
+    logLevel: 'error',
+    preview: { host: '127.0.0.1', port: 0 },
+  })
+  const browser = await chromium.launch()
+  try {
+    const page = await browser.newPage()
+    const errors = []
+    page.on('pageerror', error => errors.push(error.message))
+    page.on('console', message => {
+      if (message.type() === 'error') errors.push(message.text())
+    })
+    const port = server.httpServer.address().port
+    await page.goto(`http://127.0.0.1:${port}/`)
+    const state = () => page.evaluate(() => window.readCharts())
+    await expect
+      .poll(async () => (await state()).map(chart => chart.paths > 0))
+      .toEqual([true, true, true, true])
+    await page.getByTestId('update').click()
+    await expect
+      .poll(async () => (await state()).map(chart => chart.title))
+      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1'])
+    await expect
+      .poll(async () => (await state()).map(chart => chart.value))
+      .toEqual([11, 11, 11, 11])
+    const before = await state()
+    await page.getByTestId('theme').click()
+    await expect
+      .poll(async () => (await state()).every((chart, i) => chart.id && chart.id !== before[i].id))
+      .toBe(true)
+    await page.getByTestId('mount').click()
+    await expect.poll(state).toEqual([])
+    await expect.poll(() => page.evaluate(() => window.allDisposed())).toBe(true)
+    await page.getByTestId('mount').click()
+    await expect
+      .poll(async () => (await state()).map(chart => chart.title))
+      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1'])
+    expect(errors).toEqual([])
+  } finally {
+    await browser.close()
+    await new Promise((resolve, reject) =>
+      server.httpServer.close(error => (error ? reject(error) : resolve())),
+    )
+  }
+}
+
+async function smokeHooks(app) {
+  writeFileSync(
+    join(app, 'hook-only.html'),
+    '<div id="app"></div><script type="module" src="/hook-only.js"></script>',
+  )
+  writeFileSync(
+    join(app, 'hook-only.js'),
+    `
+import { createApp, h, ref } from 'vue-demi';
+import { useChart } from '@idux/charts';
+createApp({
+  setup() { return useChart(ref({
+    initOption: {renderer: 'svg', width: 400, height: 240}, animation: false,
+    xAxis: {type: 'category', data: ['A', 'B']}, yAxis: {type: 'value'},
+    series: [{type: 'bar', data: [10, 20]}],
+  })) },
+  render() { return h('div', {ref: 'containerRef', style: {width: '400px', height: '240px'}}) },
+}).mount('#app');
+`,
+  )
+  // A separate build prevents the component entry from retaining registration
+  // code in a shared chunk and masking a composable-only tree-shaking failure.
+  await build({
+    root: app,
+    configFile: false,
+    logLevel: 'error',
+    build: { outDir: 'hook-dist', rollupOptions: { input: join(app, 'hook-only.html') } },
+  })
+  const server = await preview({
+    root: app,
+    configFile: false,
+    logLevel: 'error',
+    build: { outDir: 'hook-dist' },
+    preview: { host: '127.0.0.1', port: 0 },
+  })
+  const browser = await chromium.launch()
+  try {
+    const page = await browser.newPage(),
+      errors = []
+    page.on('pageerror', error => errors.push(error.message))
+    page.on('console', message => {
+      if (message.type() === 'error') errors.push(message.text())
+    })
+    await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/hook-only.html`)
+    await expect
+      .poll(() => page.locator('[_echarts_instance_] svg path').count())
+      .toBeGreaterThan(0)
+    expect(errors).toEqual([])
+  } finally {
+    await browser.close()
+    await new Promise((resolve, reject) =>
+      server.httpServer.close(error => (error ? reject(error) : resolve())),
+    )
+  }
+}
+
+const adapterConsumer = `
+import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps } from '@idux/charts';
+const chart: ChartPublicProps = { autoResize: true };
+const bar: BarChartPublicProps = { data: [1, 2], barWidth: 10 };
+const line: LineChartPublicProps = { autoResize: true, smooth: true, data: [1, 2] };
+const pie: PieChartPublicProps = { data: [{ value: 1 }], roseType: 'radius' };
+// @ts-expect-error autoResize must retain its boolean type
+const invalidChart: ChartPublicProps = { autoResize: 1 };
+// @ts-expect-error smooth must retain its boolean/number type
+const invalidLine: LineChartPublicProps = { smooth: 'yes' };
+// @ts-expect-error named public types must reject unknown fields
+const unknownField: BarChartPublicProps = { unknownOption: true };
+`
+const targets = [
+  ...['5.4.3', '6.0.0'].flatMap(echarts => [
+    ['2.7.16', echarts, false],
+    ['3.5.44', echarts, false],
+  ]),
+  ['2.6.14', '6.0.0', true],
+]
+for (const [version, echartsVersion, adapter] of targets) {
+  const app = join(work, `vue-${version}-echarts-${echartsVersion}`)
+  mkdirSync(app)
+  writeFileSync(
+    join(app, 'package.json'),
+    JSON.stringify(
+      {
+        private: true,
+        type: 'module',
+        dependencies: {
+          '@idux/charts': tarballs.charts,
+          '@idux/charts-core': tarballs.core,
+          '@idux/charts-plots': tarballs.plots,
+          echarts: echartsVersion,
+          'lodash-es': '4.17.21',
+          vue: version,
+          'vue-demi': '0.14.10',
+          ...(adapter ? { '@vue/composition-api': '1.7.2' } : {}),
+        },
+      },
+      null,
+      2,
+    ),
+  )
+  writeFileSync(
+    join(app, 'pnpm-workspace.yaml'),
+    JSON.stringify(
+      {
+        packages: ['.'],
+        autoInstallPeers: false,
+        strictPeerDependencies: true,
+        allowBuilds: { 'vue-demi': true },
+        overrides: {
+          '@idux/charts>@idux/charts-core': tarballs.core,
+          '@idux/charts>@idux/charts-plots': tarballs.plots,
+          '@idux/charts-plots>@idux/charts-core': tarballs.core,
+        },
+      },
+      null,
+      2,
+    ),
+  )
+  run(['install', '--no-lockfile', '--no-frozen-lockfile'], app)
+  writeFileSync(join(app, 'inferred-fixture.d.ts'), fixtureDeclaration)
+  const scopedSlots = version.startsWith('2.') ? '$scopedSlots' : '$slots'
+  const consumer = adapter
+    ? adapterConsumer
+    : `${adapterConsumer}
+import { IxChart, IxBarChart, IxLineChart, IxPieChart } from '@idux/charts';
+import '@idux/charts/types';
+import type { GlobalComponents } from 'vue';
+import Fixture from './inferred-fixture';
+import { defineComponent } from 'vue';
+import type { VNode } from 'vue';
+type BarProps = InstanceType<typeof IxBarChart>['$props'];
+const globalProps: InstanceType<GlobalComponents['IxBarChart']>['$props'] = { autoResize: true };
+// @ts-expect-error global component props must remain typed
+const invalidGlobalProps: InstanceType<GlobalComponents['IxBarChart']>['$props'] = { autoResize: 123 };
+const good: BarProps = { autoResize: true, data: [1, 2] };
+// @ts-expect-error configuration props must remain typed on the component
+const bad: BarProps = { autoResize: 123 };
+type Resize<C extends new (...args: any[]) => any> = InstanceType<C>['$props']['autoResize'];
+const chartResize: Resize<typeof IxChart> = true;
+const lineResize: Resize<typeof IxLineChart> = true;
+const pieResize: Resize<typeof IxPieChart> = true;
+// @ts-expect-error line props must remain typed
+const badLineResize: Resize<typeof IxLineChart> = 'yes';
+// @ts-expect-error pie props must remain typed
+const badPieResize: Resize<typeof IxPieChart> = 'yes';
+const fixtureProps: InstanceType<typeof Fixture>['$props'] = { label: 'chart', autoResize: true };
+// @ts-expect-error required runtime props must remain required
+const missingLabel: InstanceType<typeof Fixture>['$props'] = { autoResize: true };
+declare const instance: InstanceType<typeof Fixture>;
+instance.$emit('change', 1);
+// @ts-expect-error inferred event payload must remain numeric
+instance.$emit('change', 'wrong');
+// @ts-expect-error undeclared events must be rejected
+instance.$emit('missing', 1);
+const nodes: VNode[] = instance.${scopedSlots}.default({ value: 1 });
+// @ts-expect-error inferred scoped slot payload must remain numeric
+instance.${scopedSlots}.default({ value: 'wrong' });
+const result: 42 = instance.focus();
+instance.count = 1;
+const doubled: number = instance.doubled;
+instance.increment(1);
+// @ts-expect-error inferred method parameters must remain numeric
+instance.increment('wrong');
+defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxPieChart, IxChart } });
+`
+  const entry = join(app, 'consumer.ts')
+  writeFileSync(entry, consumer)
+  // Vue 2.6 consumes the standalone prop aliases through its existing adapter;
+  // the default component declarations intentionally target Vue 2.7 and Vue 3.
+  const program = ts.createProgram([entry], { ...options, noEmit: true, skipLibCheck: adapter })
+  check(program)
+  if (!adapter && process.argv.includes('--runtime')) {
+    await smokeRuntime(app)
+    await smokeHooks(app)
+    console.log(
+      `PASS Vue ${version} / ECharts ${echartsVersion}: packed JS render/update/theme/unmount/remount and composable-only tree shaking`,
+    )
+  }
+  const demi = readFileSync(join(app, 'node_modules/vue-demi/lib/index.d.ts'), 'utf8')
+  assert.ok(demi.includes(adapter ? '@vue/composition-api' : "from 'vue'"))
+  console.log(
+    `PASS Vue ${version} / ECharts ${echartsVersion}: ${adapter ? 'Vue 2.6 adapter prop aliases' : 'packed declarations, inferred props/events/slots/instance API (skipLibCheck=false)'}`,
+  )
+}
+console.log(`Declaration consumer fixtures: ${work}`)
