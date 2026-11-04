@@ -1,9 +1,14 @@
 {
   "extends": "./tsconfig.app.json",
-  "exclude": [],
+  "exclude": ["**/node_modules/**", "**/dist/**"],
   "compilerOptions": {
-    "composite": true,
-    "lib": [],
+    "composite": false,
     "types": ["node", "jsdom"]
-  }
+  },
+  "include": [
+    "typings/**/*.d.ts",
+    "packages/**/__tests__/**/*.ts",
+    "packages/**/*.spec.ts",
+    "packages/**/*.test.ts"
+  ]
 }

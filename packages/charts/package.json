@@ -1,11 +1,11 @@
 {
   "name": "@idux/charts",
   "version": "0.7.2",
-  "description": "A UI Component Development Kit for Vue 3.x",
+  "description": "A chart component library for Vue 2 & 3",
   "keywords": [
     "vue",
+    "vue2",
     "vue3",
-    "vue 3.x",
     "chart",
     "charts"
   ],
@@ -31,7 +31,9 @@
     "*.md",
     "*.d.ts"
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "scripts": {
     "clean": "rimraf dist node_modules",
     "build": "rimraf dist && vite build"
@@ -41,8 +43,8 @@
     "@idux/charts-plots": "workspace:*"
   },
   "peerDependencies": {
-    "@vue/composition-api": "^1.7.0",
-    "echarts": "^5.4.0",
+    "@vue/composition-api": ">=1.6.2",
+    "echarts": "^5.4.3 || ^6.0.0",
     "lodash-es": "^4.17.0",
     "vue": "^2.6.0 || ^3.2.5"
   },
@@ -50,5 +52,8 @@
     "@vue/composition-api": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "echarts": "^6.1.0"
   }
 }

@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": false,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "printWidth": 100,
+  "trailingComma": "all",
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "proseWrap": "preserve",
+  "endOfLine": "lf",
+  "htmlWhitespaceSensitivity": "strict",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.archive/**",
+    "packages/site/components.d.ts",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "playgrounds/.packages/**",
+    "playgrounds/*/vendor/**"
+  ]
+}

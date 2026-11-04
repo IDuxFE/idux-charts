@@ -1,15 +1,11 @@
-import { type ComputedRef, type InjectionKey, computed, inject } from 'vue-demi'
+import { computed, inject, unref } from 'vue-demi'
+import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
-import { type PieSeriesOption } from 'echarts/charts'
+import type { PieSeriesOption } from 'echarts/charts'
 import { merge, get, set, cloneDeep } from 'lodash-es'
 
-import {
-  type AdditionalChartOption,
-  type BaseChartOption,
-  convertArray,
-  filterEmptyProps,
-  useTooltipsFormatter,
-} from '@idux/charts-core'
+import { convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/charts-core'
+import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const pieChartProps = [
   'data',
@@ -22,9 +18,13 @@ export const pieChartProps = [
 ] as const
 
 export interface PieChartProps
-  extends BaseChartOption<PieSeriesOption>,
+  extends
+    BaseChartOption<PieSeriesOption>,
     AdditionalChartOption,
     Pick<PieSeriesOption, (typeof pieChartProps)[number]> {}
+
+/** Named caller-facing props for component declarations; defaults are not resolved. */
+export type PieChartPublicProps = KnownProps<PieChartProps>
 
 export const PIE_CHART_TOKEN: InjectionKey<PieChartProps> = Symbol('PIE_CHART_TOKEN')
 
@@ -43,25 +43,29 @@ const defaultProps: PieChartProps = {
     top: 'center',
     left: 'center',
   },
-  tooltip: { 
+  tooltip: {
     trigger: 'item',
     backgroundColor: 'rgba(251, 253, 255, 0.88)',
     formatter: params => {
-      const title = params.name
-      const list = [{
-        name: params.seriesName,
-        value: params.value,
-        color: params.color,
-      }];
+      const item = Array.isArray(params) ? params[0] : params
+      if (!item) return ''
+      const title = item.name
+      const list = [
+        {
+          name: item.seriesName ?? '',
+          value: String(item.value ?? ''),
+          color: typeof item.color === 'string' ? item.color : undefined,
+        },
+      ]
 
-      return useTooltipsFormatter(title, list);
+      return useTooltipsFormatter(title, list)
     },
   },
 }
 
 export function usePieOption(
   props: PieSeriesOption,
-  attrs: PieChartProps,
+  attrsInput: PieChartProps | ShallowRef<PieChartProps>,
 ): ComputedRef<PieChartProps> {
   const injectProps = inject(PIE_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
@@ -72,12 +76,21 @@ export function usePieOption(
     return option
   })
 
-  const total = computed(() =>
-    // @ts-ignore
-    mergedSeriesOption.value.data!.reduce((curr, next) => curr + next.value, 0),
-  )
+  const total = computed(() => {
+    const attrs = unref(attrsInput)
+    const data =
+      mergedSeriesOption.value.data ??
+      convertArray(attrs.series).flatMap(series => series.data ?? [])
+    return data.reduce<number>((sum, item) => {
+      const value = Number(
+        typeof item === 'object' && item !== null && 'value' in item ? item.value : item,
+      )
+      return sum + (Number.isFinite(value) ? value : 0)
+    }, 0)
+  })
 
   const mergedOption = computed(() => {
+    const attrs = unref(attrsInput)
     const option = merge({}, mergedDefaultProps, attrs)
     if (attrs.title !== null) {
       if (!get(option, ['title', 'text'])) {
@@ -95,7 +108,7 @@ export function usePieOption(
   return computed(() => {
     const option = { ...mergedOption.value }
     const seriesOption = mergedSeriesOption.value
-    const { series } = attrs
+    const { series } = unref(attrsInput)
     if (!series) {
       option.series = [seriesOption]
     } else {

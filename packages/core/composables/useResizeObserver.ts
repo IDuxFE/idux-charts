@@ -1,14 +1,14 @@
-import { type ComputedRef, type Ref, watch } from 'vue-demi'
+import { watch } from 'vue-demi'
+import type { ComputedRef, Ref } from 'vue-demi'
 
-import { throttle, type EChartsType } from 'echarts/core'
+import { throttle } from 'echarts/core'
+import type { EChartsType } from 'echarts/core'
 
 export function useResizeObserver(
   containerRef: Ref<HTMLElement | undefined>,
   chartRef: Ref<EChartsType | undefined>,
   mergedAutoResize: ComputedRef<boolean | undefined>,
 ): void {
-  let listener: ResizeListener | undefined
-
   watch(
     [containerRef, chartRef, mergedAutoResize],
     ([container, instance, autoResize], _, cleanup) => {
@@ -16,14 +16,20 @@ export function useResizeObserver(
         return
       }
 
-      if (autoResize) {
-        listener ??= throttle(() => instance.resize(), 16)
-        onResize(container, listener)
-      } else {
-        offResize(container, listener)
+      if (!autoResize) {
+        return
       }
 
-      cleanup(() => offResize(container, listener))
+      const listener = throttle(() => {
+        if (chartRef.value === instance) {
+          instance.resize()
+        }
+      }, 16)
+      onResize(container, listener)
+      cleanup(() => {
+        offResize(container, listener)
+        listener.clear()
+      })
     },
   )
 }

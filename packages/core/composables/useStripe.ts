@@ -1,7 +1,8 @@
 /**
  * @file 柱状图条纹使用
  */
-import { type BarSeriesOption } from 'echarts/charts'
+import type { BarSeriesOption } from 'echarts/charts'
+
 import { useTooltipsFormatter } from './useTooltips'
 
 export function useStripe({
@@ -124,10 +125,10 @@ export function useStripeArea() {
             dashArrayX: [1, 0], // 这个一般不用调增
             dashArrayY: [6, 0], // 调整 [x, y] 中 x 的值可以调整条纹的密度
             symbolSize: 0.5, // 这个值越大，白色条纹就越宽。0.5 的时候则是平均分
-            rotation: Math.PI / 2 // 这个让条纹保持竖向
-          }
-        ]
-      }
+            rotation: Math.PI / 2, // 这个让条纹保持竖向
+          },
+        ],
+      },
     },
   }
 }
