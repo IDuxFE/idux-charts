@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+      - run: pnpm build:lib
+      - run: pnpm test:declarations
+
+  browser-tests:
+    name: Browser tests
+    # Existing screenshot baselines were recorded on Intel macOS 15.
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm test:e2e
+      # Rebuild and pack the library before installing both independent apps.
+      - run: pnpm playgrounds:prepare
+      - run: pnpm --dir playgrounds/vue2 test:e2e
+      - run: pnpm --dir playgrounds/vue3 test:e2e
+      - run: pnpm test:declarations --runtime
+      - name: Upload browser reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+            playgrounds/*/playwright-report/
+            playgrounds/*/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  ci:
+    name: CI result
+    if: ${{ always() }}
+    needs: [checks, browser-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require all checks to pass
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          BROWSER_RESULT: ${{ needs.browser-tests.result }}
+        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success
