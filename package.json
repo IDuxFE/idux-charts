@@ -24,6 +24,7 @@
     "format:check": "oxfmt . --check",
     "changelog": "pnpm changeset",
     "version": "pnpm changeset version",
+    "version:release": "pnpm run version && pnpm install --no-lockfile --no-frozen-lockfile",
     "publish": "pnpm changeset publish"
   },
   "devDependencies": {
