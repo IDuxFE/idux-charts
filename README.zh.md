@@ -94,3 +94,7 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 ## ☀️ 授权协议
 
 [MIT](https://github.com/IDuxFE/idux/blob/main/LICENSE) © 2023-present IDuxFE
+
+### 视觉定制
+
+Pie 自动布局、Radar、Gauge、LiquidFill 支持 `plotTheme`，可通过 `PLOT_THEME_TOKEN` 提供响应式对象/ref 作为全局后备。Gauge/LiquidFill 支持 `valueTextStyle`、`labelTextStyle`，LiquidFill 另支持 `unitTextStyle`，已有显式样式属性保持优先。Pie 新增 `layoutMode: 'auto' | 'native'` 和仅作用于主系列的 `seriesStyle`，不传则保留原有行为。Bar、Line、IxChart 继续使用 ECharts 的主题/样式 API。详见[配置指南](packages/site/src/0-guide/GettingStarted.page.md)；两个[兼容性 playground](playgrounds/README.zh.md) 均可通过 `/?theme` 体验。

@@ -1,16 +1,33 @@
 import type { App, Plugin } from 'vue'
+import { loadDemoFont } from './demoFont'
 
 import '@idux/cdk/index.css'
-import '@idux/components/default.css'
-import '@idux/components/switch/theme/default.css'
-import '@idux/components/switch/style/index.css'
-import '@idux/components/style/core/reset.css'
-import '@idux/components/style/core/reset-scroll.css'
+import '@idux/components/index.full.css'
+import '@idux/pro/index.css'
+import './demo.css'
 
 import type { ArchiveLoaderVueSetup } from '@idux/archive-loader-vue'
-import { IxBarChart, IxChart, IxLineChart, IxPieChart } from '@idux/charts'
+import {
+  IxBarChart,
+  IxChart,
+  IxLineChart,
+  IxPieChart,
+  IxRadarChart,
+  IxLiquidFillChart,
+  IxGaugeChart,
+} from '@idux/charts'
 
-const plugins = [IxChart, IxBarChart, IxLineChart, IxPieChart] as unknown as Plugin[]
+const plugins = [
+  IxChart,
+  IxBarChart,
+  IxLineChart,
+  IxPieChart,
+  IxRadarChart,
+  IxLiquidFillChart,
+  IxGaugeChart,
+] as unknown as Plugin[]
+
+loadDemoFont().catch(() => {})
 
 const setup: ArchiveLoaderVueSetup = {
   setupApp(app: App) {

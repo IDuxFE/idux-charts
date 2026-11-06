@@ -48,3 +48,7 @@ export function useChart(options: MaybeRef<ChartProps>): {
   chartRef: ShallowRef<EChartsType | undefined>
 }
 ```
+
+### 主题边界
+
+`IxChart` 原样消费 ECharts option 与 `AdditionalChartOption`，不解释 `plotTheme`、`layoutMode`、`seriesStyle` 或测量图的文字角色属性。使用 `theme` 切换 ECharts 初始化主题，使用 `textStyle`、各组件/系列样式调整文字；`theme` 或 `initOption` 改变时会重建实例。Plots 层的纯构建器输出可交给 IxChart，但需自行注册相应 ECharts 图表模块。

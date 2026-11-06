@@ -85,6 +85,12 @@ export default defineConfig({
     }
 
     const navRecords = getNavFromDirectory(root, {
+      mapRecords(_dir, records) {
+        return records.sort(
+          (a, b) =>
+            (idPageMetaMap.get(a.id)?.index ?? 999) - (idPageMetaMap.get(b.id)?.index ?? 999),
+        )
+      },
       getPageInfo(file, isDir) {
         const { id, name, title, description } = getMetaInfo(file, isDir)
 
@@ -113,7 +119,24 @@ export default defineConfig({
 
           const demoDir = resolve(file, './demos')
           if (existsSync(demoDir)) {
-            demos = readdirSync(demoDir).map(demo => resolve(demoDir, demo))
+            demos = readdirSync(demoDir)
+              .map(demo => {
+                const src = resolve(demoDir, demo)
+                // Pie examples declare their presentation order in archive-meta.
+                // Preserve the existing file order for other component pages.
+                const meta =
+                  id === 'pie'
+                    ? readFileSync(src, 'utf-8').match(
+                        /<archive-meta[^>]*>([\s\S]*?)<\/archive-meta>/,
+                      )
+                    : undefined
+                const index = meta
+                  ? (JSON.parse(meta[1]).index ?? 999)
+                  : Number(demo.startsWith('Legacy'))
+                return { src, index }
+              })
+              .sort((a, b) => a.index - b.index)
+              .map(demo => demo.src)
           }
 
           if (demos.length) {

@@ -94,3 +94,7 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 ## ☀️ License
 
 [MIT](https://github.com/IDuxFE/idux/blob/main/LICENSE) © 2023-present IDuxFE
+
+### Visual customization
+
+Pie built-in layout, Radar, Gauge and LiquidFill accept `plotTheme`; provide `PLOT_THEME_TOKEN` with a reactive object/ref for shared defaults. Gauge/LiquidFill expose `valueTextStyle` and `labelTextStyle`, and LiquidFill also exposes `unitTextStyle`. Existing explicit styling props keep precedence. Pie adds `layoutMode: 'auto' | 'native'` and main-series-only `seriesStyle`; omitting them preserves existing behavior. Bar, Line and IxChart keep their ECharts theme/style APIs. See [theme and configuration guide](packages/site/src/0-guide/GettingStarted.page.md) and run either [compatibility playground](playgrounds/README.md) at `/?theme`.
