@@ -122,6 +122,16 @@ for (const [name, useOption, token] of [
 }
 
 describe('pie option', () => {
+  it('does not leak the alignment control into ECharts options', () => {
+    const { option, wrapper } = setup(
+      usePieOption,
+      { data: [], align: 'bottom-end' },
+      { align: 'bottom-end' },
+    )
+    expect(option.value).not.toHaveProperty('align')
+    expect(option.value.series[0]).not.toHaveProperty('align')
+    wrapper.unmount()
+  })
   it('computes and updates the total and name, including empty data', () => {
     const props = reactive({
       data: [

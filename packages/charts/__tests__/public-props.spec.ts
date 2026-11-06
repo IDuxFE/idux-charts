@@ -8,6 +8,12 @@ import type {
 } from '@idux/charts-plots'
 
 import type {
+  PlotTheme,
+  PlotTextStyle,
+  PieSeriesStyle,
+  GaugeChartPublicProps,
+  LiquidFillChartPublicProps,
+  RadarChartPublicProps,
   ChartProps,
   ChartPublicProps,
   BarChartProps,
@@ -15,6 +21,7 @@ import type {
   LineChartProps,
   LineChartPublicProps,
   PieChartProps,
+  PieChartAlign,
   PieChartPublicProps,
 } from '../index'
 
@@ -80,6 +87,14 @@ describe('public chart prop types', () => {
     expectTypeOf<{ autoResize: number }>().not.toExtend<LineChartPublicProps>()
   })
 
+  it('exposes only the nine align positions', () => {
+    expectTypeOf<PieChartPublicProps['align']>().toEqualTypeOf<PieChartAlign | undefined>()
+    expectTypeOf<'top-end'>().toExtend<PieChartAlign>()
+    expectTypeOf<'center'>().toExtend<PieChartAlign>()
+    expectTypeOf<'center-center'>().not.toExtend<PieChartAlign>()
+    expectTypeOf<'left'>().not.toExtend<PieChartAlign>()
+  })
+
   it('preserves optionality and compatibility with the existing configuration types', () => {
     expectTypeOf<{}>().toExtend<
       ChartPublicProps & BarChartPublicProps & LineChartPublicProps & PieChartPublicProps
@@ -89,4 +104,22 @@ describe('public chart prop types', () => {
     expectTypeOf<LineChartPublicProps>().toExtend<LineChartProps>()
     expectTypeOf<PieChartPublicProps>().toExtend<PieChartProps>()
   })
+})
+
+it('retains typed theme and style contracts on every new public component', () => {
+  expectTypeOf<GaugeChartPublicProps['plotTheme']>().toEqualTypeOf<PlotTheme | undefined>()
+  expectTypeOf<LiquidFillChartPublicProps['valueTextStyle']>().toEqualTypeOf<
+    PlotTextStyle | undefined
+  >()
+  expectTypeOf<LiquidFillChartPublicProps['unitTextStyle']>().toEqualTypeOf<
+    PlotTextStyle | undefined
+  >()
+  expectTypeOf<RadarChartPublicProps['plotTheme']>().toEqualTypeOf<PlotTheme | undefined>()
+  expectTypeOf<PieChartPublicProps['layoutMode']>().toEqualTypeOf<'auto' | 'native' | undefined>()
+  expectTypeOf<PieChartPublicProps['seriesStyle']>().toEqualTypeOf<PieSeriesStyle | undefined>()
+  expectTypeOf<HasStringIndex<GaugeChartPublicProps>>().toEqualTypeOf<false>()
+  expectTypeOf<HasStringIndex<LiquidFillChartPublicProps>>().toEqualTypeOf<false>()
+  expectTypeOf<HasStringIndex<RadarChartPublicProps>>().toEqualTypeOf<false>()
+  expectTypeOf<'data'>().not.toExtend<keyof PieSeriesStyle>()
+  expectTypeOf<'radius'>().not.toExtend<keyof PieSeriesStyle>()
 })
