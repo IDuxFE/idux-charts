@@ -1,5 +1,14 @@
-import type { BarSeriesOption, LineSeriesOption, PieSeriesOption } from 'echarts/charts'
 import type {
+  BarSeriesOption,
+  LineSeriesOption,
+  PieSeriesOption,
+  RadarSeriesOption,
+  GaugeSeriesOption,
+  CustomSeriesOption,
+} from 'echarts/charts'
+import type {
+  RadarComponentOption,
+  GraphicComponentOption,
   DatasetComponentOption,
   DataZoomComponentOption,
   GridComponentOption,
@@ -59,23 +68,24 @@ interface ComponentOption {
   zlevel?: number
 }
 
-export type BaseChartOption<T extends ComponentOption> = ComposeOption<
+// Only capabilities shared by all plots belong in the base option. Plot-specific
+// coordinate systems (for example Radar) are supplied through the type parameter.
+type CommonComponentOption =
+  | GraphicComponentOption
   | DatasetComponentOption
   | DataZoomComponentOption
   | GridComponentOption
   | LegendComponentOption
   | TitleComponentOption
   | TooltipComponentOption
-  | T
->
 
-export type ChartOption = ComposeOption<
-  | DatasetComponentOption
-  | DataZoomComponentOption
-  | GridComponentOption
-  | LegendComponentOption
-  | TitleComponentOption
-  | TooltipComponentOption
+export type BaseChartOption<T extends ComponentOption> = ComposeOption<CommonComponentOption | T>
+
+export type ChartOption = BaseChartOption<
+  | RadarComponentOption
+  | RadarSeriesOption
+  | GaugeSeriesOption
+  | CustomSeriesOption
   | BarSeriesOption
   | PieSeriesOption
   | LineSeriesOption

@@ -1,7 +1,19 @@
-import { expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { effectScope, computed, shallowRef, nextTick } from 'vue'
 
 import { useResizeObserver } from '../useResizeObserver'
+
+beforeEach(() => {
+  vi.useFakeTimers()
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+    setTimeout(() => callback(0), 16),
+  )
+  vi.stubGlobal('cancelAnimationFrame', (handle: number) => clearTimeout(handle))
+})
+afterEach(() => {
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
 
 it('resizes the current instance after replacement and disconnects on cleanup', async () => {
   const callbacks: Function[] = []
@@ -31,6 +43,8 @@ it('resizes the current instance after replacement and disconnects on cleanup', 
   chart.value = second
   await nextTick()
   callbacks[0]([{ target: container }])
+  expect(second.resize).not.toHaveBeenCalled()
+  vi.advanceTimersByTime(16)
   expect(first.resize).not.toHaveBeenCalled()
   expect(second.resize).toHaveBeenCalledTimes(1)
   scope.stop()
@@ -108,7 +122,10 @@ it('honors autoResize changes and cancels queued callbacks after cleanup', async
     expect(callbacks).toHaveLength(1)
     callbacks[0]([{}])
     callbacks[0]([{}])
+    expect(instance.resize).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(16)
     expect(instance.resize).toHaveBeenCalledTimes(1)
+    callbacks[0]([{}])
     enabled.value = false
     await nextTick()
     vi.runAllTimers()
@@ -117,8 +134,12 @@ it('honors autoResize changes and cancels queued callbacks after cleanup', async
     enabled.value = true
     await nextTick()
     callbacks[1]([{}])
+    vi.advanceTimersByTime(16)
     expect(instance.resize).toHaveBeenCalledTimes(2)
+    callbacks[1]([{}])
     scope.stop()
+    vi.runAllTimers()
+    expect(instance.resize).toHaveBeenCalledTimes(2)
     expect(disconnect).toHaveBeenCalledTimes(2)
   } finally {
     scope.stop()

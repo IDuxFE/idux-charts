@@ -1,7 +1,6 @@
 import { watch } from 'vue-demi'
 import type { ComputedRef, Ref } from 'vue-demi'
 
-import { throttle } from 'echarts/core'
 import type { EChartsType } from 'echarts/core'
 
 export function useResizeObserver(
@@ -20,15 +19,20 @@ export function useResizeObserver(
         return
       }
 
-      const listener = throttle(() => {
-        if (chartRef.value === instance) {
-          instance.resize()
-        }
-      }, 16)
+      let frame: number | undefined
+      // Resizing synchronously inside ResizeObserver can change descendant sizes
+      // during the same delivery cycle. Coalesce updates into the next frame.
+      const listener = () => {
+        if (frame !== undefined) return
+        frame = requestAnimationFrame(() => {
+          frame = undefined
+          if (chartRef.value === instance) instance.resize()
+        })
+      }
       onResize(container, listener)
       cleanup(() => {
         offResize(container, listener)
-        listener.clear()
+        if (frame !== undefined) cancelAnimationFrame(frame)
       })
     },
   )
