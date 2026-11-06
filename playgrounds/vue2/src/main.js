@@ -1,3 +1,5 @@
+import Theme from './theme.js'
+import Basic from './basic.js'
 import Vue from 'vue'
 import CompositionAPI from '@vue/composition-api'
 Vue.use(CompositionAPI)
@@ -134,4 +136,6 @@ window.chartState = () =>
       background: option?.backgroundColor,
     }
   })
-new Vue(App).$mount('#app')
+new Vue(
+  location.search.includes('theme') ? Theme : location.search.includes('basic') ? Basic : App,
+).$mount('#app')

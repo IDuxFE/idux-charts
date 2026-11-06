@@ -74,3 +74,7 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 `pnpm test` handles library packaging, dependency installation for both independent playgrounds, application builds, unit tests, behavior tests, and screenshot comparisons. There is no need to run `pnpm start` beforehand. Pin Node.js, pnpm, Playwright, the operating system, and fonts in CI.
 
 The committed screenshot baselines currently target macOS (`darwin`). For Linux CI, generate and review baselines for the site and both playgrounds in the pinned Linux environment first. Do not rename macOS screenshots as Linux baselines. Normal CI runs must not pass `--update-snapshots`. Archive `playwright-report/` and `test-results/` from the repository root and both playgrounds as test artifacts.
+
+## Theme and local configuration playground
+
+Open `/?theme` in either app to test Pie, Radar, Gauge and LiquidFill from packed packages. Controls exercise reactive global `PLOT_THEME_TOKEN`, local overrides and removal, number/label styles, Pie auto/native mode and main-series styling, and empty-data recovery. `/?basic` retains the original Pie compatibility scenarios; the default page retains Bar/Line/Pie lifecycle and event tests. Run `pnpm test:playgrounds` from the root after library changes.
