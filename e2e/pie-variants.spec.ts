@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { test, expect } from './helpers'
+import { comparePixels } from './comparePixels'
 import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
@@ -58,19 +59,31 @@ for (const variant of [
         await page.locator('#comparison-surface').evaluate(el => el.remove())
         return image
       }
-      let reference: Buffer, result: Buffer
-      await expect
-        .poll(
-          async () => {
-            reference = await capture('reference')
-            result = await capture('actual')
-            return result.equals(reference)
-          },
-          { message: `${variant}/${state} rendered pixels`, timeout: 5000 },
-        )
-        .toBe(true)
-      await testInfo.attach(`${state}-reference`, { body: reference!, contentType: 'image/png' })
-      await testInfo.attach(`${state}-actual`, { body: result!, contentType: 'image/png' })
+      let reference: Buffer | undefined, result: Buffer | undefined
+      try {
+        await expect
+          .poll(
+            async () => {
+              reference = await capture('reference')
+              result = await capture('actual')
+              return comparePixels(reference, result).matches
+            },
+            { message: `${variant}/${state} rendered pixels`, timeout: 5000 },
+          )
+          .toBe(true)
+      } finally {
+        if (reference && result) {
+          await testInfo.attach(`${state}-diff`, {
+            body: comparePixels(reference, result).diff,
+            contentType: 'image/png',
+          })
+          await testInfo.attach(`${state}-reference`, {
+            body: reference,
+            contentType: 'image/png',
+          })
+          await testInfo.attach(`${state}-actual`, { body: result, contentType: 'image/png' })
+        }
+      }
     }
   })
 }
