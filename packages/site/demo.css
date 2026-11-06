@@ -1,0 +1,6 @@
+/* Keep demo sliders compact: IxSlider otherwise expands with flex: 1. */
+.chart-demo-slider.ix-slider {
+  flex: 0 0 auto;
+  width: 200px;
+  max-width: min(200px, 40vw);
+}

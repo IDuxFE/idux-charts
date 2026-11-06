@@ -1,171 +1,226 @@
 <script setup lang="ts">
-import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
-import { graphic } from 'echarts/core'
-import type { PieSeriesOption } from 'echarts/charts'
+import { IxPieChart } from '@idux/charts'
+import { IxSpace } from '@idux/components/space'
+import { IxRadio, IxRadioGroup } from '@idux/components/radio'
+import { IxEmpty } from '@idux/components/empty'
+import { IxButton } from '@idux/components/button'
+import { IxIcon, PieChart, Empty, addIconDefinitions } from '@idux/components/icon'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useThemeToken } from '@idux/components/theme'
+import '@idux/components/space/theme/default.css'
+import '@idux/components/space/style/index.css'
+import '@idux/components/radio/theme/default.css'
+import '@idux/components/radio/style/index.css'
+import '@idux/components/empty/theme/default.css'
+import '@idux/components/empty/style/index.css'
+import '@idux/components/button/theme/default.css'
+import '@idux/components/button/style/index.css'
+import '@idux/components/icon/theme/default.css'
+import '@idux/components/icon/style/index.css'
 
-type DataItem = PieSeriesOption['data']
+addIconDefinitions([PieChart, Empty])
 
-const getLinearGradient = (start: string, end: string) => {
-  return new graphic.LinearGradient(0, 0, 1, 1, [
-    {
-      offset: 0,
-      color: start, // 渐变起始颜色
-    },
-    {
-      offset: 1,
-      color: end, // 渐变结束颜色
-    },
-  ])
+type ChartStatus = 'normal' | 'allZero' | 'missing' | 'empty' | 'loading'
+const chartStatus = ref<ChartStatus>('normal')
+const totalMode = ref<'light' | 'heavy' | 'center'>('center')
+const statusDescriptions: Record<ChartStatus, string> = {
+  normal: '展示环形图（内置总数）及图例。',
+  allZero: '展示中心留空的灰色占位圆，图例数值为 0。',
+  missing: '文字标红，按有效数据渲染，悬浮提示原因。',
+  empty:
+    '用于图表无数据或加载异常时，涵盖无权限、未配置、报错等情况，展示对应占位图与操作引导，避免页面空白。',
+  loading: '展示灰色饼图图标及加载文案。',
 }
+const { themeTokens } = useThemeToken()
 
-const getDotData = () => {
-  const dataArr: DataItem = []
-
-  for (let i = 0; i < 100; i++) {
-    if (i % 2 === 0) {
-      dataArr.push({
-        name: (i + 1).toString(),
-        value: 25,
-        itemStyle: {
-          color: 'rgb(126,190,255)',
-          borderWidth: 0,
-          borderColor: 'rgba(0,0,0,0)',
-        },
-      })
-    } else {
-      dataArr.push({
-        name: (i + 1).toString(),
-        value: 20,
-        itemStyle: {
-          color: 'rgba(0,0,0,0)',
-          borderWidth: 0,
-          borderColor: 'rgba(0,0,0,0)',
-        },
-      })
-    }
-  }
-
-  return dataArr
+let reloadTimer: ReturnType<typeof setTimeout> | undefined
+const cancelReload = () => {
+  clearTimeout(reloadTimer)
+  reloadTimer = undefined
 }
+const reloadChart = () => {
+  cancelReload()
+  chartStatus.value = 'loading'
+  reloadTimer = setTimeout(() => {
+    chartStatus.value = 'normal'
+    reloadTimer = undefined
+  }, 800)
+}
+watch(chartStatus, status => {
+  if (status !== 'loading') cancelReload()
+})
+onBeforeUnmount(cancelReload)
+const chartSize = ref({ width: 480, height: 180 })
+const chartStyle = computed(() => ({
+  width: `${chartSize.value.width}px`,
+  height: `${chartSize.value.height}px`,
+}))
 
-const data = [
-  {
-    value: 45,
-    name: '高危',
-    itemStyle: {
-      color: getLinearGradient('rgba(104, 159, 255, 1)', 'rgba(104, 159, 255, 0.2)'),
-    },
-  },
-  {
-    value: 124,
-    name: '中危',
-    itemStyle: {
-      color: getLinearGradient('rgba(255, 146, 69, 1)', 'rgba(255, 146, 69, 0.2)'),
-    },
-  },
-  {
-    value: 118,
-    name: '低危',
-    itemStyle: {
-      color: getLinearGradient('rgba(219, 76, 53, 1)', 'rgba(219, 76, 53, 0.2)'),
-    },
-  },
-]
+const values = [145, 124, 118, 92, 54, 21]
+const data = computed(() =>
+  values.map((value, index) => ({
+    name: `图例${index + 1}`,
+    value:
+      chartStatus.value === 'missing' && index === 3
+        ? null
+        : chartStatus.value === 'allZero'
+          ? 0
+          : value,
+    missingReason: '数据缺失，xxxxxxxx缺失原因，请进行xxx解决方案',
+  })),
+)
 
-const pieOption: PieChartProps = {
+const total = computed(() => data.value.reduce((sum, item) => sum + (item.value ?? 0), 0))
+// 标题、汇总口径和缺失文案归业务；图形与图例的布局由组件计算。
+const presentation = computed<PieChartProps>(() => ({
+  name: '分类统计',
   legend: {
-    data,
-  },
-
-  title: {
-    // 总数
-    text: String((data || []).reduce((acc, cur) => acc + cur.value, 0)),
-    // 标题
-    textStyle: {
-      fontSize: 24,
-      fontWeight: 500,
-      color: '#2F3540',
-      fontFamily: 'D-DIN-PRO',
-    },
-    subtextStyle: {
-      fontSize: 12,
-      fontWeight: 400,
-      color: '#6A6D76',
+    formatter: name => {
+      const item = data.value.find(item => item.name === name)
+      return item?.value == null
+        ? `{label|${name}}{missing|数据缺失 ⓘ}`
+        : `{label|${name}}{value|${item.value}}`
     },
   },
-
-  // 从外到内，一个pie表示一个图
-  series: [
-    // 最外层颜色
-    {
-      type: 'pie',
-      zlevel: 1,
-      radius: ['80%', '100%'],
-      silent: true,
-      itemStyle: {
-        color: getLinearGradient('rgba(69, 143, 255, 0.08)', 'rgba(69, 143, 255, 0.01)'),
+  radius: ['88%', '100%'],
+  title:
+    totalMode.value === 'center'
+      ? { show: false, text: '', subtext: '' }
+      : totalMode.value === 'light'
+        ? {
+            show: true,
+            text: `{label|统计总数}  {value|${total.value}}`,
+            subtext: '',
+            textStyle: {
+              fontSize: 30,
+              lineHeight: 16,
+              rich: {
+                value: { fontSize: 16, fontWeight: 500, fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO' },
+              },
+            },
+          }
+        : {
+            show: true,
+            text: `{value|${total.value}}`,
+            subtext: '统计总数',
+            itemGap: 8,
+            textStyle: {
+              lineHeight: 28,
+              rich: {
+                value: { fontSize: 28, fontWeight: 700, fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO' },
+              },
+            },
+          },
+  label: {
+    show: totalMode.value === 'center',
+    position: 'center',
+    formatter: () => `{total|${total.value}}\n{gap| }\n{caption|资产总数}`,
+    rich: {
+      total: {
+        fontSize: 24,
+        fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO',
+        fontWeight: 400,
+        lineHeight: 24,
+        color: '#2F3540',
       },
-      label: {
-        show: false,
-      },
-      data: [1],
+      gap: { lineHeight: 4 },
+      caption: { fontSize: 12, lineHeight: 12, color: '#6f7785' },
     },
-
-    // 条纹
-    {
-      type: 'pie',
-      radius: ['70%', '80%'],
-      zlevel: 2,
-      emphasis: {
-        scaleSize: 10,
-      },
-      // 显示的数据
-      data: data,
-    },
-
-    // 虚线圈
-    {
-      type: 'pie',
-      zlevel: 3,
-      silent: true,
-      radius: ['64%', '65%'],
-      data: getDotData(),
-    },
-
-    //最内圈
-    {
-      type: 'pie',
-      zlevel: 4,
-      center: ['center', 'center'],
-      silent: true,
-      radius: '55%',
-      tooltip: {
-        show: false,
-      },
-      itemStyle: {
-        borderColor: getLinearGradient('rgba(69, 143, 255, 0.16)', 'rgba(69, 143, 255, 0)'),
-        borderWidth: 1,
-        color: getLinearGradient('rgba(69, 143, 255, 0.1)', 'rgba(69, 143, 255, 0)'),
-      },
-      data: [1],
-    },
-  ],
-}
+  },
+}))
 </script>
 <template>
-  <IxPieChart
-    style="width: 600px; height: 300px"
-    name="风险用户数"
-    :data="data"
-    v-bind="pieOption"
-  />
+  <IxSpace vertical class="basic-pie-demo">
+    <div class="basic-pie-demo-controls">
+      <IxRadioGroup v-model:value="totalMode" buttoned aria-label="总数展示">
+        <IxRadio key="light">轻总数</IxRadio>
+        <IxRadio key="heavy">重总数</IxRadio>
+        <IxRadio key="center">总数在饼图中间</IxRadio>
+      </IxRadioGroup>
+      <IxRadioGroup v-model:value="chartStatus" buttoned>
+        <IxRadio key="normal">正常</IxRadio>
+        <IxRadio key="allZero">全部数值为 0</IxRadio>
+        <IxRadio key="missing">数据缺失</IxRadio>
+        <IxRadio key="empty">空状态</IxRadio>
+        <IxRadio key="loading">加载中</IxRadio>
+      </IxRadioGroup>
+    </div>
+    <span class="basic-pie-demo-text">{{ statusDescriptions[chartStatus] }}</span>
+    <div class="basic-pie-demo-chart" :style="chartStyle">
+      <div v-if="chartStatus === 'empty'" class="basic-pie-demo-placeholder">
+        <IxEmpty simple>
+          <template #description>
+            <IxSpace :size="0">
+              <span class="basic-pie-demo-empty-label">加载失败，</span>
+              <IxButton mode="link" @click="reloadChart" style="display: flex">重新加载</IxButton>
+            </IxSpace>
+          </template>
+        </IxEmpty>
+      </div>
+      <div
+        v-else-if="chartStatus === 'loading'"
+        class="basic-pie-demo-placeholder"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <span class="basic-pie-demo-loading-ring" />
+        <span>图表正在加载中，请稍后...</span>
+      </div>
+      <IxPieChart
+        v-else
+        style="width: 100%; height: 100%"
+        :data="data"
+        align="center-start"
+        v-bind="presentation"
+      />
+    </div>
+  </IxSpace>
 </template>
+
+<style scoped lang="less">
+.basic-pie-demo {
+  &-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+
+  &-loading-ring {
+    width: 60px;
+    height: 60px;
+    border: 5px dashed var(--ix-color-info-container-bg-disabled);
+    border-radius: 50%;
+  }
+  &-empty-label {
+    font-size: 12px;
+  }
+
+  &-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    color: var(--ix-color-text-info);
+  }
+
+  &-text {
+    color: var(--ix-color-text-info);
+    font-size: 14px;
+    line-height: 24px;
+  }
+}
+</style>
 
 <archive-meta lang="json">
 {
-  "title": "风险用户数",
-  "description": "风险用户数的配置与使用示例。",
-  "index": 1
+  "title": "环形图",
+  "description": "业务声明数据和展示文案，组件内置图形装饰、自适应尺寸和图例布局。",
+  "index": 2
 }
 </archive-meta>

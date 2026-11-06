@@ -32,3 +32,9 @@ export function useLineOption(
   attrs: LineChartProps,
 ): ComputedRef<LineChartProps>
 ```
+
+### 主题与配置边界
+
+继续使用 ECharts `theme`、`color`、`textStyle`，以及 `label` / `series` 的局部样式。此组件不消费 `plotTheme` 或 `PLOT_THEME_TOKEN`；这些配置服务于 Pie 自动布局及 Radar/Gauge/LiquidFill 的额外绘制元素。切换 `theme` 会重新创建 ECharts 实例。
+
+组件保留已有配置合并行为，不使用新增测量图的顶层整段替换策略。需要彻底清除旧系列时显式配置 `setOptionOpts`。数据、样式和事件透传在公共组件回归测试与 Vue 2/Vue 3 playgrounds 中验证。
