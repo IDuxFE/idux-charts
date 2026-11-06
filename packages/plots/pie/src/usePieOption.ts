@@ -1,3 +1,4 @@
+import type { PlotTheme } from '../../shared/plotTheme'
 import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
@@ -8,6 +9,10 @@ import { convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/char
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const pieChartProps = [
+  'align',
+  'layoutMode',
+  'seriesStyle',
+  'plotTheme',
   'data',
   'center',
   'label',
@@ -21,7 +26,41 @@ export interface PieChartProps
   extends
     BaseChartOption<PieSeriesOption>,
     AdditionalChartOption,
-    Pick<PieSeriesOption, (typeof pieChartProps)[number]> {}
+    Pick<
+      PieSeriesOption,
+      Exclude<
+        (typeof pieChartProps)[number],
+        'data' | 'align' | 'layoutMode' | 'seriesStyle' | 'plotTheme'
+      >
+    > {
+  /** Align the complete built-in pie layout inside its container. */
+  align?: PieChartAlign
+  /** Omit both layoutMode and align to preserve 1.0.0 rendering; auto opts into built-in layout. */
+  layoutMode?: 'auto' | 'native'
+  seriesStyle?: PieSeriesStyle
+  plotTheme?: PlotTheme
+  data?: Array<NonNullable<PieSeriesOption['data']>[number] | PieChartDataItem>
+}
+
+/** Main-series presentation only; data and geometry stay under the layout's control. */
+export type PieSeriesStyle = Pick<
+  PieSeriesOption,
+  'itemStyle' | 'labelLine' | 'emphasis' | 'blur' | 'select' | 'selectedMode'
+>
+
+export type PieChartAlign =
+  | 'center'
+  | `${'top' | 'bottom'}-${'start' | 'center' | 'end'}`
+  | `center-${'start' | 'end'}`
+
+/** Optional source diagnostics survive zero and missing-value rendering. */
+export type PieChartDataItem = Omit<
+  Extract<NonNullable<PieSeriesOption['data']>[number], { name?: unknown }>,
+  'value'
+> & {
+  value?: Extract<NonNullable<PieSeriesOption['data']>[number], { name?: unknown }>['value'] | null
+  missingReason?: string
+}
 
 /** Named caller-facing props for component declarations; defaults are not resolved. */
 export type PieChartPublicProps = KnownProps<PieChartProps>
@@ -71,7 +110,18 @@ export function usePieOption(
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
   const mergedSeriesOption = computed<PieSeriesOption>(() => {
-    const option = filterEmptyProps(props)
+    const {
+      layoutMode: _mode,
+      seriesStyle,
+      plotTheme: _theme,
+      ...nativeProps
+    } = props as PieChartProps
+    const option = merge(
+      {},
+      seriesStyle ?? injectProps?.seriesStyle,
+      filterEmptyProps(nativeProps),
+    ) as PieSeriesOption
+    delete (option as PieChartProps).align
     option.type = 'pie'
     return option
   })
@@ -92,6 +142,10 @@ export function usePieOption(
   const mergedOption = computed(() => {
     const attrs = unref(attrsInput)
     const option = merge({}, mergedDefaultProps, attrs)
+    delete option.align
+    delete option.layoutMode
+    delete option.seriesStyle
+    delete option.plotTheme
     if (attrs.title !== null) {
       if (!get(option, ['title', 'text'])) {
         set(option, ['title', 'text'], `${total.value}`)
