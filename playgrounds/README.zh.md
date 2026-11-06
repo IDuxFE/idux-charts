@@ -74,3 +74,7 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 `pnpm test` 自动完成图表库打包、两个独立 playground 的依赖安装、各应用构建、单测、行为测试和截图对比，无需预先运行 `pnpm start`。流水线应固定 Node.js、pnpm、Playwright、操作系统及字体环境。
 
 当前提交的截图基准为 macOS（`darwin`）。如果流水线采用 Linux，需先在对应的固定 Linux 环境中生成并审核站点及两个 playground 的基准，不能直接把 macOS 的截图重命名成 Linux 基准。普通 CI 不传 `--update-snapshots`，并归档根目录和两个 playground 的 `playwright-report/`、`test-results/` 作为测试产物。
+
+## 主题与局部配置验证
+
+两个应用均可打开 `/?theme`，使用打包后的 Pie、Radar、Gauge、LiquidFill，验证全局响应式主题、局部覆盖及移除、数字/标签样式、Pie auto/native 模式与主系列样式，以及空数据恢复。`/?basic` 保留原有 Pie 兼容场景，默认页继续验证 Bar/Line/Pie 生命周期和事件。修改库后从根目录运行 `pnpm test:playgrounds`，重新打包再测试。

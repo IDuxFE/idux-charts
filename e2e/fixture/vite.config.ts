@@ -17,6 +17,14 @@ export default defineConfig(({ command }) => ({
       echarts: fromRoot('packages/core/node_modules/echarts'),
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: fromRoot('e2e/fixture/index.html'),
+        special: fromRoot('e2e/fixture/special.html'),
+      },
+    },
+  },
   server: { host: serverHost, port: fixturePort, strictPort: true, fs: { allow: [fromRoot('')] } },
   preview: { host: serverHost, port: fixturePort, strictPort: true },
 }))

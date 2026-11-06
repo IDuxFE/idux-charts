@@ -1,4 +1,5 @@
 import { test, expect } from './helpers'
+import { fixtureBaseURL } from './environment'
 
 for (const [chart, title, snapshot] of [
   ['bar', '简单的鼠标经过显示条纹', 'bar-striped.png'],
@@ -7,15 +8,24 @@ for (const [chart, title, snapshot] of [
   ['pie', '风险用户数', 'pie-risk-users.png'],
 ] as const) {
   test(`${chart} ${title} appearance`, async ({ page }) => {
-    await page.goto(`components/${chart}`)
-    await page.getByText('示例', { exact: true }).click()
-    const block = page
-      .locator('.archive-app-demo')
-      .filter({ has: page.getByRole('heading', { name: title, exact: false }) })
+    await page.goto(chart === 'pie' ? `${fixtureBaseURL}?legacy-risk` : `components/${chart}`)
+    if (chart !== 'pie') await page.getByRole('radio', { name: '示例', exact: true }).click()
+    const block =
+      chart === 'pie'
+        ? page.locator('#app')
+        : page
+            .locator('.archive-app-demo')
+            .filter({ has: page.getByRole('heading', { name: title, exact: false }) })
     const chartElement = block.locator('[_echarts_instance_]')
     await expect(chartElement).toHaveCount(1)
     await expect(chartElement.locator('svg path').first()).toBeAttached()
     await chartElement.scrollIntoViewIfNeeded()
+    // Fractional document offsets can produce an extra screenshot row in WebKit.
+    // Align the crop without changing the chart size or its rendering options.
+    await chartElement.evaluate(element => {
+      const y = element.getBoundingClientRect().top
+      element.style.transform = `translateY(${Math.round(y) - y}px)`
+    })
     await page.mouse.move(0, 0)
     await expect(chartElement).toHaveScreenshot(snapshot, {
       animations: 'disabled',
@@ -26,7 +36,7 @@ for (const [chart, title, snapshot] of [
 
 test('bar hover tooltip excludes the helper series and preserves appearance', async ({ page }) => {
   await page.goto('components/bar')
-  await page.getByText('示例', { exact: true }).click()
+  await page.getByRole('radio', { name: '示例', exact: true }).click()
   const chart = page
     .locator('.archive-app-demo')
     .filter({ has: page.getByRole('heading', { name: '简单的鼠标经过显示条纹' }) })

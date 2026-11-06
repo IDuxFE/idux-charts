@@ -86,11 +86,11 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart } from '@idux/charts';
 import { getInstanceByDom } from 'echarts/core';
 const revision = ref(0), dark = ref(false), mounted = ref(true);
 const instances = [];
-const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['pie', IxPieChart]];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
 createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
@@ -103,6 +103,8 @@ createApp({setup() { return () => h('main', {}, [
       initOption: {renderer: 'svg', width: 400, height: 240}, setOptionOpts: {notMerge: true},
       theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
       ...(kind === 'core' ? {xAxis: {type: 'category', data: ['A', 'B', 'C']}, yAxis: {type: 'value'}, series: [{type: 'bar', data}]} :
+        kind === 'radar' ? { indicator: ['A', 'B', 'C'].map(name => ({name, max: 100})), data: [{name: 'One', value: data}] } :
+        kind === 'gauge' || kind === 'liquid-fill' ? {value: data[0]} :
         kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} : {data, xAxis: {data: ['A', 'B', 'C']}}),
     };
     return h('section', isVue2 ? {attrs: {'data-kind': kind}, style: {width: '400px', height: '240px'}} : {'data-kind': kind, style: {width: '400px', height: '240px'}},
@@ -112,7 +114,7 @@ createApp({setup() { return () => h('main', {}, [
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
   const el = section.querySelector('[_echarts_instance_]');
   const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
-  return {id: chart?.id, title: option?.title?.[0]?.text, value: typeof data === 'object' ? data.value : data, paths: el?.querySelectorAll('svg path').length || 0};
+  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
 `,
@@ -137,14 +139,14 @@ window.allDisposed = () => instances.length > 0 && instances.every(chart => char
     const state = () => page.evaluate(() => window.readCharts())
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
-      .toEqual([true, true, true, true])
+      .toEqual([true, true, true, true, true, true, true])
     await page.getByTestId('update').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
-      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1'])
+      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1', 'radar 1', 'gauge 1', 'liquid-fill 1'])
     await expect
       .poll(async () => (await state()).map(chart => chart.value))
-      .toEqual([11, 11, 11, 11])
+      .toEqual([11, 11, 11, 11, 11, 0.11, 0.11])
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
@@ -156,7 +158,7 @@ window.allDisposed = () => instances.length > 0 && instances.every(chart => char
     await page.getByTestId('mount').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
-      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1'])
+      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1', 'radar 1', 'gauge 1', 'liquid-fill 1'])
     expect(errors).toEqual([])
   } finally {
     await browser.close()
@@ -223,11 +225,30 @@ createApp({
 }
 
 const adapterConsumer = `
-import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps } from '@idux/charts';
+import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps } from '@idux/charts';
+const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
+const gauge: GaugeChartPublicProps = { value: 20, segments: [{upper: 1, color: 'red'}], plotTheme: { textColor: 'red' }, valueTextStyle: { fontSize: 24 } };
+const themedPie: PieChartPublicProps = { layoutMode: 'auto', plotTheme: { palette: ['red'] }, seriesStyle: { emphasis: { scale: false } } };
+const themedLiquid: LiquidFillChartPublicProps = { unitTextStyle: { fontSize: 12 }, labelTextStyle: { color: 'blue' } };
+// @ts-expect-error modes must remain a finite union
+const badMode: PieChartPublicProps = { layoutMode: 'custom' };
+// @ts-expect-error local series styles cannot replace geometry
+const badSeriesStyle: PieChartPublicProps = { seriesStyle: { radius: 100 } };
+// @ts-expect-error text sizing uses numeric pixels
+const badTextStyle: GaugeChartPublicProps = { valueTextStyle: { fontSize: 'big' } };
+const liquid: LiquidFillChartPublicProps = { value: 20, waveAnimation: false };
+// @ts-expect-error value must be numeric
+const invalidGauge: GaugeChartPublicProps = { value: '20' };
+// @ts-expect-error waveAnimation must be boolean
+const invalidLiquid: LiquidFillChartPublicProps = { waveAnimation: 'yes' };
+// @ts-expect-error gridStyle accepts only line or area
+const invalidRadar: RadarChartPublicProps = { gridStyle: 'dotted' };
 const chart: ChartPublicProps = { autoResize: true };
 const bar: BarChartPublicProps = { data: [1, 2], barWidth: 10 };
 const line: LineChartPublicProps = { autoResize: true, smooth: true, data: [1, 2] };
-const pie: PieChartPublicProps = { data: [{ value: 1 }], roseType: 'radius' };
+const pie: PieChartPublicProps = { data: [{ value: 1 }], roseType: 'radius', align: 'top-end' };
+// @ts-expect-error align only accepts nine named positions
+const badAlign: PieChartPublicProps = { align: 'left' };
 // @ts-expect-error autoResize must retain its boolean type
 const invalidChart: ChartPublicProps = { autoResize: 1 };
 // @ts-expect-error smooth must retain its boolean/number type
@@ -290,7 +311,7 @@ for (const [version, echartsVersion, adapter] of targets) {
   const consumer = adapter
     ? adapterConsumer
     : `${adapterConsumer}
-import { IxChart, IxBarChart, IxLineChart, IxPieChart } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart } from '@idux/charts';
 import '@idux/charts/types';
 import type { GlobalComponents } from 'vue';
 import Fixture from './inferred-fixture';
@@ -306,7 +327,24 @@ const bad: BarProps = { autoResize: 123 };
 type Resize<C extends new (...args: any[]) => any> = InstanceType<C>['$props']['autoResize'];
 const chartResize: Resize<typeof IxChart> = true;
 const lineResize: Resize<typeof IxLineChart> = true;
+const radarResize: Resize<typeof IxRadarChart> = true;
+const gaugeResize: Resize<typeof IxGaugeChart> = true;
+const liquidResize: Resize<typeof IxLiquidFillChart> = true;
 const pieResize: Resize<typeof IxPieChart> = true;
+const pieAlign: InstanceType<typeof IxPieChart>['$props']['align'] = 'center';
+const pieMode: InstanceType<typeof IxPieChart>['$props']['layoutMode'] = 'auto';
+// @ts-expect-error component props must preserve the mode union
+const invalidPieMode: InstanceType<typeof IxPieChart>['$props']['layoutMode'] = 'custom';
+const gaugeText: InstanceType<typeof IxGaugeChart>['$props']['valueTextStyle'] = { fontSize: 24 };
+// @ts-expect-error runtime declarations must not widen styles to any
+const badGaugeText: InstanceType<typeof IxGaugeChart>['$props']['valueTextStyle'] = { fontSize: 'big' };
+// @ts-expect-error liquid text sizes must remain numeric on the component
+const badLiquidText: InstanceType<typeof IxLiquidFillChart>['$props']['unitTextStyle'] = { fontSize: 'big' };
+
+// @ts-expect-error center is the canonical name for the middle position
+const obsoletePieAlign: InstanceType<typeof IxPieChart>['$props']['align'] = 'center-center';
+// @ts-expect-error align only accepts nine named positions
+const badPieAlign: InstanceType<typeof IxPieChart>['$props']['align'] = 'left';
 // @ts-expect-error line props must remain typed
 const badLineResize: Resize<typeof IxLineChart> = 'yes';
 // @ts-expect-error pie props must remain typed
@@ -337,7 +375,7 @@ defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxPieChart, Ix
   // the default component declarations intentionally target Vue 2.7 and Vue 3.
   const program = ts.createProgram([entry], { ...options, noEmit: true, skipLibCheck: adapter })
   check(program)
-  if (!adapter && process.argv.includes('--runtime')) {
+  if (process.argv.includes('--runtime')) {
     await smokeRuntime(app)
     await smokeHooks(app)
     console.log(

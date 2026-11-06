@@ -21,13 +21,15 @@ for (const chart of ['core', 'bar', 'line', 'pie']) {
         page.getByAltText('logo').evaluate(image => (image as HTMLImageElement).naturalWidth),
       )
       .toBeGreaterThan(0)
-    await page.getByText('示例', { exact: true }).click()
+    await page.getByRole('radio', { name: '示例', exact: true }).click()
     await expect(page.locator('[_echarts_instance_]')).toHaveCount(demos.length)
     for (const demo of demos) {
       await test.step(demo.file, async () => {
-        const block = page
-          .locator('.archive-app-demo')
-          .filter({ has: page.getByRole('heading', { name: demo.title, exact: false }) })
+        const block = page.locator('.archive-app-demo').filter({
+          has: page.getByRole('heading', {
+            name: new RegExp(`^${demo.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*#?\\s*$`),
+          }),
+        })
         await expect(block).toHaveCount(1)
         const chartElement = block.locator('[_echarts_instance_]')
         await expect(chartElement).toBeVisible()
@@ -45,10 +47,11 @@ for (const chart of ['core', 'bar', 'line', 'pie']) {
     }
   })
 
-  if (chart !== 'core') {
+  // Pie loading is covered by the large-demo native loading test and Basic reload test.
+  if (chart === 'bar' || chart === 'line') {
     test(`${chart} demo toggles loading`, async ({ page }) => {
       await page.goto(`components/${chart}`)
-      await page.getByText('示例', { exact: true }).click()
+      await page.getByRole('radio', { name: '示例', exact: true }).click()
       const block = page
         .locator('.archive-app-demo')
         .filter({ has: page.getByRole('heading', { name: '加载中状态' }) })
@@ -62,3 +65,35 @@ for (const chart of ['core', 'bar', 'line', 'pie']) {
     })
   }
 }
+
+test('built-in Basic demo switches states and reloads', async ({ page }) => {
+  await page.goto('components/pie')
+  await page.getByRole('radio', { name: '示例', exact: true }).click()
+  const demo = page
+    .locator('.archive-app-demo')
+    .filter({ has: page.getByRole('heading', { name: '实心饼图' }) })
+  const chart = demo.locator('[_echarts_instance_]')
+  const instance = await chart.getAttribute('_echarts_instance_')
+  await demo.getByText('重总数', { exact: true }).click()
+  await expect(chart.locator('svg text').filter({ hasText: /^554$/ })).toHaveCSS(
+    'font-size',
+    '28px',
+  )
+  await demo.getByText('轻总数', { exact: true }).click()
+  await expect(chart.locator('svg text').filter({ hasText: /^554$/ })).toHaveCSS(
+    'font-size',
+    '16px',
+  )
+  await expect(chart.locator('svg text').filter({ hasText: /^统计总数$/ })).toHaveCount(1)
+  await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+  await demo.getByText('数据缺失', { exact: true }).click()
+  await expect(demo.locator('[_echarts_instance_]')).toContainText('数据缺失')
+  await demo.getByText('全部数值为 0', { exact: true }).click()
+  await expect(demo.locator('[_echarts_instance_]')).toContainText('统计总数')
+  await demo.getByText('空状态', { exact: true }).click()
+  await expect(demo.locator('[_echarts_instance_]')).toHaveCount(0)
+  await demo.getByRole('button', { name: '重新加载' }).click()
+  await expect(demo.getByRole('status')).toContainText('图表正在加载中')
+  await expect(demo.getByRole('status').locator('svg path')).toHaveCount(1)
+  await expect(demo.locator('[_echarts_instance_]')).toContainText('554')
+})

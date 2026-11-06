@@ -1,3 +1,5 @@
+import Theme from './theme.js'
+import Basic from './basic.js'
 import { createApp, h } from 'vue'
 import { IxBarChart, IxLineChart, IxPieChart } from '@idux/charts'
 import { getInstanceByDom, use } from 'echarts/core'
@@ -119,4 +121,6 @@ window.chartState = () =>
       background: option?.backgroundColor,
     }
   })
-createApp(App).mount('#app')
+createApp(
+  location.search.includes('theme') ? Theme : location.search.includes('basic') ? Basic : App,
+).mount('#app')
