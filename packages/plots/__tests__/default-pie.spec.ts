@@ -511,3 +511,18 @@ it('themes plain titles and legend labels and inherits root center typography', 
   expect(local.title.textStyle.color).toBe('green')
   expect(local.legend[0].textStyle.color).toBe('purple')
 })
+
+it('keeps the reference pie radius when wide legend content still fits beside the halo', () => {
+  const option = createDefaultPieOption(
+    Array.from({ length: 6 }, (_, index) => ({ name: `Item${index}`, value: index + 1 })),
+    size,
+    tokens,
+    '',
+    '',
+    'center-start',
+    { legend: { textStyle: { rich: { label: { width: 45 }, value: { width: 66 } } } } },
+  ) as any
+  expect(option.series[2].radius).toBe(60)
+  expect(option.series[0].radius).toBe(72)
+  expect(option.legend[0].left).toBe(167)
+})

@@ -368,9 +368,11 @@ export function createDefaultPieOption(
       size.width - (summaryWidth ? summaryWidth + pieConfig.legendGap - componentPadding : 0),
     ),
   )
+  // The legend already reserves its gap. Apply the standalone inset only when
+  // there is no legend, otherwise a fitting halo can shrink on wider fonts.
   const maxBackgroundRadius = Math.max(
     0,
-    availableDiameter / 2 - (presentation.radius === undefined ? 8 : 0),
+    availableDiameter / 2 - (presentation.radius === undefined && !showLegend ? 8 : 0),
   )
   const requested =
     presentation.radius === undefined

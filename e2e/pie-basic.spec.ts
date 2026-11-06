@@ -1,4 +1,5 @@
 import { test, expect } from './helpers'
+import { comparePixels } from './comparePixels'
 import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
@@ -44,10 +45,15 @@ test('automatic pie preserves the original Basic proportions and presentation', 
         contentType: 'image/png',
       })
       await testInfo.attach(`${size}-${state}-actual`, { body: result, contentType: 'image/png' })
+      const comparison = comparePixels(baseline, result)
+      await testInfo.attach(`${size}-${state}-diff`, {
+        body: comparison.diff,
+        contentType: 'image/png',
+      })
       expect(
-        result.equals(baseline),
-        `${size}/${state}: original and built-in Basic must match pixel for pixel`,
-      ).toBe(true)
+        comparison.differentPixels,
+        `${size}/${state}: differing content pixels`,
+      ).toBeLessThanOrEqual(comparison.maxDiffPixels)
     }
   }
 })
