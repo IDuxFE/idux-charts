@@ -1,2 +1,2 @@
-// Keep the build and preview base identical so E2E covers deployed asset paths.
-export const siteDeploymentBase = '/common/idux-charts/'
+// The custom Pages domain serves the site at its root. Preview uses the same base.
+export const siteDeploymentBase = '/'

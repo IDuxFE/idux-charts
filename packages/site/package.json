@@ -24,7 +24,7 @@
   "scripts": {
     "clean": "rimraf dist node_modules",
     "start": "archive dev",
-    "build": "archive build"
+    "build": "archive build && node ../../scripts/prepare-pages.mjs"
   },
   "dependencies": {
     "@idux/archive-app": "^0.5.0",
