@@ -6,7 +6,7 @@ type: page
 
 # 简介
 
-`@idux-charts` 是一个基于 `ECharts` 的 `Vue` 图表库，同时支持 `Vue 2.x` 和 `Vue 3.x`, 对 `Vue` 技术栈友好。
+`@idux/charts` 是一个基于 `ECharts` 的 `Vue` 图表库，同时支持 Vue 2（含 Vue 2.6）和 Vue 3, 对 `Vue` 技术栈友好。
 
 ## 特性
 

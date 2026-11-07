@@ -6,7 +6,7 @@ type: page
 
 # 快速上手
 
-本章节默认你已经掌握 `Vue` + `TypeScript` 的相关知识，帮助你在已有的 `Vue` 项目中安装 `@idux-charts` 用以图表的展示。
+本章节默认你已经掌握 `Vue` + `TypeScript` 的相关知识，帮助你在已有的 `Vue` 项目中安装 `@idux/charts` 用以图表的展示。
 
 ## 安装
 
@@ -14,7 +14,7 @@ type: page
 npm install echarts @idux/charts
 ```
 
-如果你使用的 `Vue` 版本低于 `2.7`, 那么请确保 `@vue/composition-api` 已经被安装。
+支持 Vue 2（含 Vue 2.6）和 Vue 3。Vue 2.6 还需安装 `@vue/composition-api >=1.6.2`，并在创建应用前注册插件。
 
 ```sh
 npm install @vue/composition-api
@@ -24,7 +24,9 @@ npm install @vue/composition-api
 
 ### 初始化
 
-参考下面的代码，新建一个 `charts.ts` 文件, 对 `@idux-charts` 进行初始化。
+以下为 Vue 3 的初始化方式。
+
+参考下面的代码，新建一个 `charts.ts` 文件, 对 `@idux/charts` 进行初始化。
 
 主要是注册组件，在组件注册的同时，会自动将 `ECharts` 的依赖按需加载进来。
 
@@ -51,6 +53,20 @@ import charts from './charts'
 const app = createApp(App)
 
 app.use(charts)
+```
+
+Vue 2 使用 `Vue.use` 注册组件，以下为 Vue 2.6 的初始化方式：
+
+```ts
+import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
+import { IxBarChart, IxChart, IxLineChart, IxPieChart } from '@idux/charts'
+import App from './App.vue'
+
+Vue.use(VueCompositionAPI)
+Vue.use(IxChart).use(IxBarChart).use(IxLineChart).use(IxPieChart)
+
+new Vue({ render: h => h(App) }).$mount('#app')
 ```
 
 ### 创建一个图表
