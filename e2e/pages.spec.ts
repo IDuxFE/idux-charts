@@ -41,7 +41,15 @@ test('Pages fallback preserves deep links, query parameters and navigation', asy
   await expect(page).toHaveURL(new URL(path, siteBaseURL).href)
   await page.getByRole('radio', { name: '示例', exact: true }).click()
   await expect(page.locator('[_echarts_instance_] svg').first()).toBeVisible()
+  // Exercise navigation while the landing page module loads asynchronously.
+  await page.route('**/assets/Introdoction*', async route => {
+    await new Promise(resolve => setTimeout(resolve, 500))
+    await route.continue()
+  })
   await page.goto(siteBaseURL)
+  // The initial redirect loads the introduction and resets expanded menu keys.
+  // Clicking before it finishes can immediately collapse the component menu.
+  await expect(page.getByRole('heading', { name: '简介', exact: true })).toBeVisible()
   await page.getByRole('menuitem', { name: '组件', exact: true }).click()
   await page.getByRole('menuitem', { name: '饼图', exact: true }).click()
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeVisible()

@@ -2,6 +2,11 @@ name: Deploy documentation
 
 on:
   workflow_dispatch:
+    inputs:
+      source_sha:
+        description: 'Optional full commit SHA already on main (blank uses current main)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -21,11 +26,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
           persist-credentials: false
+      - name: Verify deployment source
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          git merge-base --is-ancestor "$SOURCE_SHA" origin/main
       - uses: ./.github/actions/setup
       - run: pnpm exec playwright install --with-deps chromium
       # Playwright builds the site and tests a fresh production preview.
       - run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium
+      - name: Upload browser reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: documentation-browser-reports
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v6
         with:
           name: documentation
@@ -58,7 +82,7 @@ jobs:
           path: _site
       - name: Publish static files
         env:
-          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
         run: |
           test -s _site/index.html
           test -s _site/404.html

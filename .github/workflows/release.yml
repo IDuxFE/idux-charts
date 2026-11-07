@@ -69,6 +69,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      actions: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -77,7 +78,19 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm build:lib
       - uses: changesets/action/publish@v2.1.2
+        id: publish
         with:
           script: pnpm run publish
           create-github-releases: true
           push-git-tags: true
+      - name: Start documentation deployment for the published commit
+        if: steps.publish.outputs.published == 'true'
+        # npm has already succeeded; a dispatch failure must not turn it red.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh workflow run pages.yml --repo "$GITHUB_REPOSITORY" --ref main -f source_sha="$GITHUB_SHA"; then
+            echo '::warning::npm publishing succeeded, but documentation dispatch failed. Run Deploy documentation manually with this release commit SHA.'
+            exit 1
+          fi
