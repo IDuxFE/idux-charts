@@ -4,7 +4,9 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches-ignore: [main]
+    # Changesets pushes a temporary branch and then the release PR branch.
+    # The release PR gets its checks from pull_request instead.
+    branches-ignore: [main, 'changesets-ghcommit-temp/**', 'changeset-release/**']
   workflow_dispatch:
   workflow_call:
 
