@@ -43,6 +43,33 @@ const build = (data: Parameters<typeof createDefaultPieOption>[0]) =>
   createDefaultPieOption(data, size, tokens)
 
 describe('built-in pie data semantics', () => {
+  it('uses an 82px default rose radius and fits smaller containers', () => {
+    for (const roseType of ['radius', 'area'] as const) {
+      for (const show of [true, false]) {
+        const buildRose = (height: number, radius?: number) =>
+          createDefaultPieOption(
+            [{ name: 'A', value: 10 }],
+            { width: 480, height },
+            tokens,
+            '',
+            '',
+            'center',
+            {
+              roseType,
+              legend: { show },
+              radius,
+            },
+          ) as any
+        expect(buildRose(180).series[2].radius).toEqual([16, 82])
+        expect(buildRose(90).series[2].radius[1]).toBeLessThanOrEqual(45)
+        expect(buildRose(180, 50).series[2].radius).toEqual([0, 50])
+      }
+    }
+    expect(build([{ name: 'A', value: 10 }]).series).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'ix-pie-data', radius: 60 })]),
+    )
+  })
+
   it('isolates decoration data and excludes missing values from the summary', () => {
     const input = [
       { name: 'A', value: 10 },
@@ -87,6 +114,46 @@ describe('pie block alignment', () => {
   const data = ['A', 'B', 'C', 'D', 'E', 'F'].map(name => ({ name, value: 10 }))
   const aligned = (align: import('../pie/src/usePieOption').PieChartAlign) =>
     createDefaultPieOption(data, size, tokens, undefined, undefined, align) as any
+
+  it('fits hovered sectors at every alignment with inherited and per-item scale sizes', () => {
+    for (const roseType of [undefined, 'radius', 'area'] as const) {
+      for (const [emphasis, itemEmphasis, growth] of [
+        [{}, {}, 5],
+        [{ scaleSize: 24 }, {}, 24],
+        [{ scale: false }, {}, 0],
+        [{ disabled: true }, {}, 0],
+        [{ scaleSize: 24 }, { scaleSize: 32 }, 32],
+        [{ scale: false }, { scale: true, scaleSize: 16 }, 16],
+      ] as const) {
+        for (const show of [true, false]) {
+          for (const height of [180, 90]) {
+            for (const row of ['top', 'center', 'bottom']) {
+              for (const column of ['start', 'center', 'end']) {
+                const align =
+                  row === 'center' && column === 'center' ? 'center' : `${row}-${column}`
+                const option = createDefaultPieOption(
+                  [{ name: 'A', value: 10, emphasis: itemEmphasis }],
+                  { width: 480, height },
+                  tokens,
+                  '',
+                  '',
+                  align as import('../pie/src/usePieOption').PieChartAlign,
+                  { roseType, legend: { show }, seriesStyle: { emphasis } },
+                ) as any
+                const main = option.series[2]
+                const extent = (Array.isArray(main.radius) ? main.radius[1] : main.radius) + growth
+                expect(main.center[0] - extent).toBeGreaterThanOrEqual(-0.001)
+                expect(main.center[0] + extent).toBeLessThanOrEqual(480.001)
+                expect(main.center[1] - extent).toBeGreaterThanOrEqual(-0.001)
+                expect(main.center[1] + extent).toBeLessThanOrEqual(height + 0.001)
+                if (roseType && column === 'start') expect(main.center[0] - extent).toBeCloseTo(0)
+              }
+            }
+          }
+        }
+      }
+    }
+  })
 
   it('aligns all nine positions and puts the pie after the summary for end', () => {
     const base = createDefaultPieOption(data, size, tokens) as any
@@ -525,4 +592,126 @@ it('keeps the reference pie radius when wide legend content still fits beside th
   expect(option.series[2].radius).toBe(60)
   expect(option.series[0].radius).toBe(72)
   expect(option.legend[0].left).toBe(167)
+})
+
+it('renders the default rose center as a 32px white hole with a 28px gradient circle', () => {
+  for (const roseType of ['radius', 'area'] as const) {
+    for (const value of [10, 0, null]) {
+      const option = createDefaultPieOption(
+        [{ name: 'A', value }],
+        size,
+        tokens,
+        '',
+        '',
+        'center',
+        { roseType },
+      ) as any
+      expect(option.series[2].radius[0]).toBe(16)
+      expect(option.series[0]).toMatchObject({
+        radius: 16,
+        itemStyle: { color: '#fff', borderWidth: 0 },
+      })
+      const center = option.graphic.find((item: any) => item.id === 'ix-rose-center')
+      expect(center.invisible).toBe(false)
+      expect(center.shape.r * 2 + center.style.lineWidth).toBe(28)
+      expect(center.style.fill.colorStops.map((stop: any) => stop.color)).toEqual([
+        'rgba(69, 143, 255, 0.1)',
+        'rgba(69, 143, 255, 0)',
+      ])
+      expect(center.style.stroke.colorStops.map((stop: any) => stop.color)).toEqual([
+        'rgba(69, 143, 255, 0.16)',
+        'rgba(69, 143, 255, 0)',
+      ])
+    }
+  }
+  for (const radius of [40, [8, 40]] as const) {
+    const option = createDefaultPieOption(
+      [{ name: 'A', value: 10 }],
+      size,
+      tokens,
+      '',
+      '',
+      'center',
+      { roseType: 'area', radius: Array.isArray(radius) ? [...radius] : radius } as any,
+    ) as any
+    expect(option.series[2].radius).toEqual(typeof radius === 'number' ? [0, 40] : [8, 40])
+    expect(option.graphic.find((item: any) => item.id === 'ix-rose-center').invisible).toBe(
+      typeof radius === 'number',
+    )
+  }
+  expect(
+    (build([{ name: 'A', value: 10 }]) as any).graphic.find(
+      (item: any) => item.id === 'ix-rose-center',
+    ).invisible,
+  ).toBe(true)
+})
+
+it('reduces legend columns before names disappear and restores columns when space grows', () => {
+  const data = Array.from({ length: 30 }, (_, i) => ({
+    name: `分类 ${i + 1}`,
+    value: (i + 1) * 10,
+  }))
+  for (const [width, columns] of [
+    [720, 3],
+    [450, 2],
+    [280, 1],
+    [720, 3],
+  ]) {
+    const option = createDefaultPieOption(
+      data,
+      { width: width!, height: 340 },
+      tokens,
+      '',
+      '',
+      'center',
+      {
+        title: { text: '4650', subtext: '统计总数' },
+      },
+    ) as any
+    const legends = option.legend.filter((item: any) => item.show)
+    expect(legends).toHaveLength(columns!)
+    expect(legends[0].textStyle.rich.label.width).toBeGreaterThan(12)
+    expect(legends[0].formatter('分类 1')).toContain('分类 1')
+    expect(legends.at(-1).type).toBe('scroll')
+    expect(option.legend.flatMap((item: any) => item.data).map((item: any) => item.name)).toEqual(
+      data.map(item => item.name),
+    )
+  }
+})
+
+it('remeasures label space when height or explicit scrolling forces a single column', () => {
+  const data = Array.from({ length: 12 }, (_, i) => ({
+    name: `Long category name ${i + 1}`,
+    value: i,
+  }))
+  for (const legend of [{}, { type: 'scroll' as const }]) {
+    const option = createDefaultPieOption(
+      data,
+      { width: 720, height: 50 },
+      tokens,
+      '',
+      '',
+      'center',
+      { legend },
+    ) as any
+    expect(option.legend.filter((item: any) => item.show)).toHaveLength(1)
+    expect(option.legend[0].textStyle.rich.label.width).toBeGreaterThan(160)
+    expect(option.legend[0].data).toHaveLength(12)
+  }
+})
+
+it('checks the full intended column width before selecting a multi-column layout', () => {
+  const data = Array.from({ length: 12 }, (_, i) => ({ name: `Long label ${i}`, value: i }))
+  const option = createDefaultPieOption(
+    data,
+    { width: 720, height: 300 },
+    tokens,
+    '',
+    '',
+    'center',
+  ) as any
+  const legends = option.legend.filter((item: any) => item.show)
+  expect(legends).toHaveLength(2)
+  expect(legends[0].formatter(data[0]!.name)).toContain(data[0]!.name)
+  expect(legends[0].textStyle.rich.label.width).toBeGreaterThan(100)
 })

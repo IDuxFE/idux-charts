@@ -1,6 +1,8 @@
 import { loadDemoFont } from '../../packages/site/demoFont'
 import { createApp } from 'vue'
 import App from './App.vue'
+import PieHover from './PieHover.vue'
+import PieLayout from './PieLayout.vue'
 import LegacyRiskPie from './LegacyRiskPie.vue'
 import PieVariants from './PieVariants.vue'
 import PieBasicComparison from './PieBasicComparison.vue'
@@ -16,6 +18,10 @@ Promise.all(legacy ? [] : [loadDemoFont(), loadDemoFont('D-DIN-PRO')]).then(() =
         ? PieVariants
         : location.search.includes('basic')
           ? PieBasicComparison
-          : App,
+          : location.search.includes('rose-hover')
+            ? PieHover
+            : location.search.includes('pie-layout')
+              ? PieLayout
+              : App,
   ).mount('#app')
 })

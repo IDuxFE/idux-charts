@@ -101,3 +101,30 @@ it('preserves 1.0.0 injected defaults until new layout controls opt in', () => {
     wrapper.unmount()
   }
 })
+
+it('defaults rose series to clockwise while preserving explicit direction', () => {
+  for (const roseType of ['radius', 'area'] as const) {
+    for (const clockwise of [undefined, true, false]) {
+      for (const layoutMode of ['auto', 'native'] as const) {
+        let current!: ReturnType<typeof useDefaultPieOption>
+        const props: PieChartProps = { roseType, clockwise, layoutMode, data: [1, 2] }
+        const wrapper = mount(
+          defineComponent({
+            setup() {
+              const attrs = shallowRef<PieChartProps>({})
+              current = useDefaultPieOption(
+                props,
+                attrs,
+                usePieOption(props as PieSeriesOption, attrs),
+              )
+              return () => h('div')
+            },
+          }),
+        )
+        const series = current.option.value.series as PieSeriesOption[]
+        expect(series.find(item => item.roseType === roseType)?.clockwise).toBe(clockwise ?? true)
+        wrapper.unmount()
+      }
+    }
+  }
+})

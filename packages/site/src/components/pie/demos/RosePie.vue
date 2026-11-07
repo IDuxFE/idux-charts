@@ -109,7 +109,6 @@ const presentation = computed<PieChartProps>(() => ({
         : `{label|${name}}{value|${item.value}}`
     },
   },
-  radius: ['20%', '100%'],
   roseType: 'radius',
 }))
 </script>
