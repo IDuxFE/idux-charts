@@ -19,7 +19,14 @@ export function useLineChartAreaStripe(
   color?: MaybeRef<LineChartAreaStripeOption['color']>,
 ): {
   lineChartAreaStripeConfig: ComputedRef<{
-    areaStyle: { color: { image: HTMLImageElement; repeat: 'repeat-x' } }
+    areaStyle: {
+      color: {
+        image: HTMLImageElement
+        imageWidth: number
+        imageHeight: number
+        repeat: 'repeat-x'
+      }
+    }
   }>
 } {
   const options = ref<LineChartAreaStripeOption>({})
@@ -53,14 +60,21 @@ export function useLineChartAreaStripe(
     { immediate: true },
   )
 
-  const lineChartAreaStripeConfig = computed(() => ({
-    areaStyle: {
-      color: {
-        image: getLineChartAreaStripeImgEl(options.value),
-        repeat: 'repeat-x' as const,
+  const lineChartAreaStripeConfig = computed(() => {
+    const image = getLineChartAreaStripeImgEl(options.value)
+    return {
+      areaStyle: {
+        color: {
+          image,
+          // SVG patterns need dimensions before the image finishes decoding,
+          // including when theme changes recreate a chart with a cached image.
+          imageWidth: image.width,
+          imageHeight: image.height,
+          repeat: 'repeat-x' as const,
+        },
       },
-    },
-  }))
+    }
+  })
 
   return {
     lineChartAreaStripeConfig,
@@ -78,11 +92,15 @@ function getOptionsByDOM(el?: HTMLElement, color?: LineChartAreaStripeOption['co
  * 生成条纹 area 背景图
  */
 export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption = {}) {
-  const { color = '#458FFF', width: stripeWidth = 2, height: imgHeight = 90 } = options
+  const { color = '#458FFF', width = 2, height = 90 } = options
+  const stripeWidth = Number.isFinite(width) && width > 0 ? width : 2
+  const imgHeight = Number.isFinite(height) && height > 0 ? height : 90
 
   const imgEl = document.createElement('img')
   const imgWidth = stripeWidth * 2
 
+  imgEl.width = imgWidth
+  imgEl.height = imgHeight
   imgEl.src = encodeSvg(
     `
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="${imgWidth}" height="${imgHeight}" viewBox="0 0 ${imgWidth} ${imgHeight}">

@@ -1,7 +1,10 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, shallowRef } from 'vue'
-import { useLineChartAreaStripe } from '../line/src/useLineChartAreaStripe'
+import {
+  getLineChartAreaStripeImgEl,
+  useLineChartAreaStripe,
+} from '../line/src/useLineChartAreaStripe'
 
 afterEach(() => vi.unstubAllGlobals())
 it('observes an initial element, follows element/color changes, and disconnects on unmount', async () => {
@@ -39,6 +42,10 @@ it('observes an initial element, follows element/color changes, and disconnects 
   )
   try {
     expect(observe).toHaveBeenCalledWith(first)
+    expect(stripe.lineChartAreaStripeConfig.value.areaStyle.color).toMatchObject({
+      imageWidth: 4,
+      imageHeight: 100,
+    })
     expect(
       decodeURIComponent(stripe.lineChartAreaStripeConfig.value.areaStyle.color.image.src),
     ).toContain("height='100'")
@@ -51,6 +58,7 @@ it('observes an initial element, follows element/color changes, and disconnects 
     expect(
       decodeURIComponent(stripe.lineChartAreaStripeConfig.value.areaStyle.color.image.src),
     ).toContain('rgba(0, 255, 0, 0.3)')
+    expect(stripe.lineChartAreaStripeConfig.value.areaStyle.color.imageHeight).toBe(200)
     rect.mockReturnValue({ height: 240 } as DOMRect)
     callback()
     expect(
@@ -60,4 +68,15 @@ it('observes an initial element, follows element/color changes, and disconnects 
     wrapper.unmount()
   }
   expect(disconnect).toHaveBeenCalledTimes(3)
+})
+
+it('supplies usable image dimensions before decode and when the container is hidden', () => {
+  for (const height of [undefined, 0, NaN, -1]) {
+    const image = getLineChartAreaStripeImgEl({ height })
+    expect(image.width).toBe(4)
+    expect(image.height).toBe(90)
+  }
+  const custom = getLineChartAreaStripeImgEl({ width: 3, height: 180 })
+  expect(custom.width).toBe(6)
+  expect(custom.height).toBe(180)
 })
