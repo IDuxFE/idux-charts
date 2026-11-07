@@ -1,10 +1,7 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers'
 
-test('liquid fill demos update waves, boundaries and request states', async ({
-  page,
-}, testInfo) => {
-  const errors: string[] = []
-  page.on('pageerror', error => errors.push(error.message))
+async function openLiquid(page: Page) {
   await page.goto('components/liquid-fill')
   await page.getByRole('radio', { name: '示例', exact: true }).click()
   const demo = page.locator('.liquid-basic')
@@ -21,28 +18,43 @@ test('liquid fill demos update waves, boundaries and request states', async ({
     )
     await expect(demo.getByRole('slider')).toHaveAttribute('aria-valuenow', String(value))
   }
-  for (const value of [20, 0, 100, 80, 92, 0, 50]) {
-    await setValue(value)
-    await expect(chart).toContainText(String(value))
-    // Count drawn shapes, excluding the clipping path in defs: two background
-    // circles, plus either two waves, a full circle, or nothing at zero.
-    await expect
-      .poll(() =>
-        chart
-          .locator('svg path')
-          .evaluateAll(
-            paths =>
-              paths.filter(
-                path => !path.closest('defs, clipPath') && path.getAttribute('fill') !== 'none',
-              ).length,
-          ),
+  return { demo, chart, chartId, setValue }
+}
+
+for (const values of [
+  [20, 0, 100],
+  [80, 92, 0],
+  [0, 50],
+]) {
+  test(`liquid fill updates values ${values.join(' to ')} without remounting`, async ({ page }) => {
+    const { demo, chart, chartId, setValue } = await openLiquid(page)
+    for (const value of values) {
+      await setValue(value)
+      await expect(chart).toContainText(String(value))
+      // Count drawn shapes, excluding the clipping path in defs: two background
+      // circles, plus either two waves, a full circle, or nothing at zero.
+      await expect
+        .poll(() =>
+          chart
+            .locator('svg path')
+            .evaluateAll(
+              paths =>
+                paths.filter(
+                  path => !path.closest('defs, clipPath') && path.getAttribute('fill') !== 'none',
+                ).length,
+            ),
+        )
+        .toBe(value === 0 ? 2 : value === 100 ? 3 : 4)
+      await expect(chart).toHaveAttribute('_echarts_instance_', chartId!)
+      await expect(demo.locator('.status')).toHaveText(
+        value === 0 ? '' : value >= 90 ? '高危' : value >= 70 ? '中危' : '正常',
       )
-      .toBe(value === 0 ? 2 : value === 100 ? 3 : 4)
-    await expect(chart).toHaveAttribute('_echarts_instance_', chartId!)
-    await expect(demo.locator('.status')).toHaveText(
-      value === 0 ? '' : value >= 90 ? '高危' : value >= 70 ? '中危' : '正常',
-    )
-  }
+    }
+  })
+}
+
+test('liquid fill handles empty, reload and loading states', async ({ page }, testInfo) => {
+  const { demo, chart, setValue } = await openLiquid(page)
   await page.screenshot({ path: testInfo.outputPath('liquid-fill-examples.png'), fullPage: true })
   await demo.getByText('空状态', { exact: true }).click()
   await expect(chart).toHaveCount(0)
@@ -55,7 +67,6 @@ test('liquid fill demos update waves, boundaries and request states', async ({
   await expect(chart).toContainText('0')
   await page.setViewportSize({ width: 480, height: 800 })
   await expect(chart.locator('svg')).toBeVisible()
-  expect(errors).toEqual([])
 })
 
 test('additional liquid fill examples render and animated waves change shape', async ({

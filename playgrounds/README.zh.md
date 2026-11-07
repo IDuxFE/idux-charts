@@ -40,7 +40,7 @@ pnpm test:playgrounds
 pnpm test
 ```
 
-E2E 针对生产构建运行 Chromium，验证真实 SVG 渲染、ECharts 配置、数据更新、动态属性、loading、主题重建、resize、点击事件及重新挂载，并收集页面和控制台错误。每个应用独立生成 HTML 报告，并附带主题切换后的截图；失败时保留截图与 trace。视觉测试为柱状图、折线图、饼图分别保存默认主题和深色主题的基准截图，共 12 张；使用 `toHaveScreenshot` 对比，允许最多 0.5% 像素差异，保持与现有站点测试一致。
+E2E 针对生产构建运行 Chromium，验证真实 SVG 渲染、ECharts 配置、数据更新、动态属性、loading、主题重建、resize、点击事件及重新挂载，并收集页面和控制台错误。每个应用独立生成 HTML 报告，并附带主题切换后的截图；失败时保留截图；CI 在首次重试时记录 trace，本地运行则保留失败用例的 trace。视觉测试为柱状图、折线图、饼图分别保存默认主题和深色主题的基准截图，共 12 张；使用 `toHaveScreenshot` 对比，允许最多 0.5% 像素差异，保持与现有站点测试一致。
 
 应用锁文件、`vendor/`、构建产物和测试输出不提交。根 workspace、lint、format 均排除 playground；根测试通过显式命令调用其独立测试。不要给这些应用添加 workspace 依赖、源码 alias 或链接库目录。
 
@@ -80,3 +80,5 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 两个应用均可打开 `/?theme`，使用打包后的 Pie、Radar、Gauge、LiquidFill，验证全局响应式主题、局部覆盖及移除、数字/标签样式、Pie auto/native 模式与主系列样式，以及空数据恢复。`/?basic` 保留原有 Pie 兼容场景，默认页继续验证 Bar/Line/Pie 生命周期和事件。修改库后从根目录运行 `pnpm test:playgrounds`，重新打包再测试。
 
 主题页还覆盖 `CHART_THEME_TOKEN`：修改注入的 ECharts 主题对象、验证实例重建、设置组件显式主题并恢复继承。Vue 2 和 Vue 3 均使用打包产物执行这些检查。
+
+根 E2E 本地使用 4 个 worker，CI 每个分片使用 2 个 worker，同一文件内的独立用例也并行运行。两个 playground 各使用 2 个 worker。`pnpm test:playgrounds` 只构建、打包一次库，并行安装两个应用，再使用独立端口并行执行测试。可通过 `pnpm playgrounds:prepare vue2` 或 `vue3` 只准备一个应用。资源较少时可用 `pnpm test:e2e --workers=2` 降低并发。不要在同一 checkout 同时启动多个根 E2E 命令，它们共享构建目录、预览端口和报告目录；CI 分片使用独立 runner。

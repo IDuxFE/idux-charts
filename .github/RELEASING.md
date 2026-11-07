@@ -21,10 +21,17 @@ Do not manually bump package versions or edit generated changelogs. Changesets
 updates versions and internal dependencies together. Package versions are
 independent; not every release needs to update all three packages.
 
-CI checks lint, formatting, types, unit tests, and library builds on Linux. Browser
-and screenshot tests run on Intel macOS 15 against all three browsers, then test
-the packaged library in both Vue playgrounds. Playground lockfiles and local
-tarballs remain untracked. Browser reports are retained for seven days. Review
+CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
+and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
+with two workers per shard and independent HTML reports. Both Vue playgrounds
+run in separate macOS jobs. The five Vue/ECharts compatibility combinations build
+and test packed declarations and runtime behavior in separate Linux jobs. Domain
+and subpath deployment checks also run independently. Matrix jobs use
+`fail-fast: false` to retain evidence from every combination; `CI result` requires
+all jobs to succeed. Browser suites fail CI on flaky tests even when a retry
+passes. CI records traces on the first retry and captures screenshots on failure,
+avoiding trace overhead on successful first attempts. Local runs retain traces
+on failure. Playground lockfiles and local tarballs remain untracked. Browser reports are retained for seven days. Review
 screenshot differences if runner image or browser rendering changes; CI never
 automatically accepts new baselines.
 
@@ -39,7 +46,9 @@ Vue 2.7 and Vue 3 check declarations with
 bindings, data, computed values, and methods. Vue 2.6 checks the adapter prop
 aliases with its existing `skipLibCheck: true` boundary. Pass `--runtime` to also
 test the packed JS in Chromium: rendering, data updates, theme changes, disposal,
-remounting, and composable-only tree shaking. The browser CI job runs this additional smoke test.
+remounting, and composable-only tree shaking. Each compatibility CI job runs this additional smoke test.
+`IDUX_DECLARATION_TARGET=2.7.16/5.4.3` selects one combination; without it, local
+runs retain the complete compatibility matrix.
 
 Root dependency lockfiles also remain untracked. CI and release jobs install with
 `pnpm install --no-lockfile --no-frozen-lockfile`, resolving dependencies within their declared
@@ -242,3 +251,8 @@ process. Check that deployment as well as the push workflow, then open
 does not govern this documentation workflow. To roll back, restore the static
 files from a known-good `gh-pages` commit in a new commit and push it; do not
 force-push away the deployment history.
+
+Release planning runs alongside validation. Updating the release PR and publishing
+still require both planning and the complete CI validation to succeed. Library
+builds remain ordered by package dependency, and packaging/installing consumers
+always precedes their tests.

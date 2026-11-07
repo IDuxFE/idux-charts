@@ -269,7 +269,13 @@ const targets = [
   ]),
   ['2.6.14', '6.0.0', true],
 ]
-for (const [version, echartsVersion, adapter] of targets) {
+// CI isolates each consumer in its own job; local runs still cover the complete matrix.
+const target = process.env.IDUX_DECLARATION_TARGET
+const selectedTargets = target
+  ? targets.filter(([vue, echarts]) => `${vue}/${echarts}` === target)
+  : targets
+assert.ok(selectedTargets.length, `Unknown declaration target: ${target}`)
+for (const [version, echartsVersion, adapter] of selectedTargets) {
   const app = join(work, `vue-${version}-echarts-${echartsVersion}`)
   mkdirSync(app)
   writeFileSync(

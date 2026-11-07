@@ -221,10 +221,15 @@ test('native presentation updates retain the instance and legend selection', asy
   // WebKit hit-tests ECharts' transparent legend hit area instead of the SVG
   // text node. Click the visible label coordinates and assert the real selection.
   const label = actual.locator('svg text').filter({ hasText: /^图例1$/ })
-  await label.scrollIntoViewIfNeeded()
-  const box = await label.boundingBox()
-  expect(box).not.toBeNull()
-  await page.mouse.click(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  // Scroll the stable wrapper: ECharts may replace SVG labels while laying out.
+  await actual.scrollIntoViewIfNeeded()
+  let point = { x: 0, y: 0 }
+  await expect(async () => {
+    const box = await label.boundingBox()
+    expect(box).not.toBeNull()
+    point = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 }
+  }).toPass({ timeout: 10_000 })
+  await page.mouse.click(point.x, point.y)
   await expect.poll(async () => (await state()).option.legend[0].selected['图例1']).toBe(false)
   await page.getByRole('button', { name: 'Presentation', exact: true }).click()
   await expect(actual).toContainText('Assets')

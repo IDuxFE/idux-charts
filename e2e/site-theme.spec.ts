@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test'
 import { expect, test } from './helpers'
 
 for (const width of [1440, 768, 390]) {
@@ -92,9 +93,7 @@ for (const route of [
   })
 }
 
-test('nine-position controls use iDux themes and preserve the chart while aligning', async ({
-  page,
-}) => {
+async function openAlignment(page: Page) {
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('components/pie')
   const demo = page.locator('.pie-align-demo')
@@ -103,14 +102,33 @@ test('nine-position controls use iDux themes and preserve the chart while aligni
   const chart = demo.locator('[_echarts_instance_]')
   await expect(chart.locator('svg')).toBeVisible()
   const id = await chart.getAttribute('_echarts_instance_')
-  for (const button of await buttons.all()) {
-    await expect(button).toHaveClass(/ix-button/)
-    await button.click()
-    await expect(button).toHaveAttribute('aria-pressed', 'true')
-    await expect(demo.locator('[aria-pressed="true"]')).toHaveCount(1)
-    await expect(chart).toHaveAttribute('_echarts_instance_', id!)
-    await expect(chart).toContainText('554')
-  }
+  return { demo, buttons, chart, id }
+}
+
+for (const [row, start] of [
+  ['top', 0],
+  ['middle', 3],
+  ['bottom', 6],
+] as const) {
+  test(`nine-position controls align the ${row} row without recreating the chart`, async ({
+    page,
+  }) => {
+    const { demo, buttons, chart, id } = await openAlignment(page)
+    for (const button of (await buttons.all()).slice(start, start + 3)) {
+      await expect(button).toHaveClass(/ix-button/)
+      await button.click()
+      await expect(button).toHaveAttribute('aria-pressed', 'true')
+      await expect(demo.locator('[aria-pressed="true"]')).toHaveCount(1)
+      await expect(chart).toHaveAttribute('_echarts_instance_', id!)
+      await expect(chart).toContainText('554')
+    }
+  })
+}
+
+test('nine-position controls follow iDux themes and support keyboard interaction', async ({
+  page,
+}) => {
+  const { buttons } = await openAlignment(page)
   const first = buttons.first()
   await expect(first).toHaveCSS('background-color', 'rgb(10, 12, 15)')
   await first.focus()

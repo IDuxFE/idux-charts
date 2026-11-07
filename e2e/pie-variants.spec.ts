@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers'
 import { comparePixels } from './comparePixels'
 import { fixtureBaseURL } from './environment'
@@ -36,6 +37,12 @@ for (const variant of [
       await page.getByRole('combobox', { name: 'Reference state', exact: true }).selectOption(state)
       if (variant !== 'CardLightweight') await actual.getByText(caption, { exact: true }).click()
       await expect(actual.locator('[_echarts_instance_] svg')).toBeVisible()
+      await page.mouse.move(0, 0)
+      // ECharts uses requestAnimationFrame, not CSS animations. Wait for both
+      // rendered charts before serializing their SVGs into static comparison images.
+      await expect
+        .poll(() => page.evaluate(() => (window as any).variantAnimationsFinished?.()))
+        .toBe(true)
       // Rasterize both SVG outputs on the same opaque surface. Direct captures
       // across the demo's different DOM ancestors can change SVG gradient rasterization.
       const capture = async (id: string) => {
@@ -44,13 +51,14 @@ for (const variant of [
           .locator('[_echarts_instance_] svg')
           .evaluate(el => el.outerHTML)
         await page.evaluate(
-          svg => {
+          async svg => {
             document.getElementById('comparison-surface')?.remove()
             const image = document.createElement('img')
             image.id = 'comparison-surface'
             image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
             image.style.cssText = 'position:fixed;left:8px;top:50px;z-index:99999;background:white'
             document.body.append(image)
+            await image.decode()
           },
           svg.replace('</svg>', `${fontStyle}</svg>`),
         )
@@ -87,24 +95,45 @@ for (const variant of [
   })
 }
 
-test('multi-column paging leaves the first eight categories fixed and recovers after shrinking', async ({
-  page,
-}) => {
+async function openColumns(page: Page) {
   await page.goto('?variants')
   await page.getByRole('combobox', { name: 'Variant', exact: true }).selectOption('LegendColumns')
   const actual = page.getByTestId('actual')
   const slider = actual.getByRole('slider')
-  for (let step = 0; step < 20; step++) await slider.press('ArrowLeft')
-  const count = () => page.evaluate(() => (window as any).variantState()[1].series[2].data.length)
-  for (let value = 1; value <= 20; value++) {
-    await expect.poll(count).toBe(value)
-    await expect(actual.locator('svg path[d="M0 0l24 0l0 24l-24 0Z"]')).toHaveCount(
-      value > 12 ? 2 : 0,
-    )
-    if (value < 20) await slider.press('ArrowRight')
+  await expect(slider).toHaveAttribute('aria-valuenow', '12')
+  const setCount = async (value: number) => {
+    const current = Number(await slider.getAttribute('aria-valuenow'))
+    const key = value < current ? 'ArrowLeft' : 'ArrowRight'
+    // Move directly from the current value instead of repeatedly pressing
+    // against the minimum before every scenario.
+    for (let step = 0; step < Math.abs(value - current); step++) await slider.press(key)
+    await expect(slider).toHaveAttribute('aria-valuenow', String(value))
   }
-  for (let step = 0; step < 20; step++) await slider.press('ArrowLeft')
-  for (let value = 1; value < 15; value++) await slider.press('ArrowRight')
+  return { actual, setCount }
+}
+
+for (const start of [1, 6, 11, 16]) {
+  test(`multi-column legend renders category counts ${start} through ${start + 4}`, async ({
+    page,
+  }) => {
+    const { actual, setCount } = await openColumns(page)
+    const count = () =>
+      page.evaluate(() => (window as any).variantState()?.[1]?.series[2].data.length)
+    for (let value = start; value < start + 5; value++) {
+      await setCount(value)
+      await expect.poll(count).toBe(value)
+      await expect(actual.locator('svg path[d="M0 0l24 0l0 24l-24 0Z"]')).toHaveCount(
+        value > 12 ? 2 : 0,
+      )
+    }
+  })
+}
+
+test('multi-column paging leaves the first eight categories fixed and recovers after shrinking', async ({
+  page,
+}) => {
+  const { actual, setCount } = await openColumns(page)
+  await setCount(15)
   const legends = () => page.evaluate(() => (window as any).variantState()[1].legend)
   await expect.poll(async () => (await legends()).map((l: any) => l.data.length)).toEqual([4, 4, 7])
   await expect(actual.locator('svg text').filter({ hasText: /xx|\d+\/\d+/ })).toHaveCount(0)
@@ -113,10 +142,9 @@ test('multi-column paging leaves the first eight categories fixed and recovers a
   expect((await legends()).slice(0, 2).flatMap((l: any) => l.data.map((d: any) => d.name))).toEqual(
     Array.from({ length: 8 }, (_, i) => `图例${i + 1}`),
   )
-  for (let step = 0; step < 3; step++) await slider.press('ArrowLeft')
+  await setCount(12)
   await expect(actual.locator('svg path[d="M0 0l24 0l0 24l-24 0Z"]')).toHaveCount(0)
-  for (let step = 0; step < 20; step++) await slider.press('ArrowLeft')
-  for (let value = 1; value < 4; value++) await slider.press('ArrowRight')
+  await setCount(4)
   await expect
     .poll(async () => (await legends()).map((l: any) => l.show))
     .toEqual([true, false, false])
