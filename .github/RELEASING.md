@@ -12,6 +12,11 @@ affected packages and version impact, and write a concise English summary. Commi
 the generated `.changeset/*.md` alongside the code. Documentation, tests, and
 development tooling changes alone do not normally need a changeset.
 
+Creating a Git commit does not generate a changeset automatically. Contributors
+control when to add one and which packages and version increments it requests.
+Before it is consumed by a release PR, its summary and version impact can be
+edited through a normal code review.
+
 Do not manually bump package versions or edit generated changelogs. Changesets
 updates versions and internal dependencies together. Package versions are
 independent; not every release needs to update all three packages.
@@ -103,6 +108,15 @@ settings shown at setup time if the policy changes.
 4. The main workflow validates the merged commit, rebuilds the library, and
    publishes unpublished versions to npm. It also pushes package tags and creates
    GitHub Releases. Approve the `npm` environment deployment if required.
+
+Multiple feature PRs can accumulate in the same open release PR. Keep that PR
+open until the batch is ready to release; merging each feature PR does not itself
+create a new npm version. The release PR consumes the pending changeset files
+and preserves their entries in each package's changelog. Do not manually delete
+pending changesets to postpone a release.
+
+Release PR CI runs on the pull request event. Pushes to Changesets temporary
+branches and release branches are excluded from push CI to avoid duplicate runs.
 
 Both Release PR generation and publishing remain disabled until
 `RELEASE_ENABLED=true`. Once enabled, a manual **Release → Run workflow** on

@@ -170,9 +170,19 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
   await actual.locator('svg image').last().click()
   await expect.poll(async () => (await state()).option.legend[0].scrollDataIndex).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Restore', exact: true }).click()
-  await expect.poll(async () => (await state()).option.legend[0].type).toBe('plain')
-  expect((await state()).option.legend[1].show).toBe(true)
-  expect((await state()).option.legend.map((l: any) => l.data.length)).toEqual([3, 3, 0])
+  // Data updates can reach ECharts before the animation-frame resize restores
+  // the second legend column. Wait for the complete restored layout.
+  await expect(actual.locator('svg')).toHaveAttribute('width', '480')
+  await expect
+    .poll(async () => {
+      const { legend } = (await state()).option
+      return {
+        type: legend[0].type,
+        secondColumn: legend[1].show,
+        lengths: legend.map((l: any) => l.data.length),
+      }
+    })
+    .toEqual({ type: 'plain', secondColumn: true, lengths: [3, 3, 0] })
   await expect(page.getByTestId('ready-count')).toHaveText('1')
 })
 
