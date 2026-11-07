@@ -20,7 +20,7 @@ const data = [
   { value: 92, name: '图例 F' },
 ]
 const shapeOption = computed<PieChartProps>(() => ({
-  radius: shape.value === 'ring' ? ['70%', '80%'] : '80%',
+  radius: shape.value === 'ring' ? ['70%', '80%'] : shape.value === 'rose' ? undefined : '80%',
   roseType: shape.value === 'rose' ? 'area' : undefined,
 }))
 </script>
@@ -41,7 +41,7 @@ const shapeOption = computed<PieChartProps>(() => ({
       style="width: 600px; max-width: 100%; height: 300px"
       :data="data"
       name="分类数量"
-      align="center"
+      align="center-start"
       :loading="loading"
       v-bind="shapeOption"
     />

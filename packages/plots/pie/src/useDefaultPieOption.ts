@@ -140,6 +140,7 @@ export function useDefaultPieOption(
             : (settings.legend as import('echarts/components').LegendComponentOption | undefined),
         radius: props.radius ?? defaults?.radius,
         roseType: props.roseType ?? defaults?.roseType,
+        clockwise: props.clockwise ?? defaults?.clockwise,
         label: props.label ?? defaults?.label,
         markArea: props.markArea ?? defaults?.markArea,
         color: Array.isArray(settings.color) ? (settings.color as string[]) : undefined,

@@ -36,6 +36,7 @@ export function createDefaultPieOption(
     legend?: LegendComponentOption
     radius?: PieSeriesOption['radius']
     roseType?: PieSeriesOption['roseType']
+    clockwise?: boolean
     label?: PieSeriesOption['label']
     markArea?: PieSeriesOption['markArea']
     color?: string[]
@@ -57,6 +58,7 @@ export function createDefaultPieOption(
       value?: unknown
       missingReason?: string
       itemStyle?: NonNullable<PieDataItemOption['itemStyle']>
+      emphasis?: PieDataItemOption['emphasis']
     }
     const numeric = item.value == null || item.value === '-' ? NaN : Number(item.value)
     const value = Number.isFinite(numeric) && numeric >= 0 ? numeric : null
@@ -82,7 +84,23 @@ export function createDefaultPieOption(
   const text = presentation.title?.text ?? titleText
   const isAllZero = data.length > 0 && data.every(item => item.value === 0)
   const referenceSize = { width: 480, height: 180 }
-  const pieConfig = { radius: 60, backgroundRadius: 72, zeroInnerRadius: 16, legendGap: 28 }
+  const pieConfig = {
+    radius: presentation.roseType ? 82 : 60,
+    zeroInnerRadius: 16,
+    legendGap: 28,
+  }
+  const haloWidth = presentation.roseType ? 0 : 12
+  // Match ECharts' inherited per-item emphasis settings and default 5px growth.
+  const hoverGrowth = Math.max(
+    0,
+    ...data.map(item => {
+      const emphasis = { ...presentation.seriesStyle?.emphasis, ...item.emphasis }
+      if (emphasis.disabled || emphasis.scale === false) return 0
+      const growth = Number(emphasis.scaleSize ?? 5)
+      return Number.isFinite(growth) ? Math.max(0, growth) : 0
+    }),
+  )
+  const outerSpace = Math.max(haloWidth, hoverGrowth)
   const componentPadding = 5
   const legendIconTextGap = 5
   const missingValueLabel = '–'
@@ -96,8 +114,8 @@ export function createDefaultPieOption(
   const scaleX = size.width / referenceSize.width
   const scaleY = size.height / referenceSize.height
   const radiusScale = Math.min(scaleX * 1.2, scaleY)
-  // Keep the decorative halo at 12px as the chart grows.
-  const initialBackgroundRadius = pieConfig.radius * radiusScale + 12
+  // Roses have no outer halo; other pies keep a 12px decorative halo.
+  const initialBackgroundRadius = pieConfig.radius * radiusScale + outerSpace
   const summaryLeft = 2 * initialBackgroundRadius + pieConfig.legendGap - componentPadding
   const resolveRadius = (value: number | string) =>
     typeof value === 'string' && value.endsWith('%')
@@ -240,7 +258,7 @@ export function createDefaultPieOption(
     ? 0
     : Math.max(titleRect.width, subtextRect.width) + componentPadding * 2
   const initialColumns = Math.max(1, Math.min(3, Math.ceil(data.length / 4)))
-  let columns = size.width < 420 ? 1 : initialColumns
+  let columns = legend.type === 'scroll' ? 1 : initialColumns
   let labelTextWidth = 0
   let columnWidth = 0
   let legendLineHeight = legendFontSize
@@ -254,7 +272,12 @@ export function createDefaultPieOption(
       ? `{label|${label}}{missing|${missingValueLabel}}`
       : `{label|${label}}{value|${item?.value ?? ''}}`
   }
-  for (;;) {
+  const needsReadableLabel =
+    !customFormatter || data.some(item => formatLegend(item.name)?.includes('{label|'))
+  // Decide column count against the intended label width before fitting labels
+  // to the budget. Only the final single-column fallback may compress it further.
+  const preferredLabelWidth = Math.min(Math.ceil(maxLabelWidth) + 1, 120 * scaleX)
+  const measureLegend = () => {
     const budget = Math.max(0, (size.width - summaryLeft - columnGap * (columns - 1)) / columns)
     labelTextWidth = Math.max(
       0,
@@ -293,9 +316,9 @@ export function createDefaultPieOption(
           Number(style.lineHeight ?? style.fontSize ?? legendFontSize),
         ),
       )
-    if (columnWidth <= budget || columns === 1) break
-    columns--
+    return columnWidth <= budget && (!needsReadableLabel || labelTextWidth >= preferredLabelWidth)
   }
+  while (!measureLegend() && columns > 1) columns--
   resolvedLegendStyle.lineHeight = legendLineHeight
   const titleLegendGap = showTitle && showLegend ? 8 * scaleY : 0
   let rowCount = columns === 1 ? data.length : Math.min(4, Math.ceil(data.length / columns))
@@ -311,6 +334,8 @@ export function createDefaultPieOption(
         size.height)
   if (needsSingleColumn) {
     columns = 1
+    measureLegend()
+    resolvedLegendStyle.lineHeight = legendLineHeight
     // Reserve the same 24px controls used by the multi-column legend.
     rowCount = Math.max(
       1,
@@ -372,7 +397,10 @@ export function createDefaultPieOption(
   // there is no legend, otherwise a fitting halo can shrink on wider fonts.
   const maxBackgroundRadius = Math.max(
     0,
-    availableDiameter / 2 - (presentation.radius === undefined && !showLegend ? 8 : 0),
+    availableDiameter / 2 -
+      (presentation.radius === undefined && !showLegend
+        ? Math.max(0, 8 - Math.max(0, hoverGrowth - haloWidth))
+        : 0),
   )
   const requested =
     presentation.radius === undefined
@@ -385,22 +413,34 @@ export function createDefaultPieOption(
   const mainRadius =
     requestedOuter === undefined
       ? showLegend
-        ? Math.min(layout.radius, Math.max(0, maxBackgroundRadius - 12))
-        : Math.max(0, maxBackgroundRadius - Math.min(12, maxBackgroundRadius * 0.15))
-      : Math.min(requestedOuter, showLegend ? layout.radius : maxBackgroundRadius)
+        ? Math.min(layout.radius, Math.max(0, maxBackgroundRadius - outerSpace))
+        : Math.max(
+            0,
+            maxBackgroundRadius -
+              Math.max(hoverGrowth, Math.min(haloWidth, maxBackgroundRadius * 0.15)),
+          )
+      : Math.min(
+          requestedOuter,
+          showLegend ? layout.radius : maxBackgroundRadius,
+          Math.max(0, maxBackgroundRadius - hoverGrowth),
+        )
   const backgroundRadius =
     requestedOuter === undefined && !showLegend
       ? maxBackgroundRadius
-      : Math.min(mainRadius + 12, maxBackgroundRadius)
-  layout.summaryLeft += 2 * (backgroundRadius - layout.backgroundRadius)
-  layout.center[0] = backgroundRadius
+      : Math.min(mainRadius + haloWidth, maxBackgroundRadius)
+  const footprintRadius = Math.max(backgroundRadius, mainRadius + hoverGrowth)
+  layout.summaryLeft += 2 * (footprintRadius - layout.backgroundRadius)
+  layout.center[0] = footprintRadius
   layout.radius = mainRadius
   layout.backgroundRadius = backgroundRadius
   layout.zeroInnerRadius = (mainRadius * pieConfig.zeroInnerRadius) / pieConfig.radius
+  // The default rose hole is 32px; explicit radii retain caller-owned geometry.
   const radius: [number, number] = [
     requestedOuter && requested
       ? (Math.max(0, Math.min(requested[0] ?? 0, requestedOuter)) / requestedOuter) * mainRadius
-      : 0,
+      : presentation.roseType && presentation.radius === undefined
+        ? Math.min(16, mainRadius)
+        : 0,
     mainRadius,
   ]
 
@@ -414,7 +454,7 @@ export function createDefaultPieOption(
     const yFactor = verticalFactors[vertical!]
     if (xFactor !== undefined && yFactor !== undefined) {
       const blockRight = Math.max(
-        layout.center[0] + layout.backgroundRadius,
+        layout.center[0] + footprintRadius,
         summaryWidth ? layout.summaryLeft + summaryWidth : 0,
       )
       if (horizontal === 'end') {
@@ -422,11 +462,11 @@ export function createDefaultPieOption(
         layout.summaryLeft = blockRight - layout.summaryLeft - summaryWidth
       }
       const blockTop = Math.min(
-        layout.center[1] - layout.backgroundRadius,
+        layout.center[1] - footprintRadius,
         layout.summaryHeight ? layout.titleTop : Infinity,
       )
       const blockBottom = Math.max(
-        layout.center[1] + layout.backgroundRadius,
+        layout.center[1] + footprintRadius,
         layout.summaryHeight ? layout.titleTop + layout.summaryHeight : 0,
       )
       const dx = Math.max(0, size.width - blockRight) * xFactor
@@ -656,13 +696,47 @@ export function createDefaultPieOption(
           ],
         }
       }),
+      {
+        id: 'ix-rose-center',
+        type: 'circle',
+        silent: true,
+        z: 1,
+        invisible: !presentation.roseType || radius[0] <= 2,
+        // Keep a 2px white gap and include half the 1px stroke in the 28px diameter.
+        shape: { cx: layout.center[0], cy: layout.center[1], r: Math.max(0, radius[0] - 2.5) },
+        style: {
+          fill: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: getAlphaColor(decorationColor, 0.1) },
+              { offset: 1, color: getAlphaColor(decorationColor, 0) },
+            ],
+          },
+          stroke: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: getAlphaColor(decorationColor, 0.16) },
+              { offset: 1, color: getAlphaColor(decorationColor, 0) },
+            ],
+          },
+          lineWidth: 1,
+        },
+      },
     ],
     series: [
       {
         type: 'pie',
         center: layout.center,
         label: { show: false },
-        radius: presentation.roseType ? layout.zeroInnerRadius : layout.backgroundRadius,
+        radius: presentation.roseType ? radius[0] : layout.backgroundRadius,
         id: 'ix-pie-background',
         z: 0,
         silent: true,
@@ -673,17 +747,19 @@ export function createDefaultPieOption(
         data: [{ value: 1, name: '' }],
         itemStyle: {
           borderWidth: 0,
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: getAlphaColor(decorationColor, 0.08) },
-              { offset: 1, color: getAlphaColor(decorationColor, 0) },
-            ],
-          },
+          color: presentation.roseType
+            ? '#fff'
+            : {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  { offset: 0, color: getAlphaColor(decorationColor, 0.08) },
+                  { offset: 1, color: getAlphaColor(decorationColor, 0) },
+                ],
+              },
         },
       },
       {
@@ -714,9 +790,13 @@ export function createDefaultPieOption(
           ? { label: presentation.label }
           : {}),
         markArea: presentation.markArea,
-        radius: presentation.radius === undefined ? layout.radius : radius,
+        radius:
+          presentation.radius === undefined && !presentation.roseType ? layout.radius : radius,
         // ECharts merges options; null clears a previously selected rose shape.
         roseType: presentation.roseType ?? (null as unknown as PieSeriesOption['roseType']),
+        clockwise: presentation.clockwise ?? true,
+        // Reset omitted emphasis fields when ECharts merges reactive updates.
+        emphasis: { scale: true, scaleSize: 5, disabled: false },
         id: 'ix-pie-data',
         z: 2,
         stillShowZeroSum: false,

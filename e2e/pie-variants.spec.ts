@@ -9,12 +9,11 @@ const font = readFileSync(
 ).toString('base64')
 const fontStyle = `<style>${['D-DIN-PRO', 'IDuxChartDemoDIN'].map(family => `@font-face{font-family:${family};src:url(data:font/ttf;base64,${font})}`).join('')}</style>`
 
+// Rose defaults intentionally differ from the frozen CLI; pie-layout.spec.ts verifies their new design.
 for (const variant of [
   'BasicTotal',
   'RingPie',
   'RingExternal',
-  'RosePie',
-  'RoseTotal',
   'LegendPercentage',
   'LegendColumns',
   'CardPie',

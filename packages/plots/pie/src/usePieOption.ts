@@ -20,6 +20,7 @@ export const pieChartProps = [
   'markArea',
   'radius',
   'roseType',
+  'clockwise',
 ] as const
 
 export interface PieChartProps
@@ -167,6 +168,9 @@ export function usePieOption(
       option.series = [seriesOption]
     } else {
       option.series = convertArray(series).map(item => merge({}, seriesOption, item))
+    }
+    for (const item of option.series ?? []) {
+      if (item.roseType && item.clockwise === undefined) item.clockwise = true
     }
     return option
   })

@@ -12,19 +12,20 @@ title: API
 
 同时支持 [ECharts 配置](https://echarts.apache.org/zh/option.html)和 [AdditionalChartOption](/components/core#additionalchartoption)。
 
-| 名称       | 说明                                                                                   | 类型                        | 默认值             |
-| ---------- | -------------------------------------------------------------------------------------- | --------------------------- | ------------------ |
-| `data`     | 数据，分类 `name` 应唯一；`0` 为有效值，`null` 表示缺失，可用 `missingReason` 补充原因 | `PieChartProps['data']`     | —                  |
-| `name`     | 系列名称，显示在默认 tooltip 中                                                        | `string`                    | —                  |
-| `align`    | 自动布局下整个图文区域的对齐位置，见下表                                               | `PieChartAlign`             | `center-start`     |
-| `radius`   | 半径；数组为 `[内半径, 外半径]`。自动布局中作为尺寸上限，空间不足时缩小                | `number \| string \| Array` | 自动计算           |
-| `roseType` | 启用玫瑰图                                                                             | `'radius' \| 'area'`        | —                  |
-| `title`    | 标题内容及样式；自动布局不自动生成统计标题或计算合计                                   | `TitleComponentOption`      | 不显示             |
-| `legend`   | 图例显隐、格式化及样式                                                                 | `LegendComponentOption`     | 显示名称和数值     |
-| `tooltip`  | 提示内容及样式                                                                         | `TooltipComponentOption`    | 显示系列名称及数据 |
-| `label`    | 扇区标签；`position: 'center'` 可显示一次业务提供的中心摘要                            | `SeriesLabelOption`         | —                  |
-| `center`   | 手动指定圆心，如 `['50%', '50%']`；设置后退出自动布局                                  | `Array`                     | 自动计算           |
-| `markArea` | 图表标域                                                                               | `MarkAreaOption`            | —                  |
+| 名称        | 说明                                                                                   | 类型                        | 默认值             |
+| ----------- | -------------------------------------------------------------------------------------- | --------------------------- | ------------------ |
+| `data`      | 数据，分类 `name` 应唯一；`0` 为有效值，`null` 表示缺失，可用 `missingReason` 补充原因 | `PieChartProps['data']`     | —                  |
+| `name`      | 系列名称，显示在默认 tooltip 中                                                        | `string`                    | —                  |
+| `align`     | 自动布局下整个图文区域的对齐位置，见下表                                               | `PieChartAlign`             | `center-start`     |
+| `radius`    | 半径；数组为 `[内半径, 外半径]`。自动布局中作为尺寸上限，空间不足时缩小                | `number \| string \| Array` | 自动计算           |
+| `roseType`  | 启用玫瑰图                                                                             | `'radius' \| 'area'`        | —                  |
+| `clockwise` | 扇区是否顺时针排列；`false` 为逆时针                                                   | `boolean`                   | `true`             |
+| `title`     | 标题内容及样式；自动布局不自动生成统计标题或计算合计                                   | `TitleComponentOption`      | 不显示             |
+| `legend`    | 图例显隐、格式化及样式                                                                 | `LegendComponentOption`     | 显示名称和数值     |
+| `tooltip`   | 提示内容及样式                                                                         | `TooltipComponentOption`    | 显示系列名称及数据 |
+| `label`     | 扇区标签；`position: 'center'` 可显示一次业务提供的中心摘要                            | `SeriesLabelOption`         | —                  |
+| `center`    | 手动指定圆心，如 `['50%', '50%']`；设置后退出自动布局                                  | `Array`                     | 自动计算           |
+| `markArea`  | 图表标域                                                                               | `MarkAreaOption`            | —                  |
 
 #### 什么时候使用自动布局？
 
@@ -69,7 +70,7 @@ const data = [
 <!-- 环形：内半径大于 0；保留自动布局时需设置 align -->
 <IxPieChart name="设备状态" :data="data" align="center" :radius="['70%', '80%']" />
 
-<!-- 玫瑰图 -->
+<!-- 玫瑰图：480 × 180 基准容器下最大扇区默认半径为 82px，随可用空间自适应 -->
 <IxPieChart name="设备状态" :data="data" align="center" rose-type="radius" />
 ```
 
@@ -114,7 +115,7 @@ const data = [
 
 中心摘要不会随图例筛选自动重算。需要更丰富的格式时，可使用 `title.textStyle.rich`、`legend.textStyle.rich` 或 `label.rich`。
 
-图例在空间充足时按 1–4 项单列、5–8 项两列、9 项起三列排列。三列超过 12 项时，前两列各固定 4 项，第三列分页。宽度不足时减少列数；高度不足或显式设置 `legend.type: 'scroll'` 时改为单列。只要条目超过当前可见行数，就会分页并显示组件绘制的上下按钮，因此不足 12 项也可能分页。原生滚动图例负责内容切换，按钮由组件提供。
+图例在空间充足时按 1–4 项单列、5–8 项两列、9 项起三列排列。三列超过 12 项时，前两列各固定 4 项，第三列分页。最多三列；按图标、名称区域（沿用默认最大宽度）、数值和列间距测量实际可用宽度，不足时逐级减少列数并重新分配名称宽度，避免名称被压空；高度不足或显式设置 `legend.type: 'scroll'` 时改为单列。只要条目超过当前可见行数，就会分页并显示组件绘制的上下按钮，因此不足 12 项也可能分页。原生滚动图例负责内容切换，按钮由组件提供。
 
 #### 数据与状态
 
@@ -196,3 +197,7 @@ export function usePieOption(
 Pie 保留 ECharts 的默认更新合并策略，移除任意深层样式不保证清除实例中的旧值；需要完整清除时使用 `setOptionOpts: { notMerge: true }`，这也会重置未显式传入的图例选择等状态。普通样式更新仍可保留交互状态。
 
 主题字段和文字优先级见[快速上手](/0-guide/GettingStarted.page.md)。自动布局支持根 textStyle 作为文字后备，title.textStyle、legend.textStyle、label 等局部配置优先；plotTheme 仅作用于自动布局，native 路径沿用 ECharts theme。未传新属性时原有模式推断与默认效果不变。
+
+自动布局会为悬停放大的扇区预留空间，九宫格对齐均按放大后的边界计算，避免靠边时被裁切。默认放大半径为 5px，可通过 `:series-style="{ emphasis: { scaleSize: 12 } }"` 配置；设置 `scale: false` 或 `disabled: true` 时不为该强调效果预留空间。单个数据项的 `emphasis` 覆盖也会参与计算。空间不足时自动缩小饼图半径。
+
+自动布局中的玫瑰图默认保留直径 32px 的白色中心区，内部为直径 28px（含 1px 边框）的装饰圆，填充由 10% 蓝色渐变至透明，边框由 16% 蓝色渐变至透明。中心尺寸不随容器放大；空间不足时会收缩。`plotTheme.color` 可调整装饰颜色。显式 `radius` 仍优先：数组指定内外半径，单值指定实心玫瑰图。中心装饰会跟随显式内半径，并保留 2px 白色间隔。
