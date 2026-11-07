@@ -4,7 +4,7 @@ title: API
 
 ### IxLiquidFillChart
 
-从 `@idux/charts` 导入。支持 Vue 2.6（需安装 `@vue/composition-api`）、Vue 2.7 和 Vue 3；容器需要明确高度。
+从 `@idux/charts` 导入。支持 Vue 2（含 Vue 2.6）和 Vue 3，Vue 2.6 需安装并注册 `@vue/composition-api`；容器需要明确高度。
 
 | 名称                        | 说明                                    | 类型                      | 默认值                |
 | --------------------------- | --------------------------------------- | ------------------------- | --------------------- |

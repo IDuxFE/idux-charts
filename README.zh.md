@@ -10,9 +10,9 @@
 npm install echarts @idux/charts
 ```
 
-支持 Vue `^2.6.0 || ^3.2.5` 和 ECharts `^5.4.3 || ^6.0.0`。Vue 2.6 还需要安装 `@vue/composition-api >=1.6.2`；Vue 2.7 和 Vue 3 无需安装此插件。
+支持 Vue 2（含 Vue 2.6）和 Vue 3。依赖版本为 Vue `^2.6.0 || ^3.2.5` 和 ECharts `^5.4.3 || ^6.0.0`。
 
-如果在 Vue 2.x(< 2.7) 中使用，需要确认 `@vue/composition-api` 已经被安装
+Vue 2.6 还需安装 `@vue/composition-api >=1.6.2`，并在创建应用前通过 `Vue.use(VueCompositionAPI)` 注册插件：
 
 ```sh
 npm install @vue/composition-api
@@ -21,13 +21,27 @@ npm install @vue/composition-api
 ## 🔨 使用
 
 ```ts
-// vue@2.x(< 2.7)
-// import { createApp } from "@vue/composition-api";
+// Vue 3
 import { createApp } from 'vue'
+import App from './App.vue'
 import { IxChart, IxLineChart } from '@idux/charts'
 
 const app = createApp(App)
 app.use(IxChart).use(IxLineChart)
+```
+
+Vue 2 使用 `Vue.use` 注册组件；以下为 Vue 2.6 的完整初始化示例：
+
+```ts
+import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
+import { IxChart, IxLineChart } from '@idux/charts'
+import App from './App.vue'
+
+Vue.use(VueCompositionAPI)
+Vue.use(IxChart).use(IxLineChart)
+
+new Vue({ render: h => h(App) }).$mount('#app')
 ```
 
 ```vue
@@ -63,11 +77,9 @@ const lineProps: LineChartPublicProps = {
 }
 ```
 
-现有的 `*ChartProps` 继续允许扩展配置字段。`*ChartPublicProps` 从对应类型推导，去掉宽泛索引签名，保留具名属性的类型及可选性；不会补齐默认值，也不包含 HTML 属性。这是配置类型与具名公开属性的区分，不是 Vue 内部已解析 Props 与外部可选 Props 的区分。
+`*ChartProps` 允许扩展配置字段；`*ChartPublicProps` 去掉宽泛索引签名，保留具名属性的类型及可选性，不补齐默认值，也不包含 HTML 属性。默认组件声明保留 `vue-demi` 引用及事件、插槽和实例成员的类型推导。
 
-默认组件声明保留 `vue-demi` 引用及原有配置属性类型；`*ChartPublicProps` 独立提供给 Vue 2.6 适配层，不替换默认组件声明。Vue 2.6 项目可在现有的 `DefineComponent` 适配声明中使用 `*ChartPublicProps`，无需自行实现索引签名过滤。
-
-默认组件声明面向 Vue 2.7 和 Vue 3，保留事件、带参数插槽及实例成员的自动推导。Vue 2.7 的插槽函数位于 `$scopedSlots`，Vue 3 位于 `$slots`。Vue 2.6 适配层保留自己的组件声明和 `skipLibCheck: true` 配置；属性别名不会把默认组件声明转换成 Vue 2.6 原生组件声明。
+Vue 2.6 项目通过现有的 `DefineComponent` 适配声明使用 `*ChartPublicProps`，并保留 `skipLibCheck: true`。这些属性类型供适配层使用，不替换默认组件声明。
 
 ## ⌨️ 开发
 

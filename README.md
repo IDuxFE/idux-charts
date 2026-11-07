@@ -10,9 +10,9 @@ English | [简体中文](README.zh.md)
 npm install echarts @idux/charts
 ```
 
-Requires Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.0.0`. Vue 2.6 additionally requires `@vue/composition-api >=1.6.2`; Vue 2.7 and Vue 3 do not require this plugin.
+Supports Vue 2 (including Vue 2.6) and Vue 3. Peer dependencies are Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.0.0`.
 
-To make `@idux/charts` work for Vue 2.x(< 2.7), you need to have `@vue/composition-api` installed:
+Vue 2.6 also requires `@vue/composition-api >=1.6.2`. Register the plugin with `Vue.use(VueCompositionAPI)` before creating the application:
 
 ```sh
 npm install @vue/composition-api
@@ -21,13 +21,27 @@ npm install @vue/composition-api
 ## 🔨 Usage
 
 ```ts
-// vue@2.x(< 2.7)
-// import { createApp } from "@vue/composition-api";
+// Vue 3
 import { createApp } from 'vue'
+import App from './App.vue'
 import { IxChart, IxLineChart } from '@idux/charts'
 
 const app = createApp(App)
 app.use(IxChart).use(IxLineChart)
+```
+
+Use `Vue.use` to register components in Vue 2. A complete Vue 2.6 initialization example:
+
+```ts
+import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
+import { IxChart, IxLineChart } from '@idux/charts'
+import App from './App.vue'
+
+Vue.use(VueCompositionAPI)
+Vue.use(IxChart).use(IxLineChart)
+
+new Vue({ render: h => h(App) }).$mount('#app')
 ```
 
 ```vue
@@ -63,11 +77,9 @@ const lineProps: LineChartPublicProps = {
 }
 ```
 
-The existing `*ChartProps` types continue to accept extension fields. Each `*ChartPublicProps` type derives from its corresponding configuration type, removes broad index signatures, and preserves named property types and optionality. It does not resolve defaults or include HTML attributes. This distinction describes open configuration versus named public props, rather than Vue's resolved internal props versus caller-facing props.
+`*ChartProps` allow extension fields. `*ChartPublicProps` remove broad index signatures while preserving named property types and optionality; they do not resolve defaults or include HTML attributes. Default component declarations retain `vue-demi` imports and inferred event, slot, and instance types.
 
-Default component declarations retain `vue-demi` imports and the existing configuration prop types. The `*ChartPublicProps` aliases are provided separately for Vue 2.6 adapters; they do not replace the default component declarations. Vue 2.6 projects can use them in their existing `DefineComponent` adapters without implementing index-signature filtering themselves.
-
-Default component declarations target Vue 2.7 and Vue 3 and preserve inferred events, scoped slots, and instance bindings. Vue 2.7 exposes scoped slot functions through `$scopedSlots`; Vue 3 uses `$slots`. Vue 2.6 adapters retain their own component declarations and `skipLibCheck: true`; the prop aliases do not make the default component declarations native Vue 2.6 declarations.
+Vue 2.6 projects use `*ChartPublicProps` through their existing `DefineComponent` adapters and retain `skipLibCheck: true`. These prop types support the adapter layer; they do not replace the default component declarations.
 
 ## ⌨️ Development
 

@@ -33,7 +33,8 @@ so browser upgrades and screenshot changes are reviewed together. CI also instal
 Chromium through each playground's own Playwright CLI before testing it.
 
 After building, `pnpm test:declarations` packs the actual library and installs it
-in independent Vue 2.7 and Vue 3 projects against ECharts 5.4.3 and 6.0.0. Both check declarations with
+in independent Vue 2.6, Vue 2.7, and Vue 3 projects against ECharts 5.4.3 and 6.0.0.
+Vue 2.7 and Vue 3 check declarations with
 `skipLibCheck: false`, including inferred props, events, scoped slots, setup
 bindings, data, computed values, and methods. Vue 2.6 checks the adapter prop
 aliases with its existing `skipLibCheck: true` boundary. Pass `--runtime` to also
