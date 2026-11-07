@@ -68,10 +68,35 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  pages-smoke:
+    name: Documentation deployment smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE_BASE: /
+      SITE_DOMAIN: charts.idux.site
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium
+      - name: Upload documentation browser reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: documentation-browser-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
   ci:
     name: CI result
     if: ${{ always() }}
-    needs: [checks, browser-tests]
+    needs: [checks, browser-tests, pages-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -79,4 +104,5 @@ jobs:
         env:
           CHECKS_RESULT: ${{ needs.checks.result }}
           BROWSER_RESULT: ${{ needs.browser-tests.result }}
-        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success
+          PAGES_RESULT: ${{ needs.pages-smoke.result }}
+        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success && test "$PAGES_RESULT" = success

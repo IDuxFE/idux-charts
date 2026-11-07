@@ -162,11 +162,21 @@ workflow logs first. Never attempt to overwrite an existing npm version.
 
 ## Deploying the documentation site
 
-Documentation deployment is independent of npm releases. The **Deploy documentation**
-workflow is manual: after merging the changes you want to publish, select
+Documentation runs in a separate **Deploy documentation** workflow. After
+Changesets successfully publishes new npm packages (`published == 'true'`),
+Release dispatches that workflow with the exact published commit SHA. Creating
+a release PR, a normal merge, or a publish run with nothing new does not deploy.
+Dispatch uses `GITHUB_TOKEN` with `actions: write`; `workflow_dispatch` is an
+exception to GitHub's token-trigger restriction. A dispatch failure is reported
+as a warning and does not change the successful npm publish result.
+
+For documentation-only updates or deployment retries, select
 **Actions → Deploy documentation → Run workflow → main** in `IDuxFE/idux-charts`.
-Forks and other branches cannot deploy. Merging a PR or publishing an npm package
-alone does not deploy the site.
+Leave `source_sha` blank to deploy the selected main commit, or enter the full
+release commit SHA to retry that exact version. The source must be a commit
+already on main and must contain the documentation build/test tooling. Forks
+and other branches cannot deploy. A failed documentation run can be retried
+without publishing npm packages again.
 
 Keep **Settings → Pages → Source** set to **Deploy from a branch**, with branch
 **gh-pages** and folder **/(root)**. Keep the custom domain **charts.idux.site**
@@ -181,7 +191,8 @@ builds. Keep credentials in Actions secrets, never in source or static artifacts
 
 The build job builds the production site and runs a Chromium smoke test covering
 Pages-style 404 fallback, deep-link refresh, query/hash preservation, navigation,
-and chart rendering. It uploads only `packages/site/dist/`. A separate deploy job
+and chart rendering. Browser reports and failure traces are retained for seven
+days. The deployment artifact contains only `packages/site/dist/`. A separate deploy job
 copies that artifact into `gh-pages`, removes obsolete assets, and pushes a normal
 commit recording the source SHA. Existing branch history is retained; identical
 output produces no commit. No source code or dependencies are published.
@@ -216,6 +227,8 @@ SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm exec playwright test e2e/pages.spec.ts
 ```
 
 CI tests the default root path and also runs a Chromium subpath regression.
+A required Ubuntu smoke job exercises the same configuration as deployment;
+the broader browser/screenshot suite continues to run on macOS.
 The build generates
 `404.html` from the same application entry as `index.html`, so history routes
 load without redirecting or losing URL parameters. GitHub Pages still returns
