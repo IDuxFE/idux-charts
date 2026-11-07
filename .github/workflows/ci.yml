@@ -23,70 +23,119 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - run: pnpm lint
-      - run: pnpm format:check
-      - run: pnpm typecheck
-      - run: pnpm test:unit
-      - run: pnpm build:lib
-      - run: pnpm test:declarations
+      - run: pnpm check
 
   browser-tests:
-    name: Browser tests
-    # Existing screenshot baselines were recorded on Intel macOS 15.
+    name: Browser tests (${{ matrix.browser }}, ${{ matrix.shard }}/2)
+    # Preserve the OS used by the reviewed screenshot baselines.
     runs-on: macos-15-intel
-    timeout-minutes: 30
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
-      - run: pnpm exec playwright install --with-deps chromium firefox webkit
-      - run: pnpm test:e2e
-      - name: Test documentation under a subpath without a custom domain
-        env:
-          SITE_BASE: /idux-charts/
-          SITE_DOMAIN: ''
-        run: pnpm exec playwright test e2e/pages.spec.ts e2e/site-theme.spec.ts --project=chromium --reporter=line --output=test-results-subpath
-      # Rebuild and pack the library before installing both independent apps.
-      - run: pnpm playgrounds:prepare
-      - run: pnpm --dir playgrounds/vue2 exec playwright install --with-deps chromium
-      - run: pnpm --dir playgrounds/vue3 exec playwright install --with-deps chromium
-      - run: pnpm --dir playgrounds/vue2 test:e2e
-      - run: pnpm --dir playgrounds/vue3 test:e2e
-      - run: pnpm test:declarations --runtime
+      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - run: pnpm test:e2e --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
       - name: Upload browser reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: browser-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          name: browser-reports-${{ matrix.browser }}-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report/
             test-results/
-            test-results-subpath/
-            playgrounds/*/playwright-report/
-            playgrounds/*/test-results/
           retention-days: 7
           if-no-files-found: ignore
 
-  pages-smoke:
-    name: Documentation deployment smoke test
+  playground-tests:
+    name: Playground (${{ matrix.vue }})
+    runs-on: macos-15-intel
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        vue: [vue2, vue3]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      # Build and pack once per isolated runner, then install only its consumer.
+      - run: pnpm playgrounds:prepare ${{ matrix.vue }}
+      - run: pnpm --dir playgrounds/${{ matrix.vue }} exec playwright install --with-deps chromium
+      - run: pnpm --dir playgrounds/${{ matrix.vue }} test:e2e
+      - name: Upload playground reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: playground-reports-${{ matrix.vue }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playgrounds/${{ matrix.vue }}/playwright-report/
+            playgrounds/${{ matrix.vue }}/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  compatibility:
+    name: Compatibility (Vue ${{ matrix.vue }}, ECharts ${{ matrix.echarts }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        vue: ['2.7.16', '3.5.44']
+        echarts: ['5.4.3', '6.0.0']
+        include:
+          - vue: '2.6.14'
+            echarts: '6.0.0'
     env:
-      SITE_BASE: /
-      SITE_DOMAIN: charts.idux.site
+      IDUX_DECLARATION_TARGET: ${{ matrix.vue }}/${{ matrix.echarts }}
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium
+      - run: pnpm build:lib
+      # --runtime also checks packed declarations; avoid testing them twice.
+      - run: pnpm test:declarations --runtime
+
+  pages-smoke:
+    name: Documentation (${{ matrix.deployment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - deployment: domain
+            base: /
+            domain: charts.idux.site
+            tests: e2e/pages.spec.ts
+          - deployment: subpath
+            base: /idux-charts/
+            domain: ''
+            tests: e2e/pages.spec.ts e2e/site-theme.spec.ts
+    env:
+      SITE_BASE: ${{ matrix.base }}
+      SITE_DOMAIN: ${{ matrix.domain }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test ${{ matrix.tests }} --project=chromium
       - name: Upload documentation browser reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6
         with:
-          name: documentation-browser-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          name: documentation-browser-reports-${{ matrix.deployment }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             playwright-report/
             test-results/
@@ -96,13 +145,11 @@ jobs:
   ci:
     name: CI result
     if: ${{ always() }}
-    needs: [checks, browser-tests, pages-smoke]
+    needs: [checks, browser-tests, playground-tests, compatibility, pages-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require all checks to pass
         env:
-          CHECKS_RESULT: ${{ needs.checks.result }}
-          BROWSER_RESULT: ${{ needs.browser-tests.result }}
-          PAGES_RESULT: ${{ needs.pages-smoke.result }}
-        run: test "$CHECKS_RESULT" = success && test "$BROWSER_RESULT" = success && test "$PAGES_RESULT" = success
+          RESULTS: ${{ toJSON(needs) }}
+        run: echo "$RESULTS" | jq -e 'all(.[]; .result == "success")'

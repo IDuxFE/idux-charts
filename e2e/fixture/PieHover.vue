@@ -74,6 +74,7 @@ const inspect = () => {
   const series = model.option
   const rect = dom.getBoundingClientRect()
   return {
+    roseType: series.roseType,
     width: chart.getWidth(),
     height: chart.getHeight(),
     sectors: data.value.map((_, index) => {

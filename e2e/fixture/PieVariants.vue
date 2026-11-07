@@ -36,6 +36,12 @@ const change = async () => {
   await nextTick()
 }
 Object.assign(window, {
+  variantAnimationsFinished: () =>
+    ['reference', 'actual'].every(id => {
+      const el = document.querySelector(`[data-testid=${id}] [_echarts_instance_]`)
+      const chart = el && getInstanceByDom(el as HTMLElement)
+      return chart && chart.getZr().animation.isFinished()
+    }),
   variantState: () =>
     ['reference', 'actual'].map(id => {
       const el = document.querySelector(`[data-testid=${id}] [_echarts_instance_]`)

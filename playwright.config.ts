@@ -8,11 +8,14 @@ export default defineConfig({
   expect: { timeout: 10_000 },
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  workers: isCI ? 1 : 2,
+  failOnFlakyTests: isCI,
+  fullyParallel: true,
+  workers: isCI ? 2 : 4,
   reporter: [['html', { open: 'never' }]],
   use: {
+    screenshot: 'only-on-failure',
     baseURL: siteBaseURL,
-    trace: 'retain-on-failure',
+    trace: isCI ? 'on-first-retry' : 'retain-on-failure',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

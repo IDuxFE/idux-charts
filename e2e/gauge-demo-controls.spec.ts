@@ -1,11 +1,9 @@
 import { test, expect } from './helpers'
 
-test('gauge demos support sizes, zero, states and business scenarios', async ({
-  page,
-}, testInfo) => {
-  await page.goto('components/gauge')
-  await page.getByRole('radio', { name: '示例', exact: true }).click()
-  for (const name of ['basic', 'status', 'segmented']) {
+for (const name of ['basic', 'status', 'segmented']) {
+  test(`gauge ${name} demo supports sizes, zero and request states`, async ({ page }) => {
+    await page.goto('components/gauge')
+    await page.getByRole('radio', { name: '示例', exact: true }).click()
     const demo = page.locator(`.gauge-${name}`)
     const charts = demo.locator('[_echarts_instance_]')
     await expect(charts.first().locator('svg')).toBeVisible()
@@ -22,7 +20,12 @@ test('gauge demos support sizes, zero, states and business scenarios', async ({
     await expect(demo.getByRole('status')).toBeVisible()
     await demo.getByText('正常', { exact: true }).click()
     await expect(charts.first().locator('svg')).toBeVisible()
-  }
+  })
+}
+
+test('gauge business scenarios and responsive layout', async ({ page }, testInfo) => {
+  await page.goto('components/gauge')
+  await page.getByRole('radio', { name: '示例', exact: true }).click()
   const segmented = page.locator('.gauge-segmented')
   await segmented.getByText('评分等级', { exact: true }).click()
   await expect(segmented.locator('[_echarts_instance_]')).toHaveCount(4)

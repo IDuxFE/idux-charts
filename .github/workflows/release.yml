@@ -19,7 +19,6 @@ jobs:
 
   plan:
     name: Plan release
-    needs: validate
     if: >-
       github.repository == 'IDuxFE/idux-charts' &&
       github.ref == 'refs/heads/main' &&
@@ -39,7 +38,7 @@ jobs:
 
   version:
     name: Update release PR
-    needs: plan
+    needs: [validate, plan]
     if: needs.plan.outputs.mode == 'version'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -61,7 +60,7 @@ jobs:
 
   publish:
     name: Publish to npm
-    needs: plan
+    needs: [validate, plan]
     if: needs.plan.outputs.mode == 'publish'
     runs-on: ubuntu-latest
     timeout-minutes: 15
