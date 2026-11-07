@@ -186,11 +186,41 @@ copies that artifact into `gh-pages`, removes obsolete assets, and pushes a norm
 commit recording the source SHA. Existing branch history is retained; identical
 output produces no commit. No source code or dependencies are published.
 
-The build uses `/` as its asset/router base for the custom domain. It generates
+Build-time configuration is available through shell environment variables:
+
+| Variable      | Default | Purpose                                                                       |
+| ------------- | ------- | ----------------------------------------------------------------------------- |
+| `SITE_BASE`   | `/`     | Absolute asset/router path; a trailing slash is added if omitted.             |
+| `SITE_DOMAIN` | unset   | Optional custom hostname for `CNAME`; omit it for a `github.io` project site. |
+
+For example, to build and preview a project site without a custom domain:
+
+```sh
+SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm build:site
+SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm preview
+```
+
+Use the same `SITE_BASE` for build and preview. These are build-tool environment
+variables, not runtime settings or automatic `.env` file loading. Development
+still runs at `/`. The production deployment workflow explicitly sets
+`SITE_BASE=/` and `SITE_DOMAIN=charts.idux.site`, preserving the official site.
+Other builds do not inherit that domain. An unset or empty `SITE_DOMAIN` removes
+any stale generated `CNAME`; setting a custom hostname also requires matching
+GitHub Pages settings and DNS. The upstream push workflow remains restricted to
+the official domain; building for another destination does not change that target.
+
+To run the subpath smoke test locally:
+
+```sh
+SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm exec playwright test e2e/pages.spec.ts
+```
+
+CI tests the default root path and also runs a Chromium subpath regression.
+The build generates
 `404.html` from the same application entry as `index.html`, so history routes
 load without redirecting or losing URL parameters. GitHub Pages still returns
-HTTP 404 for these deep links; this is its static hosting behavior. `CNAME` and
-`.nojekyll` are included in every deployment.
+HTTP 404 for these deep links; this is its static hosting behavior. `.nojekyll`
+is always included; `CNAME` is included only when `SITE_DOMAIN` is configured.
 
 After the workflow pushes, GitHub runs the separate **pages build and deployment**
 process. Check that deployment as well as the push workflow, then open

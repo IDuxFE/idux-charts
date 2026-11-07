@@ -33,6 +33,7 @@ yarn.lock
 pnpm-lock.yaml
 
 test-results/
+test-results-subpath/
 playwright-report/
 
 

@@ -42,6 +42,11 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e
+      - name: Test documentation under a subpath without a custom domain
+        env:
+          SITE_BASE: /idux-charts/
+          SITE_DOMAIN: ''
+        run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium --reporter=line --output=test-results-subpath
       # Rebuild and pack the library before installing both independent apps.
       - run: pnpm playgrounds:prepare
       - run: pnpm --dir playgrounds/vue2 exec playwright install --with-deps chromium
@@ -57,6 +62,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            test-results-subpath/
             playgrounds/*/playwright-report/
             playgrounds/*/test-results/
           retention-days: 7
