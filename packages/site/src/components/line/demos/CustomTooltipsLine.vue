@@ -1,17 +1,20 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useThemeToken } from '@idux/components/theme'
 import { IxLineChart, useTooltipsFormatter } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
-const lineOption: LineChartProps = {
+const { themeTokens } = useThemeToken()
+const lineOption = computed<LineChartProps>(() => ({
   title: { text: '自定义 tooltips' },
   // 若不自定义 tooltips，就会使用这块代码作为默认的 tooltips 效果
   tooltip: {
     trigger: 'axis',
-    backgroundColor: '#FBFDFF',
+    backgroundColor: themeTokens.value.colorContainerBg,
     axisPointer: {
       lineStyle: {
         type: 'dashed',
-        color: '#D3D7DE',
+        color: themeTokens.value.colorSeparator,
       },
     },
     formatter(params) {
@@ -47,7 +50,7 @@ const lineOption: LineChartProps = {
       name: '到店靓女',
     },
   ],
-}
+}))
 </script>
 <template>
   <IxLineChart style="height: 300px" v-bind="lineOption" />

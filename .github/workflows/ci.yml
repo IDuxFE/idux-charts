@@ -46,7 +46,7 @@ jobs:
         env:
           SITE_BASE: /idux-charts/
           SITE_DOMAIN: ''
-        run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium --reporter=line --output=test-results-subpath
+        run: pnpm exec playwright test e2e/pages.spec.ts e2e/site-theme.spec.ts --project=chromium --reporter=line --output=test-results-subpath
       # Rebuild and pack the library before installing both independent apps.
       - run: pnpm playgrounds:prepare
       - run: pnpm --dir playgrounds/vue2 exec playwright install --with-deps chromium

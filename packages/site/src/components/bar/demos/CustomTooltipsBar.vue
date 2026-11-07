@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useThemeToken } from '@idux/components/theme'
 import { IxBarChart, useTooltipsFormatter } from '@idux/charts'
 import type { BarChartProps } from '@idux/charts'
 
-const barOption: BarChartProps = {
+const { themeTokens } = useThemeToken()
+const barOption = computed<BarChartProps>(() => ({
   title: { text: '自定义 tooltips' },
   // 若不自定义 tooltips，就会使用这块代码作为默认的 tooltips 效果
   tooltip: {
     trigger: 'axis',
-    backgroundColor: '#FBFDFF',
+    backgroundColor: themeTokens.value.colorContainerBg,
     formatter(params) {
       if (!Array.isArray(params) || !params.length) {
         return ''
@@ -47,7 +50,7 @@ const barOption: BarChartProps = {
       },
     },
   ],
-}
+}))
 </script>
 <template>
   <IxBarChart style="height: 300px" v-bind="barOption" />

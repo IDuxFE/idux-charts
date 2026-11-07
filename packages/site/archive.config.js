@@ -12,6 +12,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   root: resolve(__dirname, './src'),
+  setupFile: resolve(__dirname, './appSetup.ts'),
 
   theme: {
     themeStyle: 'default',

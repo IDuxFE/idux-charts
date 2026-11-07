@@ -1,0 +1,100 @@
+.site-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  color: var(--archive-ix-text-color-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.site-theme-toggle:hover {
+  color: var(--archive-ix-color-primary);
+  background: var(--archive-ix-background-color-medium);
+}
+.site-theme-toggle:focus-visible {
+  outline: 2px solid var(--archive-ix-color-primary);
+  outline-offset: 2px;
+}
+:root[data-theme='dark'] {
+  --archive-ix-text-color: var(--site-color-text);
+  --archive-ix-text-color-secondary: var(--site-color-text-info);
+  --archive-ix-text-color-info: var(--site-color-text-info);
+  --archive-ix-text-color-disabled: var(--site-color-text-disabled);
+  --archive-ix-text-color-title: var(--site-color-text-title);
+  --archive-ix-text-color-title-secondary: var(--site-color-text);
+  --archive-ix-background-color: var(--site-color-container-bg);
+  --archive-ix-background-color-light: var(--site-color-container-bg);
+  --archive-ix-background-color-medium: var(--site-color-info-container-bg);
+  --archive-ix-background-color-deep: var(--site-color-fill-container-bg);
+  --archive-ix-border-color: var(--site-color-border);
+  --archive-ix-border-color-secondary: var(--site-color-separator);
+  --archive-ix-color-primary-l50: var(--site-color-container-bg-active);
+  --archive-app-sider-header-label-color: var(--site-color-text-title);
+  --archive-app-page-title-color: var(--site-color-text-title);
+  --archive-app-page-description-color: var(--site-color-text-info);
+  --archive-app-page-header-background: var(--site-color-container-bg);
+  --archive-app-page-header-tabs-background: var(--site-color-info-container-bg);
+  --archive-app-demo-title-color: var(--site-color-text-title);
+  --archive-app-demo-description-color: var(--site-color-text-info);
+  --archive-app-demo-content-background: var(--site-color-info-container-bg);
+  --archive-app-demo-stage-background: var(--site-color-container-bg);
+  --archive-app-demo-stage-border: 1px solid var(--site-color-border);
+  --archive-app-demo-tools-background: var(--site-color-container-bg);
+  --archive-md-background-color: var(--site-color-container-bg);
+  --archive-md-background-color-mute: var(--site-color-info-container-bg);
+  --archive-md-background-color-alt: var(--site-color-info-container-bg);
+  --archive-md-divider-color: var(--site-color-border);
+  --archive-md-divider-color-light: var(--site-color-separator);
+  --archive-md-text-color: var(--site-color-text);
+  --archive-md-text-color-light: var(--site-color-text-info);
+  --archive-md-text-color-code: #96c7ff;
+  --archive-md-color-primary: #689fff;
+  --archive-md-color-primary-lighter: var(--site-color-container-bg-active);
+  --archive-md-custom-block-info-code-bg: var(--site-color-info-container-bg);
+  --archive-md-custom-block-success-bg: #112b26;
+  --archive-md-custom-block-warning-bg: #322a18;
+  --archive-md-custom-block-error-bg: #321d1d;
+}
+
+:root[data-theme='dark'] .archive-app__root-wrapper {
+  background-color: var(--site-color-container-bg);
+}
+:root[data-theme='dark']
+  :is(
+    .archive-app-selector-content,
+    .archive-app-selector-clear,
+    .archive-app-select-overlay,
+    .archive-app-textarea-inner,
+    .archive-app-message-content,
+    .archive-app-tabs-nav-tab,
+    .archive-app-tabs-nav-pre,
+    .archive-app-tabs-nav-next
+  ) {
+  color: var(--site-color-text);
+  background-color: var(--site-color-container-bg);
+  border-color: var(--site-color-border);
+}
+:root[data-theme='dark'] .charts-tooltips-title,
+:root[data-theme='dark'] .charts-tooltips-item {
+  color: var(--site-color-text);
+}
+:root[data-theme='dark'] .charts-tooltips-item {
+  background: var(--site-color-info-container-bg);
+}
+:root[data-theme='dark']
+  .archive-app-tabs-card
+  > .archive-app-tabs-nav-wrapper
+  > .archive-app-tabs-nav
+  > .archive-app-tabs-nav-tab-selected:not(.archive-app-tabs-nav-tab-disabled) {
+  background-color: var(--site-color-info-container-bg);
+  border-color: var(--site-color-border);
+}
+:root[data-theme='dark'] .archive-app-textarea-with-count::after,
+:root[data-theme='dark'] .archive-app-select-overlay-multiple .archive-app-select-option-selected {
+  color: var(--site-color-text);
+  background-color: var(--site-color-container-bg);
+}

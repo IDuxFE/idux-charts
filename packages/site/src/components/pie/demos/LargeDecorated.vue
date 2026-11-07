@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useThemeToken } from '@idux/components/theme'
 import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 import { graphic } from 'echarts/core'
@@ -73,7 +75,8 @@ const data = [
   },
 ]
 
-const pieOption: PieChartProps = {
+const { themeTokens } = useThemeToken()
+const pieOption = computed<PieChartProps>(() => ({
   legend: {
     data,
   },
@@ -85,13 +88,13 @@ const pieOption: PieChartProps = {
     textStyle: {
       fontSize: 24,
       fontWeight: 500,
-      color: '#2F3540',
+      color: themeTokens.value.colorTextTitle,
       fontFamily: 'D-DIN-PRO',
     },
     subtextStyle: {
       fontSize: 12,
       fontWeight: 400,
-      color: '#6A6D76',
+      color: themeTokens.value.colorTextInfo,
     },
   },
 
@@ -151,7 +154,7 @@ const pieOption: PieChartProps = {
       data: [1],
     },
   ],
-}
+}))
 </script>
 <template>
   <IxPieChart

@@ -127,3 +127,38 @@ provide(PLOT_THEME_TOKEN, plotTheme)
 Gauge、LiquidFill 的 `valueTextStyle` 和 `labelTextStyle` 支持 `{ color, fontFamily, fontSize, fontWeight, lineHeight }`；LiquidFill 还支持 `unitTextStyle`。字号单位为 px，使用数值。单位默认保留小号排版，需要单独改变时使用 `unitTextStyle`。
 
 `plotTheme` 不会读取通过 `registerTheme` 注册的命名主题，也不自动监听页面祖先 CSS class。应用切换明暗主题时应同步更新 `theme` 与上述响应式 `plotTheme`，或仅更新 `plotTheme` 以保留实例。Pie 原有 CSS token 后备仍保留。
+
+### 暗黑模式与应用级主题
+
+文档站菜单左下角的月亮／太阳图标可切换明暗模式；窄屏时入口位于顶部右侧。首次访问跟随系统，手动选择后保存到本地并在同源标签页之间同步。浏览器禁止存储时，本次页面内仍可切换。文档中的静态设计图片保留原图，不随主题变色。
+
+应用可通过 `CHART_THEME_TOKEN` 提供 ECharts 主题名称、主题对象或响应式 ref。优先级为组件显式 `theme` → 注入的主题 → 内置 `seer`。下面的代码放在图表的父组件 `setup` 中；Vue 2.6 从 `@vue/composition-api` 引入对应函数。
+
+```ts
+import { computed, provide, ref } from 'vue'
+import { CHART_THEME_TOKEN, PLOT_THEME_TOKEN } from '@idux/charts'
+
+const dark = ref(false)
+provide(
+  CHART_THEME_TOKEN,
+  computed(() => (dark.value ? 'dark' : 'seer')),
+)
+provide(
+  PLOT_THEME_TOKEN,
+  computed(() =>
+    dark.value
+      ? {
+          textColor: '#F4F8FF',
+          secondaryTextColor: '#88909F',
+          borderColor: '#3C424D',
+          splitLineColor: '#22262E',
+          splitAreaColor: '#171A1F',
+        }
+      : {},
+  ),
+)
+```
+
+ECharts 原生支持 `dark` 主题。文档站使用 iDux 的 `IxThemeProvider` 和 `getThemeTokens`，在保留现有数据语义色的基础上同步背景、文字、边框、提示框和图表辅助元素。业务应用需自行联动 iDux 主题、两个图表主题 token 及自定义富文本颜色；图表库不依赖 iDux 组件库。
+
+修改 ECharts 主题会沿用现有生命周期重建图表，重新触发 `onReady`，缩放与图例选中等实例内状态可能重置；仅更新 `plotTheme` 则保持实例。`darkMode: true` 的图表默认使用深色原生加载遮罩，`loading` 对象里的 `textColor`、`maskColor` 等显式配置可覆盖默认值。

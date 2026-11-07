@@ -105,7 +105,7 @@ const businessTitle = computed(() => ({
 }
 .stage {
   max-width: 100%;
-  outline: 1px dashed #a1a7b3;
+  outline: 1px dashed var(--ix-color-border);
 }
 </style>
 <archive-meta lang="json">

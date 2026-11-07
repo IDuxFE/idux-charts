@@ -122,10 +122,10 @@ const presentation = computed<PieChartProps>(() => ({
         fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO',
         fontWeight: 400,
         lineHeight: 24,
-        color: '#2F3540',
+        color: themeTokens.value.colorTextTitle,
       },
       gap: { lineHeight: 4 },
-      caption: { fontSize: 12, lineHeight: 12, color: '#6f7785' },
+      caption: { fontSize: 12, lineHeight: 12, color: themeTokens.value.colorTextInfo },
     },
   },
 }))
