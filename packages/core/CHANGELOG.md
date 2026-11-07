@@ -1,5 +1,13 @@
 # @idux/charts-core
 
+## 1.1.0
+
+### Minor Changes
+
+- 887b91a: Add Radar, Gauge and LiquidFill components with pure option builders, public prop types and reactive plot theme/typography configuration. Extend core option types for the new series and coordinate systems.
+
+  Schedule automatic chart resizing on the next animation frame to avoid ResizeObserver delivery loops, and cancel pending resize work when auto-resize is disabled or the chart is disposed.
+
 ## 1.0.0
 
 ### Major Changes

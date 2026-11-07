@@ -1,5 +1,23 @@
 # @idux/charts-plots
 
+## 1.1.0
+
+### Minor Changes
+
+- 1934758: Add responsive built-in Pie layouts with alignment, paged legends and zero/missing-data presentation, plus explicit layout modes and main-series style overrides. Pie calls without the new layout controls retain 1.0.0 rendering and total calculation; opt into the built-in presentation with `layoutMode: 'auto'` or `align`. Existing explicit geometry and native option overrides retain their compatibility path.
+
+  Expand component guides, demos and packed Vue 2/Vue 3 playground coverage, including cross-version declaration and browser regression tests.
+
+- 887b91a: Add Radar, Gauge and LiquidFill components with pure option builders, public prop types and reactive plot theme/typography configuration. Extend core option types for the new series and coordinate systems.
+
+  Schedule automatic chart resizing on the next animation frame to avoid ResizeObserver delivery loops, and cancel pending resize work when auto-resize is disabled or the chart is disposed.
+
+### Patch Changes
+
+- 34ae7b4: Preserve the built-in Pie radius when a wider legend still fits beside the chart. Reserve the standalone chart inset only when the legend is hidden, avoiding unnecessary shrinking with platform-dependent font widths.
+- Updated dependencies [887b91a]
+  - @idux/charts-core@1.1.0
+
 ## 1.0.0
 
 ### Major Changes
