@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useThemeToken } from '@idux/components/theme'
 import { createRadarOption } from '@idux/charts'
 import type { RadarChartProps } from '@idux/charts'
 
@@ -19,14 +21,15 @@ const data = [
 ]
 // 顶层 radar 会整体替换，先使用构造函数保留默认配置及顺时针映射。
 const base = createRadarOption({ indicator, data, clockwise: true, area: true, radius: '60%' })
-const option: RadarChartProps = {
+const { themeTokens } = useThemeToken()
+const option = computed<RadarChartProps>(() => ({
   ...base,
   radar: {
     ...base.radar,
     shape: 'circle',
-    axisName: { color: '#354052', fontSize: 13 },
+    axisName: { color: themeTokens.value.colorText, fontSize: 13 },
     splitArea: { show: false },
-    splitLine: { lineStyle: { color: '#D8DDE5', type: 'dashed' } },
+    splitLine: { lineStyle: { color: themeTokens.value.colorSeparator, type: 'dashed' } },
   },
   tooltip: {
     trigger: 'item',
@@ -43,7 +46,7 @@ const option: RadarChartProps = {
       ].join('\n')
     },
   },
-}
+}))
 </script>
 
 <template>

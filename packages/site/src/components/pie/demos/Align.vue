@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { IxButton } from '@idux/components/button'
 import { IxPieChart } from '@idux/charts'
 import type { PieChartAlign, PieChartProps } from '@idux/charts'
 
@@ -48,12 +49,13 @@ const legend: PieChartProps['legend'] = {
 <template>
   <div class="pie-align-demo">
     <div class="pie-align-demo-controls" aria-label="饼图对齐位置">
-      <button
+      <IxButton
         v-for="position in positions"
         :key="position"
+        :mode="align === position ? 'primary' : 'default'"
         :aria-pressed="align === position"
         @click="align = position"
-        >{{ position }}</button
+        >{{ position }}</IxButton
       >
     </div>
     <div class="pie-align-demo-stage">
@@ -68,21 +70,10 @@ const legend: PieChartProps['legend'] = {
   gap: 8px;
   margin-bottom: 16px;
 }
-.pie-align-demo-controls button {
-  padding: 6px;
-  cursor: pointer;
-  border: 1px solid #e1e5eb;
-  background: white;
-  border-radius: 3px;
-}
-.pie-align-demo-controls button[aria-pressed='true'] {
-  border-color: #458fff;
-  color: #458fff;
-}
 .pie-align-demo-stage {
   width: 600px;
   height: 300px;
-  border: 1px dashed #a1a7b3;
+  border: 1px dashed var(--ix-color-border);
 }
 </style>
 <archive-meta lang="json">
