@@ -28,6 +28,10 @@ tarballs remain untracked. Browser reports are retained for seven days. Review
 screenshot differences if runner image or browser rendering changes; CI never
 automatically accepts new baselines.
 
+Keep Playwright pinned to the same exact version in the root and both playgrounds
+so browser upgrades and screenshot changes are reviewed together. CI also installs
+Chromium through each playground's own Playwright CLI before testing it.
+
 After building, `pnpm test:declarations` packs the actual library and installs it
 in independent Vue 2.7 and Vue 3 projects against ECharts 5.4.3 and 6.0.0. Both check declarations with
 `skipLibCheck: false`, including inferred props, events, scoped slots, setup

@@ -44,6 +44,8 @@ jobs:
       - run: pnpm test:e2e
       # Rebuild and pack the library before installing both independent apps.
       - run: pnpm playgrounds:prepare
+      - run: pnpm --dir playgrounds/vue2 exec playwright install --with-deps chromium
+      - run: pnpm --dir playgrounds/vue3 exec playwright install --with-deps chromium
       - run: pnpm --dir playgrounds/vue2 test:e2e
       - run: pnpm --dir playgrounds/vue3 test:e2e
       - run: pnpm test:declarations --runtime

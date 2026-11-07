@@ -32,7 +32,7 @@
     "@idux/cdk": "^2.11.0",
     "@idux/components": "^2.11.0",
     "@idux/pro": "^2.11.0",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "1.64.1",
     "@types/jsdom": "^28.0.3",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.14.0",
