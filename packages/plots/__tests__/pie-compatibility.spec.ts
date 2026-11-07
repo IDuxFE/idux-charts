@@ -1,3 +1,4 @@
+import { seerTheme } from '@idux/charts-core'
 import type { PieSeriesOption } from 'echarts/charts'
 import { mount } from '@vue/test-utils'
 import { defineComponent, h, nextTick, shallowReactive, shallowRef } from 'vue'
@@ -10,7 +11,15 @@ import type { PieChartProps as LegacyPieProps } from './fixtures/usePieOption1_0
 
 // Functions have separate identities in the frozen implementation; compare their
 // output separately, while preserving every serializable option in the comparison.
-const serializable = (option: unknown) => JSON.parse(JSON.stringify(option))
+const serializable = (option: unknown) => {
+  const result = JSON.parse(JSON.stringify(option))
+  // The former tooltip surface now lives in the default theme so dark themes can override it.
+  // Resolve that single default before comparing the remaining legacy options.
+  if (result.tooltip && result.tooltip.backgroundColor === undefined) {
+    result.tooltip.backgroundColor = seerTheme.tooltip.backgroundColor
+  }
+  return result
+}
 
 for (const [name, presentation] of [
   ['data only', {}],

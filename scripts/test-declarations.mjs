@@ -225,6 +225,12 @@ createApp({
 }
 
 const adapterConsumer = `
+import { provide, ref } from 'vue-demi';
+import { CHART_THEME_TOKEN, type ChartTheme } from '@idux/charts';
+provide(CHART_THEME_TOKEN, ref<ChartTheme>('dark'));
+provide(CHART_THEME_TOKEN, { darkMode: true, textStyle: { color: '#fff' } });
+// @ts-expect-error themes must be names or objects, not numbers
+provide(CHART_THEME_TOKEN, 42);
 import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps } from '@idux/charts';
 const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
 const gauge: GaugeChartPublicProps = { value: 20, segments: [{upper: 1, color: 'red'}], plotTheme: { textColor: 'red' }, valueTextStyle: { fontSize: 24 } };

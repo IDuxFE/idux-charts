@@ -44,7 +44,6 @@ const defaultProps: LineChartProps = {
   },
   tooltip: {
     trigger: 'axis',
-    backgroundColor: 'rgba(251, 253, 255, 0.88)',
     axisPointer: {
       lineStyle: {
         type: 'dashed',

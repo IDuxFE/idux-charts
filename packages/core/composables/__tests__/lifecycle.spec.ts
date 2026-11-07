@@ -7,11 +7,13 @@ vi.mock('echarts/core', () => ({ init: vi.fn(), use: vi.fn() }))
 vi.mock('../useResizeObserver', () => ({ useResizeObserver: vi.fn() }))
 import { init } from 'echarts/core'
 import { useChart } from '../useChart'
+import { CHART_THEME_TOKEN } from '../../themes/token'
 
 function createInstance() {
   const events = new Map<string, Set<(...args: unknown[]) => void>>()
   return {
     group: '',
+    getOption: vi.fn(() => ({ darkMode: false })),
     setOption: vi.fn(),
     dispose: vi.fn(),
     showLoading: vi.fn(),
@@ -60,6 +62,36 @@ beforeEach(() => {
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()))
 
 describe('useChart lifecycle', () => {
+  it('inherits reactive application themes while preserving explicit overrides', async () => {
+    const theme = shallowRef('dark')
+    const local = reactive<{ theme?: string }>({})
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const chart = useChart(local)
+          return () => h('div', { ref: chart.containerRef })
+        },
+      }),
+      { global: { provide: { [CHART_THEME_TOKEN as symbol]: theme } } },
+    )
+    wrappers.push(wrapper)
+    expect(vi.mocked(init).mock.calls.at(-1)?.[1]).toBe('dark')
+    theme.value = 'seer'
+    await nextTick()
+    expect(instances[0].dispose).toHaveBeenCalledOnce()
+    expect(vi.mocked(init).mock.calls.at(-1)?.[1]).toBe('seer')
+    local.theme = 'custom'
+    await nextTick()
+    const count = instances.length
+    theme.value = 'dark'
+    await nextTick()
+    expect(instances).toHaveLength(count)
+    expect(vi.mocked(init).mock.calls.at(-1)?.[1]).toBe('custom')
+    local.theme = undefined
+    await nextTick()
+    expect(vi.mocked(init).mock.calls.at(-1)?.[1]).toBe('dark')
+  })
+
   it('initializes with defaults, filters wrapper options, and releases its instance', async () => {
     const ready = vi.fn()
     const options = reactive({
@@ -102,6 +134,27 @@ describe('useChart lifecycle', () => {
     options.value.onClick = vi.fn()
     await nextTick()
     expect(instances[0].setOption).toHaveBeenCalledTimes(3)
+  })
+
+  it('uses a dark loading mask and preserves explicit loading styles', async () => {
+    const options = reactive<any>({ loading: false })
+    setup(options)
+    const instance = instances[0]
+    instance.getOption.mockReturnValue({ darkMode: true })
+    options.loading = true
+    await nextTick()
+    expect(instance.showLoading).toHaveBeenLastCalledWith({
+      text: '加载中...',
+      textColor: '#F4F8FF',
+      maskColor: 'rgba(10, 12, 15, 0.8)',
+    })
+    options.loading = { maskColor: 'transparent', textColor: 'red' }
+    await nextTick()
+    expect(instance.showLoading).toHaveBeenLastCalledWith({
+      text: '加载中...',
+      textColor: 'red',
+      maskColor: 'transparent',
+    })
   })
 
   it('shows default and custom loading without pushing loading to setOption', async () => {

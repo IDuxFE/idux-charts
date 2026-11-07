@@ -44,7 +44,6 @@ const defaultProps: BarChartProps = {
   },
   tooltip: {
     trigger: 'axis',
-    backgroundColor: 'rgba(251, 253, 255, 0.88)',
   },
 }
 

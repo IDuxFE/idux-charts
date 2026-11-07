@@ -18,6 +18,7 @@ import Gauge from '../gauge/src/Gauge'
 import LiquidFill from '../liquid-fill/src/LiquidFill'
 
 const instances: {
+  getOption: ReturnType<typeof vi.fn>
   setOption: ReturnType<typeof vi.fn>
   dispose: ReturnType<typeof vi.fn>
   showLoading: ReturnType<typeof vi.fn>
@@ -32,6 +33,7 @@ beforeEach(() => {
     .mockReset()
     .mockImplementation(() => {
       const instance = {
+        getOption: vi.fn(() => ({ darkMode: false })),
         setOption: vi.fn(),
         dispose: vi.fn(),
         showLoading: vi.fn(),

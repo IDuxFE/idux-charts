@@ -13,6 +13,7 @@ import { useChart } from '../useChart'
 function setup(options: any, listeners = {}) {
   const events = new Map<string, Set<Function>>()
   const instance = {
+    getOption: vi.fn(() => ({ darkMode: false })),
     setOption: vi.fn(),
     dispose: vi.fn(),
     hideLoading: vi.fn(),

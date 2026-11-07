@@ -70,6 +70,8 @@ Chart components register their required ECharts modules. Global registration is
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point.
 
+- `CHART_THEME_TOKEN` supplies a reactive ECharts theme name/object to all charts. Explicit `theme` props override it; the fallback is `seer`. Theme changes recreate instances; coordinate `PLOT_THEME_TOKEN` for generated labels and graphics. Dark charts use a dark native loading mask unless explicitly overridden.
+
 ## TypeScript
 
 `*ChartProps` types describe chart configuration and allow extension fields. `*ChartPublicProps` expose named public properties while preserving their types and optionality for component type adapters. See the [repository README](https://github.com/IDuxFE/idux-charts/blob/main/README.md#typescript-prop-types) for adapter details.

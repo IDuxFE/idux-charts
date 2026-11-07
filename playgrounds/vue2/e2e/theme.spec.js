@@ -57,3 +57,31 @@ test('reactive global theme, local styles and explicit Pie modes work in the pac
   )
   expect(errors).toEqual([])
 })
+
+test('packaged charts inherit a reactive ECharts theme and honor local overrides', async ({
+  page,
+}) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/?theme')
+  const state = () => page.evaluate(() => window.themePlotState())
+  await expect.poll(async () => (await state()).pie?.option.textStyle.color).toBe('#123456')
+  const before = (await state()).pie.id
+  await page.getByRole('button', { name: 'Dark charts', exact: true }).click()
+  await expect.poll(async () => (await state()).pie.option.darkMode).toBe(true)
+  expect((await state()).pie.id).not.toBe(before)
+  for (const chart of Object.values(await state())) {
+    expect(chart.option.darkMode).toBe(true)
+    expect(chart.option.textStyle.color).toBe('#f4f8ff')
+  }
+  await page.getByRole('button', { name: 'Local chart theme', exact: true }).click()
+  await expect.poll(async () => (await state()).pie.option.textStyle.color).toBe('#345678')
+  const localId = (await state()).pie.id
+  await page.getByRole('button', { name: 'Light charts', exact: true }).click()
+  expect((await state()).pie.id).toBe(localId)
+  expect((await state()).pie.option.textStyle.color).toBe('#345678')
+  await page.getByRole('button', { name: 'Clear chart override', exact: true }).click()
+  await expect.poll(async () => (await state()).pie.option.textStyle.color).toBe('#123456')
+  expect((await state()).pie.option.darkMode).toBe(false)
+  expect(errors).toEqual([])
+})

@@ -527,7 +527,6 @@ export function createDefaultPieOption(
   const option: PieChartProps = {
     tooltip: {
       trigger: 'item',
-      backgroundColor: 'rgba(251, 253, 255, 0.88)',
       formatter: params => {
         const item = Array.isArray(params) ? params[0] : params
         if (!item) return ''
