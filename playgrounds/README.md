@@ -56,7 +56,7 @@ Review the updated screenshots before committing. Do not update baselines to byp
 
 ## CI conventions
 
-The site, behavior test fixture, and both playground E2E suites build first, then start independent preview servers. Local and CI runs use the same mode without reusing development servers or enabling HMR. The site is served under `/common/idux-charts/`. Playwright manages the servers.
+The site, behavior test fixture, and both playground E2E suites build first, then start independent preview servers. Local and CI runs use the same mode without reusing development servers or enabling HMR. The site is served at `/`, matching `https://charts.idux.site/`. Playwright manages the servers.
 
 Install root dependencies first, then install the browsers and system dependencies required by the pinned Playwright version:
 

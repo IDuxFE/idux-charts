@@ -56,7 +56,7 @@ pnpm test:e2e:update
 
 ## CI 执行约定
 
-站点、行为测试 fixture 和两个 playground 的 E2E 都先构建，再启动独立的 preview 服务；本地与 CI 使用相同模式，不复用开发服务器，不启用 HMR。站点通过 `/common/idux-charts/` 部署子路径访问，服务由 Playwright 启停。
+站点、行为测试 fixture 和两个 playground 的 E2E 都先构建，再启动独立的 preview 服务；本地与 CI 使用相同模式，不复用开发服务器，不启用 HMR。站点通过 `/` 根路径访问，与 `https://charts.idux.site/` 一致，服务由 Playwright 启停。
 
 流水线先安装根依赖，再安装与锁定 Playwright 版本对应的浏览器及系统依赖：
 

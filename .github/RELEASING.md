@@ -159,3 +159,42 @@ workflow logs first. Never attempt to overwrite an existing npm version.
   Composition API peer can also warn in the Vue 3 development workspace. Do not
   broaden those upstream peer declarations to hide warnings: packed-consumer
   projects instead use strict peer validation for each supported Vue version.
+
+## Deploying the documentation site
+
+Documentation deployment is independent of npm releases. The **Deploy documentation**
+workflow is manual: after merging the changes you want to publish, select
+**Actions → Deploy documentation → Run workflow → main** in `IDuxFE/idux-charts`.
+Forks and other branches cannot deploy. Merging a PR or publishing an npm package
+alone does not deploy the site.
+
+Keep **Settings → Pages → Source** set to **Deploy from a branch**, with branch
+**gh-pages** and folder **/(root)**. Keep the custom domain **charts.idux.site**
+and its DNS record pointing at **iduxfe.github.io**.
+
+Configure the repository secret **PAGES_DEPLOY_TOKEN** with a fine-grained PAT
+that has **Contents: read/write** access to this upstream repository. The token
+owner must have permission to push to `gh-pages`. If this secret is absent, the
+workflow reuses **RELEASE_GITHUB_TOKEN**. There is deliberately no fallback to
+`GITHUB_TOKEN`: pushes made with that token do not trigger branch-based Pages
+builds. Keep credentials in Actions secrets, never in source or static artifacts.
+
+The build job builds the production site and runs a Chromium smoke test covering
+Pages-style 404 fallback, deep-link refresh, query/hash preservation, navigation,
+and chart rendering. It uploads only `packages/site/dist/`. A separate deploy job
+copies that artifact into `gh-pages`, removes obsolete assets, and pushes a normal
+commit recording the source SHA. Existing branch history is retained; identical
+output produces no commit. No source code or dependencies are published.
+
+The build uses `/` as its asset/router base for the custom domain. It generates
+`404.html` from the same application entry as `index.html`, so history routes
+load without redirecting or losing URL parameters. GitHub Pages still returns
+HTTP 404 for these deep links; this is its static hosting behavior. `CNAME` and
+`.nojekyll` are included in every deployment.
+
+After the workflow pushes, GitHub runs the separate **pages build and deployment**
+process. Check that deployment as well as the push workflow, then open
+<https://charts.idux.site/> and refresh a chart route. The npm environment approval
+does not govern this documentation workflow. To roll back, restore the static
+files from a known-good `gh-pages` commit in a new commit and push it; do not
+force-push away the deployment history.
