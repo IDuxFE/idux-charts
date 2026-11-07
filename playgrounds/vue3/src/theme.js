@@ -4,6 +4,7 @@ import {
   IxLiquidFillChart,
   IxRadarChart,
   PLOT_THEME_TOKEN,
+  CHART_THEME_TOKEN,
 } from '@idux/charts'
 import { getInstanceByDom } from 'echarts/core'
 import { h } from 'vue'
@@ -16,13 +17,15 @@ export default {
       secondaryTextColor: undefined,
       fontFamily: undefined,
     },
+    chartTheme: { darkMode: false, textStyle: { color: '#123456' } },
+    localChartTheme: undefined,
     localTheme: undefined,
     mode: 'auto',
     styled: false,
     value: 50,
   }),
   provide() {
-    return { [PLOT_THEME_TOKEN]: this.theme }
+    return { [PLOT_THEME_TOKEN]: this.theme, [CHART_THEME_TOKEN]: this.chartTheme }
   },
   render() {
     const button = (text, action) => h('button', { onClick: action }, text)
@@ -30,12 +33,27 @@ export default {
       h(component, {
         ...props,
         plotTheme: this.localTheme,
+        theme: this.localChartTheme,
         initOption: { renderer: 'svg' },
         animation: false,
         class: `theme-${name}`,
         style: { width: '480px', height: '240px' },
       })
     return h('main', {}, [
+      button('Dark charts', () => {
+        this.chartTheme.darkMode = true
+        this.chartTheme.textStyle.color = '#f4f8ff'
+      }),
+      button('Light charts', () => {
+        this.chartTheme.darkMode = false
+        this.chartTheme.textStyle.color = '#123456'
+      }),
+      button('Local chart theme', () => {
+        this.localChartTheme = { darkMode: false, textStyle: { color: '#345678' } }
+      }),
+      button('Clear chart override', () => {
+        this.localChartTheme = undefined
+      }),
       button('Theme', () =>
         Object.assign(this.theme, {
           color: '#8754cc',

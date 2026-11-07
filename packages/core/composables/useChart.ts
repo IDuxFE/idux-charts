@@ -1,4 +1,5 @@
 import {
+  inject,
   shallowRef,
   watch,
   onMounted,
@@ -21,6 +22,7 @@ use([PictorialBarChart])
 
 import { useResizeObserver } from './useResizeObserver'
 import type { ChartProps } from '../types'
+import { CHART_THEME_TOKEN } from '../themes/token'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -43,7 +45,8 @@ export function useChart<U extends ChartProps>(
   const mergedInitOption = computed(() => unref(options).initOption)
   const mergedLoading = computed(() => unref(options).loading)
   const mergedSetOptionOpts = computed(() => unref(options).setOptionOpts)
-  const mergedTheme = computed(() => unref(options).theme ?? 'seer')
+  const providedTheme = inject(CHART_THEME_TOKEN, undefined)
+  const mergedTheme = computed(() => unref(options).theme ?? unref(providedTheme) ?? 'seer')
 
   let boundEvents: { name: string; handler: Function; once: boolean; wrapped: any }[] = []
 
@@ -166,7 +169,11 @@ export function useChart<U extends ChartProps>(
     const loading = mergedLoading.value
 
     if (loading) {
-      instance.showLoading(isBoolean(loading) ? defaultLoading : { ...defaultLoading, ...loading })
+      const defaults =
+        instance.getOption().darkMode === true
+          ? { ...defaultLoading, textColor: '#F4F8FF', maskColor: 'rgba(10, 12, 15, 0.8)' }
+          : defaultLoading
+      instance.showLoading(isBoolean(loading) ? defaults : { ...defaults, ...loading })
     } else {
       instance.hideLoading()
     }

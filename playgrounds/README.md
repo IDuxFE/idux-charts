@@ -78,3 +78,5 @@ The committed screenshot baselines currently target macOS (`darwin`). For Linux 
 ## Theme and local configuration playground
 
 Open `/?theme` in either app to test Pie, Radar, Gauge and LiquidFill from packed packages. Controls exercise reactive global `PLOT_THEME_TOKEN`, local overrides and removal, number/label styles, Pie auto/native mode and main-series styling, and empty-data recovery. `/?basic` retains the original Pie compatibility scenarios; the default page retains Bar/Line/Pie lifecycle and event tests. Run `pnpm test:playgrounds` from the root after library changes.
+
+The theme page also exercises `CHART_THEME_TOKEN`: mutate a provided ECharts theme object, verify chart reinitialization, apply an explicit per-chart theme and restore inheritance. These checks run against packed artifacts in both Vue 2 and Vue 3.

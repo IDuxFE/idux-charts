@@ -64,6 +64,10 @@ const option: ChartProps = {
 
 This package does not ship a separate CSS file. Shared HTML tooltip styles are provided by `@idux/charts/dist/style.css`.
 
+## Application themes
+
+Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing the inherited theme recreates the chart, following the existing theme lifecycle. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).
+
 ## TypeScript
 
 `*ChartProps` types describe chart configuration and allow extension fields. `*ChartPublicProps` expose named public properties while preserving their types and optionality for component type adapters. See the [repository README](https://github.com/IDuxFE/idux-charts/blob/main/README.md#typescript-prop-types) for adapter details.

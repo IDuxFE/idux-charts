@@ -69,6 +69,8 @@ const option: LineChartProps = {
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。此包自身不输出 CSS；需要这些样式时，安装 `@idux/charts` 并导入该样式文件，或由应用提供对应样式。
 
+- 所有图表继承 `@idux/charts-core`（也由 `@idux/charts` 导出）的 `CHART_THEME_TOKEN`。显式 ECharts `theme` 属性优先，切换时重建实例；生成的文字和辅助图形需配合 `PLOT_THEME_TOKEN` 同步更新。
+
 ## TypeScript
 
 `*ChartProps` 用于图表配置，允许扩展字段；`*ChartPublicProps` 提供具名公开属性类型，保留属性的类型及可选性，便于编写组件类型适配。具体适配说明见[仓库 README](https://github.com/IDuxFE/idux-charts/blob/main/README.zh.md#typescript-属性类型)。

@@ -110,6 +110,7 @@ export const seerTheme = {
   },
 
   tooltip: {
+    backgroundColor: 'rgba(251, 253, 255, 0.88)',
     borderWidth: 0,
     padding: 12,
     textStyle: {

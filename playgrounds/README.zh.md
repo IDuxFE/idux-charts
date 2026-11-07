@@ -78,3 +78,5 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 ## 主题与局部配置验证
 
 两个应用均可打开 `/?theme`，使用打包后的 Pie、Radar、Gauge、LiquidFill，验证全局响应式主题、局部覆盖及移除、数字/标签样式、Pie auto/native 模式与主系列样式，以及空数据恢复。`/?basic` 保留原有 Pie 兼容场景，默认页继续验证 Bar/Line/Pie 生命周期和事件。修改库后从根目录运行 `pnpm test:playgrounds`，重新打包再测试。
+
+主题页还覆盖 `CHART_THEME_TOKEN`：修改注入的 ECharts 主题对象、验证实例重建、设置组件显式主题并恢复继承。Vue 2 和 Vue 3 均使用打包产物执行这些检查。

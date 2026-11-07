@@ -64,6 +64,10 @@ const option: ChartProps = {
 
 此包不提供独立 CSS 文件；共享 HTML 提示框样式由 `@idux/charts/dist/style.css` 提供。
 
+## 应用级主题
+
+可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。注入主题变化沿用已有主题生命周期，重新创建图表实例。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。
+
 ## TypeScript
 
 `*ChartProps` 用于图表配置，允许扩展字段；`*ChartPublicProps` 提供具名公开属性类型，保留属性的类型及可选性，便于编写组件类型适配。具体适配说明见[仓库 README](https://github.com/IDuxFE/idux-charts/blob/main/README.zh.md#typescript-属性类型)。
