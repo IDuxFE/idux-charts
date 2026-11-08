@@ -1,5 +1,19 @@
 # @idux/charts-plots
 
+## 1.1.1
+
+### Patch Changes
+
+- 2e89956: Supply stripe image dimensions before decoding so theme reinitialization and hidden containers do not produce invalid SVG patterns.
+- 879376a: Add CHART_THEME_TOKEN for reactive application-wide chart themes, with explicit per-chart themes taking precedence.
+
+  Use a dark loading mask for dark chart themes while retaining explicit loading overrides.
+
+  Let chart tooltips inherit theme surfaces, retaining the light Seer background.
+
+- Updated dependencies [879376a]
+  - @idux/charts-core@1.2.0
+
 ## 1.1.0
 
 ### Minor Changes
