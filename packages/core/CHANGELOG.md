@@ -1,5 +1,15 @@
 # @idux/charts-core
 
+## 1.2.0
+
+### Minor Changes
+
+- 879376a: Add CHART_THEME_TOKEN for reactive application-wide chart themes, with explicit per-chart themes taking precedence.
+
+  Use a dark loading mask for dark chart themes while retaining explicit loading overrides.
+
+  Let chart tooltips inherit theme surfaces, retaining the light Seer background.
+
 ## 1.1.0
 
 ### Minor Changes
