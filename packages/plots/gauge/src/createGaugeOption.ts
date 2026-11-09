@@ -68,12 +68,20 @@ export function createGaugeOption(
     renderItem: (_params, api) => {
       const width = api.getWidth(),
         height = api.getHeight()
-      const radius = Math.max(1, Math.min(width / 2 - 6, height - 18))
+      const sweep = props.size === 'md' ? 210 : 190
+      const overhang = (sweep - 180) / 2
+      const shadow = props.size === 'md' ? 4 : 6
+      // Ring width is radial: the lg outer/inner diameters are 150/128px.
+      const stroke = props.size === 'md' ? 7 : 11
+      const radius = Math.max(1, Math.min(width / 2 - shadow, height - 12 - shadow))
       const cx = width / 2,
-        cy = height - 12
-      const stroke = props.size === 'md' ? 8 : 12
-      const inner = Math.max(1, radius - (props.size === 'md' ? 22 : 28))
-      const angle = (value: number) => ((170 + value * 200) * Math.PI) / 180
+        cy = Math.min(
+          height - 12,
+          height - (radius + shadow) * Math.sin((overhang * Math.PI) / 180),
+        )
+      // Leave an 8px gap inside the gray track: default inner diameters are 100/88px.
+      const inner = Math.max(1, radius - stroke - shadow - 8)
+      const angle = (value: number) => ((180 - overhang + value * sweep) * Math.PI) / 180
       const point = (value: number, r = inner): number[] => [
         cx + Math.cos(angle(value)) * r,
         cy + Math.sin(angle(value)) * r,
@@ -113,8 +121,8 @@ export function createGaugeOption(
             0,
             1,
             getAlphaColor(props.backgroundColor ?? theme.borderColor ?? '#D8DDE5', 0.3),
-            radius + 6,
-            stroke + 12,
+            radius + shadow,
+            stroke + shadow * 2,
           ),
           sector(0, 1, props.backgroundColor ?? theme.borderColor ?? '#D8DDE5'),
           ...(segments.length
