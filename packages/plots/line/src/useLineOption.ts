@@ -39,6 +39,8 @@ const defaultProps: LineChartProps = {
     containLabel: true,
   },
   legend: {
+    // 折线图默认的图例图标是线形，这里统一改成正方形色块，并固定在图表下方
+    icon: 'rect',
     bottom: 0,
     itemGap: 40,
   },
@@ -59,6 +61,22 @@ const defaultCategoryAxis = {
 
 const defaultValueAxis = {
   type: 'value',
+}
+
+/**
+ * 合并坐标轴配置。
+ *
+ * 用户既可以把 xAxis / yAxis 配置成单个对象，也可以配置成数组（如双 Y 轴、多 Y 轴）。
+ * 直接用 lodash 的 merge 合并「单对象默认值 + 数组」时，数组会被合并成
+ * { 0: {...}, 1: {...} } 形式的普通对象，导致 ECharts 报 `yAxis "0" not found`。
+ * 因此数组场景需要逐项合并，保证结果仍然是数组。
+ */
+function mergeAxisOption(defaultAxis: object, axis: any) {
+  if (Array.isArray(axis)) {
+    return axis.map(item => merge(cloneDeep(defaultAxis), item))
+  }
+
+  return merge(cloneDeep(defaultAxis), axis)
 }
 
 export function useLineOption(
@@ -134,8 +152,8 @@ export function useLineOption(
       ? [defaultCategoryAxis, defaultValueAxis]
       : [defaultValueAxis, defaultCategoryAxis]
 
-    option.xAxis = merge(cloneDeep(defaultXAxis), xAxis)
-    option.yAxis = merge(cloneDeep(defaultYAxis), yAxis)
+    option.xAxis = mergeAxisOption(defaultXAxis, xAxis)
+    option.yAxis = mergeAxisOption(defaultYAxis, yAxis)
     if (!series) {
       option.series = seriesOption ? [seriesOption] : []
     } else {
