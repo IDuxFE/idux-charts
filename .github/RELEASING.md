@@ -18,8 +18,17 @@ Before it is consumed by a release PR, its summary and version impact can be
 edited through a normal code review.
 
 Do not manually bump package versions or edit generated changelogs. Changesets
-updates versions and internal dependencies together. Package versions are
-independent; not every release needs to update all three packages.
+updates versions and internal dependencies together. The three public packages
+(`@idux/charts-core`, `@idux/charts-plots`, and `@idux/charts`) form one fixed
+version group in `.changeset/config.json`. Any release of a member bumps and
+publishes all three at the same version, including packages with no code changes.
+Contributors still select the affected packages and their actual version impact;
+Changesets applies the highest requested bump to the entire group. The private
+documentation site is excluded. Keep new public library packages in this group.
+
+Use `pnpm exec changeset status --output /tmp/idux-charts-release-plan.json`
+to inspect the planned versions before merging a release-bearing PR. Do not use
+`linked` groups for this policy: they do not require every member to be published.
 
 CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
 and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
