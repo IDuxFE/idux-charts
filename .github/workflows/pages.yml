@@ -86,9 +86,14 @@ jobs:
         run: |
           test -s _site/index.html
           test -s _site/404.html
+          cmp _site/index.html _site/404.html
           test "$(cat _site/CNAME)" = charts.idux.site
           test -f _site/.nojekyll
-          rsync -a --delete --exclude='.git' _site/ published/
+          # Checkout and artifact extraction can give same-size files the same
+          # timestamp. Compare contents so hashed asset references always update.
+          rsync -a --checksum --delete --exclude='.git' _site/ published/
+          cmp _site/index.html published/index.html
+          cmp _site/404.html published/404.html
           cd published
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'

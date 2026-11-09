@@ -1,3 +1,9 @@
+.archive-app__page__content,
+.archive-app__page__content__inner {
+  /* Let the document shrink beside the fixed-width table of contents. */
+  min-width: 0;
+}
+
 .site-theme-toggle {
   display: inline-flex;
   align-items: center;
