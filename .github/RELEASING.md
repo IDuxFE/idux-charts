@@ -35,6 +35,14 @@ on failure. Playground lockfiles and local tarballs remain untracked. Browser re
 screenshot differences if runner image or browser rendering changes; CI never
 automatically accepts new baselines.
 
+Documentation layout changes also affect chart screenshot dimensions. Before
+opening a PR that changes shared site styles, run
+`pnpm exec playwright test e2e/site-layout.spec.ts e2e/visual.spec.ts` across all
+three browsers. If the layout change intentionally changes a baseline, review
+the rendered chart and its dimensions before updating only the affected images,
+then rerun without `--update-snapshots`. Do not increase screenshot tolerances or
+disable flaky-test failures to make a layout change pass.
+
 Keep Playwright pinned to the same exact version in the root and both playgrounds
 so browser upgrades and screenshot changes are reviewed together. CI also installs
 Chromium through each playground's own Playwright CLI before testing it.
