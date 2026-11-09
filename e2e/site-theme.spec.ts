@@ -5,6 +5,9 @@ for (const width of [1440, 768, 390]) {
   test(`theme control follows system and persists manual choice at ${width}px`, async ({
     page,
   }) => {
+    // This persistence scenario loads three documents, including the full pie
+    // showcase twice. Give it its own budget on slower Firefox CI runners.
+    test.setTimeout(60_000)
     await page.setViewportSize({ width, height: 900 })
     await page.emulateMedia({ colorScheme: 'dark' })
     await page.goto('components/pie')
@@ -214,7 +217,8 @@ for (const kind of ['bar', 'line']) {
         .filter({ has: page.getByRole('heading', { name: title }) })
       const chart = demo.locator('[_echarts_instance_]')
       await chart.scrollIntoViewIfNeeded()
-      await expect(chart.locator('svg')).toBeVisible()
+      await expect(chart).toHaveAttribute('data-ix-chart-theme', 'dark')
+      await expect(chart.locator('svg text').first()).toBeAttached()
       const box = await chart.boundingBox()
       await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
       const tooltip = chart.locator('.charts-tooltips')
@@ -226,6 +230,8 @@ for (const kind of ['bar', 'line']) {
       )
       await page.getByRole('button', { name: '切换到亮色模式' }).click()
       await chart.scrollIntoViewIfNeeded()
+      await expect(chart).toHaveAttribute('data-ix-chart-theme', 'light')
+      await expect(chart.locator('svg text').first()).toBeAttached()
       await page.mouse.move(0, 0)
       const lightBox = await chart.boundingBox()
       await page.mouse.move(lightBox!.x + lightBox!.width / 2, lightBox!.y + lightBox!.height / 2)

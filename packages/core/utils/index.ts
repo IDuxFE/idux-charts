@@ -14,7 +14,13 @@ import { seerTheme } from '../themes'
 export type Writeable<T> = { -readonly [P in keyof T]: T[P] }
 
 export function isVertical(option: any): boolean {
-  return !!(option && option.xAxis && option.xAxis.data)
+  const xAxes = convertArray(option?.xAxis)
+  return xAxes.some(
+    (axis: { type?: string; data?: unknown }) =>
+      axis.type === 'category' ||
+      axis.type === 'time' ||
+      (axis.type === undefined && axis.data !== undefined),
+  )
 }
 
 export function mergeAttrs(props: any, listeners?: Record<string, Function>): any {

@@ -94,7 +94,7 @@ const inspect = () => {
           lineWidth: center.style.lineWidth,
         }
       : null,
-    white: model.getSeriesByIndex(0).getData().getItemGraphicEl(0).style.fill,
+    background: model.getSeriesByIndex(0).getData().getItemGraphicEl(0).style.fill,
     radius: main.option.radius,
     centerPosition: { x: rect.x + main.option.center[0], y: rect.y + main.option.center[1] },
     legends: model

@@ -145,3 +145,27 @@ test('radar examples demonstrate independent ranges, loading and custom options'
   await expect(custom).toContainText('目标方案')
   expect(errors).toEqual([])
 })
+
+test('radar default tooltip uses the shared chart title and value rows', async ({ page }) => {
+  const { chart } = await openRadar(page)
+  // Hover the first object's actual marker after its animation settles. A fixed
+  // coordinate can hit the second object while the radar is still expanding.
+  await chart.locator('svg path[fill="#458fff" i][transform^="matrix"]').first().hover()
+  const tooltip = page.locator('.charts-tooltips:visible')
+  await expect(tooltip.locator('.charts-tooltips-title')).toHaveText('攻击A')
+  await expect(tooltip.locator('.charts-tooltips-item-name')).toHaveText([
+    '攻击路径',
+    '攻击难度',
+    '权限要求',
+    '影响范围',
+    '可用性影响',
+  ])
+  await expect(tooltip.locator('.charts-tooltips-item-value')).toHaveText([
+    '12',
+    '10',
+    '23',
+    '17',
+    '21',
+  ])
+  await expect(tooltip.locator('.charts-tooltips-item').first()).toHaveCSS('display', 'flex')
+})

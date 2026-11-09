@@ -18,8 +18,17 @@ Before it is consumed by a release PR, its summary and version impact can be
 edited through a normal code review.
 
 Do not manually bump package versions or edit generated changelogs. Changesets
-updates versions and internal dependencies together. Package versions are
-independent; not every release needs to update all three packages.
+updates versions and internal dependencies together. The three public packages
+(`@idux/charts-core`, `@idux/charts-plots`, and `@idux/charts`) form one fixed
+version group in `.changeset/config.json`. Any release of a member bumps and
+publishes all three at the same version, including packages with no code changes.
+Contributors still select the affected packages and their actual version impact;
+Changesets applies the highest requested bump to the entire group. The private
+documentation site is excluded. Keep new public library packages in this group.
+
+Use `pnpm exec changeset status --output /tmp/idux-charts-release-plan.json`
+to inspect the planned versions before merging a release-bearing PR. Do not use
+`linked` groups for this policy: they do not require every member to be published.
 
 CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
 and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
@@ -28,8 +37,9 @@ run in separate macOS jobs. The five Vue/ECharts compatibility combinations buil
 and test packed declarations and runtime behavior in separate Linux jobs. Domain
 and subpath deployment checks also run independently. Matrix jobs use
 `fail-fast: false` to retain evidence from every combination; `CI result` requires
-all jobs to succeed. Browser suites fail CI on flaky tests even when a retry
-passes. CI records traces on the first retry and captures screenshots on failure,
+all jobs to succeed. Browser tests that pass on retry are accepted by CI and
+remain marked as flaky in the report. Tests that exhaust their retries still
+fail CI. CI records traces on the first retry and captures screenshots on failure,
 avoiding trace overhead on successful first attempts. Local runs retain traces
 on failure. Playground lockfiles and local tarballs remain untracked. Browser reports are retained for seven days. Review
 screenshot differences if runner image or browser rendering changes; CI never
@@ -40,8 +50,8 @@ opening a PR that changes shared site styles, run
 `pnpm exec playwright test e2e/site-layout.spec.ts e2e/visual.spec.ts` across all
 three browsers. If the layout change intentionally changes a baseline, review
 the rendered chart and its dimensions before updating only the affected images,
-then rerun without `--update-snapshots`. Do not increase screenshot tolerances or
-disable flaky-test failures to make a layout change pass.
+then rerun without `--update-snapshots`. Do not increase screenshot tolerances to
+make a layout change pass.
 
 Keep Playwright pinned to the same exact version in the root and both playgrounds
 so browser upgrades and screenshot changes are reviewed together. CI also installs

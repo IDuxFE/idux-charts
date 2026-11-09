@@ -27,3 +27,69 @@ describe('radar clockwise layout', () => {
     ).toMatchObject([{ data: [{ value: [0, 0, 0] }] }])
   })
 })
+
+describe('radar default tooltip', () => {
+  it.each([false, true])('matches indicator names and values with clockwise=%s', clockwise => {
+    const option = createRadarOption({
+      indicator: ['A', 'B', 'C'].map(name => ({ name })),
+      clockwise,
+    })
+    const tooltip = option.tooltip as { formatter: (params: unknown) => string }
+    const host = document.createElement('div')
+    host.innerHTML = tooltip.formatter({
+      name: 'Object',
+      value: clockwise ? [0, 30, 20] : [0, 20, 30],
+      color: '#458fff',
+    })
+    expect(host.querySelector('.charts-tooltips-title')?.textContent).toBe('Object')
+    expect(
+      [...host.querySelectorAll('.charts-tooltips-item')].map(row => [
+        row.querySelector('.charts-tooltips-item-name')?.textContent,
+        row.querySelector('.charts-tooltips-item-value')?.textContent,
+      ]),
+    ).toEqual(
+      clockwise
+        ? [
+            ['A', '0'],
+            ['C', '30'],
+            ['B', '20'],
+          ]
+        : [
+            ['A', '0'],
+            ['B', '20'],
+            ['C', '30'],
+          ],
+    )
+    expect(
+      (host.querySelector('.charts-tooltips-item-border') as HTMLElement).style.background,
+    ).toBe('rgb(69, 143, 255)')
+  })
+
+  it('escapes text and handles absent measurements and empty callbacks', () => {
+    const option = createRadarOption({ indicator: [{ name: '<b>Axis</b>' }, { name: 'Missing' }] })
+    const tooltip = option.tooltip as { formatter: (params: unknown) => string }
+    const host = document.createElement('div')
+    host.innerHTML = tooltip.formatter([{ name: '<img src=x>', value: ['<script>'], color: 'red' }])
+    expect(host.querySelector('img, script, b')).toBeNull()
+    expect(host.querySelector('.charts-tooltips-title')?.textContent).toBe('<img src=x>')
+    expect(
+      [...host.querySelectorAll('.charts-tooltips-item-value')].map(el => el.textContent),
+    ).toEqual(['<script>', '-'])
+    expect(tooltip.formatter([])).toBe('')
+    expect(tooltip.formatter({})).toBe('')
+  })
+})
+
+it('uses the shared gradient marker color for radar tooltips', () => {
+  const option = createRadarOption({ indicator: [{ name: 'A' }] })
+  const tooltip = option.tooltip as { formatter: (params: unknown) => string }
+  expect(
+    tooltip.formatter({
+      name: 'R',
+      value: [1],
+      color: {
+        colorStops: [{ color: 'transparent' }, { color: 'red' }],
+      },
+    }),
+  ).toContain('background: red')
+})

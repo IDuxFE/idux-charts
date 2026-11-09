@@ -701,7 +701,7 @@ export function createDefaultPieOption(
         silent: true,
         z: 1,
         invisible: !presentation.roseType || radius[0] <= 2,
-        // Keep a 2px white gap and include half the 1px stroke in the 28px diameter.
+        // Keep a 2px transparent gap and include half the 1px stroke in the 28px diameter.
         shape: { cx: layout.center[0], cy: layout.center[1], r: Math.max(0, radius[0] - 2.5) },
         style: {
           fill: {
@@ -747,7 +747,7 @@ export function createDefaultPieOption(
         itemStyle: {
           borderWidth: 0,
           color: presentation.roseType
-            ? '#fff'
+            ? 'transparent'
             : {
                 type: 'linear',
                 x: 0,

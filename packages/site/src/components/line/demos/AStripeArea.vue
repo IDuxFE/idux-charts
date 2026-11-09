@@ -29,6 +29,7 @@ const lineOption = computed<LineChartProps>(() => ({
   series: [
     {
       ...lineChartAreaStripeConfig.value, // 配置区域图的条纹效果。
+      name: '访问次数',
       showSymbol: false,
       smooth: true,
       lineStyle: {

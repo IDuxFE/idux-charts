@@ -5,7 +5,12 @@ import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 import type { PieSeriesOption } from 'echarts/charts'
 import { merge, get, set, cloneDeep } from 'lodash-es'
 
-import { convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/charts-core'
+import {
+  convertArray,
+  filterEmptyProps,
+  useTooltipsFormatter,
+  getTooltipsColor,
+} from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const pieChartProps = [
@@ -93,7 +98,7 @@ const defaultProps: PieChartProps = {
         {
           name: item.seriesName ?? '',
           value: String(item.value ?? ''),
-          color: typeof item.color === 'string' ? item.color : undefined,
+          color: getTooltipsColor(item.color),
         },
       ]
 

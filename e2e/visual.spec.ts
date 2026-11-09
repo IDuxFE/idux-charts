@@ -52,6 +52,9 @@ test('bar hover tooltip excludes the helper series and preserves appearance', as
   await expect(tooltip).toBeVisible()
   await expect(tooltip.locator('.charts-tooltips-item')).toHaveCount(1)
   await expect(tooltip).toContainText('324 次')
+  // Whole-chart pixel tolerance can miss a small tooltip with missing styles.
+  await expect(tooltip.locator('.charts-tooltips-item')).toHaveCSS('display', 'flex')
+  await expect(tooltip.locator('.charts-tooltips-title')).toHaveCSS('font-size', '12px')
   await expect(chart).toHaveScreenshot('bar-stripe-hover.png', {
     animations: 'disabled',
     maxDiffPixelRatio: 0.005,

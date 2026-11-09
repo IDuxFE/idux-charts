@@ -32,7 +32,8 @@
     "*.d.ts"
   ],
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "**/*.less"
   ],
   "scripts": {
     "clean": "rimraf dist node_modules",

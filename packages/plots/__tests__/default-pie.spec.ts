@@ -12,6 +12,13 @@ vi.mock('echarts/core', async () => {
     ...actual,
     format: {
       ...actual.format,
+      // Match the fixed-width layout measurement below. Real font truncation is
+      // covered by pie-layout.spec.ts in Chromium, Firefox and WebKit.
+      truncateText: (text: string, width: number, _font: string, ellipsis: string) => {
+        if (text.length * 8 <= width) return text
+        const length = Math.max(0, Math.floor(width / 8) - ellipsis.length)
+        return text.slice(0, length) + ellipsis
+      },
       getTextRect: (
         text: string,
         _font: string,
@@ -594,7 +601,7 @@ it('keeps the reference pie radius when wide legend content still fits beside th
   expect(option.legend[0].left).toBe(167)
 })
 
-it('renders the default rose center as a 32px white hole with a 28px gradient circle', () => {
+it('renders the default rose center as a 32px transparent hole with a 28px gradient circle', () => {
   for (const roseType of ['radius', 'area'] as const) {
     for (const value of [10, 0, null]) {
       const option = createDefaultPieOption(
@@ -609,7 +616,7 @@ it('renders the default rose center as a 32px white hole with a 28px gradient ci
       expect(option.series[2].radius[0]).toBe(16)
       expect(option.series[0]).toMatchObject({
         radius: 16,
-        itemStyle: { color: '#fff', borderWidth: 0 },
+        itemStyle: { color: 'transparent', borderWidth: 0 },
       })
       const center = option.graphic.find((item: any) => item.id === 'ix-rose-center')
       expect(center.invisible).toBe(false)

@@ -8,7 +8,7 @@ const { themeTokens } = useThemeToken()
 const size = ref<'lg' | 'md'>('lg')
 const state = ref('normal')
 const chartStyle = computed(() => ({
-  width: size.value === 'lg' ? '180px' : '144px',
+  width: size.value === 'lg' ? '162px' : '134px',
   height: size.value === 'lg' ? '110px' : '90px',
 }))
 const valueOf = (value: number) => (state.value === 'zero' ? 0 : value)
