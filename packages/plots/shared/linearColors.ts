@@ -37,20 +37,46 @@ export function getLinearColors(dir: LinearDirection | DirectionConfig): LinearG
   const directionConfig = getLinearDirectionConfig(dir)
 
   return seerLinearGradientColors.map(([startColor, endColor]) => {
-    return {
-      ...directionConfig,
-      colorStops: [
-        {
-          offset: 0,
-          color: startColor,
-        },
-        {
-          offset: 1,
-          color: endColor,
-        },
-      ],
-    }
+    return createLinearGradientColor(directionConfig, startColor, endColor)
   })
+}
+
+/**
+ * 根据起始颜色与终止颜色生成单个渐变颜色对象。
+ *
+ * 返回值与 {@link getBarLinearColors} 返回数组中的元素结构一致，
+ * 便于在 option 中单独为一个系列指定自定义渐变。
+ *
+ * @param startColor 渐变的起始颜色，如 `#FFC145`
+ * @param endColor 渐变的终止颜色，如 `#FFE396`
+ * @param dir 渐变方向，默认为水平方向（从左到右）
+ */
+export function getBarLinearColor(
+    startColor: string,
+    endColor: string,
+    dir: LinearDirection | DirectionConfig = LinearDirection.horizontal,
+): LinearGradientObject {
+    return createLinearGradientColor(getLinearDirectionConfig(dir), startColor, endColor)
+}
+
+function createLinearGradientColor(
+    directionConfig: DirectionConfig,
+    startColor: string,
+    endColor: string,
+): LinearGradientObject {
+    return {
+        ...directionConfig,
+        colorStops: [
+            {
+                offset: 0,
+                color: startColor,
+            },
+            {
+                offset: 1,
+                color: endColor,
+            },
+        ],
+    };
 }
 
 function getLinearDirectionConfig(dir: LinearDirection | DirectionConfig): DirectionConfig {

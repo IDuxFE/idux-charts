@@ -14,4 +14,4 @@ export {
   type BarChartPublicProps,
 } from './src/useBarOption'
 
-export { getBarLinearColors } from './src/getBarLinearColors'
+export { getBarLinearColors, getBarLinearColor, LinearDirection } from './src/getBarLinearColors'
