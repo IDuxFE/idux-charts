@@ -70,3 +70,35 @@ describe('gradient and stripe helpers', () => {
     expect(image.src).not.toContain('<svg')
   })
 })
+
+it('exports single gradients with default, preset and custom directions without shared state', async () => {
+  const { getBarLinearColor, LinearDirection: Direction } = await import('../bar')
+  expect(getBarLinearColor('red', 'blue')).toEqual({
+    type: 'linear',
+    x: 0,
+    y: 0,
+    x2: 1,
+    y2: 0,
+    colorStops: [
+      { offset: 0, color: 'red' },
+      { offset: 1, color: 'blue' },
+    ],
+  })
+  for (const direction of [
+    Direction.horizontal,
+    Direction.vertical,
+    Direction.reverseHorizontal,
+    Direction.reverseVertical,
+  ]) {
+    expect(getBarLinearColor('#458FFF', '#8FBFFF', direction)).toEqual(
+      getBarLinearColors(direction)[0],
+    )
+  }
+  const config = { type: 'linear' as const, x: 0.1, y: 0.2, x2: 0.8, y2: 0.9, global: true }
+  const gradient = getBarLinearColor('red', 'blue', config)
+  expect(gradient).toMatchObject(config)
+  gradient.colorStops[0].color = 'black'
+  gradient.x = 5
+  expect(getBarLinearColor('red', 'blue', config).colorStops[0].color).toBe('red')
+  expect(config.x).toBe(0.1)
+})

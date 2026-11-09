@@ -8,6 +8,7 @@ import { ref } from 'vue'
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
+  name: '访问次数',
   title: { text: '折线图标题' },
   xAxis: {
     data: ['星期一', '星期二', '星期三', '星期四', '星期五'],

@@ -20,6 +20,7 @@ import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
 // 这个图形需要单独注册
 use([PictorialBarChart])
 
+import { createTooltipTheme } from './tooltipTheme'
 import { useResizeObserver } from './useResizeObserver'
 import type { ChartProps } from '../types'
 import { CHART_THEME_TOKEN } from '../themes/token'
@@ -80,6 +81,8 @@ export function useChart<U extends ChartProps>(
     })
   }
 
+  const tooltipTheme = createTooltipTheme(() => containerRef.value)
+
   const initChat = () => {
     const container = containerRef.value
     if (!container) {
@@ -88,10 +91,13 @@ export function useChart<U extends ChartProps>(
 
     const instance = init(container, mergedTheme.value, mergedInitOption.value)
 
+    instance.on('rendered', tooltipTheme.rendered)
+
     const currOptions = unref(options)
     const { restOptions, events } = processOptions(currOptions, getListeners(), false)
 
-    instance.setOption(restOptions, mergedSetOptionOpts.value)
+    instance.setOption(tooltipTheme.prepare(restOptions), mergedSetOptionOpts.value)
+    tooltipTheme.sync(instance)
     prevRestOptions.value = cloneDeep(restOptions) as U
 
     syncEvents(instance, events)
@@ -133,7 +139,12 @@ export function useChart<U extends ChartProps>(
       syncEvents(instance, events)
 
       if (!isEqual(restOptions, prevRestOptions.value)) {
-        instance.setOption(restOptions, mergedSetOptionOpts.value)
+        instance.setOption(tooltipTheme.prepare(restOptions), mergedSetOptionOpts.value)
+        if (restOptions.darkMode !== prevRestOptions.value?.darkMode) {
+          tooltipTheme.sync(instance)
+        } else {
+          tooltipTheme.rendered()
+        }
         prevRestOptions.value = cloneDeep(restOptions) as U
       }
     },

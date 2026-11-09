@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { useTooltipsFormatter } from '../useTooltips'
+import { getTooltipsColor, useTooltipsFormatter } from '../useTooltips'
 import { useStripeBarSeries, useStripeBarTooltip } from '../useStripe'
 
 describe('tooltip output', () => {
@@ -54,5 +54,26 @@ describe('tooltip output', () => {
       },
     ])
     expect(series).toEqual({ name: 'Visits', data: [1, 2] })
+  })
+})
+
+describe('gradient tooltip colors', () => {
+  it.each([
+    [['#8FBFFF', '#458FFF'], '#458FFF'],
+    [['#458FFF', '#8FBFFF'], '#458FFF'],
+    [['black', '#ffffff'], 'black'],
+    [['rgb(100%,100%,100%)', '#888888'], '#888888'],
+    [['hsl(0, 0%, 100%)', '#123'], '#123'],
+    [['rgba(0,0,0,0)', '#458FFF'], '#458FFF'],
+    [['rgba(0,0,0,0.2)', 'rgba(50,100,200,0.9)'], 'rgba(50,100,200,0.9)'],
+    [['invalid', 'transparent'], ''],
+    [[], ''],
+  ])('selects a visible color from %j', (colors, expected) => {
+    expect(getTooltipsColor({ colorStops: colors.map(color => ({ color })) })).toBe(expected)
+  })
+  it('preserves plain colors and handles missing values', () => {
+    expect(getTooltipsColor('red')).toBe('red')
+    expect(getTooltipsColor(null)).toBe('')
+    expect(getTooltipsColor({})).toBe('')
   })
 })

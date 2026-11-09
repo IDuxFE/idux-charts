@@ -22,6 +22,7 @@ export default defineConfig(({ command }) => ({
       input: {
         main: fromRoot('e2e/fixture/index.html'),
         special: fromRoot('e2e/fixture/special.html'),
+        cartesian: fromRoot('e2e/fixture/cartesian.html'),
       },
     },
   },

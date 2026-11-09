@@ -7,6 +7,7 @@ import { loadDemoFont } from './demoFont'
 import '@idux/cdk/index.css'
 import '@idux/components/index.full.css'
 import '@idux/pro/index.css'
+import '../charts/style/index.less'
 import './demo.css'
 
 import type { ArchiveLoaderVueSetup } from '@idux/archive-loader-vue'

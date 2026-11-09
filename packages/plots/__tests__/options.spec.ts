@@ -210,3 +210,161 @@ it.each([
   expect(option.value.title.text).toBe(expected)
   wrapper.unmount()
 })
+
+for (const [name, useOption] of [
+  ['bar', useBarOption],
+  ['line', useLineOption],
+] as const) {
+  describe(`${name} multi-axis regression`, () => {
+    it('refreshes unit bindings when series props change without changing attributes', () => {
+      const props = reactive({ data: [10], yAxisIndex: 0 })
+      const { option, wrapper } = setup(useOption, props, {
+        xAxis: { data: ['A'] },
+        yAxis: [{ name: 'ms' }, { name: '%' }],
+      })
+      const params = [{ name: 'A', value: 10, seriesIndex: 0 }]
+      expect(option.value.tooltip.formatter(params)).toContain('10 ms')
+      props.yAxisIndex = 1
+      expect(option.value.tooltip.formatter(params)).toContain('10 %')
+      wrapper.unmount()
+    })
+    it('preserves array axes, bindings, units and gradient markers without mutating inputs', () => {
+      const attrs = {
+        xAxis: [{ data: ['A'] }],
+        yAxis: [{ name: 'ms' }, { id: 'ratio', name: '%', type: 'log' }],
+        series: [{ data: [10] }, { data: [20], yAxisIndex: 1 }, { data: [30], yAxisId: 'ratio' }],
+      }
+      const original = structuredClone(attrs)
+      const { option, wrapper } = setup(useOption, {}, attrs)
+      expect(option.value.xAxis).toMatchObject([{ type: 'category' }])
+      expect(option.value.yAxis).toMatchObject([{ type: 'value' }, { type: 'log' }])
+      const html = option.value.tooltip.formatter(
+        [2, 0, 1].map(seriesIndex => ({
+          name: 'A',
+          seriesName: `S${seriesIndex}`,
+          seriesIndex,
+          value: 10,
+          color: { colorStops: [{ color: 'transparent' }, { color: '#458FFF' }] },
+        })),
+      )
+      const host = document.createElement('div')
+      host.innerHTML = html
+      expect(
+        [...host.querySelectorAll('.charts-tooltips-item-value')].map(el => el.textContent),
+      ).toEqual(['10 %', '10 ms', '10 %'])
+      expect(
+        (host.querySelector('.charts-tooltips-item-border') as HTMLElement).style.background,
+      ).toBe('rgb(69, 143, 255)')
+      expect(attrs).toEqual(original)
+      wrapper.unmount()
+    })
+    it('updates axis shape and units, supports horizontal axes and formatter precedence', () => {
+      const attrs = reactive<any>({ xAxis: { data: ['A'] }, yAxis: { name: 'ms' } })
+      const { option, wrapper } = setup(useOption, { data: [10] }, attrs)
+      const param = { name: 'A', seriesName: 'S', seriesIndex: 0, dataIndex: 0, value: 10 }
+      expect(option.value.tooltip.formatter(param)).toContain('10 ms')
+      attrs.xAxis = [{ name: 'MB' }, { name: '%' }]
+      attrs.yAxis = [{ data: ['A'] }]
+      attrs.series = [{ xAxisIndex: 1, data: [10] }]
+      expect(option.value.xAxis).toMatchObject([{ type: 'value' }, { type: 'value' }])
+      expect(option.value.yAxis).toMatchObject([{ type: 'category' }])
+      expect(option.value.tooltip.formatter(param)).toContain('10 %')
+      attrs.tooltip = { valueFormatter: (value: number) => `${value} custom` }
+      expect(option.value.tooltip.formatter(param)).toContain('10 custom')
+      const custom = () => 'override'
+      attrs.tooltip = { formatter: custom }
+      expect(option.value.tooltip.formatter).toBe(custom)
+      wrapper.unmount()
+    })
+  })
+}
+
+it('uses the shared gradient marker color for native pie tooltips', () => {
+  const { option, wrapper } = setup(usePieOption, { data: [] })
+  expect(
+    option.value.tooltip.formatter({
+      name: 'P',
+      value: 1,
+      color: {
+        colorStops: [{ color: 'transparent' }, { color: 'red' }],
+      },
+    }),
+  ).toContain('background: red')
+  wrapper.unmount()
+})
+
+it('preserves the Seer light pointer and inherits other theme colors and caller overrides', () => {
+  const attrs = reactive<any>({ xAxis: { data: ['A'] } })
+  const { option, wrapper } = setup(useLineOption, {}, attrs)
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBe('#D3D7DE')
+  attrs.theme = 'dark'
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBeUndefined()
+  attrs.theme = { darkMode: true, tooltip: { axisPointer: { lineStyle: { color: 'purple' } } } }
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBeUndefined()
+  attrs.tooltip = { axisPointer: { lineStyle: { color: 'red' } } }
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBe('red')
+  delete attrs.tooltip
+  delete attrs.theme
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBe('#D3D7DE')
+  wrapper.unmount()
+})
+
+it('resolves time-axis values and units from the bound value axis', () => {
+  const { option, wrapper } = setup(
+    useLineOption,
+    {},
+    {
+      xAxis: { type: 'time' },
+      yAxis: { name: 'ms' },
+      series: [{ data: [[1730000000000, 10]] }],
+    },
+  )
+  expect(option.value.yAxis.type).toBe('value')
+  const html = option.value.tooltip.formatter([
+    {
+      name: 'Monday',
+      seriesIndex: 0,
+      value: [1730000000000, 10],
+      encode: { x: [0], y: [1] },
+    },
+  ])
+  expect(html).toContain('10 ms')
+  expect(html).not.toContain('1730000000000')
+  wrapper.unmount()
+})
+
+it('resolves units independently for series with different grid orientations', () => {
+  const { option, wrapper } = setup(
+    useLineOption,
+    {},
+    {
+      xAxis: [{ type: 'time' }, { id: 'horizontal', type: 'value', name: 'MB' }],
+      yAxis: [
+        { type: 'value', name: 'ms' },
+        { type: 'category', data: ['A'] },
+      ],
+      series: [{ data: [10] }, { xAxisId: 'horizontal', yAxisIndex: 1, data: [20] }],
+    },
+  )
+  const html = option.value.tooltip.formatter([
+    { name: 'A', seriesIndex: 1, value: 20 },
+    { name: 'A', seriesIndex: 0, value: 10 },
+  ])
+  expect(html).toContain('20 MB')
+  expect(html).toContain('10 ms')
+  wrapper.unmount()
+})
+
+it('uses the merged line theme when choosing pointer defaults', () => {
+  const attrs = reactive<any>({ xAxis: { data: ['A'] } })
+  const { option, wrapper } = setup(useLineOption, {}, attrs, {
+    [LINE_CHART_TOKEN as symbol]: { theme: 'dark' },
+  })
+  expect(option.value.theme).toBe('dark')
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBeUndefined()
+  attrs.theme = 'seer'
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBe('#D3D7DE')
+  attrs.tooltip = { axisPointer: { lineStyle: { color: 'red' } } }
+  expect(option.value.tooltip.axisPointer.lineStyle.color).toBe('red')
+  wrapper.unmount()
+})

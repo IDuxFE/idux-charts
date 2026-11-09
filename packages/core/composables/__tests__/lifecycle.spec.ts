@@ -239,3 +239,17 @@ it('does not reinitialize for equivalent init options but observes nested change
   expect(instances).toHaveLength(2)
   expect(instances[0].dispose).toHaveBeenCalledTimes(1)
 })
+
+it('updates chart-local tooltip theme state from resolved ECharts options', async () => {
+  const options = reactive({ darkMode: false })
+  const { wrapper } = setup(options)
+  expect(wrapper.attributes('data-ix-chart-theme')).toBe('light')
+  instances[0]!.getOption.mockReturnValue({ darkMode: true })
+  options.darkMode = true
+  await nextTick()
+  expect(wrapper.attributes('data-ix-chart-theme')).toBe('dark')
+  instances[0]!.getOption.mockReturnValue({ darkMode: false })
+  options.darkMode = false
+  await nextTick()
+  expect(wrapper.attributes('data-ix-chart-theme')).toBe('light')
+})

@@ -5,6 +5,7 @@ import type { LineChartProps } from '@idux/charts'
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
+  name: '访问次数',
   smooth: true,
   lineStyle: {
     // 实现连线上的阴影效果

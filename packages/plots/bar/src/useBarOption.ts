@@ -1,12 +1,11 @@
+import { mergeAxisOption, createCartesianTooltip } from '../../shared/cartesian'
 import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
-import type { DefaultLabelFormatterCallbackParams } from 'echarts'
-
 import type { BarSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, set, merge, isFunction } from 'lodash-es'
+import { cloneDeep, get, set, merge } from 'lodash-es'
 
-import { isVertical, convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/charts-core'
+import { isVertical, convertArray, filterEmptyProps } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const barChartProps = [
@@ -51,11 +50,11 @@ const defaultBarGap = 0.2
 const defaultBarWidth = 10
 
 const defaultCategoryAxis = {
-  type: 'category',
+  type: 'category' as const,
 }
 
 const defaultValueAxis = {
-  type: 'value',
+  type: 'value' as const,
 }
 
 export function useBarOption(
@@ -105,33 +104,6 @@ export function useBarOption(
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
     }
 
-    const tooltipFormatter = get(option, ['tooltip', 'formatter'])
-    if (!tooltipFormatter) {
-      // value的处理：如果有配置valueFormatter，优先使用valueFormatter，然后是坐标轴名称
-      const valueFormatter = get(option, ['tooltip', 'valueFormatter'])
-      const AxisName = get(option, ['yAxis', 'name']) || get(option, ['xAxis', 'name'])
-      set(option, ['tooltip', 'formatter'], (params: DefaultLabelFormatterCallbackParams[]) => {
-        if (!params?.length) {
-          return ''
-        }
-
-        const title = params[0]!.name
-        const list = params.map(param => {
-          return {
-            name: param.seriesName ?? '',
-            value: isFunction(valueFormatter)
-              ? valueFormatter(param.value)
-              : AxisName
-                ? `${param.value} ${AxisName}`
-                : param.value,
-            color: typeof param.color === 'string' ? param.color : undefined,
-          }
-        })
-
-        return useTooltipsFormatter(title, list)
-      })
-    }
-
     return option
   })
 
@@ -145,13 +117,17 @@ export function useBarOption(
       ? [defaultCategoryAxis, defaultValueAxis]
       : [defaultValueAxis, defaultCategoryAxis]
 
-    option.xAxis = merge(cloneDeep(defaultXAxis), xAxis)
-    option.yAxis = merge(cloneDeep(defaultYAxis), yAxis)
+    option.xAxis = mergeAxisOption(defaultXAxis, xAxis)
+    option.yAxis = mergeAxisOption(defaultYAxis, yAxis)
 
     if (!series) {
       option.series = seriesOption ? [seriesOption] : []
     } else {
       option.series = convertArray(series).map(item => merge({}, seriesOption, item))
+    }
+
+    if (!get(option, ['tooltip', 'formatter'])) {
+      option.tooltip = { ...option.tooltip, formatter: createCartesianTooltip(option) }
     }
 
     return option

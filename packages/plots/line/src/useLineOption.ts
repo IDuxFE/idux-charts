@@ -1,12 +1,11 @@
+import { mergeAxisOption, createCartesianTooltip } from '../../shared/cartesian'
 import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
-import type { DefaultLabelFormatterCallbackParams } from 'echarts'
-
 import type { LineSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, merge, set, isFunction } from 'lodash-es'
+import { cloneDeep, get, merge, set } from 'lodash-es'
 
-import { isVertical, convertArray, filterEmptyProps, useTooltipsFormatter } from '@idux/charts-core'
+import { isVertical, convertArray, filterEmptyProps, CHART_THEME_TOKEN } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 export const lineChartProps = [
@@ -49,40 +48,24 @@ const defaultProps: LineChartProps = {
     axisPointer: {
       lineStyle: {
         type: 'dashed',
-        color: '#D3D7DE',
       },
     },
   },
 }
 
 const defaultCategoryAxis = {
-  type: 'category',
+  type: 'category' as const,
 }
 
 const defaultValueAxis = {
-  type: 'value',
-}
-
-/**
- * 合并坐标轴配置。
- *
- * 用户既可以把 xAxis / yAxis 配置成单个对象，也可以配置成数组（如双 Y 轴、多 Y 轴）。
- * 直接用 lodash 的 merge 合并「单对象默认值 + 数组」时，数组会被合并成
- * { 0: {...}, 1: {...} } 形式的普通对象，导致 ECharts 报 `yAxis "0" not found`。
- * 因此数组场景需要逐项合并，保证结果仍然是数组。
- */
-function mergeAxisOption(defaultAxis: object, axis: any) {
-  if (Array.isArray(axis)) {
-    return axis.map(item => merge(cloneDeep(defaultAxis), item))
-  }
-
-  return merge(cloneDeep(defaultAxis), axis)
+  type: 'value' as const,
 }
 
 export function useLineOption(
   props: LineSeriesOption,
   attrsInput: LineChartProps | ShallowRef<LineChartProps>,
 ): ComputedRef<LineChartProps> {
+  const providedTheme = inject(CHART_THEME_TOKEN, undefined)
   const injectProps = inject(LINE_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
@@ -95,6 +78,13 @@ export function useLineOption(
   const mergedOption = computed(() => {
     const attrs = unref(attrsInput)
     const option = merge({}, mergedDefaultProps, attrs)
+    // Preserve Seer's original light pointer; other themes own their colors.
+    if (
+      (option.theme ?? unref(providedTheme) ?? 'seer') === 'seer' &&
+      get(option, ['tooltip', 'axisPointer', 'lineStyle', 'color']) === undefined
+    ) {
+      set(option, ['tooltip', 'axisPointer', 'lineStyle', 'color'], '#D3D7DE')
+    }
 
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
       // 如果有 title, 额外增加 24px
@@ -111,34 +101,6 @@ export function useLineOption(
     // @ts-ignore
     if (legend === false || series.length <= 1) {
       set(option, ['legend'], undefined)
-    }
-
-    const tooltipFormatter = get(option, ['tooltip', 'formatter'])
-    // 如果没有配置tooltip.formatter，则给个默认的
-    if (!tooltipFormatter) {
-      // value的处理：如果有配置valueFormatter，优先使用valueFormatter，然后是坐标轴名称
-      const valueFormatter = get(option, ['tooltip', 'valueFormatter'])
-      const yAxisName = get(option, ['yAxis', 'name'])
-      set(option, ['tooltip', 'formatter'], (params: DefaultLabelFormatterCallbackParams[]) => {
-        if (!params?.length) {
-          return ''
-        }
-
-        const title = params[0]!.name
-        const list = params.map(param => {
-          return {
-            name: param.seriesName ?? '',
-            value: isFunction(valueFormatter)
-              ? valueFormatter(param.value)
-              : yAxisName
-                ? `${param.value} ${yAxisName}`
-                : param.value,
-            color: typeof param.color === 'string' ? param.color : undefined,
-          }
-        })
-
-        return useTooltipsFormatter(title, list)
-      })
     }
 
     return option
@@ -158,6 +120,10 @@ export function useLineOption(
       option.series = seriesOption ? [seriesOption] : []
     } else {
       option.series = convertArray(series).map(item => merge({}, seriesOption, item))
+    }
+
+    if (!get(option, ['tooltip', 'formatter'])) {
+      option.tooltip = { ...option.tooltip, formatter: createCartesianTooltip(option) }
     }
 
     return option

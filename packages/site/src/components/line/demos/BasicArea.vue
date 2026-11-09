@@ -5,6 +5,7 @@ import type { LineChartProps } from '@idux/charts'
 const data = [123, 324, 156, 244, 188]
 
 const lineOption: LineChartProps = {
+  name: '访问次数',
   areaStyle: {
     color: useLinearGradient(),
   },
