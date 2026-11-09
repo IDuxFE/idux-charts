@@ -52,17 +52,17 @@ export function getLinearColors(dir: LinearDirection | DirectionConfig): LinearG
  * @param dir 渐变方向，默认为水平方向（从左到右）
  */
 export function getLinearColor(
-    startColor: string,
-    endColor: string,
-    dir: LinearDirection | DirectionConfig = LinearDirection.horizontal,
+  startColor: string,
+  endColor: string,
+  dir: LinearDirection | DirectionConfig = LinearDirection.horizontal,
 ): LinearGradientObject {
-    return createLinearGradientColor(getLinearDirectionConfig(dir), startColor, endColor)
+  return createLinearGradientColor(getLinearDirectionConfig(dir), startColor, endColor)
 }
 
 function createLinearGradientColor(
-    directionConfig: DirectionConfig,
-    startColor: string,
-    endColor: string,
+  directionConfig: DirectionConfig,
+  startColor: string,
+  endColor: string,
 ): LinearGradientObject {
   return {
     ...directionConfig,
