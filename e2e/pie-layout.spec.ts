@@ -4,7 +4,7 @@ import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
 
-test('rose defaults render a white 32px hole and a bordered 28px gradient circle', async ({
+test('rose defaults render a transparent 32px hole and a bordered 28px gradient circle', async ({
   page,
 }, testInfo) => {
   await page.goto('?pie-layout')
@@ -19,13 +19,13 @@ test('rose defaults render a white 32px hole and a bordered 28px gradient circle
           const option = await inspect()
           return {
             radius: option.radius,
-            white: option.white,
+            background: option.background,
             width: option.center?.bounds.width,
             height: option.center?.bounds.height,
             border: option.center?.lineWidth,
           }
         })
-        .toEqual({ radius: [16, 82], white: '#fff', width: 28, height: 28, border: 1 })
+        .toEqual({ radius: [16, 82], background: 'transparent', width: 28, height: 28, border: 1 })
     }
   }
   await page.getByRole('combobox', { name: 'State' }).selectOption('normal')
@@ -38,24 +38,41 @@ test('rose defaults render a white 32px hole and a bordered 28px gradient circle
     'rgba(69, 143, 255, 0.16)',
     'rgba(69, 143, 255, 0)',
   ])
-  const image = await page.screenshot({
-    scale: 'css',
-    clip: {
-      x: option.centerPosition.x - 16,
-      y: option.centerPosition.y - 16,
-      width: 32,
-      height: 32,
-    },
-  })
-  await testInfo.attach('rose-center', { body: image, contentType: 'image/png' })
-  const png = PNG.sync.read(image)
-  const pixel = (x: number, y: number) =>
-    Array.from(png.data.subarray((y * png.width + x) * 4, (y * png.width + x) * 4 + 3))
-  // Sample the outer white rim, outside the antialiased inner border.
-  expect([0, 1, 2].some(x => pixel(x, 16).every(channel => channel === 255))).toBe(true)
-  expect([0, 1, 2].some(y => pixel(16, y).every(channel => channel === 255))).toBe(true)
-  expect(pixel(16, 6)[0]).toBeLessThan(pixel(16, 24)[0]!)
-  expect(pixel(16, 6)[2]).toBe(255)
+  for (const background of ['#ffffff', '#eef4fa', '#0a0c0f']) {
+    await page.getByTestId('layout-chart').evaluate((element, color) => {
+      element.style.background = color
+    }, background)
+    const image = await page.screenshot({
+      scale: 'css',
+      clip: {
+        x: option.centerPosition.x - 16,
+        y: option.centerPosition.y - 16,
+        width: 32,
+        height: 32,
+      },
+    })
+    await testInfo.attach(`rose-center-${background.slice(1)}`, {
+      body: image,
+      contentType: 'image/png',
+    })
+    const png = PNG.sync.read(image)
+    const pixel = (x: number, y: number) =>
+      Array.from(png.data.subarray((y * png.width + x) * 4, (y * png.width + x) * 4 + 3))
+    const surface = [1, 3, 5].map(index => parseInt(background.slice(index, index + 2), 16))
+    // At the midpoint the 10%-to-transparent gradient blends about 5% blue
+    // into the host surface, including non-white light and dark backgrounds.
+    const blue = [69, 143, 255]
+    pixel(16, 16).forEach((channel, index) => {
+      const expected = surface[index]! * 0.95 + blue[index]! * 0.05
+      expect(Math.abs(channel - expected)).toBeLessThanOrEqual(2)
+    })
+    if (background === '#0a0c0f') {
+      expect(pixel(16, 6)[2]).toBeGreaterThan(pixel(16, 24)[2]!)
+      expect(pixel(16, 16).every(channel => channel < 50)).toBe(true)
+    } else {
+      expect(pixel(16, 6)[0]).toBeLessThan(pixel(16, 24)[0]!)
+    }
+  }
   for (const [mode, expected] of [
     ['custom', [8, 60]],
     ['solid', [0, 60]],
