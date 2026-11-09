@@ -1,5 +1,5 @@
 ---
-title: 设计说明
+title: 指南
 ---
 
 水波图的绘图逻辑由 `packages/plots/liquid-fill` 持有。组件复用 IxChart 的实例、响应式属性、事件与尺寸管理，不依赖 Vue 2 UI 组件。
