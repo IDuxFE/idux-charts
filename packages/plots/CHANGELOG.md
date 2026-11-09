@@ -1,5 +1,13 @@
 # @idux/charts-plots
 
+## 1.2.1
+
+### Patch Changes
+
+- ab38e82: Fix gradient tooltip markers and preserve light and dark tooltip styles when mounting outside the chart. Correct multi-axis and time-axis units, respect injected line themes, and align Gauge, Radar, and rose-chart presentation.
+- Updated dependencies [ab38e82]
+  - @idux/charts-core@1.2.1
+
 ## 1.1.1
 
 ### Patch Changes
