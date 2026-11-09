@@ -9,5 +9,19 @@ runs:
     - uses: pnpm/action-setup@v6
       with:
         version: '11.8.0'
+    # canvas falls back to a native build when a prebuilt binary is unavailable.
+    - name: Install canvas build dependencies (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    - name: Install canvas build dependencies (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      env:
+        HOMEBREW_NO_AUTO_UPDATE: '1'
+        HOMEBREW_NO_INSTALL_CLEANUP: '1'
+      run: brew install pkg-config cairo pango libpng jpeg giflib librsvg pixman python-setuptools
     - run: pnpm install --no-lockfile --no-frozen-lockfile
       shell: bash

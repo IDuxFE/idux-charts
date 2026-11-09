@@ -1,5 +1,17 @@
+import type { Page } from '@playwright/test'
 import { test, expect } from './helpers'
 import { fixtureBaseURL } from './environment'
+
+async function showTooltip(page: Page, index: number, dark: boolean) {
+  const chart = page.locator(`.chart-${index}`)
+  // Theme changes recreate the instance; an SVG root alone is not evidence
+  // that lazy setOption has rendered the new series.
+  await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
+  for (const label of ['Threshold', 'Peak', 'Window']) {
+    await expect(chart.locator('svg text').filter({ hasText: label }).first()).toBeVisible()
+  }
+  await page.evaluate(index => (window as any).showCartesianTooltip(index), index)
+}
 
 for (const portal of ['', 'body', 'host']) {
   for (const index of [0, 1]) {
@@ -7,13 +19,8 @@ for (const portal of ['', 'body', 'host']) {
       page,
     }) => {
       await page.goto(`${fixtureBaseURL}cartesian.html?portal=${portal}`)
-      const chart = page.locator(`.chart-${index}`)
       for (const dark of [false, true, false]) {
-        for (const label of ['Threshold', 'Peak', 'Window']) {
-          await expect(chart.locator('svg text').filter({ hasText: label }).first()).toBeVisible()
-        }
-        await page.evaluate(index => (window as any).showCartesianTooltip(index), index)
-        await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
+        await showTooltip(page, index, dark)
         const tooltip = page.locator(`.demo-tooltip-${index} .charts-tooltips`)
         if (portal === 'body')
           await expect(page.locator(`body > .demo-tooltip-${index}`)).toHaveCount(1)
@@ -66,11 +73,10 @@ test('portalled tooltips keep independent themes on the same page', async ({ pag
   await page.goto(`${fixtureBaseURL}cartesian.html?portal=body&mixed`)
   for (const swapped of [false, true]) {
     for (const index of [0, 1]) {
-      await expect(page.locator(`.chart-${index} svg`)).toBeVisible()
-      await page.evaluate(index => (window as any).showCartesianTooltip(index), index)
+      const dark = index === 1 ? !swapped : swapped
+      await showTooltip(page, index, dark)
       const row = page.locator(`body > .demo-tooltip-${index} .charts-tooltips-item`).first()
       await expect(row).toBeVisible()
-      const dark = index === 1 ? !swapped : swapped
       await expect(row).toHaveCSS(
         'background-color',
         dark ? 'rgb(28, 35, 46)' : 'rgb(255, 255, 255)',

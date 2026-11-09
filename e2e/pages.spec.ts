@@ -36,11 +36,15 @@ test('Pages fallback preserves deep links, query parameters and navigation', asy
   await page.goto(new URL(path, siteBaseURL).href)
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeVisible()
   await expect(page).toHaveURL(new URL(path, siteBaseURL).href)
+  // The route shell appears before its dynamic imports finish. Let this static
+  // page finish loading so a deliberate reload does not abort those imports.
+  await page.waitForLoadState('networkidle')
   await page.reload()
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeVisible()
   await expect(page).toHaveURL(new URL(path, siteBaseURL).href)
   await page.getByRole('radio', { name: '示例', exact: true }).click()
   await expect(page.locator('[_echarts_instance_] svg').first()).toBeVisible()
+  await page.waitForLoadState('networkidle')
   // Exercise navigation while the landing page module loads asynchronously.
   await page.route('**/assets/Introdoction*', async route => {
     await new Promise(resolve => setTimeout(resolve, 500))

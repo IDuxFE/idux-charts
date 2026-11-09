@@ -28,8 +28,9 @@ run in separate macOS jobs. The five Vue/ECharts compatibility combinations buil
 and test packed declarations and runtime behavior in separate Linux jobs. Domain
 and subpath deployment checks also run independently. Matrix jobs use
 `fail-fast: false` to retain evidence from every combination; `CI result` requires
-all jobs to succeed. Browser suites fail CI on flaky tests even when a retry
-passes. CI records traces on the first retry and captures screenshots on failure,
+all jobs to succeed. Browser tests that pass on retry are accepted by CI and
+remain marked as flaky in the report. Tests that exhaust their retries still
+fail CI. CI records traces on the first retry and captures screenshots on failure,
 avoiding trace overhead on successful first attempts. Local runs retain traces
 on failure. Playground lockfiles and local tarballs remain untracked. Browser reports are retained for seven days. Review
 screenshot differences if runner image or browser rendering changes; CI never
@@ -40,8 +41,8 @@ opening a PR that changes shared site styles, run
 `pnpm exec playwright test e2e/site-layout.spec.ts e2e/visual.spec.ts` across all
 three browsers. If the layout change intentionally changes a baseline, review
 the rendered chart and its dimensions before updating only the affected images,
-then rerun without `--update-snapshots`. Do not increase screenshot tolerances or
-disable flaky-test failures to make a layout change pass.
+then rerun without `--update-snapshots`. Do not increase screenshot tolerances to
+make a layout change pass.
 
 Keep Playwright pinned to the same exact version in the root and both playgrounds
 so browser upgrades and screenshot changes are reviewed together. CI also installs

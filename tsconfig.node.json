@@ -11,6 +11,8 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["node"],
     "target": "ES2022",
     "module": "ESNext",

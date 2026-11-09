@@ -44,6 +44,7 @@
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/test-utils": "^2.5.1",
     "@vue/tsconfig": "^0.9.1",
+    "canvas": "^3.2.3",
     "echarts": "^6.1.0",
     "jsdom": "~28.1.0",
     "less": "^4.9.1",

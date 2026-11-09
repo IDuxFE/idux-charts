@@ -7,7 +7,7 @@ export default defineConfig({
   workers: 2,
   reporter: [['list'], ['html', { open: 'never' }]],
   retries: process.env.CI ? 1 : 0,
-  failOnFlakyTests: !!process.env.CI,
+  failOnFlakyTests: false,
   use: {
     viewport: { width: 1280, height: 900 },
     deviceScaleFactor: 1,

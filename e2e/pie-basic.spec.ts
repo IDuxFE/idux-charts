@@ -139,7 +139,7 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
   const original = await state()
   await page.getByRole('combobox', { name: 'Alignment' }).selectOption('center')
   await page.getByRole('button', { name: 'Toggle legend', exact: true }).click()
-  expect((await state()).option.legend.every((l: any) => !l.show)).toBe(true)
+  await expect.poll(async () => (await state()).option.legend.every((l: any) => !l.show)).toBe(true)
   await page.getByRole('button', { name: 'Toggle title', exact: true }).click()
   await expect.poll(async () => (await state()).option.series[2].center).toEqual([240, 90])
   for (const shape of ['ring', 'rose', 'pie']) {
@@ -147,9 +147,12 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
     await expect.poll(async () => (await state()).option.series[2].center[0]).toBeCloseTo(240)
     await expect.poll(async () => (await state()).option.series[2].center[1]).toBeCloseTo(90)
     expect((await state()).id).toBe(original.id)
-    if (shape === 'ring') expect((await state()).option.series[2].radius[0]).toBeCloseTo(63)
-    if (shape === 'pie') expect((await state()).option.series[2].roseType).toBeNull()
-    if (shape === 'rose') expect((await state()).option.series[2].roseType).toBe('area')
+    if (shape === 'ring')
+      await expect.poll(async () => (await state()).option.series[2].radius[0]).toBeCloseTo(63)
+    if (shape === 'pie')
+      await expect.poll(async () => (await state()).option.series[2].roseType).toBeNull()
+    if (shape === 'rose')
+      await expect.poll(async () => (await state()).option.series[2].roseType).toBe('area')
     await testInfo.attach(`center-no-legend-${shape}`, {
       body: await page.getByTestId('actual').screenshot(),
       contentType: 'image/png',

@@ -12,6 +12,13 @@ vi.mock('echarts/core', async () => {
     ...actual,
     format: {
       ...actual.format,
+      // Match the fixed-width layout measurement below. Real font truncation is
+      // covered by pie-layout.spec.ts in Chromium, Firefox and WebKit.
+      truncateText: (text: string, width: number, _font: string, ellipsis: string) => {
+        if (text.length * 8 <= width) return text
+        const length = Math.max(0, Math.floor(width / 8) - ellipsis.length)
+        return text.slice(0, length) + ellipsis
+      },
       getTextRect: (
         text: string,
         _font: string,
