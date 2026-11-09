@@ -129,14 +129,14 @@ export const seerTheme = {
     axisLine: {
       show: true,
       lineStyle: {
-        color: '#EDF1F7',
+        color: '#E1E5EB',
       },
     },
     axisTick: {
       show: true,
       alignWithLabel: true,
       lineStyle: {
-        color: '#EDF1F7',
+        color: '#E1E5EB',
       },
     },
     axisLabel: {
@@ -162,7 +162,7 @@ export const seerTheme = {
     },
     splitLine: {
       lineStyle: {
-        color: '#EDF1F7',
+        color: '#E1E5EB',
       },
     },
     splitArea: {

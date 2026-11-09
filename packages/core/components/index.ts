@@ -2,6 +2,9 @@ import {
   DataZoomComponent,
   GridComponent,
   LegendComponent,
+  MarkAreaComponent,
+  MarkLineComponent,
+  MarkPointComponent,
   TitleComponent,
   TooltipComponent,
 } from 'echarts/components'
@@ -17,6 +20,9 @@ const IxChart = createInstall(Chart, [
   GridComponent,
   TitleComponent,
   TooltipComponent,
+  MarkLineComponent,
+  MarkPointComponent,
+  MarkAreaComponent,
 
   LabelLayout,
   UniversalTransition,
