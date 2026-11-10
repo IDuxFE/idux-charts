@@ -59,7 +59,6 @@ export function createInstall<Component>(
 ): Component {
   use(ext)
 
-  // 主题 seer 主题
   registerTheme('seer', seerTheme)
 
   const install = (app: App) => {

@@ -1,6 +1,3 @@
-/**
- * @file 柱状图条纹使用
- */
 import type { BarSeriesOption } from 'echarts/charts'
 
 import { useTooltipsFormatter } from './useTooltips'
@@ -19,7 +16,6 @@ export function useStripe({
   rotate?: number
 }): BarSeriesOption {
   return {
-    // 分隔线
     name: '',
     data: data,
     // @ts-ignore
@@ -83,18 +79,18 @@ export function useStripeBarSeries({
   rotate,
   size,
 }: {
-  // 柱状图的数据
+  // Bar series to overlay with stripes.
   series: {
     name: string
     data: number[]
   }
-  // 柱状图以及条纹的颜色
+  // Stripe color.
   color: string
-  // 条纹的偏移量，酌情设置，影响条纹的位置
+  // Stripe offset in pixels.
   offset?: [number, number]
-  // 条纹的大小
+  // Stripe symbol dimensions.
   size?: [number, number]
-  // 条纹的旋转角度
+  // Stripe symbol rotation in degrees.
   rotate?: number
 }): BarSeriesOption[] {
   return [
@@ -122,10 +118,10 @@ export function useStripeArea() {
         decals: [
           {
             color: 'white',
-            dashArrayX: [1, 0], // 这个一般不用调增
-            dashArrayY: [6, 0], // 调整 [x, y] 中 x 的值可以调整条纹的密度
-            symbolSize: 0.5, // 这个值越大，白色条纹就越宽。0.5 的时候则是平均分
-            rotation: Math.PI / 2, // 这个让条纹保持竖向
+            dashArrayX: [1, 0],
+            dashArrayY: [6, 0], // The first value controls stripe spacing.
+            symbolSize: 0.5, // 0.5 splits the stripe and the gap evenly.
+            rotation: Math.PI / 2, // Keep the stripes vertical.
           },
         ],
       },

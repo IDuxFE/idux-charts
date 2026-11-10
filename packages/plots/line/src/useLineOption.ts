@@ -38,7 +38,7 @@ const defaultProps: LineChartProps = {
     containLabel: true,
   },
   legend: {
-    // 折线图默认的图例图标是线形，这里统一改成正方形色块，并固定在图表下方
+    // Use a color swatch in place of the native line legend icon.
     icon: 'rect',
     bottom: 0,
     itemGap: 40,
@@ -87,12 +87,12 @@ export function useLineOption(
     }
 
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
-      // 如果有 title, 额外增加 24px
+      // Reserve room for the title.
       const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
       set(option, ['grid', 'top'], top)
     }
     if (attrs.dataZoom && !get(attrs, ['grid', 'bottom'])) {
-      // 如果有 dataZoom, 额外增加 32px
+      // Reserve room for the zoom slider.
       const bottom = get(mergedDefaultProps, ['grid', 'bottom'], 32) + 32
       set(option, ['grid', 'bottom'], bottom)
     }

@@ -6,11 +6,11 @@ import { getAlphaColor } from '@idux/charts-core'
 type MaybeRef<T> = UnwrapRef<T> | Ref<UnwrapRef<T>>
 
 export interface LineChartAreaStripeOption {
-  /** 条纹颜色 */
+  /** Stripe color. */
   color?: string
-  /** 条纹宽度 */
+  /** Stripe width. */
   width?: number
-  /** 条纹高度 */
+  /** Stripe height. */
   height?: number
 }
 
@@ -89,7 +89,7 @@ function getOptionsByDOM(el?: HTMLElement, color?: LineChartAreaStripeOption['co
 }
 
 /**
- * 生成条纹 area 背景图
+ * Create an SVG stripe pattern for the area fill.
  */
 export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption = {}) {
   const { color = '#458FFF', width = 2, height = 90 } = options
@@ -122,9 +122,6 @@ export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption =
   return imgEl
 }
 
-/**
- * svg 转 dataurl
- */
 function encodeSvg(svgStr: string) {
   const encodedSvg = svgStr
     .replace(/"/g, "'")

@@ -10,27 +10,23 @@ export enum LinearDirection {
 type DirectionConfig = Omit<LinearGradientObject, 'colorStops'>
 
 /**
- * seer 支持的渐变的颜色列表
+ * Seer gradients as [start color, end color] pairs.
  *
  * @see https://seerdesignmg.sangfor.com/file/66349883742837?fileOpenFrom=search_result&page_id=728%3A5538
- *
- * 格式为：
- *
- * `[起始颜色, 终止颜色]`
  */
 const seerLinearGradientColors: [string, string][] = [
-  ['#458FFF', '#8FBFFF'], // 蓝
-  ['#20CC94', '#6EE6B6'], // 绿
-  ['#FFC145', '#FFE396'], // 黄
-  ['#F5654F', '#FF957B'], // 红
-  ['#6A6AFD', '#9B9BFF'], // 钻蓝
-  ['#6ED1FF', '#9EE0FF'], // 湖蓝
-  ['#008787', '#10BBBB'], // 墨绿
-  ['#FF9245', '#FFB783'], // 橘黄
-  ['#F587B3', '#F7B1CD'], // 粉
-  ['#8352CC', '#A77BEA'], // 紫
-  ['#65779B', '#99ACD1'], // 灰
-  ['#E1E5EB', '#E9ECF1'], // 置灰
+  ['#458FFF', '#8FBFFF'],
+  ['#20CC94', '#6EE6B6'],
+  ['#FFC145', '#FFE396'],
+  ['#F5654F', '#FF957B'],
+  ['#6A6AFD', '#9B9BFF'],
+  ['#6ED1FF', '#9EE0FF'],
+  ['#008787', '#10BBBB'],
+  ['#FF9245', '#FFB783'],
+  ['#F587B3', '#F7B1CD'],
+  ['#8352CC', '#A77BEA'],
+  ['#65779B', '#99ACD1'],
+  ['#E1E5EB', '#E9ECF1'],
 ]
 
 export function getLinearColors(dir: LinearDirection | DirectionConfig): LinearGradientObject[] {
@@ -42,14 +38,11 @@ export function getLinearColors(dir: LinearDirection | DirectionConfig): LinearG
 }
 
 /**
- * 根据起始颜色与终止颜色生成单个渐变颜色对象。
+ * Create a gradient for an individual series using the same format as {@link getLinearColors}.
  *
- * 返回值与 {@link getLinearColors} 返回数组中的元素结构一致，
- * 便于在 option 中单独为一个系列指定自定义渐变。
- *
- * @param startColor 渐变的起始颜色，如 `#FFC145`
- * @param endColor 渐变的终止颜色，如 `#FFE396`
- * @param dir 渐变方向，默认为水平方向（从左到右）
+ * @param startColor Starting color, such as `#FFC145`.
+ * @param endColor Ending color, such as `#FFE396`.
+ * @param dir Gradient direction. Defaults to left to right.
  */
 export function getLinearColor(
   startColor: string,
