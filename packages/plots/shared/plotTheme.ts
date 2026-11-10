@@ -1,7 +1,7 @@
 import { computed, inject, unref } from 'vue-demi'
 import type { InjectionKey, Ref } from 'vue-demi'
 
-/** Visual defaults for Pie's built-in layout, Radar, Gauge and LiquidFill. */
+/** Visual defaults for the built-in Bar and Pie layouts, Radar, Gauge and LiquidFill. */
 export interface PlotTheme {
   color?: string
   palette?: string[]

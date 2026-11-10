@@ -13,18 +13,14 @@ export interface TooltipsFormatItem {
   name: string
   value: string | number
   /**
-   * 图例色块颜色，支持普通颜色字符串（如 `#458FFF`）
-   * 或渐变对象（如 `itemStyle.color` 配置的 linear 渐变），
-   * 传入渐变时优先取最不透明的色标，同透明度下取更深的颜色。
+   * Tooltip swatch color or a gradient. Gradients use the darkest stop
+   * among the stops with the highest opacity.
    */
   color?: string | GradientLikeColor
 }
 
 /**
- * 提取用于 tooltip 色块展示的颜色。
- *
- * 柱体、折线等图形常配置为线性渐变，此时 hover 提示中的竖杠
- * 需要与图形中更深的颜色保持一致，因此优先选择最不透明的色标，同透明度时取亮度最低的颜色。
+ * Resolve a solid swatch color from a chart color or gradient.
  */
 export function getTooltipsColor(color?: Color | GradientLikeColor | null): string {
   if (!color) {
@@ -49,19 +45,36 @@ export function getTooltipsColor(color?: Color | GradientLikeColor | null): stri
   return stops[0]?.color ?? ''
 }
 
-export function useTooltipsFormatter(title: string, list: TooltipsFormatItem[]): string {
-  return `
-    <div class="charts-tooltips">
-			<div class="charts-tooltips-title">${title}</div>
-			${list
-        .map(item => {
-          return `
+function renderTooltipItems(items: TooltipsFormatItem[]) {
+  return items
+    .map(
+      item => `
 					<div class="charts-tooltips-item">
 						<span class="charts-tooltips-item-border" style="background: ${getTooltipsColor(item.color)}"></span>
 						<span class="charts-tooltips-item-name">${item.name}</span>
 						<span class="charts-tooltips-item-value">${item.value}</span>
-					</div>`
-        })
-        .join('')}
-		</div>`
+					</div>`,
+    )
+    .join('')
+}
+
+export function useTooltipsFormatter(
+  title: string,
+  list: TooltipsFormatItem[],
+  rowsPerColumn?: number,
+): string {
+  const size = Math.floor(rowsPerColumn ?? 0)
+  const content =
+    size > 0 && list.length > size
+      ? `<div class="charts-tooltips-columns">${Array.from(
+          { length: Math.ceil(list.length / size) },
+          (_, index) =>
+            `<div class="charts-tooltips-column">${renderTooltipItems(list.slice(index * size, (index + 1) * size))}</div>`,
+        ).join('')}</div>`
+      : renderTooltipItems(list)
+  return `
+    <div class="charts-tooltips">
+      <div class="charts-tooltips-title">${title}</div>
+      ${content}
+    </div>`
 }

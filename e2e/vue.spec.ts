@@ -47,8 +47,8 @@ for (const chart of ['core', 'bar', 'line', 'pie']) {
     }
   })
 
-  // Pie loading is covered by the large-demo native loading test and Basic reload test.
-  if (chart === 'bar' || chart === 'line') {
+  // The category bar and pie loading states have dedicated coverage.
+  if (chart === 'line') {
     test(`${chart} demo toggles loading`, async ({ page }) => {
       await page.goto(`components/${chart}`)
       await page.getByRole('radio', { name: '示例', exact: true }).click()

@@ -207,8 +207,11 @@ test('storage denial still allows a manual choice for the current page', async (
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 })
 
-for (const kind of ['bar', 'line']) {
-  for (const title of ['自定义 tooltips', kind === 'bar' ? '基础柱状图' : '基础折线图']) {
+for (const [kind, titles] of [
+  ['bar', ['基础柱状图-竖向']],
+  ['line', ['自定义 tooltips', '基础折线图']],
+] as const) {
+  for (const title of titles) {
     test(`${kind} ${title} tooltips inherit dark surfaces`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: 'dark' })
       await page.goto(`components/${kind}`)
