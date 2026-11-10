@@ -151,13 +151,12 @@ test('single-column legend shares compact paging controls and pages both ways', 
   const secondLabel = chart.locator('svg text').filter({ hasText: /^分类 2$/ })
   const rowHeight = (await secondLabel.boundingBox())!.y - before!.y
   const chartBox = (await chart.boundingBox())!
+  const firstLabelY = async () => (await firstLabel.boundingBox())?.y ?? NaN
   await page.mouse.move(before!.x + before!.width / 2, before!.y + before!.height / 2)
   await page.mouse.wheel(0, 120)
-  await expect
-    .poll(async () => (await firstLabel.boundingBox())!.y)
-    .toBeCloseTo(before!.y - rowHeight)
+  await expect.poll(firstLabelY).toBeCloseTo(before!.y - rowHeight)
   await page.mouse.wheel(0, -120)
-  await expect.poll(async () => (await firstLabel.boundingBox())!.y).toBeCloseTo(before!.y)
+  await expect.poll(firstLabelY).toBeCloseTo(before!.y)
   expect((await chart.boundingBox())!.y).toBeCloseTo(chartBox.y)
 
   await page.mouse.move(chartBox.x + 4, chartBox.y + chartBox.height / 2)
