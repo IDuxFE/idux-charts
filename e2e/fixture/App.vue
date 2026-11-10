@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { IxBarChart, IxLineChart, IxPieChart, useTooltipsFormatter } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
 import type { EChartsType } from 'echarts/core'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -8,8 +9,21 @@ import { CanvasRenderer } from 'echarts/renderers'
 use(CanvasRenderer)
 const requestedKind = new URLSearchParams(location.search).get('kind')
 const kind = requestedKind === 'pie' || requestedKind === 'line' ? requestedKind : 'bar'
-const component = { bar: IxBarChart, line: IxLineChart, pie: IxPieChart }[kind] ?? IxBarChart
+const categoryArea = requestedKind === 'category-area'
+const component = categoryArea
+  ? IxLineChart
+  : { bar: IxBarChart, line: IxLineChart, pie: IxPieChart }[kind]
 const data = ref([20, 40, 60])
+const areaSeriesCount = ref(2)
+const areaSeries = [
+  { id: 'base', name: 'Base', stack: 'total', data: [5, 5, 5, 5] },
+  {
+    id: 'visits',
+    name: 'Visits',
+    stack: 'total',
+    data: [20, { value: null, missingReason: 'Offline' }, 60, 80],
+  },
+]
 const visible = ref(true)
 const loading = ref(false)
 const autoResize = ref(true)
@@ -26,6 +40,22 @@ const lastClick = ref('')
 const legendChange = ref('')
 const instances: EChartsType[] = []
 const lastInstance = () => instances.at(-1)!
+
+const categoryAreaOption = computed<LineChartProps>(() => ({
+  animation: false,
+  categories: ['A', 'B', 'C', 'D'],
+  area: 'striped',
+  series: areaSeries.slice(0, areaSeriesCount.value),
+  referenceLine: areaSeriesCount.value === 2 ? { value: 75, name: 'Threshold' } : undefined,
+  setOptionOpts: { notMerge: false },
+  tooltip: {
+    formatter(params) {
+      const items = Array.isArray(params) ? params : [params]
+      const visits = items.find(param => param.seriesName === 'Visits')
+      return visits ? JSON.stringify({ data: visits.data, value: visits.value }) : ''
+    },
+  },
+}))
 
 const option = computed(() => ({
   animation: false,
@@ -73,11 +103,12 @@ function ready(instance: EChartsType) {
   instances.push(instance)
   readyCount.value++
 }
-function click(params: { name: string; dataIndex: number; value: number }) {
+function click(params: { name: string; dataIndex: number; data: unknown; value: unknown }) {
   clicks.value++
   lastClick.value = JSON.stringify({
     name: params.name,
     dataIndex: params.dataIndex,
+    data: params.data,
     value: params.value,
   })
 }
@@ -95,6 +126,10 @@ Object.assign(window, {
     point: () => {
       const instance = lastInstance()
       const el = instance.getDom().getBoundingClientRect()
+      if (categoryArea) {
+        const [x, y] = instance.convertToPixel({ seriesId: 'visits' }, [1, 45]) as [number, number]
+        return { x: el.left + x, y: el.top + y }
+      }
       if (kind === 'pie') {
         const series = (instance.getOption().series as any[])[0]
         const coordinate = (value: number | string, length: number) =>
@@ -124,6 +159,11 @@ Object.assign(window, {
 })
 </script>
 <template>
+  <template v-if="categoryArea">
+    <button @click="areaSeriesCount = 1">Shrink series</button>
+    <button @click="areaSeriesCount = 0">Clear series</button>
+    <button @click="areaSeriesCount = 2">Restore series</button>
+  </template>
   <button @click="data = [30, 50, 70]">Replace data</button>
   <button @click="data[0] = 90">Mutate data</button>
   <button @click="data = []">Clear data</button>
@@ -141,7 +181,7 @@ Object.assign(window, {
     <component
       :is="component"
       v-if="visible"
-      v-bind="option"
+      v-bind="categoryArea ? categoryAreaOption : option"
       :loading="loading"
       :auto-resize="autoResize"
       :theme="theme"

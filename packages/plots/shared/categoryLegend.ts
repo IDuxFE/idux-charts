@@ -4,8 +4,8 @@ import type { GraphicComponentOption, LegendComponentOption } from 'echarts/comp
 import type { EChartsType } from 'echarts/core'
 import { format } from 'echarts/core'
 
-import type { PlotTheme } from '../../shared/plotTheme'
-import type { LegendWheelRegion } from '../../shared/useLegendWheel'
+import type { PlotTheme } from './plotTheme'
+import type { LegendWheelRegion } from './useLegendWheel'
 
 type LegendItem = { name: string; icon: string }
 function legendState(option?: LegendComponentOption): {
@@ -36,7 +36,7 @@ export function appendLegendGraphics(
     : [...options, ...elements]
 }
 
-export function createCategoryBarLegend(
+export function createCategoryLegend(
   entries: LegendItem[],
   legend: ChartProps['legend'],
   width: number,
@@ -44,6 +44,7 @@ export function createCategoryBarLegend(
   dark: boolean,
   getChart: () => EChartsType | undefined,
   currentLegend?: ChartProps['legend'],
+  idPrefix = 'ix-bar-legend',
 ): {
   legend: ChartProps['legend']
   height: number
@@ -155,7 +156,7 @@ export function createCategoryBarLegend(
       const up = direction === -1
       const enabled = up ? row > 0 : row < lastRow
       return {
-        id: up ? 'ix-bar-legend-up' : 'ix-bar-legend-down',
+        id: up ? `${idPrefix}-up` : `${idPrefix}-down`,
         type: 'group',
         left: left + legendWidth + 4,
         bottom: bottom + (up ? rowHeight + gap : 0),
@@ -163,7 +164,7 @@ export function createCategoryBarLegend(
         onclick: () => scrollBy(direction),
         children: [
           {
-            id: up ? 'ix-bar-legend-up-hit' : 'ix-bar-legend-down-hit',
+            id: up ? `${idPrefix}-up-hit` : `${idPrefix}-down-hit`,
             type: 'rect',
             z: 10,
             cursor: enabled ? 'pointer' : 'default',
@@ -171,7 +172,7 @@ export function createCategoryBarLegend(
             style: { fill: 'transparent' },
           },
           {
-            id: up ? 'ix-bar-legend-up-icon' : 'ix-bar-legend-down-icon',
+            id: up ? `${idPrefix}-up-icon` : `${idPrefix}-down-icon`,
             type: 'polyline',
             z: 11,
             silent: true,

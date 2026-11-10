@@ -1,29 +1,14 @@
 import { test, expect } from './helpers'
 import { fixtureBaseURL } from './environment'
 
-for (const [chart, title, snapshot] of [
-  ['bar', '简单的鼠标经过显示条纹', 'bar-striped.png'],
-  ['bar', '堆叠柱状图', 'bar-stacked.png'],
-  ['line', '条纹面积图', 'line-striped-area.png'],
-  ['pie', '风险用户数', 'pie-risk-users.png'],
+for (const [chart, title, snapshot, fixture] of [
+  ['bar', '简单的鼠标经过显示条纹', 'bar-striped.png', 'legacy-bar-stripe'],
+  ['bar', '堆叠柱状图', 'bar-stacked.png', 'legacy-bar-stack'],
+  ['pie', '风险用户数', 'pie-risk-users.png', 'legacy-risk'],
 ] as const) {
   test(`${chart} ${title} appearance`, async ({ page }) => {
-    const fixture =
-      chart === 'bar'
-        ? snapshot === 'bar-striped.png'
-          ? 'legacy-bar-stripe'
-          : 'legacy-bar-stack'
-        : chart === 'pie'
-          ? 'legacy-risk'
-          : undefined
-    await page.goto(fixture ? `${fixtureBaseURL}?${fixture}` : `components/${chart}`)
-    if (!fixture) await page.getByRole('radio', { name: '示例', exact: true }).click()
-    const block = fixture
-      ? page.locator('#app')
-      : page
-          .locator('.archive-app-demo')
-          .filter({ has: page.getByRole('heading', { name: title, exact: false }) })
-    const chartElement = block.locator('[_echarts_instance_]')
+    await page.goto(`${fixtureBaseURL}?${fixture}`)
+    const chartElement = page.locator('#app [_echarts_instance_]')
     await expect(chartElement).toHaveCount(1)
     await expect(chartElement.locator('svg path').first()).toBeAttached()
     await chartElement.scrollIntoViewIfNeeded()
@@ -40,6 +25,22 @@ for (const [chart, title, snapshot] of [
     })
   })
 }
+
+test('single-series area keeps its fitted stripe during hover', async ({ page }) => {
+  await page.goto('components/area')
+  const demo = page.locator('.archive-app-demo').filter({
+    has: page.getByRole('heading', { name: '基础面积图（状态示例）', exact: false }),
+  })
+  const chart = demo.locator('[_echarts_instance_]')
+  const stripe = chart.locator('svg pattern[width="4"]')
+  await expect(stripe).toHaveAttribute('height', '320')
+  await chart.scrollIntoViewIfNeeded()
+  const bounds = await chart.boundingBox()
+  expect(bounds).not.toBeNull()
+  await page.mouse.move(bounds!.x + bounds!.width * 0.55, bounds!.y + 190)
+  await expect(chart.locator('.charts-tooltips')).toBeVisible()
+  await expect(stripe).toHaveAttribute('height', '320')
+})
 
 test('bar hover tooltip excludes the helper series and preserves appearance', async ({ page }) => {
   await page.goto(`${fixtureBaseURL}?legacy-bar-stripe`)

@@ -4,6 +4,11 @@
   min-width: 0;
 }
 
+.archive-app__page__content:has(> .archive-app__page__content__inner .area-shadow-chart)
+  > .archive-app__page__content__anchor {
+  display: none;
+}
+
 .site-theme-toggle {
   display: inline-flex;
   align-items: center;

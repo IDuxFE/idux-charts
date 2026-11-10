@@ -1,5 +1,5 @@
 import { computed, ref, watch } from 'vue'
-import { getThemeTokens } from '@idux/components/theme'
+import { getAlphaColor, getThemeTokens } from '@idux/components/theme'
 import { merge } from 'lodash-es'
 import { seerTheme } from '@idux/charts'
 
@@ -71,6 +71,11 @@ export const plotTheme = computed(() => {
     borderColor: t.colorBorder,
     splitLineColor: t.colorSeparator,
     splitAreaColor: t.colorInfoContainerBg,
+    missingBackgroundColor: getAlphaColor(
+      t.colorErrorBg,
+      t.alertCompColorAlpha,
+      t.colorContainerBg,
+    ),
   }
 })
 export const chartTheme = computed(() => {

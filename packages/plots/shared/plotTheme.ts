@@ -1,7 +1,7 @@
 import { computed, inject, unref } from 'vue-demi'
 import type { InjectionKey, Ref } from 'vue-demi'
 
-/** Visual defaults for the built-in Bar and Pie layouts, Radar, Gauge and LiquidFill. */
+/** Visual defaults for built-in plot layouts. */
 export interface PlotTheme {
   color?: string
   palette?: string[]
@@ -12,9 +12,13 @@ export interface PlotTheme {
   splitLineColor?: string
   splitAreaColor?: string
   errorColor?: string
+  /** Fill for missing categories in Bar and missing ranges in Line and Area. */
+  missingBackgroundColor?: string
   fontFamily?: string
   numberFontFamily?: string
 }
+
+export const defaultDarkMissingBackgroundColor = '#361A1B'
 
 /** Small shared text contract; positioning remains owned by each plot. */
 export interface PlotTextStyle {

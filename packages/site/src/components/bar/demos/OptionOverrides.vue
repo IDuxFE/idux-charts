@@ -17,7 +17,7 @@ const overrides: BarChartProps = {
 <template>
   <label class="bar-override-switch">
     应用外部配置
-    <IxSwitch v-model:checked="customized" aria-label="应用外部配置" />
+    <IxSwitch v-model:checked="customized" size="sm" aria-label="应用外部配置" />
   </label>
   <IxBarChart
     :categories="categories"

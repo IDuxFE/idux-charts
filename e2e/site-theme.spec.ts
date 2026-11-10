@@ -49,7 +49,7 @@ test('system theme changes apply until a manual choice is made', async ({ page }
 for (const route of [
   '0-guide/Introdoction.page.md',
   '0-guide/GettingStarted.page.md',
-  ...['core', 'pie', 'bar', 'line', 'radar', 'gauge', 'liquid-fill'].map(
+  ...['core', 'pie', 'bar', 'line', 'area', 'radar', 'gauge', 'liquid-fill'].map(
     name => `components/${name}`,
   ),
 ]) {
@@ -207,42 +207,35 @@ test('storage denial still allows a manual choice for the current page', async (
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 })
 
-for (const [kind, titles] of [
-  ['bar', ['基础柱状图-竖向']],
-  ['line', ['自定义 tooltips', '基础折线图']],
+for (const [kind, title] of [
+  ['bar', '基础柱状图-竖向'],
+  ['line', '基础折线图'],
+  ['area', '基础面积图（状态示例）'],
 ] as const) {
-  for (const title of titles) {
-    test(`${kind} ${title} tooltips inherit dark surfaces`, async ({ page }) => {
-      await page.emulateMedia({ colorScheme: 'dark' })
-      await page.goto(`components/${kind}`)
-      const demo = page
-        .locator('.archive-app-demo')
-        .filter({ has: page.getByRole('heading', { name: title }) })
-      const chart = demo.locator('[_echarts_instance_]')
-      await chart.scrollIntoViewIfNeeded()
-      await expect(chart).toHaveAttribute('data-ix-chart-theme', 'dark')
-      await expect(chart.locator('svg text').first()).toBeAttached()
-      const box = await chart.boundingBox()
-      await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
-      const tooltip = chart.locator('.charts-tooltips')
-      await expect(tooltip).toBeVisible()
-      await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
-      await expect(tooltip.locator('.charts-tooltips-title')).toHaveCSS(
-        'color',
-        'rgb(244, 248, 255)',
-      )
-      await page.getByRole('button', { name: '切换到亮色模式' }).click()
-      await chart.scrollIntoViewIfNeeded()
-      await expect(chart).toHaveAttribute('data-ix-chart-theme', 'light')
-      await expect(chart.locator('svg text').first()).toBeAttached()
-      await page.mouse.move(0, 0)
-      const lightBox = await chart.boundingBox()
-      await page.mouse.move(lightBox!.x + lightBox!.width / 2, lightBox!.y + lightBox!.height / 2)
-      await expect(tooltip).toBeVisible()
-      await expect(tooltip.locator('..')).toHaveCSS(
-        'background-color',
-        title === '自定义 tooltips' ? 'rgb(255, 255, 255)' : 'rgba(251, 253, 255, 0.88)',
-      )
-    })
-  }
+  test(`${kind} ${title} tooltips inherit dark surfaces`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto(`components/${kind}`)
+    const demo = page
+      .locator('.archive-app-demo')
+      .filter({ has: page.getByRole('heading', { name: title }) })
+    const chart = demo.locator('[_echarts_instance_]')
+    await chart.scrollIntoViewIfNeeded()
+    await expect(chart).toHaveAttribute('data-ix-chart-theme', 'dark')
+    await expect(chart.locator('svg text').first()).toBeAttached()
+    const box = await chart.boundingBox()
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+    const tooltip = chart.locator('.charts-tooltips')
+    await expect(tooltip).toBeVisible()
+    await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
+    await expect(tooltip.locator('.charts-tooltips-title')).toHaveCSS('color', 'rgb(244, 248, 255)')
+    await page.getByRole('button', { name: '切换到亮色模式' }).click()
+    await chart.scrollIntoViewIfNeeded()
+    await expect(chart).toHaveAttribute('data-ix-chart-theme', 'light')
+    await expect(chart.locator('svg text').first()).toBeAttached()
+    await page.mouse.move(0, 0)
+    const lightBox = await chart.boundingBox()
+    await page.mouse.move(lightBox!.x + lightBox!.width / 2, lightBox!.y + lightBox!.height / 2)
+    await expect(tooltip).toBeVisible()
+    await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgba(251, 253, 255, 0.88)')
+  })
 }

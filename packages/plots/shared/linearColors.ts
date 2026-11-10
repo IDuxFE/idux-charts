@@ -29,6 +29,8 @@ const seerLinearGradientColors: [string, string][] = [
   ['#E1E5EB', '#E9ECF1'],
 ]
 
+export const seerGradientStartColors = seerLinearGradientColors.map(([startColor]) => startColor)
+
 export function getLinearColors(dir: LinearDirection | DirectionConfig): LinearGradientObject[] {
   const directionConfig = getLinearDirectionConfig(dir)
 
