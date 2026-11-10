@@ -1,5 +1,16 @@
 # @idux/charts
 
+## 1.3.0
+
+### Patch Changes
+
+- 98141f5: Keep tooltip rows at 32px and vertically center their labels and values when the host page has no box-sizing reset.
+- Updated dependencies [98141f5]
+- Updated dependencies [98141f5]
+- Updated dependencies [98141f5]
+  - @idux/charts-plots@1.3.0
+  - @idux/charts-core@1.3.0
+
 ## 1.2.1
 
 ### Patch Changes
