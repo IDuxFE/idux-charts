@@ -1,0 +1,17 @@
+import { t as Ui } from "./client-CMWdSpQf.js";
+import { Ar as createElementBlock, Jr as openBlock, bt as _plugin_vue_export_helper_default, jr as createStaticVNode } from "./app-default-_3RnZ9LU.js";
+JSON.parse("{\"title\":\"指南\",\"description\":\"\",\"frontmatter\":{\"title\":\"指南\"},\"headers\":[{\"level\":3,\"title\":\"选择合适的示例\",\"slug\":\"选择合适的示例\",\"link\":\"#选择合适的示例\",\"children\":[]},{\"level\":3,\"title\":\"数据准备\",\"slug\":\"数据准备\",\"link\":\"#数据准备\",\"children\":[]},{\"level\":3,\"title\":\"布局与状态\",\"slug\":\"布局与状态\",\"link\":\"#布局与状态\",\"children\":[]},{\"level\":3,\"title\":\"公共库的职责\",\"slug\":\"公共库的职责\",\"link\":\"#公共库的职责\",\"children\":[]}],\"relativePath\":\"src/components/radar/Design.md\"}");
+var _sfc_main = { name: "Design.md" };
+var _hoisted_1 = { class: "archive-md" };
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+	return openBlock(), createElementBlock("div", _hoisted_1, [..._cache[0] || (_cache[0] = [createStaticVNode("<h3 id=\"选择合适的示例\" tabindex=\"-1\">选择合适的示例 <a class=\"header-anchor\" href=\"#选择合适的示例\" aria-hidden=\"true\">#</a></h3><ul><li><strong>基础型</strong>：用于完整的条件试验，包含对象数、维度数、网格、径向间距、填充样式及业务空态/重试。</li><li><strong>独立量程与方向</strong>：用于不同单位的指标对比，展示每个维度的独立量程、顺逆时针切换、百分比半径和原生加载遮罩。</li><li><strong>样式与提示框定制</strong>：用于设计定制，展示配置构造函数、圆形网格、目标虚线及按原始数据顺序组织提示内容。</li></ul><h3 id=\"数据准备\" tabindex=\"-1\">数据准备 <a class=\"header-anchor\" href=\"#数据准备\" aria-hidden=\"true\">#</a></h3><p>每个对象使用相同的维度顺序，同一维度在不同对象之间使用同一量程。维度建议至少三个，对象过多时可通过图例筛选，避免轮廓互相遮挡。基础示例的 1–4 个对象、3–12 个维度和 0–25 量程仅是展示范围，不是组件限制。</p><p>不同单位可以配置独立量程，但应在名称或提示中标明单位。雷达图表达的是各维度在自身量程中的相对位置，不宜直接把多边形面积作为综合得分。成本、时延等「越小越好」的指标，应由业务先明确方向和评分方式。</p><p>零值、缺失和空数据含义不同。需要保留零值对象时，传入完整的零值数组；没有对象时传 <code>[]</code> 并按业务需求显示空态。组件不代替业务填充缺失值。</p><h3 id=\"布局与状态\" tabindex=\"-1\">布局与状态 <a class=\"header-anchor\" href=\"#布局与状态\" aria-hidden=\"true\">#</a></h3><p>常规卡片可使用百分比 <code>radius</code> 和明确的容器高度，并为轴名称、底部图例预留空间。固定径向间距时，可按 <code>radius = 间距 × splitNumber</code> 计算半径，同步调整容器尺寸；基础示例对窄容器采用横向滚动。</p><p>默认不显示每条轴的数值标签。基础示例的所有维度使用相同量程，因此额外绘制顶部刻度；独立量程不能直接共用这组刻度，应在提示中展示各维度数值和单位。示例额外使用的 <code>GraphicComponent</code> 由示例自行注册。</p><p>只需加载遮罩时使用 <code>loading</code>；需要定制图标、空态或重新加载按钮时，由外层页面控制。请求、定时器取消、错误信息和权限提示均属于调用方职责。</p><h3 id=\"公共库的职责\" tabindex=\"-1\">公共库的职责 <a class=\"header-anchor\" href=\"#公共库的职责\" aria-hidden=\"true\">#</a></h3><p><code>packages/plots/radar</code> 负责雷达坐标系与系列注册、默认视觉样式、维度与数值的同步排列和配置生成。Vue 包装层复用 IxChart 的实例、响应式属性、事件及尺寸管理；不依赖站点 UI 组件。</p><p>保留 <code>createRadarOption</code> 与组件包装层的分离：纯函数便于组合和验证，组件负责响应式更新及生命周期。常见样式通过 <code>area</code>、<code>gridStyle</code>、<code>radius</code>、<code>center</code> 等属性表达；特殊视觉通过 ECharts 配置覆盖。无需把业务维度、对象上限、固定量程或模拟重试放入公共库。</p><p>顶层字段采用整体替换，避免隐式深合并导致样式难以清除。局部定制先调用构造函数再展开字段，并保持 <code>radar.indicator</code> 与 <code>series.data</code> 的绘制顺序一致。详细规则参见 API。</p>", 14)])]);
+}
+// ../../../../../../../archive__resolvedarchive-page:/home/runner/work/idux-charts/idux-charts/packages/site/src/components/radar/Design.md__resolved
+var __archive_data__ = {
+	"id": "archive-item-43",
+	"filename": "Design.md",
+	"relativePath": "components/radar/Design.md",
+	"query": {},
+	instance: Ui("archive-vue-loader-0", /* @__PURE__ */ _plugin_vue_export_helper_default(_sfc_main, [["render", _sfc_render], ["__file", "/home/runner/work/idux-charts/idux-charts/packages/site/src/components/radar/Design.md"]]))
+};
+export { __archive_data__ as default };
