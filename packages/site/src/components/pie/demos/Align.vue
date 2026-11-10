@@ -25,7 +25,7 @@ const title: PieChartProps['title'] = {
   textStyle: {
     fontSize: 30,
     lineHeight: 16,
-    rich: { value: { fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO' } },
+    rich: { value: { fontFamily: 'D-DIN-PRO' } },
   },
 }
 const legend: PieChartProps['legend'] = {

@@ -81,7 +81,7 @@ const presentation = computed<PieChartProps>(() => ({
               fontSize: 30,
               lineHeight: 16,
               rich: {
-                value: { fontSize: 16, fontWeight: 500, fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO' },
+                value: { fontSize: 16, fontWeight: 500, fontFamily: 'D-DIN-PRO' },
               },
             },
           }
@@ -93,7 +93,7 @@ const presentation = computed<PieChartProps>(() => ({
             textStyle: {
               lineHeight: 28,
               rich: {
-                value: { fontSize: 28, fontWeight: 700, fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO' },
+                value: { fontSize: 28, fontWeight: 700, fontFamily: 'D-DIN-PRO' },
               },
             },
           },
@@ -104,7 +104,7 @@ const presentation = computed<PieChartProps>(() => ({
     rich: {
       total: {
         fontSize: 24,
-        fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO',
+        fontFamily: 'D-DIN-PRO',
         fontWeight: 400,
         lineHeight: 24,
         color: themeTokens.value.colorTextTitle,

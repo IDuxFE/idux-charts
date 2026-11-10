@@ -70,7 +70,7 @@ onBeforeUnmount(cancel)
           :style="chartStyle"
           :color="item.color"
           label="用户体验评分"
-          valueFontFamily="IDuxChartDemoDIN, sans-serif"
+          valueFontFamily="D-DIN-PRO, sans-serif"
           :textColor="themeTokens.colorText"
           :labelColor="themeTokens.colorTextInfo"
           :backgroundColor="themeTokens.colorInfoContainerBgDisabled"

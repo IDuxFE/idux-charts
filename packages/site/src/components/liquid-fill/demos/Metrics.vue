@@ -16,7 +16,7 @@ const metrics = [
         :value="metric.value"
         :color="metric.color"
         :label="metric.label"
-        :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+        :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
         style="height: 240px"
       />
     </div>

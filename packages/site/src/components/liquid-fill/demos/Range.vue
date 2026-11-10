@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; flex-wrap: wrap; gap: 24px">
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="48"
       :max="64"
       unit="GB"
@@ -10,13 +10,13 @@
       style="width: 200px; height: 240px"
     />
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="100"
       label="完整填充"
       style="width: 200px; height: 240px"
     />
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="120"
       label="越界值保留原文"
       style="width: 200px; height: 240px"

@@ -87,7 +87,7 @@ onBeforeUnmount(cancel)
           :zeroColor="themeTokens.colorInfoContainerBgDisabled"
           :textColor="themeTokens.colorText"
           :backgroundColor="themeTokens.colorContainerBg"
-          :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+          :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
           style="width: 100%; height: 100%"
         />
       </template>

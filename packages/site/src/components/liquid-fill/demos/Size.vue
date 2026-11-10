@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 24px">
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="50"
       :radius="40"
       :waveAnimation="false"
@@ -9,13 +9,13 @@
       style="width: 140px; height: 200px"
     />
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="50"
       label="默认尺寸"
       style="width: 200px; height: 240px"
     />
     <IxLiquidFillChart
-      :textStyle="{ fontFamily: 'IDuxChartDemoDIN, sans-serif' }"
+      :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
       :value="50"
       :radius="88"
       label="大尺寸"

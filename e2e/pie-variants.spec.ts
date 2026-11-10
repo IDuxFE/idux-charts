@@ -8,7 +8,7 @@ test.use({ baseURL: fixtureBaseURL })
 const font = readFileSync(
   new URL('../packages/site/assets/D-DIN-PRO-Regular.ttf', import.meta.url),
 ).toString('base64')
-const fontStyle = `<style>${['D-DIN-PRO', 'IDuxChartDemoDIN'].map(family => `@font-face{font-family:${family};src:url(data:font/ttf;base64,${font})}`).join('')}</style>`
+const fontStyle = `<style>@font-face{font-family:D-DIN-PRO;src:url(data:font/ttf;base64,${font})}</style>`
 
 // Rose defaults intentionally differ from the frozen CLI; pie-layout.spec.ts verifies their new design.
 for (const variant of [
