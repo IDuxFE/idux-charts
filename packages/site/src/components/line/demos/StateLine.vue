@@ -23,7 +23,12 @@ const loading = ref(true)
 <template>
   <IxSpace block vertical :size="24">
     <IxSwitch v-model:checked="loading"></IxSwitch>
-    <IxLineChart style="height: 300px" :data="data" :loading="loading" v-bind="lineOption" />
+    <IxLineChart
+      style="height: 300px"
+      :data="data"
+      :loading="loading && { text: '加载中...' }"
+      v-bind="lineOption"
+    />
   </IxSpace>
 </template>
 

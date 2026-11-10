@@ -42,7 +42,7 @@ const shapeOption = computed<PieChartProps>(() => ({
       :data="data"
       name="分类数量"
       align="center-start"
-      :loading="loading"
+      :loading="loading && { text: '加载中...' }"
       v-bind="shapeOption"
     />
   </div>
