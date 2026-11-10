@@ -2,6 +2,8 @@ import { computed, unref, ref, watch } from 'vue-demi'
 import type { Component, ComputedRef, Ref, UnwrapRef } from 'vue-demi'
 
 import { getAlphaColor } from '@idux/charts-core'
+import { graphic, registerPostUpdate } from 'echarts/core'
+import type { LineSeriesOption } from 'echarts/charts'
 
 type MaybeRef<T> = UnwrapRef<T> | Ref<UnwrapRef<T>>
 
@@ -120,6 +122,98 @@ export function getLineChartAreaStripeImgEl(options: LineChartAreaStripeOption =
   )
 
   return imgEl
+}
+
+const areaStripeWidth = 2
+const areaStripeTileWidth = areaStripeWidth * 2
+
+export function createStackedAreaStripe(color: string) {
+  const image = encodeSvg(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${areaStripeTileWidth}" height="1" viewBox="0 0 ${areaStripeTileWidth} 1">
+  <rect width="${areaStripeWidth}" height="1" fill="${getAlphaColor(color, 0.3)}"/>
+  <rect x="${areaStripeWidth}" width="${areaStripeWidth}" height="1" fill="${getAlphaColor(color, 0.21)}"/>
+</svg>`,
+  )
+  // A vertically repeating tile keeps the tint constant across each stack band.
+  return {
+    color: { image, imageWidth: areaStripeTileWidth, imageHeight: 1, repeat: 'repeat' as const },
+    opacity: 1,
+  }
+}
+
+function singleAreaStripeImage(color: string, height: number, top: number, bottom: number) {
+  return encodeSvg(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${areaStripeTileWidth}" height="${height}" viewBox="0 0 ${areaStripeTileWidth} ${height}">
+  <linearGradient id="fade" gradientUnits="userSpaceOnUse" x1="0" y1="${top}" x2="0" y2="${bottom}">
+    <stop stop-color="${getAlphaColor(color, 0.3)}"/>
+    <stop offset="100%" stop-color="${getAlphaColor(color, 0)}"/>
+  </linearGradient>
+  <rect width="${areaStripeWidth}" height="${height}" fill="url(#fade)"/>
+  <rect x="${areaStripeWidth}" width="${areaStripeWidth}" height="${height}" fill="url(#fade)" opacity="0.7"/>
+</svg>`,
+  )
+}
+
+export function createSingleAreaStripe(color: string) {
+  return {
+    color: {
+      image: singleAreaStripeImage(color, 128, 0, 128),
+      imageWidth: areaStripeTileWidth,
+      imageHeight: 128,
+      repeat: 'repeat' as const,
+      fitArea: color,
+    },
+    opacity: 1,
+  }
+}
+
+export function installSingleAreaStripe() {
+  const pendingFits = new WeakMap<object, () => void>()
+  registerPostUpdate((model, api) => {
+    const pending = pendingFits.get(api)
+    if (pending) {
+      api.off('finished', pending)
+      pendingFits.delete(api)
+    }
+    const fits: (() => void)[] = []
+    model.eachSeriesByType('line', series => {
+      const fill = (series.option as LineSeriesOption).areaStyle?.color
+      if (!isAreaStripePattern(fill)) return
+      api.getViewOfSeriesModel(series).group.traverse(element => {
+        if (element.type !== 'ec-polygon') return
+        const shape = element as InstanceType<typeof graphic.Polygon>
+        fits.push(() => {
+          const { y, height } = shape.getBoundingRect()
+          const imageHeight = api.getHeight()
+          if (!height || !imageHeight) return
+          // The tile covers the whole chart vertically. Its gradient spans just the area.
+          const image = singleAreaStripeImage(fill.fitArea, imageHeight, y, y + height)
+          if (image === fill.image) return
+          // ECharts keeps the original fill object for hover and selection states.
+          fill.image = image
+          fill.imageHeight = imageHeight
+          shape.dirtyStyle()
+        })
+      })
+    })
+    if (!fits.length) return
+    const fit = () => fits.forEach(update => update())
+    fit()
+    // A zoom or update can animate the native polygon from its previous bounds.
+    const finish = () => {
+      api.off('finished', finish)
+      pendingFits.delete(api)
+      fit()
+    }
+    pendingFits.set(api, finish)
+    api.on('finished', finish)
+  })
+}
+
+function isAreaStripePattern(
+  fill: unknown,
+): fill is ReturnType<typeof createSingleAreaStripe>['color'] {
+  return !!fill && typeof fill === 'object' && 'fitArea' in fill && typeof fill.fitArea === 'string'
 }
 
 function encodeSvg(svgStr: string) {

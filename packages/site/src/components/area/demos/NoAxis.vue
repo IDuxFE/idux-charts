@@ -2,7 +2,7 @@
 import { useLinearGradient, useLineStyleColor, getAlphaColor } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
-const data = [123, 324, 156, 244, 188]
+const data = [123, 324, 156, 244, 188, 287, 216]
 
 const lineOption: LineChartProps = {
   name: '访问次数',
@@ -11,9 +11,11 @@ const lineOption: LineChartProps = {
     color: useLinearGradient(),
   },
   title: { text: '折线图标题' },
+  grid: { left: 12, right: 12 },
   xAxis: {
     show: false,
-    data: ['星期一', '星期二', '星期三', '星期四', '星期五'],
+    boundaryGap: false,
+    data: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
   },
   yAxis: {
     show: false,
@@ -21,7 +23,6 @@ const lineOption: LineChartProps = {
   },
   series: [
     {
-      data: [123, 324, 156, 244, 188],
       showSymbol: false,
       lineStyle: {
         // 实现连线上的阴影效果
@@ -34,13 +35,18 @@ const lineOption: LineChartProps = {
 }
 </script>
 <template>
-  <IxLineChart style="height: 300px" :data="data" v-bind="lineOption" />
+  <IxLineChart
+    class="area-shadow-chart"
+    style="width: 100%; height: 300px"
+    :data="data"
+    v-bind="lineOption"
+  />
 </template>
 
 <archive-meta lang="json">
 {
   "title": "无坐标轴+阴影效果",
   "description": "无坐标轴+阴影效果的配置与使用示例。",
-  "index": 5
+  "index": 11
 }
 </archive-meta>

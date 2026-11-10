@@ -279,7 +279,7 @@ test('category bars follow the site theme for the slider, tooltip and data state
   await expect(tooltip.locator('.charts-tooltips-title')).toHaveCSS('color', 'rgb(244, 248, 255)')
 
   await selectState(demo, missingState)
-  await expect(svg.locator('path[fill="rgb(255,149,123)"][fill-opacity="0.24"]')).toBeVisible()
+  await expect(svg.locator('path[fill="rgb(54, 26, 27)"]')).toBeVisible()
   await hoverCategory(page, svg, '微信网页')
   await expect(tooltip).toContainText('数据缺失，采集任务未返回结果，请检查采集配置')
   await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
@@ -290,7 +290,7 @@ test('category bars follow the site theme for the slider, tooltip and data state
   const aboveSvg = above.locator('[_echarts_instance_] svg')
   await selectState(above, missingState)
   await expect(aboveSvg.locator('path[fill="#687080"]')).toHaveCount(4)
-  await expect(aboveSvg.locator('path[fill="rgb(255,149,123)"][fill-opacity="0.24"]')).toBeVisible()
+  await expect(aboveSvg.locator('path[fill="rgb(54, 26, 27)"]')).toBeVisible()
 
   await selectState(demo, '全部值为 0')
   const zero = svg.getByText('暂无数据', { exact: true })

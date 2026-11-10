@@ -90,7 +90,7 @@ import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChar
 import { getInstanceByDom } from 'echarts/core';
 const revision = ref(0), dark = ref(false), mounted = ref(true);
 const instances = [];
-const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
 createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
@@ -100,12 +100,20 @@ createApp({setup() { return () => h('main', {}, [
     const data = [10 + revision.value, 20, 30];
     const props = {
       title: {text: kind + ' ' + revision.value}, animation: false, autoResize: true,
-      initOption: {renderer: 'svg', width: 400, height: 240}, setOptionOpts: {notMerge: true},
+      initOption: {renderer: 'svg', width: 400, height: 240},
+      setOptionOpts: {notMerge: kind !== 'area'},
       theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
       ...(kind === 'core' ? {xAxis: {type: 'category', data: ['A', 'B', 'C']}, yAxis: {type: 'value'}, series: [{type: 'bar', data}]} :
         kind === 'radar' ? { indicator: ['A', 'B', 'C'].map(name => ({name, max: 100})), data: [{name: 'One', value: data}] } :
         kind === 'gauge' || kind === 'liquid-fill' ? {value: data[0]} :
-        kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} : {data, xAxis: {data: ['A', 'B', 'C']}}),
+        kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} :
+        kind === 'area' ? {categories: ['A', 'B', 'C', 'D', 'E', 'F'], area: 'striped', series: [
+          {name: 'Area', stack: 'total', data: revision.value ? [...data, 40, 50, 60] : [data[0], null, null, 40, {value: null, missingReason: 'Offline'}, 60]},
+          ...(revision.value ? [] : [{name: 'Comparison', data: [...data, 40, 50, 60]}]),
+        ], tooltip: {formatter: params => {
+          const sample = params.find(param => param.seriesName === 'Area');
+          return sample ? JSON.stringify({data: sample.data, value: sample.value}) : '';
+        }}} : {data, xAxis: {data: ['A', 'B', 'C']}}),
     };
     return h('section', isVue2 ? {attrs: {'data-kind': kind}, style: {width: '400px', height: '240px'}} : {'data-kind': kind, style: {width: '400px', height: '240px'}},
       [h(component, isVue2 ? {attrs: props} : props)]);
@@ -117,6 +125,12 @@ window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).m
   return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
+const areaChart = () => {
+  const el = document.querySelector('[data-kind="area"] [_echarts_instance_]');
+  return getInstanceByDom(el);
+};
+window.areaSeriesCount = () => areaChart()?.getOption().series?.length;
+window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIndex: 0, dataIndex: 4});
 `,
   )
   await build({ root: app, configFile: false, logLevel: 'error' })
@@ -139,14 +153,31 @@ window.allDisposed = () => instances.length > 0 && instances.every(chart => char
     const state = () => page.evaluate(() => window.readCharts())
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
-      .toEqual([true, true, true, true, true, true, true])
+      .toEqual([true, true, true, true, true, true, true, true])
+    const area = page.locator('[data-kind="area"]')
+    await expect(area.locator('svg pattern[width="4"][height="240"]').first()).toBeAttached()
+    await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(3)
+    await page.evaluate(() => window.showAreaGap())
+    await expect(area).toContainText(
+      '{"data":{"value":null,"missingReason":"Offline"},"value":null}',
+    )
     await page.getByTestId('update').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
-      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1', 'radar 1', 'gauge 1', 'liquid-fill 1'])
+      .toEqual([
+        'core 1',
+        'bar 1',
+        'line 1',
+        'area 1',
+        'pie 1',
+        'radar 1',
+        'gauge 1',
+        'liquid-fill 1',
+      ])
     await expect
       .poll(async () => (await state()).map(chart => chart.value))
-      .toEqual([11, 11, 11, 11, 11, 0.11, 0.11])
+      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 0.11])
+    await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(1)
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
@@ -158,7 +189,16 @@ window.allDisposed = () => instances.length > 0 && instances.every(chart => char
     await page.getByTestId('mount').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
-      .toEqual(['core 1', 'bar 1', 'line 1', 'pie 1', 'radar 1', 'gauge 1', 'liquid-fill 1'])
+      .toEqual([
+        'core 1',
+        'bar 1',
+        'line 1',
+        'area 1',
+        'pie 1',
+        'radar 1',
+        'gauge 1',
+        'liquid-fill 1',
+      ])
     expect(errors).toEqual([])
   } finally {
     await browser.close()

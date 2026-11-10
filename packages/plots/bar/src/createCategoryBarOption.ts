@@ -1,6 +1,6 @@
 import type { DefaultLabelFormatterCallbackParams } from 'echarts'
 import type { EChartsType } from 'echarts/core'
-import type { BarSeriesOption, CustomSeriesOption, LineSeriesOption } from 'echarts/charts'
+import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
 import { escape, merge, pick } from 'lodash-es'
 import {
   convertArray,
@@ -10,10 +10,13 @@ import {
   useTooltipsFormatter,
 } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
+import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
 import type { PlotTheme } from '../../shared/plotTheme'
+import { createReferenceSeries, referenceLegendIcon } from '../../shared/referenceLine'
+import type { ReferenceLine } from '../../shared/referenceLine'
 import type { LegendWheelRegion } from '../../shared/useLegendWheel'
 
-import { appendLegendGraphics, createCategoryBarLegend } from './categoryBarLegend'
+import { appendLegendGraphics, createCategoryLegend } from '../../shared/categoryLegend'
 import {
   categoryBarId,
   countBarColumns,
@@ -29,12 +32,7 @@ import {
 import { getBarLinearColors, LinearDirection } from './getBarLinearColors'
 import type { BarChartProps } from './useBarOption'
 
-export interface BarReferenceLine {
-  value: number
-  /** Optional legend entry. Use a name distinct from the bar series. */
-  name?: string
-  color?: string
-}
+export type BarReferenceLine = ReferenceLine
 
 export interface CategoryBarProps {
   /** Opts into the category layout. Data items correspond to these labels by index. */
@@ -137,7 +135,9 @@ export function createCategoryBarOption(
   const secondaryText = theme.secondaryTextColor ?? '#A1A7B3'
   const trackColor = theme.mutedColor ?? (dark ? '#3C424D' : 'rgba(143, 162, 191, 0.18)')
   const errorColor = theme.errorColor ?? (dark ? '#FF957B' : '#F5654F')
-  const missingColor = getAlphaColor(errorColor, dark ? 0.24 : 0.12)
+  const missingColor =
+    theme.missingBackgroundColor ??
+    (dark ? defaultDarkMissingBackgroundColor : getAlphaColor(errorColor, 0.12))
   const colors = getBarLinearColors(
     horizontal ? LinearDirection.reverseHorizontal : LinearDirection.vertical,
   )
@@ -231,26 +231,13 @@ export function createCategoryBarOption(
   const reference =
     referenceLine && Number.isFinite(referenceLine.value) ? referenceLine : undefined
   const referenceColor = reference?.color ?? errorColor
-  const referenceSeries: LineSeriesOption[] = reference
+  const referenceSeries = reference
     ? [
-        {
-          type: 'line',
-          name: reference.name,
-          data: [],
-          silent: true,
-          tooltip: { show: false },
-          itemStyle: { color: referenceColor },
-          lineStyle: { color: referenceColor },
-          markLine: {
-            silent: true,
-            symbol: 'none',
-            zlevel: Math.min(...barSeries.map(bar => bar.zlevel ?? 0)),
-            z: backgroundZ,
-            label: { show: false },
-            lineStyle: { color: referenceColor, type: 'dashed', width: 1 },
-            data: [horizontal ? { xAxis: reference.value } : { yAxis: reference.value }],
-          },
-        },
+        createReferenceSeries(reference, referenceColor, {
+          axis: horizontal ? 'xAxis' : 'yAxis',
+          z: backgroundZ,
+          zlevel: Math.min(...barSeries.map(bar => bar.zlevel ?? 0)),
+        }),
       ]
     : []
   const legendVisible =
@@ -258,9 +245,7 @@ export function createCategoryBarOption(
     (bars.length > 1 || !!reference?.name || !!legend)
   const legendData = [
     ...barSeries.map(bar => ({ name: String(bar.name), icon: 'roundRect' })),
-    ...(reference?.name
-      ? [{ name: reference.name, icon: 'path://M0,0h3v1H0z M5,0h3v1H5z M10,0h3v1h-3z' }]
-      : []),
+    ...(reference?.name ? [{ name: reference.name, icon: referenceLegendIcon }] : []),
   ]
   const {
     legend: mergedLegend,
@@ -268,7 +253,7 @@ export function createCategoryBarOption(
     pager,
     wheel,
   } = legendVisible
-    ? createCategoryBarLegend(legendData, legend, width, theme, dark, getChart, current.legend)
+    ? createCategoryLegend(legendData, legend, width, theme, dark, getChart, current.legend)
     : { legend: undefined, height: 0, pager: undefined, wheel: undefined }
   const zoomColor = theme.color ?? '#689FFF'
   const darkSlider = dark

@@ -11,11 +11,45 @@ interface ChartState {
   disposed: boolean[]
   allDisposed: boolean
   option: {
-    series: { data: (number | { name: string; value: number })[] }[]
+    series: { name: string; type: string; data: (number | { name: string; value: number })[] }[]
     title: { text: string }[]
     legend: { selected: Record<string, boolean> }[]
   }
 }
+
+test.describe('category area browser behavior', () => {
+  test.beforeEach(async ({ page }) => open(page, 'category-area'))
+
+  test('removes stale data and helper series with merge requested', async ({ page }) => {
+    const initial = await state(page)
+    const seriesNames = async () => (await state(page)).option.series.map(series => series.name)
+    expect(initial.option.series).toHaveLength(4)
+    await clickButton(page, 'Shrink series')
+    await expect.poll(seriesNames).toEqual(['Base'])
+    await clickButton(page, 'Clear series')
+    await expect.poll(seriesNames).toEqual([])
+    await expect(page.getByTestId('container').locator('svg pattern')).toHaveCount(0)
+    await clickButton(page, 'Restore series')
+    await expect.poll(seriesNames).toEqual(initial.option.series.map(series => series.name))
+    expect((await state(page)).id).toBe(initial.id)
+  })
+
+  test('draws the stacked gap marker and exposes the original sample to callbacks', async ({
+    page,
+  }) => {
+    const expected = { data: { value: null, missingReason: 'Offline' }, value: null }
+    const chart = page.getByTestId('container')
+    await expect(chart.locator('svg pattern[width="4"][height="1"]').first()).toBeAttached()
+    await clickData(page)
+    await expect(chart).toContainText(JSON.stringify(expected))
+    await expect(page.getByTestId('clicks')).toHaveText('1')
+    expect(JSON.parse(await page.getByTestId('payload').innerText())).toEqual({
+      name: 'B',
+      dataIndex: 1,
+      ...expected,
+    })
+  })
+})
 declare global {
   interface Window {
     chartTest: { state: () => ChartState; point: () => { x: number; y: number } }

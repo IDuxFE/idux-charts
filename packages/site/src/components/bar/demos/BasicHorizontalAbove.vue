@@ -29,7 +29,7 @@ const scenarios = [
   {
     key: 'missing',
     label: '数据未上报（单点值缺失）',
-    description: '首个分类未上报，始终显示浅红色底条。悬浮可查看缺报原因。',
+    description: '首个分类未上报，显示随主题切换的缺报底条。悬浮可查看缺报原因。',
   },
   {
     key: 'reference',

@@ -8,6 +8,12 @@ import { cloneDeep, get, merge, set } from 'lodash-es'
 import { isVertical, convertArray, filterEmptyProps, CHART_THEME_TOKEN } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
+import type { CategoryLineProps } from './createCategoryLineOption'
+import type { LineChartDataItem } from './categoryLineData'
+
+type LineChartData = Array<NonNullable<LineSeriesOption['data']>[number] | LineChartDataItem>
+type LineChartSeriesOption = Omit<LineSeriesOption, 'data'> & { data?: LineChartData }
+
 export const lineChartProps = [
   'data',
   'areaStyle',
@@ -20,9 +26,12 @@ export const lineChartProps = [
 
 export interface LineChartProps
   extends
-    BaseChartOption<LineSeriesOption>,
+    BaseChartOption<LineChartSeriesOption>,
     AdditionalChartOption,
-    Pick<LineSeriesOption, (typeof lineChartProps)[number]> {}
+    CategoryLineProps,
+    Pick<LineSeriesOption, Exclude<(typeof lineChartProps)[number], 'data'>> {
+  data?: LineChartData
+}
 
 /** Named caller-facing props for component declarations; defaults are not resolved. */
 export type LineChartPublicProps = KnownProps<LineChartProps>
@@ -62,7 +71,7 @@ const defaultValueAxis = {
 }
 
 export function useLineOption(
-  props: LineSeriesOption,
+  props: LineSeriesOption | ComputedRef<LineSeriesOption>,
   attrsInput: LineChartProps | ShallowRef<LineChartProps>,
 ): ComputedRef<LineChartProps> {
   const providedTheme = inject(CHART_THEME_TOKEN, undefined)
@@ -70,7 +79,7 @@ export function useLineOption(
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
   const mergedSeriesOption = computed<LineSeriesOption>(() => {
-    const option = filterEmptyProps(props)
+    const option = filterEmptyProps(unref(props))
     option.type = 'line'
     return option
   })
