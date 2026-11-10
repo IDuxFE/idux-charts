@@ -1,5 +1,7 @@
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { usePlotTheme, mergePlotTheme } from '../../shared/plotTheme'
+import { useLegendWheel } from '../../shared/useLegendWheel'
+import type { LegendWheelRegion } from '../../shared/useLegendWheel'
 import {
   computed,
   onBeforeUnmount,
@@ -29,11 +31,11 @@ export function useDefaultPieOption(
   const plotTheme = usePlotTheme(() => mergePlotTheme(defaults?.plotTheme, props.plotTheme))
   const instance = getCurrentInstance()
   const element = () => (instance?.proxy?.$refs.chart as { $el?: HTMLElement } | undefined)?.$el
-  const legendPage = shallowRef(0)
+  const legendRow = shallowRef(0)
   watch(
     () => props.data,
     () => {
-      legendPage.value = 0
+      legendRow.value = 0
     },
   )
   const size = shallowRef({ width: 480, height: 180 })
@@ -93,6 +95,7 @@ export function useDefaultPieOption(
   let observedElement: HTMLElement | undefined
   const observe = () => {
     const el = element()
+    bindLegendWheel(automatic.value ? el : undefined)
     if (el === observedElement) return
     observer?.disconnect()
     observedElement = el
@@ -113,9 +116,10 @@ export function useDefaultPieOption(
     },
   )
   onBeforeUnmount(() => observer?.disconnect())
-  const option = computed(() => {
-    if (!automatic.value) return legacy.value
+  const layout = computed(() => {
+    if (!automatic.value) return { option: legacy.value, wheel: undefined }
     const settings = merge({}, defaults, attrs.value)
+    let wheel: LegendWheelRegion | undefined
     const preset = createDefaultPieOption(
       props.data ?? defaults?.data ?? [],
       size.value,
@@ -128,9 +132,12 @@ export function useDefaultPieOption(
         textStyle: settings.textStyle as PlotTextStyle | undefined,
         seriesStyle: props.seriesStyle ?? defaults?.seriesStyle,
         page: {
-          index: legendPage.value,
-          onChange: index => {
-            legendPage.value = index
+          row: legendRow.value,
+          onChange: row => {
+            legendRow.value = row
+          },
+          onWheelRegion: region => {
+            wheel = region
           },
         },
         title: settings.title as import('echarts/components').TitleComponentOption | undefined,
@@ -155,7 +162,9 @@ export function useDefaultPieOption(
     delete result.layoutMode
     delete result.seriesStyle
     delete result.plotTheme
-    return result
+    return { option: result, wheel }
   })
+  const bindLegendWheel = useLegendWheel(() => layout.value.wheel)
+  const option = computed(() => layout.value.option)
   return { option, automatic }
 }
