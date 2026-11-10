@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { IxLineChart } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
 const lineOption: LineChartProps = {

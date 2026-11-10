@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IxLineChart, useLineStyleColor, getAlphaColor } from '@idux/charts'
+import { useLineStyleColor, getAlphaColor } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
 const lineOption: LineChartProps = {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { IxChart } from '@idux/charts'
 import type { ChartProps } from '@idux/charts'
 
 const data = [

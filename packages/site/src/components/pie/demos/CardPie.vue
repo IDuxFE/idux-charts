@@ -1,30 +1,8 @@
 <script setup lang="ts">
-import { IxCard } from '@idux/components/card'
-import { IxHeader } from '@idux/components/header'
-import '@idux/components/card/theme/default.css'
-import '@idux/components/card/style/index.css'
-import '@idux/components/header/theme/default.css'
-import '@idux/components/header/style/index.css'
-
 import type { PieChartProps } from '@idux/charts'
-import { IxPieChart } from '@idux/charts'
-import { IxSpace } from '@idux/components/space'
-import { IxRadio, IxRadioGroup } from '@idux/components/radio'
-import { IxEmpty } from '@idux/components/empty'
-import { IxButton } from '@idux/components/button'
-import { IxIcon, PieChart, Empty, addIconDefinitions } from '@idux/components/icon'
+import { PieChart, Empty, addIconDefinitions } from '@idux/components/icon'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import '@idux/components/space/theme/default.css'
-import '@idux/components/space/style/index.css'
-import '@idux/components/radio/theme/default.css'
-import '@idux/components/radio/style/index.css'
-import '@idux/components/empty/theme/default.css'
-import '@idux/components/empty/style/index.css'
-import '@idux/components/button/theme/default.css'
-import '@idux/components/button/style/index.css'
-import '@idux/components/icon/theme/default.css'
-import '@idux/components/icon/style/index.css'
 
 addIconDefinitions([PieChart, Empty])
 

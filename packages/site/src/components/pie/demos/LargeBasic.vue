@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
-import { IxRadio, IxRadioGroup } from '@idux/components/radio'
-import { IxSwitch } from '@idux/components/switch'
-import '@idux/components/radio/theme/default.css'
-import '@idux/components/radio/style/index.css'
-import '@idux/components/switch/theme/default.css'
-import '@idux/components/switch/style/index.css'
 
 const shape = ref<'pie' | 'ring' | 'rose'>('pie')
 const loading = ref(false)

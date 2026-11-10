@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 import { graphic } from 'echarts/core'
 import type { PieSeriesOption } from 'echarts/charts'

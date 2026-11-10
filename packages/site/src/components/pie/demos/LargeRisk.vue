@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { format } from 'echarts/core'
-import { IxPieChart, seerColorsForRisk, useTooltipsFormatter } from '@idux/charts'
+import { seerColorsForRisk, useTooltipsFormatter } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 
 // 将颜色绑定到等级，筛选或重排数据时仍保留对应的风险颜色。

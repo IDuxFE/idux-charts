@@ -23,7 +23,7 @@ export default defineConfig(({ command, isPreview }) => {
               ? { name, from: '@idux/charts' }
               : undefined
           },
-          IduxResolver({ importStyle: 'css' }),
+          IduxResolver(),
         ],
       }),
     ],

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { IxLineChart, useTooltipsFormatter } from '@idux/charts'
+import { useTooltipsFormatter } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
 const { themeTokens } = useThemeToken()
