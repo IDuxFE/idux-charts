@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { IxSpace } from '@idux/components/space'
-import { IxSwitch } from '@idux/components/switch'
-import { IxLineChart } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 import { ref } from 'vue'
 

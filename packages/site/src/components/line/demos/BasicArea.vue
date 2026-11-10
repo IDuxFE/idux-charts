@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IxLineChart, useLinearGradient } from '@idux/charts'
+import { useLinearGradient } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188]

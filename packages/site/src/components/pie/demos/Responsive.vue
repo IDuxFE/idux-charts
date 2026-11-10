@@ -1,15 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { IxPieChart } from '@idux/charts'
-import { IxSlider } from '@idux/components/slider'
-import { IxRadio, IxRadioGroup } from '@idux/components/radio'
-import { IxSwitch } from '@idux/components/switch'
-import '@idux/components/slider/theme/default.css'
-import '@idux/components/slider/style/index.css'
-import '@idux/components/radio/theme/default.css'
-import '@idux/components/radio/style/index.css'
-import '@idux/components/switch/theme/default.css'
-import '@idux/components/switch/style/index.css'
 
 const width = ref(480)
 const height = ref(240)

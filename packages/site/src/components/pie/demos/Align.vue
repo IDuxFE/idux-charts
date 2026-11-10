@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IxButton } from '@idux/components/button'
-import { IxPieChart } from '@idux/charts'
 import type { PieChartAlign, PieChartProps } from '@idux/charts'
 
 const align = ref<PieChartAlign>('center')

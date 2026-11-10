@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { IxLineChart, useLineStyleColor, useLineChartAreaStripe, getAlphaColor } from '@idux/charts'
+import { useLineStyleColor, useLineChartAreaStripe, getAlphaColor } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 import { computed, ref } from 'vue'
 import { AriaComponent } from 'echarts/components'

@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { IxCard } from '@idux/components/card'
-import { IxHeader } from '@idux/components/header'
-import '@idux/components/card/theme/default.css'
-import '@idux/components/card/style/index.css'
-import '@idux/components/header/theme/default.css'
-import '@idux/components/header/style/index.css'
-
-import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 import { format } from 'echarts/core'
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { Empty, Loading, addIconDefinitions, IxIcon } from '@idux/components/icon'
+import { Empty, Loading, addIconDefinitions } from '@idux/components/icon'
 
 addIconDefinitions([Empty, Loading])
 const { themeTokens } = useThemeToken()
