@@ -76,7 +76,7 @@ const presentation = computed<PieChartProps>(() => ({
     rich: {
       total: {
         fontSize: 24,
-        fontFamily: 'IDuxChartDemoDIN, D-DIN-PRO',
+        fontFamily: 'D-DIN-PRO',
         fontWeight: 400,
         lineHeight: 24,
         color: themeTokens.value.colorTextTitle,

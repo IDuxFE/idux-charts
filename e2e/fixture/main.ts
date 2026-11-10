@@ -12,7 +12,8 @@ import '../../packages/charts/style/index.less'
 const legacy = location.search.includes('legacy-risk')
 const legacyBar = location.search.startsWith('?legacy-bar-')
 // The legacy screenshot predates registration of the numeric demo font.
-Promise.all(legacy ? [] : [loadDemoFont(), loadDemoFont('D-DIN-PRO')]).then(() => {
+const fontReady = legacy ? Promise.resolve() : loadDemoFont()
+fontReady.then(() => {
   createApp(
     legacy
       ? LegacyRiskPie
