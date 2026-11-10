@@ -1,4 +1,5 @@
 import type { PlotTheme, PlotTextStyle } from '../../shared/plotTheme'
+import type { LegendWheelRegion } from '../../shared/useLegendWheel'
 import type { PieSeriesOption } from 'echarts/charts'
 type PieDataItemOption = Extract<NonNullable<PieSeriesOption['data']>[number], { name?: unknown }>
 import { format } from 'echarts/core'
@@ -40,7 +41,11 @@ export function createDefaultPieOption(
     label?: PieSeriesOption['label']
     markArea?: PieSeriesOption['markArea']
     color?: string[]
-    page?: { index: number; onChange: (index: number) => void }
+    page?: {
+      row: number
+      onChange: (row: number) => void
+      onWheelRegion?: (region: LegendWheelRegion) => void
+    }
   } = {},
 ): PieChartProps {
   const theme = presentation.plotTheme ?? {}
@@ -350,8 +355,12 @@ export function createDefaultPieOption(
   }
   const paged = showLegend && data.length > columns * rowCount
   const pagerHeight = paged ? 24 : 0
-  const lastPage = Math.max(0, Math.ceil((data.length - (columns - 1) * rowCount) / rowCount) - 1)
-  const pageIndex = Math.max(0, Math.min(presentation.page?.index ?? 0, lastPage))
+  const lastRow = Math.max(0, data.length - columns * rowCount)
+  const row = Math.max(0, Math.min(presentation.page?.row ?? 0, lastRow))
+  const scrollBy = (rows: number) => {
+    const next = Math.max(0, Math.min(row + rows, lastRow))
+    if (next !== row) presentation.page?.onChange(next)
+  }
   const legendHeight = !showLegend
     ? 0
     : rowCount * legendLineHeight + Math.max(0, rowCount - 1) * itemGap + 10
@@ -382,6 +391,15 @@ export function createDefaultPieOption(
     titleWidth,
     showLegend ? (Math.min(columns, data.length) - 1) * layout.columnStep + columnWidth : 0,
   )
+  if (paged) {
+    presentation.page?.onWheelRegion?.({
+      left: layout.summaryLeft,
+      top: layout.legendTop,
+      width: (columns - 1) * layout.columnStep + columnWidth,
+      height: legendHeight + pagerHeight,
+      scrollBy,
+    })
+  }
 
   // Reserve only visible text, then fit the circle into the remaining rectangle.
   // With a legend, preserve the original Basic proportions. Without one,
@@ -570,7 +588,7 @@ export function createDefaultPieOption(
         bottom: 'auto',
         height: scroll ? layout.legendHeight - 10 + 24 : 'auto',
         pageFormatter: () => '',
-        ...(paged && last ? { scrollDataIndex: pageIndex * rowCount } : {}),
+        ...(paged && last ? { scrollDataIndex: row } : {}),
         pageButtonGap: 0,
         pageTextStyle: { fontSize: 24, color: 'transparent' },
         pageIconSize: 0,
@@ -658,7 +676,7 @@ export function createDefaultPieOption(
         },
       },
       ...[false, true].map((next, index) => {
-        const enabled = next ? pageIndex < lastPage : pageIndex > 0
+        const enabled = next ? row < lastRow : row > 0
         return {
           id: `ix-pie-pager-${index}`,
           type: 'group' as const,
@@ -673,7 +691,7 @@ export function createDefaultPieOption(
             index * 28,
           y: layout.legendTop + layout.legendHeight,
           z: 10,
-          onclick: () => presentation.page?.onChange(pageIndex + (next ? 1 : -1)),
+          onclick: () => scrollBy(next ? rowCount : -rowCount),
           children: [
             {
               type: 'rect' as const,
