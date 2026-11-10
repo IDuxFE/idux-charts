@@ -113,7 +113,7 @@ for (const kind of ['bar', 'line', 'pie']) {
       await expect(page.getByTestId('ready')).toHaveText('2')
       expect((await state(page)).id).not.toBe(initial.id)
       await clickButton(page, 'Toggle loading')
-      await expect(page.getByTestId('container')).toContainText('加载中...')
+      await expect(page.getByTestId('container')).toContainText('Loading...')
       await clickButton(page, 'Change renderer')
       await expect(page.getByTestId('ready')).toHaveText('3')
       await expect(page.getByTestId('container').locator('canvas')).toBeVisible()

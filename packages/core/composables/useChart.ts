@@ -17,7 +17,7 @@ import { init, use } from 'echarts/core'
 import type { EChartsType } from 'echarts/core'
 import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
 
-// 这个图形需要单独注册
+// Register the pictorial series used by stripe helpers.
 use([PictorialBarChart])
 
 import { createTooltipTheme } from './tooltipTheme'
@@ -27,7 +27,7 @@ import { CHART_THEME_TOKEN } from '../themes/token'
 
 export type MaybeRef<T> = T | Ref<T>
 
-const defaultLoading = { text: '加载中...' }
+const defaultLoading = { text: 'Loading...' }
 
 export function useChart<U extends ChartProps>(
   options: MaybeRef<U>,

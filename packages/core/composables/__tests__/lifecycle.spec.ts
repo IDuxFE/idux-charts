@@ -144,14 +144,14 @@ describe('useChart lifecycle', () => {
     options.loading = true
     await nextTick()
     expect(instance.showLoading).toHaveBeenLastCalledWith({
-      text: '加载中...',
+      text: 'Loading...',
       textColor: '#F4F8FF',
       maskColor: 'rgba(10, 12, 15, 0.8)',
     })
     options.loading = { maskColor: 'transparent', textColor: 'red' }
     await nextTick()
     expect(instance.showLoading).toHaveBeenLastCalledWith({
-      text: '加载中...',
+      text: 'Loading...',
       textColor: 'red',
       maskColor: 'transparent',
     })
@@ -161,7 +161,7 @@ describe('useChart lifecycle', () => {
     const options = reactive<any>({ loading: true })
     setup(options)
     await nextTick()
-    expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: '加载中...' })
+    expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: 'Loading...' })
     options.loading = { text: 'Working', color: 'red' }
     await nextTick()
     expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: 'Working', color: 'red' })
@@ -190,7 +190,7 @@ describe('useChart lifecycle', () => {
       expect(instances[0].dispose).toHaveBeenCalledTimes(1)
       expect(chart.chartRef.value).toBe(instances[1])
       expect(instances[1].setOption.mock.lastCall?.[0]).toEqual({ series: options.series })
-      expect(instances[1].showLoading).toHaveBeenCalledWith({ text: '加载中...' })
+      expect(instances[1].showLoading).toHaveBeenCalledWith({ text: 'Loading...' })
       expect(instances[1].group).toBe('linked')
       instances[1].emit('click', { name: 'A', value: 2 })
       expect(click).toHaveBeenCalledExactlyOnceWith({ name: 'A', value: 2 })
