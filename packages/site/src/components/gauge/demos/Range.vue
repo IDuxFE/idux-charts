@@ -4,7 +4,7 @@ const value = ref(48)
 </script>
 <template>
   <IxSpace vertical class="gauge-range">
-    <IxRadioGroup v-model:value="value" buttoned aria-label="容量">
+    <IxRadioGroup v-model:value="value" buttoned size="sm" aria-label="容量">
       <IxRadio :key="0">0 GB</IxRadio>
       <IxRadio :key="48">48 GB</IxRadio>
       <IxRadio :key="64">64 GB</IxRadio>

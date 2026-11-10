@@ -100,11 +100,11 @@ const presentation = computed<PieChartProps>(() => ({
 <template>
   <IxSpace vertical class="basic-pie-demo">
     <div class="basic-pie-demo-controls">
-      <IxRadioGroup v-model:value="totalMode" buttoned aria-label="总数展示">
+      <IxRadioGroup v-model:value="totalMode" buttoned size="sm" aria-label="总数展示">
         <IxRadio key="light">轻总数</IxRadio>
         <IxRadio key="heavy">重总数</IxRadio>
       </IxRadioGroup>
-      <IxRadioGroup v-model:value="chartStatus" buttoned>
+      <IxRadioGroup v-model:value="chartStatus" buttoned size="sm">
         <IxRadio key="normal">正常</IxRadio>
         <IxRadio key="allZero">全部数值为 0</IxRadio>
         <IxRadio key="missing">数据缺失</IxRadio>
@@ -119,7 +119,9 @@ const presentation = computed<PieChartProps>(() => ({
           <template #description>
             <IxSpace :size="0">
               <span class="basic-pie-demo-empty-label">加载失败，</span>
-              <IxButton mode="link" @click="reloadChart" style="display: flex">重新加载</IxButton>
+              <IxButton mode="link" size="sm" @click="reloadChart" style="display: flex"
+                >重新加载</IxButton
+              >
             </IxSpace>
           </template>
         </IxEmpty>

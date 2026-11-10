@@ -40,17 +40,17 @@ onBeforeUnmount(cancel)
 <template>
   <IxSpace vertical class="gauge-basic">
     <IxSpace wrap>
-      <IxRadioGroup v-model:value="size" buttoned aria-label="仪表尺寸">
+      <IxRadioGroup v-model:value="size" buttoned size="sm" aria-label="仪表尺寸">
         <IxRadio key="lg">大</IxRadio><IxRadio key="md">中</IxRadio>
       </IxRadioGroup>
-      <IxRadioGroup v-model:value="state" buttoned aria-label="数据状态">
+      <IxRadioGroup v-model:value="state" buttoned size="sm" aria-label="数据状态">
         <IxRadio key="normal">正常</IxRadio><IxRadio key="zero">数值为 0</IxRadio>
         <IxRadio key="empty">空状态</IxRadio><IxRadio key="loading">加载中</IxRadio>
       </IxRadioGroup>
     </IxSpace>
     <div class="stage">
       <IxEmpty v-if="state === 'empty'" simple description="暂无数据">
-        <IxButton mode="link" @click="reload">重新加载</IxButton>
+        <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
       </IxEmpty>
       <div
         v-else-if="state === 'loading'"

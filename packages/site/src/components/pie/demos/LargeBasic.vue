@@ -20,13 +20,13 @@ const shapeOption = computed<PieChartProps>(() => ({
 <template>
   <div>
     <div class="large-pie-controls">
-      <IxRadioGroup v-model:value="shape" buttoned aria-label="大尺寸图表形态">
+      <IxRadioGroup v-model:value="shape" buttoned size="sm" aria-label="大尺寸图表形态">
         <IxRadio key="pie">实心</IxRadio>
         <IxRadio key="ring">环形</IxRadio>
         <IxRadio key="rose">玫瑰</IxRadio>
       </IxRadioGroup>
       <label class="large-pie-loading"
-        >加载中 <IxSwitch v-model:checked="loading" aria-label="大尺寸图表加载"
+        >加载中 <IxSwitch v-model:checked="loading" size="sm" aria-label="大尺寸图表加载"
       /></label>
     </div>
     <!-- align 保留自动布局；大尺寸容器无需手动定位标题或图例。 -->

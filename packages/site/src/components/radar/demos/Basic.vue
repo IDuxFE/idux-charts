@@ -136,6 +136,7 @@ onBeforeUnmount(cancelReload)
         <IxSelect
           v-model:value="objectCount"
           :dataSource="objectOptions"
+          size="sm"
           :style="{ width: '80px' }"
           aria-label="对象个数"
         />
@@ -145,20 +146,21 @@ onBeforeUnmount(cancelReload)
         <IxSelect
           v-model:value="dimensionCount"
           :dataSource="dimensionOptions"
+          size="sm"
           :style="{ width: '80px' }"
           aria-label="变量个数"
         />
       </IxSpace>
       <IxSpace align="center"
         ><span>网格线样式</span>
-        <IxRadioGroup v-model:value="gridStyle" buttoned>
+        <IxRadioGroup v-model:value="gridStyle" buttoned size="sm">
           <IxRadio key="area">线面</IxRadio>
           <IxRadio key="line">线框</IxRadio>
         </IxRadioGroup>
       </IxSpace>
       <IxSpace align="center"
         ><span>网格线间距</span>
-        <IxRadioGroup v-model:value="gridSpacing" buttoned>
+        <IxRadioGroup v-model:value="gridSpacing" buttoned size="sm">
           <IxRadio :key="20">紧凑</IxRadio>
           <IxRadio :key="30">适中</IxRadio>
           <IxRadio :key="40">宽松</IxRadio>
@@ -166,13 +168,13 @@ onBeforeUnmount(cancelReload)
       </IxSpace>
       <IxSpace align="center"
         ><span>图形样式</span>
-        <IxRadioGroup v-model:value="shapeStyle" buttoned>
+        <IxRadioGroup v-model:value="shapeStyle" buttoned size="sm">
           <IxRadio key="line">线性</IxRadio>
           <IxRadio key="area">面性</IxRadio>
         </IxRadioGroup>
       </IxSpace>
     </IxSpace>
-    <IxRadioGroup v-model:value="chartStatus" buttoned aria-label="图表状态">
+    <IxRadioGroup v-model:value="chartStatus" buttoned size="sm" aria-label="图表状态">
       <IxRadio key="normal">正常</IxRadio>
       <IxRadio key="allZero">全部数值为 0</IxRadio>
       <IxRadio key="empty">空状态</IxRadio>
@@ -185,7 +187,7 @@ onBeforeUnmount(cancelReload)
             ><template #description>
               <IxSpace align="center"
                 ><span>暂无数据</span>
-                <IxButton mode="link" @click="reloadChart">重新加载</IxButton>
+                <IxButton mode="link" size="sm" @click="reloadChart">重新加载</IxButton>
               </IxSpace>
             </template></IxEmpty
           >
