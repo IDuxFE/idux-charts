@@ -123,18 +123,11 @@ export default defineConfig({
             demos = readdirSync(demoDir)
               .map(demo => {
                 const src = resolve(demoDir, demo)
-                // Pie examples declare their presentation order in archive-meta.
-                // Preserve the existing file order for other component pages.
-                const meta =
-                  id === 'pie'
-                    ? readFileSync(src, 'utf-8').match(
-                        /<archive-meta[^>]*>([\s\S]*?)<\/archive-meta>/,
-                      )
-                    : undefined
-                const index = meta
-                  ? (JSON.parse(meta[1]).index ?? 999)
-                  : Number(demo.startsWith('Legacy'))
-                return { src, index }
+                const meta = readFileSync(src, 'utf-8').match(
+                  /<archive-meta[^>]*>([\s\S]*?)<\/archive-meta>/,
+                )
+                const index = meta ? JSON.parse(meta[1]).index : undefined
+                return { src, index: index ?? Infinity }
               })
               .sort((a, b) => a.index - b.index)
               .map(demo => demo.src)

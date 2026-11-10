@@ -10,6 +10,23 @@
   font-size: 12px;
 }
 
+.charts-tooltips-columns {
+  display: flex;
+  gap: 8px;
+  max-width: min(var(--ix-chart-tooltip-columns-max-width, 100vw), calc(100vw - 48px));
+  max-height: calc(100vh - 64px);
+  overflow: auto;
+}
+
+.charts-tooltips-column {
+  flex: 0 0 auto;
+  min-width: 180px;
+
+  .charts-tooltips-item {
+    gap: 12px;
+  }
+}
+
 .charts-tooltips-item {
   position: relative;
   box-sizing: border-box;

@@ -8,6 +8,16 @@ import { cloneDeep, get, set, merge } from 'lodash-es'
 import { isVertical, convertArray, filterEmptyProps } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
+import type { CategoryBarProps } from './createCategoryBarOption'
+
+export const categoryBarProps = [
+  'categories',
+  'layout',
+  'referenceLine',
+  'zeroText',
+  'plotTheme',
+] as const
+
 export const barChartProps = [
   'data',
   'barGap',
@@ -18,11 +28,24 @@ export const barChartProps = [
   'stack',
 ] as const
 
+type NativeBarData = NonNullable<BarSeriesOption['data']>
+
+/** A category value may carry a reason when its measurement is missing. */
+export type BarChartDataItem = Extract<NativeBarData[number], { value?: unknown }> & {
+  missingReason?: string
+}
+
+type BarChartData = Array<NativeBarData[number] | BarChartDataItem>
+type BarChartSeriesOption = Omit<BarSeriesOption, 'data'> & { data?: BarChartData }
+
 export interface BarChartProps
   extends
-    BaseChartOption<BarSeriesOption>,
+    BaseChartOption<BarChartSeriesOption>,
     AdditionalChartOption,
-    Pick<BarSeriesOption, (typeof barChartProps)[number]> {}
+    CategoryBarProps,
+    Pick<BarSeriesOption, Exclude<(typeof barChartProps)[number], 'data'>> {
+  data?: BarChartData
+}
 
 /** Named caller-facing props for component declarations; defaults are not resolved. */
 export type BarChartPublicProps = KnownProps<BarChartProps>
@@ -58,17 +81,17 @@ const defaultValueAxis = {
 }
 
 export function useBarOption(
-  props: BarSeriesOption,
+  props: BarSeriesOption | ComputedRef<BarSeriesOption>,
   attrsInput: BarChartProps | ShallowRef<BarChartProps>,
 ): ComputedRef<BarChartProps> {
   const injectProps = inject(BAR_CHART_TOKEN, null)
   const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
 
   const mergedSeriesOption = computed<BarSeriesOption>(() => {
-    const option = filterEmptyProps(props)
+    const option = filterEmptyProps(unref(props))
     option.type = 'bar'
 
-    // 这是为了让鼠标悬浮到 bar 上时不要出现高亮，设计师要求
+    // Disable the native hover highlight unless the caller configures it.
     if (!option.emphasis) {
       option.emphasis = {
         disabled: true,
@@ -82,12 +105,12 @@ export function useBarOption(
     const attrs = unref(attrsInput)
     const option = merge({}, mergedDefaultProps, attrs)
     if (attrs.title && !get(attrs, ['grid', 'top'])) {
-      // 如果有 title, 额外增加 24px
+      // Reserve room for the title.
       const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
       set(option, ['grid', 'top'], top)
     }
     if (attrs.dataZoom && !get(attrs, ['grid', 'bottom'])) {
-      // 如果有 dataZoom, 额外增加 32px
+      // Reserve room for the zoom slider.
       const bottom = get(mergedDefaultProps, ['grid', 'bottom'], 32) + 32
       set(option, ['grid', 'bottom'], bottom)
     }
@@ -98,7 +121,6 @@ export function useBarOption(
       set(option, ['legend'], undefined)
     }
     if (!get(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'])) {
-      // 当 series 为空时，默认为 1
       const seriesLength = convertArray(attrs.series).length || 1
       const axisPointerWidth = seriesLength * defaultBarWidth * (1 + defaultBarGap) + 8
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
