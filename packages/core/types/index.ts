@@ -28,31 +28,31 @@ export type KnownProps<Props> = {
 
 export interface AdditionalChartOption<T extends EChartsType = EChartsType> {
   /**
-   * 是否开启自动 resize
+   * Whether to resize when the container changes size.
    */
   autoResize?: boolean
   /**
-   * 图表的分组
+   * Group ID for linked charts.
    */
   group?: string
   /**
-   * 图表用于初始化的配置
+   * Options passed to ECharts init.
    */
   initOption?: ChartInitOption
   /**
-   * 是否显示加载中状态
+   * Show a loading overlay. Pass an object to customize the overlay, including its text.
    */
   loading?: boolean | object
   /**
-   * 图表实例 setOption 的第二个参数
+   * Options passed as the second argument to ECharts setOption.
    */
   setOptionOpts?: SetOptionOpts
   /**
-   * 图表的主题
+   * Theme name or object passed to ECharts init.
    */
   theme?: ChartTheme
   /**
-   * 图表渲染完成执行回调
+   * Called when the chart instance is initialized.
    */
   onReady?: (chart: T) => void
 

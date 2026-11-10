@@ -4,7 +4,7 @@ import { getAlphaColor } from '@idux/charts-core'
 
 export function useLineStyleColor(color: string = '#458FFF') {
   return {
-    // 配置折线图的两边逐渐透明的效果。
+    // Fade the line toward both ends.
     type: 'linear',
     x: 0,
     y: 0,
@@ -13,25 +13,25 @@ export function useLineStyleColor(color: string = '#458FFF') {
     colorStops: [
       {
         offset: 0,
-        color: getAlphaColor(color, 0.1), // 左边透明
+        color: getAlphaColor(color, 0.1),
       },
       {
         offset: 0.2,
-        color: getAlphaColor(color, 0.9), // 左边透明
+        color: getAlphaColor(color, 0.9),
       },
       {
         offset: 0.5,
-        color: getAlphaColor(color, 1), // 中间不透明
+        color: getAlphaColor(color, 1),
       },
       {
         offset: 0.8,
-        color: getAlphaColor(color, 0.9), // 右边透明
+        color: getAlphaColor(color, 0.9),
       },
       {
         offset: 1,
-        color: getAlphaColor(color, 0.1), // 右边透明
+        color: getAlphaColor(color, 0.1),
       },
     ],
-    globalCoord: false, // 缺省为 false
+    globalCoord: false,
   } as ZRColor
 }
