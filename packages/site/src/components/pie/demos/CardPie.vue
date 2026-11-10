@@ -89,7 +89,7 @@ const presentation = computed<PieChartProps>(() => ({
 </script>
 <template>
   <IxSpace vertical block class="basic-pie-demo">
-    <IxRadioGroup v-model:value="chartStatus" buttoned>
+    <IxRadioGroup v-model:value="chartStatus" buttoned size="sm">
       <IxRadio key="normal">正常</IxRadio>
       <IxRadio key="allZero">全部数值为 0</IxRadio>
       <IxRadio key="missing">数据缺失</IxRadio>
@@ -101,7 +101,9 @@ const presentation = computed<PieChartProps>(() => ({
     <IxCard shadow class="basic-pie-demo-card">
       <template #header>
         <IxHeader title="资产概览" size="sm">
-          <template #suffix><IxButton mode="link" @click="reloadChart">刷新</IxButton></template>
+          <template #suffix
+            ><IxButton mode="link" size="sm" @click="reloadChart">刷新</IxButton></template
+          >
         </IxHeader>
       </template>
       <div class="basic-pie-demo-chart" :style="chartStyle">
@@ -110,7 +112,9 @@ const presentation = computed<PieChartProps>(() => ({
             <template #description>
               <IxSpace :size="0">
                 <span class="basic-pie-demo-empty-label">加载失败，</span>
-                <IxButton mode="link" @click="reloadChart" style="display: flex">重新加载</IxButton>
+                <IxButton mode="link" size="sm" @click="reloadChart" style="display: flex"
+                  >重新加载</IxButton
+                >
               </IxSpace>
             </template>
           </IxEmpty>

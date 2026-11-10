@@ -50,22 +50,22 @@ const businessTitle = computed(() => ({
       </div>
       <div class="control">
         <span>数据量</span>
-        <IxRadioGroup v-model:value="count" buttoned aria-label="数据量"
+        <IxRadioGroup v-model:value="count" buttoned size="sm" aria-label="数据量"
           ><IxRadio :key="6">6 项</IxRadio><IxRadio :key="30">30 项</IxRadio></IxRadioGroup
         >
       </div>
       <div class="control">
         <span>形态</span>
-        <IxRadioGroup v-model:value="shape" buttoned aria-label="形态"
+        <IxRadioGroup v-model:value="shape" buttoned size="sm" aria-label="形态"
           ><IxRadio key="pie">实心</IxRadio><IxRadio key="ring">环图</IxRadio
           ><IxRadio key="rose">玫瑰图</IxRadio></IxRadioGroup
         >
       </div>
       <div class="control"
-        ><span>图例</span><IxSwitch v-model:checked="legend" aria-label="图例"
+        ><span>图例</span><IxSwitch v-model:checked="legend" size="sm" aria-label="图例"
       /></div>
       <div class="control"
-        ><span>业务标题</span><IxSwitch v-model:checked="title" aria-label="业务标题"
+        ><span>业务标题</span><IxSwitch v-model:checked="title" size="sm" aria-label="业务标题"
       /></div>
     </div>
     <div class="stage" :style="{ width: `${width}px`, height: `${height}px` }">

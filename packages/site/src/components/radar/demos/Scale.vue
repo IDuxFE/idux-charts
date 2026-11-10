@@ -18,11 +18,11 @@ const data = [
 <template>
   <IxSpace vertical block :size="16" class="radar-scale-demo">
     <IxSpace wrap :size="16">
-      <IxRadioGroup v-model:value="direction" buttoned>
+      <IxRadioGroup v-model:value="direction" buttoned size="sm">
         <IxRadio key="clockwise">顺时针</IxRadio>
         <IxRadio key="counterclockwise">逆时针</IxRadio>
       </IxRadioGroup>
-      <IxRadioGroup v-model:value="status" buttoned>
+      <IxRadioGroup v-model:value="status" buttoned size="sm">
         <IxRadio key="ready">展示数据</IxRadio>
         <IxRadio key="loading">原生加载遮罩</IxRadio>
       </IxRadioGroup>

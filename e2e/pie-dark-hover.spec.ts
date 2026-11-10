@@ -22,16 +22,26 @@ for (const title of [
     })
     const chart = demo.locator('[_echarts_instance_]')
     const tooltip = chart.locator('div[style*="z-index: 9999999"]')
+    const decorated = title === '大尺寸：多层装饰环图'
     for (const dark of [true, false]) {
       await chart.scrollIntoViewIfNeeded()
+      if (decorated)
+        await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
       await expect(chart.locator('svg')).toBeVisible()
-      // Sweep the plot itself, not the legend, to trigger real sector emphasis.
+      // Move across the plot at mid-height to trigger real sector emphasis.
       await expect(async () => {
         await page.mouse.move(0, 0)
         const box = (await chart.boundingBox())!
-        for (let x = 8; x < Math.min(300, box.width / 2); x += 8) {
-          await page.mouse.move(box.x + x, box.y + box.height / 2)
-          if (await tooltip.isVisible()) break
+        const centerY = box.y + box.height / 2
+        if (decorated) {
+          // The interactive ring spans 70% to 80% of the radius between silent layers.
+          const radius = Math.min(box.width, box.height) / 2
+          await page.mouse.move(box.x + box.width / 2 - radius * 0.75, centerY)
+        } else {
+          for (let x = 8; x < Math.min(300, box.width / 2); x += 8) {
+            await page.mouse.move(box.x + x, centerY)
+            if (await tooltip.isVisible()) break
+          }
         }
         await expect(tooltip).toBeVisible({ timeout: 500 })
       }).toPass({ timeout: 5000 })

@@ -50,6 +50,7 @@ const legend: PieChartProps['legend'] = {
       <IxButton
         v-for="position in positions"
         :key="position"
+        size="sm"
         :mode="align === position ? 'primary' : 'default'"
         :aria-pressed="align === position"
         @click="align = position"

@@ -105,7 +105,7 @@ const presentation = computed<PieChartProps>(() => ({
         />
         <output>{{ categoryCount }} 个分类</output>
       </label>
-      <IxRadioGroup v-model:value="chartStatus" buttoned>
+      <IxRadioGroup v-model:value="chartStatus" buttoned size="sm">
         <IxRadio key="normal">正常</IxRadio>
         <IxRadio key="allZero">全部数值为 0</IxRadio>
         <IxRadio key="missing">数据缺失</IxRadio>
@@ -120,7 +120,9 @@ const presentation = computed<PieChartProps>(() => ({
           <template #description>
             <IxSpace :size="0">
               <span class="basic-pie-demo-empty-label">加载失败，</span>
-              <IxButton mode="link" @click="reloadChart" style="display: flex">重新加载</IxButton>
+              <IxButton mode="link" size="sm" @click="reloadChart" style="display: flex"
+                >重新加载</IxButton
+              >
             </IxSpace>
           </template>
         </IxEmpty>
