@@ -1,5 +1,11 @@
 # @idux/charts-core
 
+## 1.3.0
+
+### Patch Changes
+
+- 98141f5: Use an English fallback for the built-in loading overlay. Applications can provide localized text through `loading.text`.
+
 ## 1.2.1
 
 ### Patch Changes

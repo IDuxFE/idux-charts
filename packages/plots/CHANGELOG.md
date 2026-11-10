@@ -1,5 +1,19 @@
 # @idux/charts-plots
 
+## 1.3.0
+
+### Minor Changes
+
+- 98141f5: Add an opt-in category layout for bar charts with zoom-aware bar widths, horizontal tracks, separate zero and missing data states, per-point `missingReason`, reference lines behind the bars, and responsive legends.
+- 98141f5: Add opt-in category layouts for line and area charts with responsive legends, zoom controls, reference lines, and missing-data markers and bands. Shrinking or clearing data removes generated series and overlays. Tooltip and event callbacks receive the original sample even when the chart draws an interpolated point.
+
+  Page overflowing pie legends by row to keep more categories accessible in compact layouts.
+
+### Patch Changes
+
+- Updated dependencies [98141f5]
+  - @idux/charts-core@1.3.0
+
 ## 1.2.1
 
 ### Patch Changes
