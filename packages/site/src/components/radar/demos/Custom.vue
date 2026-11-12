@@ -19,7 +19,7 @@ const data = [
     areaStyle: { opacity: 0 },
   },
 ]
-// 顶层 radar 会整体替换，先使用构造函数保留默认配置及顺时针映射。
+// 构造函数生成顺时针排列的维度和系列，下面再按主题定制网格样式。
 const base = createRadarOption({ indicator, data, clockwise: true, area: true, radius: '60%' })
 const { themeTokens } = useThemeToken()
 const option = computed<RadarChartProps>(() => ({

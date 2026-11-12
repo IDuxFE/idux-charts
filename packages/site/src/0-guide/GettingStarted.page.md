@@ -40,7 +40,7 @@ const data = [123, 324, 156]
 </template>
 ```
 
-导入图表组件时会注册该组件内置的 ECharts 模块。Vue 3 可在 `<script setup>` 中直接使用，也可调用 `app.component('IxLineChart', IxLineChart)` 全局注册。Vue 2 可用组件的 `components: { IxLineChart }` 局部注册，或调用 `Vue.component('IxLineChart', IxLineChart)` 全局注册。
+导入图表组件时会注册该组件内置的 ECharts 模块。Vue 3 可在 `<script setup>` 中直接使用，或通过 `app.use(IxLineChart)` 全局注册。Vue 2 可用 `components: { IxLineChart }` 局部注册，或通过 `Vue.use(IxLineChart)` 全局注册。`app.component` 和 `Vue.component` 也可以用于全局注册。
 
 ## 应用主题
 
@@ -90,3 +90,12 @@ provide(
 ## TypeScript 配置类型
 
 从 `@idux/charts` 导入 `BarChartProps`、`LineChartProps` 等类型来声明配置对象。编写二次封装时，可用对应的 `*ChartPublicProps` 提取具名属性类型。
+
+## 升级注意事项
+
+常用的组件导入、`v-bind` 和 `onReady` 用法可直接沿用。使用以下自定义配置时，按对应规则检查。
+
+- **数据和分类轴**。对象按字段合并，数组整体替换。传入 `series[].data` 时，每个系列应提供完整数据。分类 Bar 和 Line / Area 的分类标签由 `categories` 决定。原生 Pie 的默认合计按最终生效的系列数据计算，可用 `title: null` 清除标题。
+- **Tooltip**。调用 `useTooltipsFormatter` 时传原始文本，由工具统一转义。需要渲染自定义 HTML 时，可直接提供 `tooltip.formatter`。Bar 和 Line 原生布局的默认 Tooltip 向 `tooltip.valueFormatter` 传入数值轴上的测量值。时间轴数据如 `['2026-01-01', 10]` 会传入 `10`。
+- **默认配置和更新**。`BAR_CHART_TOKEN` 和 `LINE_CHART_TOKEN` 也会作用于分类布局。内置布局在删除配置时会应用完整配置清理旧图形。即使显式设置 `notMerge: false`，需要清理时仍会替换更新。单独修改 `setOptionOpts` 也会应用到当前配置。
+- **背景色和实例**。Gauge 和 LiquidFill 兼容旧的 `backgroundColor`。新代码可分别使用 `trackColor` 和 `containerColor`，整张图的背景使用 `chartBackgroundColor`。组件挂载后可通过模板 ref 调用 `getEChartsInstance()`。切换主题或初始化配置后，使用 `onReady` 回调或模板 ref 获取新实例。

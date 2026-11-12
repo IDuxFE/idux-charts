@@ -63,9 +63,9 @@ const option: LineChartProps = {
 ## 配置与主题
 
 - `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption` 提供纯配置构建函数。
-- `BAR_CHART_TOKEN`、`LINE_CHART_TOKEN`、`PIE_CHART_TOKEN` 可通过 Vue `provide` 设置对应图表的共享配置。
-- Pie 自动布局、Radar、Gauge、LiquidFill 支持 `plotTheme`，可用 `PLOT_THEME_TOKEN` 提供响应式共享默认值；纯配置构建函数需要显式传入 `plotTheme`。
-- 所有图表支持 ECharts 的 `theme`；Bar、Line 不消费 `plotTheme`，继续使用 ECharts 样式配置。
+- `BAR_CHART_TOKEN`、`LINE_CHART_TOKEN`、`PIE_CHART_TOKEN` 通过 Vue `provide` 为对应图表的原生和内置布局提供默认配置。
+- 分类 Bar、Line / Area、自动 Pie、Radar、Gauge 和 LiquidFill 支持 `plotTheme`。用 `PLOT_THEME_TOKEN` 提供响应式默认值，直接调用纯配置构建函数时传入所需的 `plotTheme`。
+- 配置对象按字段合并，数组整体替换。所有组件的模板 ref 均可调用 `getEChartsInstance()`。
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。此包自身不输出 CSS；需要这些样式时，安装 `@idux/charts` 并导入该样式文件，或由应用提供对应样式。
 
