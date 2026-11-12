@@ -2,19 +2,27 @@
 title: API
 ---
 
-面积图使用 [IxLineChart](/components/line) 的 `area`、`smooth` 和 `stack`，与折线图共用数据、缩略轴、图例和缺失点处理。传入 `area` 使用渐变填充，传入 `area="striped"` 使用条纹填充。多条系列使用相同的 `stack` 名称即可堆叠。
+### 面积图
 
-面积图的深浅条纹各宽 2 px。堆叠面积的填充从层顶延续到层底，单系列面积的填充从面积顶部渐隐至底边。
+使用 <a href="./line">IxLineChart</a>，传入 `categories` 启用分类布局。设置 `area` 使用渐变填充，设置 `area="striped"` 使用条纹填充。用 `smooth` 平滑曲线，用 `series[].stack` 为各堆叠系列指定相同的组名。原生配置通过 `areaStyle` 添加填充。
 
 ```vue
-<IxLineChart
-  :categories="['07-01', '07-02', '07-03']"
-  :series="[
-    { name: '迅雷', data: [24, 30, 36], stack: 'total' },
-    { name: '微信', data: [16, 18, 29], stack: 'total' },
-  ]"
-  area="striped"
-  :data-zoom="{ type: 'slider' }"
-  style="height: 320px"
-/>
+<script setup lang="ts">
+import { IxLineChart, type LineChartProps } from '@idux/charts'
+
+const option: LineChartProps = {
+  categories: ['周一', '周二', '周三'],
+  area: 'striped',
+  series: [
+    { name: '上行', data: [24, 30, 36], stack: 'traffic' },
+    { name: '下行', data: [16, 18, 29], stack: 'traffic' },
+  ],
+}
+</script>
+
+<template>
+  <IxLineChart v-bind="option" style="height: 320px" />
+</template>
 ```
+
+用堆叠面积展示总量及各系列的贡献。希望比较各系列的走势时，可用折线减少填充区域的遮挡。数据、图例、缩略轴和缺报处理与折线图共用。
