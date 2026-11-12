@@ -1,22 +1,14 @@
-import type {
-  DefaultLabelFormatterCallbackParams,
-  XAXisComponentOption,
-  YAXisComponentOption,
-} from 'echarts'
+import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
 import type { EChartsType } from 'echarts/core'
 import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
-import { escape, pick } from 'lodash-es'
-import {
-  convertArray,
-  filterEmptyProps,
-  getAlphaColor,
-  getTooltipsColor,
-  useTooltipsFormatter,
-} from '@idux/charts-core'
+import { pick } from 'lodash-es'
+import { convertArray, filterEmptyProps, getAlphaColor, getTooltipsColor } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
 import { cartesianGridBounds } from '../../shared/cartesian'
 import { mergePlotOptions } from '../../shared/plotOptions'
+import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
+import type { PlotTooltipParams } from '../../shared/plotTooltip'
 import type { PlotTheme } from '../../shared/plotTheme'
 import { createReferenceSeries, referenceLegendIcon } from '../../shared/referenceLine'
 import type { ReferenceLine } from '../../shared/referenceLine'
@@ -438,43 +430,38 @@ export function createCategoryBarOption(
                 : 'rgba(129,130,136,0.2)',
           },
         },
-        formatter: (
-          input: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[],
-        ) => {
-          const params = convertArray(input).filter(param => param.seriesType === 'bar')
-          if (!params.length) return ''
-          const reasons: string[] = []
-          const rows = params.flatMap(param => {
-            const measurement = scalarValue(param.data)
-            if (isMissing(measurement)) {
-              const reason = missingReason(param.data)
-              const prefix = bars.length > 1 ? `${escape(param.seriesName)}: ` : ''
-              reasons.push(`<div>${prefix}${escape(reason || '–')}</div>`)
-              return []
-            }
-            const formatted =
-              (typeof measurement === 'number' || typeof measurement === 'string') &&
-              typeof tooltip?.valueFormatter === 'function'
-                ? tooltip.valueFormatter(Number(measurement), param.dataIndex)
-                : value?.name
-                  ? `${measurement} ${value.name}`
-                  : measurement
-            return [
-              {
-                name: param.seriesName ?? '',
-                value: String(formatted),
-                color: getTooltipsColor(param.color),
-              },
-            ]
-          })
-          const title = params[0]!.name
-          const reasonsHtml = reasons.length
-            ? `<div style="max-width: 220px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; font-size: 12px; opacity: 0.72;">${reasons.join('')}</div>`
-            : ''
-          return rows.length
-            ? useTooltipsFormatter(title, rows, tooltipRowsPerColumn) + reasonsHtml
-            : `<div class="charts-tooltips"><div class="charts-tooltips-title">${escape(title)}</div>${reasonsHtml}</div>`
-        },
+        formatter: createPlotTooltipFormatter(
+          (input: PlotTooltipParams) => {
+            const params = convertArray(input).filter(param => param.seriesType === 'bar')
+            if (!params.length) return
+            const reasons: string[] = []
+            const rows = params.flatMap(param => {
+              const measurement = scalarValue(param.data)
+              if (isMissing(measurement)) {
+                const reason = missingReason(param.data)
+                const prefix = bars.length > 1 ? `${param.seriesName ?? ''}: ` : ''
+                reasons.push(`${prefix}${reason || '–'}`)
+                return []
+              }
+              const formatted =
+                (typeof measurement === 'number' || typeof measurement === 'string') &&
+                typeof tooltip?.valueFormatter === 'function'
+                  ? tooltip.valueFormatter(Number(measurement), param.dataIndex)
+                  : value?.name
+                    ? `${measurement} ${value.name}`
+                    : measurement
+              return [
+                {
+                  name: param.seriesName ?? '',
+                  value: String(formatted),
+                  color: getTooltipsColor(param.color),
+                },
+              ]
+            })
+            return { title: params[0]!.name, rows, notes: reasons }
+          },
+          { rowsPerColumn: tooltipRowsPerColumn, notesWidth: 220, notesInsideWhenEmpty: true },
+        ),
       },
       tooltip,
       multiColumnTooltip && width > 24

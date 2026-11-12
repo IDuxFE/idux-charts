@@ -5,10 +5,11 @@ type PieDataItemOption = Extract<NonNullable<PieSeriesOption['data']>[number], {
 import { format } from 'echarts/core'
 import { merge } from 'lodash-es'
 import type { LegendComponentOption, TitleComponentOption } from 'echarts/components'
-import { getAlphaColor, seerColors, seerTheme, useTooltipsFormatter } from '@idux/charts-core'
+import { getAlphaColor, seerColors, seerTheme } from '@idux/charts-core'
 import type { PieChartProps, PieChartAlign, PieSeriesStyle } from './usePieOption'
 import { getLinearColors } from '../../shared/linearColors'
 import { mergePlotOptions } from '../../shared/plotOptions'
+import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
 
 export interface PieDisplayTokens {
   fontFamily: string
@@ -498,22 +499,26 @@ export function createDefaultPieOption(
     }
   }
 
-  const formatItemTooltip = (name: string) => {
-    const item = data.find(item => item.name === name)
-    if (!item) return ''
+  const formatItemTooltip = createPlotTooltipFormatter(
+    (name: string) => {
+      const item = data.find(item => item.name === name)
+      if (!item) return
 
-    const missing = item.value === null
-    const content = useTooltipsFormatter(item.name, [
-      {
-        name: seriesName,
-        value: missing ? missingValueLabel : String(item.value),
-        color: item.markerColor,
-      },
-    ])
-    return missing
-      ? `${content}<div style="max-width: 240px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; font-size: 12px; color: ${tokens.colorTextInfo};">${format.encodeHTML(item.missingReason)}</div>`
-      : content
-  }
+      const missing = item.value === null
+      return {
+        title: item.name,
+        rows: [
+          {
+            name: seriesName,
+            value: missing ? missingValueLabel : String(item.value),
+            color: item.markerColor,
+          },
+        ],
+        notes: missing ? [item.missingReason] : undefined,
+      }
+    },
+    { notesColor: tokens.colorTextInfo },
+  )
 
   const isRing = radius[0] > 0 && !presentation.roseType
   const centerLabel = presentation.label?.position === 'center' && presentation.label.show !== false

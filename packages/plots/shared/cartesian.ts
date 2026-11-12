@@ -1,13 +1,11 @@
-import type {
-  DefaultLabelFormatterCallbackParams,
-  XAXisComponentOption,
-  YAXisComponentOption,
-} from 'echarts'
+import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
 import type { TooltipComponentOption } from 'echarts/components'
 import { version } from 'echarts/core'
-import { convertArray, getTooltipsColor, useTooltipsFormatter } from '@idux/charts-core'
+import { convertArray, getTooltipsColor } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { clearChartComponent, mergePlotOptions } from './plotOptions'
+import { createPlotTooltipFormatter } from './plotTooltip'
+import type { PlotTooltipParams } from './plotTooltip'
 
 export const cartesianGridBounds =
   Number.parseInt(version, 10) < 6
@@ -85,12 +83,12 @@ function createCartesianTooltip(
   valueFormatter?: TooltipComponentOption['valueFormatter'],
 ) {
   const series = convertArray(option.series)
-  return (input: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[]) => {
+  return createPlotTooltipFormatter((input: PlotTooltipParams) => {
     const params = convertArray(input)
-    if (!params.length) return ''
-    return useTooltipsFormatter(
-      params[0]!.name,
-      params.map(param => {
+    if (!params.length) return
+    return {
+      title: params[0]!.name,
+      rows: params.map(param => {
         const { axis, dimension } = resolveValueAxis(option, series[param.seriesIndex ?? 0])
         const measurement = Array.isArray(param.value)
           ? param.value[
@@ -110,8 +108,8 @@ function createCartesianTooltip(
           color: getTooltipsColor(param.color),
         }
       }),
-    )
-  }
+    }
+  })
 }
 
 export function applyCartesianTooltip(option: ChartProps) {

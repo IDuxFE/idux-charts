@@ -4,13 +4,9 @@ import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
 import type { PieSeriesOption } from 'echarts/charts'
 import { clearChartComponent, mergePlotOptions, resolvePlotInput } from '../../shared/plotOptions'
-
-import {
-  convertArray,
-  filterEmptyProps,
-  useTooltipsFormatter,
-  getTooltipsColor,
-} from '@idux/charts-core'
+import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
+import type { PlotTooltipParams } from '../../shared/plotTooltip'
+import { convertArray, filterEmptyProps, getTooltipsColor } from '@idux/charts-core'
 import type {
   AdditionalChartOption,
   BaseChartOption,
@@ -96,20 +92,20 @@ const defaultProps: PieChartProps = {
   },
   tooltip: {
     trigger: 'item',
-    formatter: params => {
+    formatter: createPlotTooltipFormatter((params: PlotTooltipParams) => {
       const item = Array.isArray(params) ? params[0] : params
-      if (!item) return ''
-      const title = item.name
-      const list = [
-        {
-          name: item.seriesName ?? '',
-          value: String(item.value ?? ''),
-          color: getTooltipsColor(item.color),
-        },
-      ]
-
-      return useTooltipsFormatter(title, list)
-    },
+      if (!item) return
+      return {
+        title: item.name,
+        rows: [
+          {
+            name: item.seriesName ?? '',
+            value: String(item.value ?? ''),
+            color: getTooltipsColor(item.color),
+          },
+        ],
+      }
+    }),
   },
 }
 
