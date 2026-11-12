@@ -17,9 +17,14 @@ import type {
   TooltipComponentOption,
 } from 'echarts/components'
 import type { ComposeOption, EChartsType, init, SetOptionOpts } from 'echarts/core'
+import type { EChartsOption } from 'echarts'
 export type ChartInitParameters = Parameters<typeof init>
 export type ChartTheme = NonNullable<ChartInitParameters[1]>
 export type ChartInitOption = NonNullable<ChartInitParameters[2]>
+
+export type ChartInstanceMethods = {
+  getEChartsInstance(): EChartsType | undefined
+}
 
 /** Retain declared properties and their modifiers without broad index signatures. */
 export type KnownProps<Props> = {
@@ -31,6 +36,8 @@ export interface AdditionalChartOption<T extends EChartsType = EChartsType> {
    * Whether to resize when the container changes size.
    */
   autoResize?: boolean
+  /** Chart-wide background, including on plots with a local background color. */
+  chartBackgroundColor?: EChartsOption['backgroundColor']
   /**
    * Group ID for linked charts.
    */
@@ -91,7 +98,10 @@ export type ChartOption = BaseChartOption<
   | LineSeriesOption
 >
 
-export interface ChartProps extends ChartOption, AdditionalChartOption {}
+export interface ChartProps extends Omit<KnownProps<ChartOption>, 'title'>, AdditionalChartOption {
+  /** Set to null to remove the current title component. */
+  title?: ChartOption['title'] | null
+}
 
 /** Named caller-facing props for component declarations; defaults are not resolved. */
 export type ChartPublicProps = KnownProps<ChartProps>
