@@ -53,15 +53,24 @@ test.skipIf(process.platform === 'win32')(
     const stopped = once(server, 'exit')
     owner.kill('SIGKILL')
     await stopped
+    // The guard can exit before every signaled descendant releases its socket.
+    await expect
+      .poll(
+        () =>
+          new Promise<boolean>((resolve, reject) => {
+            const probe = createServer()
+            probe.once('error', (error: NodeJS.ErrnoException) => {
+              if (error.code === 'EADDRINUSE') resolve(false)
+              else reject(error)
+            })
+            probe.listen(port, '127.0.0.1', () => {
+              probe.close(error => (error ? reject(error) : resolve(true)))
+            })
+          }),
+        { timeout: 2_000, interval: 50 },
+      )
+      .toBe(true)
     expect(process.kill(other.pid!, 0)).toBe(true)
-    const probe = createServer()
-    await new Promise<void>((resolve, reject) => {
-      probe.once('error', reject)
-      probe.listen(port, '127.0.0.1', resolve)
-    })
-    await new Promise<void>((resolve, reject) =>
-      probe.close(error => (error ? reject(error) : resolve())),
-    )
   },
   10_000,
 )
