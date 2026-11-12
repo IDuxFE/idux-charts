@@ -1,7 +1,7 @@
 import {
+  applyCartesianGridBounds,
   applyCartesianLegend,
   applyCartesianTooltip,
-  cartesianGridBounds,
   mergeAxisOption,
   reserveCartesianSpace,
 } from '../../shared/cartesian'
@@ -66,7 +66,6 @@ const defaultProps: BarChartProps = {
     bottom: 32,
     left: 32,
     right: 32,
-    ...cartesianGridBounds,
   },
   legend: {
     bottom: 0,
@@ -106,6 +105,7 @@ export function useBarOption(
       ...omit(seriesProps, categoryBarProps),
       type: 'bar',
     } as BarSeriesOption
+    applyCartesianGridBounds(option.grid)
     reserveCartesianSpace(option, defaultProps, attrs)
     const { xAxis, yAxis, series } = option
     const [defaultXAxis, defaultYAxis] = isVertical(option)

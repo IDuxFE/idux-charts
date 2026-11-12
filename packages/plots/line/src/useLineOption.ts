@@ -1,7 +1,7 @@
 import {
+  applyCartesianGridBounds,
   applyCartesianLegend,
   applyCartesianTooltip,
-  cartesianGridBounds,
   mergeAxisOption,
   reserveCartesianSpace,
 } from '../../shared/cartesian'
@@ -53,7 +53,6 @@ const defaultProps: LineChartProps = {
     bottom: 32,
     left: 32,
     right: 32,
-    ...cartesianGridBounds,
   },
   legend: {
     // Use a color swatch in place of the native line legend icon.
@@ -103,6 +102,7 @@ export function useLineOption(
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'color'], '#D3D7DE')
     }
 
+    applyCartesianGridBounds(option.grid)
     reserveCartesianSpace(option, defaultProps, attrs)
     const { xAxis, yAxis, series } = option
     const [defaultXAxis, defaultYAxis] = isVertical(option)

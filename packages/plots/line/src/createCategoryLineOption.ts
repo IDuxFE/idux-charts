@@ -7,7 +7,7 @@ import { convertArray, getAlphaColor } from '@idux/charts-core'
 import { pick } from 'lodash-es'
 
 import { appendLegendGraphics, createCategoryLegend } from '../../shared/categoryLegend'
-import { cartesianGridBounds, mergeAxisOption } from '../../shared/cartesian'
+import { mergeCartesianGrid, mergeAxisOption } from '../../shared/cartesian'
 import { mergePlotOptions } from '../../shared/plotOptions'
 import { seerGradientStartColors } from '../../shared/linearColors'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
@@ -308,13 +308,12 @@ export function createCategoryLineOption(
     | undefined
   const option: ChartProps = {
     ...runtime,
-    grid: mergePlotOptions<NonNullable<ChartProps['grid']>>(
+    grid: mergeCartesianGrid(
       {
         top: attrs.title ? 56 : 36,
         bottom: 12 + legendHeight + (hasSlider ? 24 : 0),
         left: 18,
         right: 20,
-        ...cartesianGridBounds,
       },
       grid,
     ),
