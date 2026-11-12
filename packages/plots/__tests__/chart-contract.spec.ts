@@ -287,3 +287,80 @@ it('exposes the same instance as onReady for every chart, including after reinit
     expect(item.ready).toHaveBeenCalledTimes(2)
   }
 })
+
+it.each([
+  ['bar', IxBarChart, { layout: 'horizontal' }],
+  ['line', IxLineChart, {}],
+  ['stacked area', IxLineChart, { area: 'striped', stack: 'total' }],
+] as const)(
+  '%s keeps a historical window and follows the latest edge on append',
+  async (_, component, extra) => {
+    const item = mountChart(component, {
+      ...extra,
+      categories: ['A', 'B', 'C', 'D', 'E', 'F'],
+      data: [1, 2, 3, 4, 5, 6],
+      dataZoom: { id: 'window', type: 'inside', start: 0, end: 100 },
+    })
+    const window = () => item.option.dataZoom[0]
+    item.chart.dispatchAction({
+      type: 'dataZoom',
+      dataZoomId: 'window',
+      startValue: 1,
+      endValue: 3,
+    })
+    item.props.categories.push('G', 'H')
+    item.props.data.push(7, 8)
+    await nextTick()
+    expect(window()).toMatchObject({ startValue: 1, endValue: 3 })
+
+    item.chart.dispatchAction({
+      type: 'dataZoom',
+      dataZoomId: 'window',
+      startValue: 5,
+      endValue: 7,
+    })
+    item.props.categories = [...item.props.categories, 'I', 'J']
+    item.props.data = [...item.props.data, 9, 10]
+    await nextTick()
+    expect(window()).toMatchObject({ startValue: 7, endValue: 9 })
+
+    item.props.categories.push('K')
+    item.props.data.push(11)
+    item.props.dataZoom = { id: 'window', type: 'inside', startValue: 0, endValue: 2 }
+    await nextTick()
+    expect(window()).toMatchObject({ startValue: 0, endValue: 2 })
+  },
+)
+
+it.each([IxChart, IxLineChart])(
+  'restores zoom and legend state on theme changes',
+  async component => {
+    const categories = ['A', 'B', 'C', 'D', 'E']
+    const item = mountChart(component, {
+      ...(component === IxChart
+        ? { xAxis: { type: 'category', data: categories }, yAxis: { type: 'value' } }
+        : { categories }),
+      legend: {},
+      series: [
+        { name: 'Alpha', type: 'line', data: [1, 2, 3, 4, 5] },
+        { name: 'Beta', type: 'line', data: [2, 4, 6, 8, 10] },
+      ],
+      dataZoom: { id: 'window', type: 'inside', startValue: 0, endValue: 4 },
+    })
+    const oldChart = item.chart
+    oldChart.dispatchAction({ type: 'dataZoom', dataZoomId: 'window', startValue: 1, endValue: 3 })
+    oldChart.dispatchAction({ type: 'legendUnSelect', name: 'Beta' })
+    item.props.theme = 'dark'
+    await nextTick()
+    expect(oldChart.isDisposed()).toBe(true)
+    expect(item.option.dataZoom[0]).toMatchObject({ startValue: 1, endValue: 3 })
+    expect(item.option.legend[0].selected.Beta).toBe(false)
+
+    item.props.theme = 'seer'
+    item.props.dataZoom = { id: 'window', type: 'inside', startValue: 0, endValue: 2 }
+    item.props.legend = { selected: { Beta: true } }
+    await nextTick()
+    expect(item.option.dataZoom[0]).toMatchObject({ startValue: 0, endValue: 2 })
+    expect(item.option.legend[0].selected.Beta).toBe(true)
+  },
+)

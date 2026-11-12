@@ -25,6 +25,7 @@ import { useResizeObserver } from './useResizeObserver'
 import type { ChartProps } from '../types'
 import { CHART_THEME_TOKEN } from '../themes/token'
 import { isChartEvent, replaceChartComponent, splitChartOptions } from '../utils/chartOptions'
+import { restoreChartInteraction } from '../utils/chartInteraction'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -88,7 +89,7 @@ export function useChart<U extends ChartProps>(
 
   const tooltipTheme = createTooltipTheme(() => containerRef.value)
 
-  const initChat = () => {
+  const initChart = (initialOption?: ChartProps) => {
     const container = containerRef.value
     if (!container) {
       return
@@ -101,7 +102,10 @@ export function useChart<U extends ChartProps>(
     const currOptions = unref(options)
     const { restOptions, events } = processOptions(currOptions, getListeners())
 
-    instance.setOption(tooltipTheme.prepare(restOptions), mergedSetOptionOpts.value)
+    instance.setOption(
+      tooltipTheme.prepare(initialOption ?? restOptions),
+      mergedSetOptionOpts.value,
+    )
     tooltipTheme.sync(instance)
     prevRestOptions.value = cloneDeep(restOptions) as U
     prevSetOptionOpts = cloneDeep(mergedSetOptionOpts.value)
@@ -123,7 +127,7 @@ export function useChart<U extends ChartProps>(
     }
   }
 
-  onMounted(() => initChat())
+  onMounted(() => initChart())
   onBeforeUnmount(() => destroyChart())
   // Vue attrs and Vue 2 listeners are refreshed during component updates.
   onUpdated(() => {
@@ -131,6 +135,21 @@ export function useChart<U extends ChartProps>(
       syncEvents(chartRef.value, processOptions(unref(options), getListeners()).events)
     }
   })
+
+  watch(
+    [() => cloneDeep(mergedTheme.value), () => cloneDeep(mergedInitOption.value)],
+    ([theme, initOption], [previousTheme, previousInitOption]) => {
+      if (isEqual(theme, previousTheme) && isEqual(initOption, previousInitOption)) {
+        return
+      }
+      const instance = chartRef.value
+      if (!instance) return
+      const { restOptions } = processOptions(unref(options), getListeners())
+      const initialOption = restoreChartInteraction(instance, prevRestOptions.value, restOptions)
+      destroyChart()
+      initChart(initialOption)
+    },
+  )
 
   watch(
     () => unref(options),
@@ -158,17 +177,6 @@ export function useChart<U extends ChartProps>(
     },
     {
       deep: true,
-    },
-  )
-
-  watch(
-    [() => cloneDeep(mergedTheme.value), () => cloneDeep(mergedInitOption.value)],
-    ([theme, initOption], [previousTheme, previousInitOption]) => {
-      if (isEqual(theme, previousTheme) && isEqual(initOption, previousInitOption)) {
-        return
-      }
-      destroyChart()
-      initChat()
     },
   )
 

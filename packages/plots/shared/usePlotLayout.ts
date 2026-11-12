@@ -12,6 +12,8 @@ import type { EChartsType } from 'echarts/core'
 import type { LegendComponentOption } from 'echarts/components'
 import { convertArray } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
+import { categoryZoomUpdate } from './categoryZoom'
+import type { CategoryZoomConfig } from './categoryZoom'
 
 export function usePlotSize(
   active: () => boolean,
@@ -64,7 +66,7 @@ export function usePlotSize(
   return { element, size, width }
 }
 
-type InteractionConfig = { zoom?: unknown; legend?: unknown; selection?: unknown }
+type InteractionConfig = { zoom?: CategoryZoomConfig; legend?: unknown; selection?: unknown }
 
 export function createPlotInteraction() {
   let chart: EChartsType | undefined
@@ -77,14 +79,14 @@ export function createPlotInteraction() {
     read(config?: InteractionConfig): Pick<ChartProps, 'dataZoom' | 'legend' | 'series'> {
       const keep = (key: keyof InteractionConfig) =>
         config?.[key] !== undefined && isEqual(config[key], previous?.[key])
-      const zoom = keep('zoom')
+      const zoom = categoryZoomUpdate(config?.zoom, previous?.zoom)
       const legend = keep('legend')
       const selection = keep('selection')
       previous = cloneDeep(config)
       if (!(zoom || legend || selection) || !chart || chart.isDisposed()) return {}
       const current = chart.getOption() as ChartProps
       return {
-        dataZoom: zoom ? current.dataZoom : undefined,
+        dataZoom: zoom?.(current.dataZoom),
         legend: legend ? current.legend : undefined,
         series: selection ? current.series : undefined,
       }
@@ -102,7 +104,7 @@ export function categoryInteraction(
     zoom: {
       categories: input.categories,
       layout,
-      axis: convertArray(axis)[0]?.id,
+      axisId: convertArray(axis)[0]?.id,
       dataZoom: attrs.dataZoom,
     },
     legend: {

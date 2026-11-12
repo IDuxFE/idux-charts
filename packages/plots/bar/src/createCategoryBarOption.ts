@@ -1,3 +1,4 @@
+import { targetsCategoryZoomAxis } from '../../shared/categoryZoom'
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
 import type { EChartsType } from 'echarts/core'
 import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
@@ -25,7 +26,6 @@ import {
   getCategoryZoom,
   getMissingBarWidth,
   getVisibleBarWidth,
-  targetsBarZoomAxis,
 } from './categoryBarWidth'
 import { getBarLinearColors, LinearDirection } from './getBarLinearColors'
 import type { BarChartProps } from './useBarOption'
@@ -282,8 +282,8 @@ export function createCategoryBarOption(
     if (item.type && item.type !== 'slider') return item
     const orient =
       item.orient ??
-      (targetsBarZoomAxis(item, 'y', yAxisInput?.id) &&
-      !targetsBarZoomAxis(item, 'x', xAxisInput?.id)
+      (targetsCategoryZoomAxis(item, 'y', yAxisInput?.id) &&
+      !targetsCategoryZoomAxis(item, 'x', xAxisInput?.id)
         ? 'vertical'
         : 'horizontal')
     return {
