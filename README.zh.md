@@ -95,6 +95,8 @@ pnpm start
 
 CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/RELEASING.md)。
 
+运行 `pnpm benchmark:charts` 可在 Chromium 中测量首帧、刷新和缩放耗时。运行条件和参考结果见[性能基线](e2e/PERFORMANCE.md)。
+
 ## 🤝 如何贡献
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/IDuxFE/idux-charts/pulls)

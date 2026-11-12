@@ -95,6 +95,8 @@ Open a browser: `http://localhost:8080/`
 
 See [CI and releases](.github/RELEASING.md) for checks, changesets, and automated npm publishing.
 
+Run `pnpm benchmark:charts` to measure initial rendering, refresh, and zoom in Chromium. See the [performance baseline](e2e/PERFORMANCE.md) for the workload and reference results.
+
 ## 🤝 Contributing
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/IDuxFE/idux-charts/pulls)

@@ -5,7 +5,7 @@ import { fixturePort, serverHost } from '../environment'
 
 const fromRoot = (path: string) => fileURLToPath(new URL(`../../${path}`, import.meta.url))
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, mode }) => ({
   root: fileURLToPath(new URL('.', import.meta.url)),
   define: { __VERSION__: JSON.stringify('test'), __DEV__: command !== 'build' },
   plugins: [vue()],
@@ -19,11 +19,14 @@ export default defineConfig(({ command }) => ({
   },
   build: {
     rollupOptions: {
-      input: {
-        main: fromRoot('e2e/fixture/index.html'),
-        special: fromRoot('e2e/fixture/special.html'),
-        cartesian: fromRoot('e2e/fixture/cartesian.html'),
-      },
+      input:
+        mode === 'benchmark'
+          ? fromRoot('e2e/fixture/benchmark.html')
+          : {
+              main: fromRoot('e2e/fixture/index.html'),
+              special: fromRoot('e2e/fixture/special.html'),
+              cartesian: fromRoot('e2e/fixture/cartesian.html'),
+            },
     },
   },
   server: { host: serverHost, port: fixturePort, strictPort: true, fs: { allow: [fromRoot('')] } },

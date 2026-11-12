@@ -18,16 +18,22 @@ type LineData = NonNullable<LineSeriesOption['data']>
 
 export function measurement(item: LineData[number]) {
   const value = getLineSampleValue(item)
-  if (typeof value === 'string' && !value.trim()) return undefined
-  return (typeof value === 'number' || typeof value === 'string') && Number.isFinite(Number(value))
-    ? Number(value)
-    : undefined
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
+  if (typeof value !== 'string' || !value.trim()) return undefined
+  const numeric = Number(value)
+  return Number.isFinite(numeric) ? numeric : undefined
 }
 
-export function normalizeLineData(data: LineData | undefined, categories: string[]): LineData {
+export function normalizeLineData(
+  data: LineData | undefined,
+  categories: string[],
+  recordMeasurement: (index: number, value: number | undefined) => void,
+): LineData {
   return categories.map((_, index) => {
     const item = data?.[index]
-    if (measurement(item) !== undefined) return item
+    const value = measurement(item)
+    recordMeasurement(index, value)
+    if (value !== undefined) return item
     return item && typeof item === 'object' && !Array.isArray(item) && !(item instanceof Date)
       ? { ...item, value: null }
       : null

@@ -61,23 +61,29 @@ export function createCategoryLineOption(
     : theme.palette
   const errorColor = theme.errorColor ?? (dark ? '#FF957B' : '#F5654F')
   const textColor = theme.secondaryTextColor ?? (dark ? '#C2C7D1' : '#6F7785')
-  const values = lines.map(line => normalizeLineData(line.data, categories))
-  const missing = categories.flatMap((_, index) =>
-    values.some(data => measurement(data[index]) === undefined) ? [index] : [],
+  const missingCounts = new Uint32Array(categories.length)
+  let allZero = true
+  const values = lines.map(line =>
+    normalizeLineData(line.data, categories, (index, value) => {
+      if (value === undefined) missingCounts[index] = missingCounts[index]! + 1
+      if (value !== 0) allZero = false
+    }),
   )
-  const missingSlots = new Set(missing)
+  const missing: number[] = []
+  missingCounts.forEach((count, index) => {
+    if (count) missing.push(index)
+  })
+  const isGap = (data: NonNullable<LineSeriesOption['data']>, index: number) =>
+    getLineSampleValue(data[index]) == null
   const pointSlots = new Set(
     missing.filter(
       slot =>
         slot > 0 &&
         slot < categories.length - 1 &&
-        !missingSlots.has(slot - 1) &&
-        !missingSlots.has(slot + 1) &&
+        !missingCounts[slot - 1] &&
+        !missingCounts[slot + 1] &&
         !lines.some(
-          (line, index) =>
-            line.stack &&
-            line.connectNulls === false &&
-            measurement(values[index]![slot]) === undefined,
+          (line, index) => line.stack && line.connectNulls === false && isGap(values[index]!, slot),
         ),
     ),
   )
@@ -86,10 +92,9 @@ export function createCategoryLineOption(
   // band behind the lines and mask each line only at its own missing slots.
   const coverGaps =
     bandSlots.length > 0 &&
-    bandSlots.every(index => values.every(data => measurement(data[index]) === undefined)) &&
+    bandSlots.every(index => missingCounts[index] === lines.length) &&
     lines.every(line => line.connectNulls !== false)
   const maskLines = bandSlots.length > 0 && !coverGaps
-  const allZero = values.every(data => data.every(item => measurement(item) === 0))
   const lineSeries = lines.map((line, index): InterpolatedLineSeries => {
     const color = nativeColors?.[index % nativeColors.length]
     const itemColor = line.itemStyle?.color ?? color
@@ -119,7 +124,7 @@ export function createCategoryLineOption(
     }
     const pointValues = new Map<number, number>()
     for (const slot of pointSlots) {
-      if (measurement(data[slot]) !== undefined) continue
+      if (!isGap(data, slot)) continue
       const left = measurement(data[slot - 1])
       const right = measurement(data[slot + 1])
       if (left !== undefined && right !== undefined) pointValues.set(slot, left / 2 + right / 2)
@@ -152,7 +157,7 @@ export function createCategoryLineOption(
       connectNulls:
         coverGaps ||
         pointValues.size > 0 ||
-        (maskLines && bandSlots.some(slot => measurement(data[slot]) === undefined)),
+        (maskLines && bandSlots.some(slot => isGap(data, slot))),
       ...line,
       type: 'line',
       id: line.id ?? `ix-line-series-${index}`,
