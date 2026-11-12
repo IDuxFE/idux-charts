@@ -1,9 +1,10 @@
-import { defineComponent, h } from 'vue-demi'
+import { defineComponent, h, isVue2 } from 'vue-demi'
 import type { ShallowRef } from 'vue-demi'
 
 import { useChart, useReactiveAttrs } from '../composables'
 import type { ChartInstanceMethods, ChartProps } from '../types'
 import { withChartProps } from '../utils/withChartProps'
+import { isChartDomAttr } from '../utils/chartOptions'
 
 interface ChartBindings extends ChartInstanceMethods {
   containerRef: ShallowRef<HTMLDivElement | undefined>
@@ -25,8 +26,14 @@ export default withChartProps<ChartProps>()(
     },
     render() {
       const { class: className, style } = this.$attrs
+      const attrs = Object.fromEntries(
+        Object.entries(this.$attrs).flatMap(([key, value]) =>
+          isChartDomAttr(key) ? [[key === 'tabIndex' ? 'tabindex' : key, value]] : [],
+        ),
+      )
 
       return h('div', {
+        ...(isVue2 ? { attrs } : attrs),
         ref: 'containerRef',
         class: className,
         style: {

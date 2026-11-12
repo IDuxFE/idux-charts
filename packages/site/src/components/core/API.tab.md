@@ -55,6 +55,10 @@ const option = {
 
 分类 Bar、Line 和 Area 在 `categories` 末尾追加标签且缩放配置未变时，回看的窗口保持原范围，停在末端的窗口跟随新数据并保持采样点数，全范围视图继续显示全部数据。替换或重排分类时采用传入的缩放配置。
 
+### 无障碍
+
+图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。可用 `role="img"` 和 `aria-label` 为图表提供名称，用 `aria-describedby` 关联说明。需要操作图例或查看具体数据时，可在容器外提供键盘可操作的控件和数据表。
+
 ### 自定义 Tooltip
 
 分类和原生 Bar、Line / Area 可用 `tooltip.valueFormatter` 修改数值显示，同时沿用内置标题、色标和缺报提示。需要自己组织标题、数据行或输出格式时，用 `tooltip.formatter` 提供完整内容。回调参数来自 ECharts，单项提示通常收到一个数据项，轴触发提示通常收到数据项数组。

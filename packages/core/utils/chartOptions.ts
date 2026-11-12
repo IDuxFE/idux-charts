@@ -18,8 +18,18 @@ export function isChartEvent(key: string): boolean {
   return /^on[^a-z]/.test(key)
 }
 
+export function isChartDomAttr(key: string): boolean {
+  return (
+    key === 'role' ||
+    key === 'tabindex' ||
+    key === 'tabIndex' ||
+    key.startsWith('aria-') ||
+    key.startsWith('data-')
+  )
+}
+
 function isChartOptionKey(key: string): boolean {
-  return !controlKeys.has(key) && !isChartEvent(key)
+  return !controlKeys.has(key) && !isChartEvent(key) && !isChartDomAttr(key)
 }
 
 export function splitChartOptions(props: ChartProps): {

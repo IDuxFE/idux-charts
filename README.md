@@ -77,7 +77,7 @@ const lineProps: LineChartPublicProps = {
 }
 ```
 
-`*ChartProps` allow extension fields. `*ChartPublicProps` remove broad index signatures while preserving named property types and optionality; they do not resolve defaults or include HTML attributes. Default component declarations retain `vue-demi` imports and inferred event, slot, and instance types.
+`*ChartProps` allow extension fields. `*ChartPublicProps` preserve named property types and optionality, including the declared accessibility attributes. Default component declarations retain `vue-demi` imports and inferred event, slot, and instance types.
 
 Vue 2.6 projects use `*ChartPublicProps` through their existing `DefineComponent` adapters and retain `skipLibCheck: true`. These prop types support the adapter layer; they do not replace the default component declarations.
 

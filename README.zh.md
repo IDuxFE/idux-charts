@@ -77,7 +77,7 @@ const lineProps: LineChartPublicProps = {
 }
 ```
 
-`*ChartProps` 允许扩展配置字段；`*ChartPublicProps` 去掉宽泛索引签名，保留具名属性的类型及可选性，不补齐默认值，也不包含 HTML 属性。默认组件声明保留 `vue-demi` 引用及事件、插槽和实例成员的类型推导。
+`*ChartProps` 允许扩展配置字段。`*ChartPublicProps` 保留具名属性（含已声明的无障碍属性）的类型和可选性。默认组件声明保留 `vue-demi` 引用及事件、插槽和实例成员的类型推导。
 
 Vue 2.6 项目通过现有的 `DefineComponent` 适配声明使用 `*ChartPublicProps`，并保留 `skipLibCheck: true`。这些属性类型供适配层使用，不替换默认组件声明。
 
