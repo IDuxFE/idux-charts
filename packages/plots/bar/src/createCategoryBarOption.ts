@@ -5,7 +5,7 @@ import { pick } from 'lodash-es'
 import { convertArray, filterEmptyProps, getAlphaColor, getTooltipsColor } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
-import { cartesianGridBounds } from '../../shared/cartesian'
+import { mergeCartesianGrid } from '../../shared/cartesian'
 import { mergePlotOptions } from '../../shared/plotOptions'
 import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
 import type { PlotTooltipParams } from '../../shared/plotTooltip'
@@ -381,13 +381,12 @@ export function createCategoryBarOption(
     ...runtime,
     loading,
     color: attrs.color ?? theme.palette ?? colors,
-    grid: mergePlotOptions<NonNullable<ChartProps['grid']>>(
+    grid: mergeCartesianGrid(
       {
         top: attrs.title ? 44 : 24,
         bottom: 12 + legendBottom + (bottomSlider ? 24 : 0),
         left: 16,
         right: rightSlider ? 44 : 20,
-        ...cartesianGridBounds,
       },
       grid,
     ),

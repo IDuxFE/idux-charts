@@ -1,16 +1,60 @@
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
-import type { TooltipComponentOption } from 'echarts/components'
+import type { GridComponentOption, TooltipComponentOption } from 'echarts/components'
 import { version } from 'echarts/core'
+import { cloneDeep } from 'lodash-es'
 import { convertArray, getTooltipsColor } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { clearChartComponent, mergePlotOptions } from './plotOptions'
 import { createPlotTooltipFormatter } from './plotTooltip'
 import type { PlotTooltipParams } from './plotTooltip'
 
-export const cartesianGridBounds =
-  Number.parseInt(version, 10) < 6
-    ? { containLabel: true }
-    : { outerBoundsMode: 'same' as const, outerBoundsContain: 'axisLabel' as const }
+const hasOuterBounds = Number.parseInt(version, 10) >= 6
+
+function setGridBounds(grid: GridComponentOption, useDefaults: boolean) {
+  if (!hasOuterBounds) {
+    if (useDefaults && grid.containLabel === undefined) grid.containLabel = true
+    return
+  }
+
+  if (grid.outerBoundsMode === undefined) {
+    if (grid.outerBounds !== undefined) {
+      // ECharts ignores a custom bounds rectangle in 'same' mode.
+      grid.outerBoundsMode = 'auto'
+    } else if (
+      grid.containLabel === false &&
+      grid.outerBoundsContain === undefined &&
+      grid.outerBoundsClampWidth === undefined &&
+      grid.outerBoundsClampHeight === undefined
+    ) {
+      grid.outerBoundsMode = 'none'
+    } else if (useDefaults) {
+      grid.outerBoundsMode = 'same'
+    }
+  }
+  if (useDefaults && grid.outerBoundsContain === undefined) {
+    grid.outerBoundsContain = 'axisLabel'
+  }
+}
+
+/** Resolve bounds after merging so built-in defaults cannot mask a caller's layout. */
+export function applyCartesianGridBounds(grid: ChartProps['grid']) {
+  if (Array.isArray(grid)) {
+    grid.forEach(item => {
+      if (item) setGridBounds(item, false)
+    })
+  } else if (grid) {
+    setGridBounds(grid, true)
+  }
+}
+
+export function mergeCartesianGrid(
+  defaults: GridComponentOption,
+  input: ChartProps['grid'],
+): NonNullable<ChartProps['grid']> {
+  const grid = Array.isArray(input) ? cloneDeep(input) : mergePlotOptions(defaults, input)
+  applyCartesianGridBounds(grid)
+  return grid
+}
 
 export function reserveCartesianSpace(
   option: ChartProps,

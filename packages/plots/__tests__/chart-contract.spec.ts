@@ -160,6 +160,42 @@ it.each([
   },
 )
 
+it.each([
+  ['native Bar', IxBarChart, false],
+  ['native Line', IxLineChart, false],
+  ['category Bar', IxBarChart, true],
+  ['category Line', IxLineChart, true],
+] as const)('%s respects caller-owned grid bounds', async (_, component, category) => {
+  const bounds = { top: 56, bottom: 52, left: 56, right: 32 }
+  const item = mountChart(component, {
+    data: [10, 20, 30],
+    ...(category ? { categories: ['A', 'B', 'C'] } : { xAxis: { data: ['A', 'B', 'C'] } }),
+    grid: { ...bounds, containLabel: false },
+  })
+  expect(item.option.grid[0]).toMatchObject({ ...bounds, outerBoundsMode: 'none' })
+  expect(item.chart.convertToPixel({ yAxisIndex: 0 }, 0)).toBe(240 - bounds.bottom)
+
+  const outerBounds = { left: 60, right: 36, top: 60, bottom: 56 }
+  item.props.grid = { ...bounds, containLabel: false, outerBounds, outerBoundsContain: 'all' }
+  await nextTick()
+  expect(item.option.grid[0]).toMatchObject({
+    outerBoundsMode: 'auto',
+    outerBoundsContain: 'all',
+    outerBounds,
+  })
+  expect(item.chart.convertToPixel({ yAxisIndex: 0 }, 0)).toBeLessThan(240 - bounds.bottom)
+
+  item.props.grid = [
+    { ...bounds, containLabel: false },
+    { ...bounds, containLabel: false, outerBoundsMode: 'same', outerBoundsClampWidth: '50%' },
+  ]
+  await nextTick()
+  expect(item.option.grid).toMatchObject([
+    { ...bounds, outerBoundsMode: 'none' },
+    { ...bounds, outerBoundsMode: 'same', outerBoundsClampWidth: '50%' },
+  ])
+})
+
 it('replaces the entire shorthand data array and computes Pie totals from the final series', async () => {
   for (const component of [IxBarChart, IxLineChart, IxPieChart]) {
     const item = mountChart(component, { data: [1, 2, 3], series: [{ data: [9] }] })
