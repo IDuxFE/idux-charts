@@ -2,8 +2,10 @@ import type { PlotTheme, PlotTextStyle } from '../../shared/plotTheme'
 import type { RadarSeriesOption } from 'echarts/charts'
 import type { RadarComponentOption } from 'echarts/components'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
-import { convertArray, useTooltipsFormatter, getTooltipsColor } from '@idux/charts-core'
+import { convertArray, getTooltipsColor } from '@idux/charts-core'
 import { mergeNativePlotOptions, mergePlotOptions } from '../../shared/plotOptions'
+import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
+import type { PlotTooltipParams } from '../../shared/plotTooltip'
 
 export const radarProps = [
   'indicator',
@@ -100,19 +102,19 @@ export function createRadarOption(
     tooltip: {
       trigger: 'item',
       confine: true,
-      formatter: params => {
+      formatter: createPlotTooltipFormatter((params: PlotTooltipParams) => {
         const item = Array.isArray(params) ? params[0] : params
-        if (!item || !Array.isArray(item.value)) return ''
+        if (!item || !Array.isArray(item.value)) return
         const values = item.value
-        return useTooltipsFormatter(
-          item.name ?? '',
-          (radarFor(series[item.seriesIndex ?? 0])?.indicator ?? []).map((axis, index) => ({
+        return {
+          title: item.name ?? '',
+          rows: (radarFor(series[item.seriesIndex ?? 0])?.indicator ?? []).map((axis, index) => ({
             name: axis.name ?? '',
             value: String(values[index] ?? '-'),
             color: getTooltipsColor(item.color),
           })),
-        )
-      },
+        }
+      }),
     },
     legend: { bottom: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12 },
     radar,

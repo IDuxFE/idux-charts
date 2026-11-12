@@ -1,9 +1,9 @@
 import type { LineSeriesOption, CustomSeriesOption } from 'echarts/charts'
-import type { DefaultLabelFormatterCallbackParams } from 'echarts'
 import type { TooltipComponentOption } from 'echarts/components'
 import type { ChartProps } from '@idux/charts-core'
-import { convertArray, getTooltipsColor, useTooltipsFormatter } from '@idux/charts-core'
-import { escape } from 'lodash-es'
+import { convertArray, getTooltipsColor } from '@idux/charts-core'
+import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
+import type { PlotTooltipParams } from '../../shared/plotTooltip'
 
 import { getLineSampleValue } from './categoryLineInterpolation'
 
@@ -110,46 +110,44 @@ export function createCategoryLineTooltip(
     start = end + 1
   }
 
-  return (input: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[]) => {
-    const params = convertArray(input)
-    const line = params.find(param => (param.seriesIndex ?? Infinity) < lines.length)
-    const band = params.find(param => param.seriesId === missingBandId)
-    const index = line?.dataIndex ?? (Array.isArray(band?.value) ? Number(band.value[0]) : -1)
-    if (index < 0 || index >= categories.length) return ''
-    const rows = params.flatMap(param => {
-      const series = lines[param.seriesIndex ?? -1]
-      const sample = values[param.seriesIndex ?? -1]?.[index]
-      const value = measurement(sample)
-      if (!series || value === undefined) return []
-      const axis =
-        series.yAxisId == null
-          ? axes[series.yAxisIndex ?? 0]
-          : axes.find(axis => axis.id != null && String(axis.id) === String(series.yAxisId))
-      const formatted =
-        valueFormatter?.(value, index) ?? (axis?.name ? `${value} ${axis.name}` : value)
-      return [
-        {
-          name: String(series.name),
-          value: String(formatted),
-          color: getTooltipsColor(param.color),
-        },
-      ]
-    })
-    // Collect reasons from the original samples even if ECharts omits nulls from the tooltip.
-    const reasons = new Set<string>()
-    if (titles.has(index)) {
-      for (const samples of values) {
-        const item = samples[index] as LineChartDataItem | undefined
-        if (item?.missingReason && measurement(item) === undefined) reasons.add(item.missingReason)
+  return createPlotTooltipFormatter(
+    (input: PlotTooltipParams) => {
+      const params = convertArray(input)
+      const line = params.find(param => (param.seriesIndex ?? Infinity) < lines.length)
+      const band = params.find(param => param.seriesId === missingBandId)
+      const index = line?.dataIndex ?? (Array.isArray(band?.value) ? Number(band.value[0]) : -1)
+      if (index < 0 || index >= categories.length) return
+      const rows = params.flatMap(param => {
+        const series = lines[param.seriesIndex ?? -1]
+        const sample = values[param.seriesIndex ?? -1]?.[index]
+        const value = measurement(sample)
+        if (!series || value === undefined) return []
+        const axis =
+          series.yAxisId == null
+            ? axes[series.yAxisIndex ?? 0]
+            : axes.find(axis => axis.id != null && String(axis.id) === String(series.yAxisId))
+        const formatted =
+          valueFormatter?.(value, index) ?? (axis?.name ? `${value} ${axis.name}` : value)
+        return [
+          {
+            name: String(series.name),
+            value: String(formatted),
+            color: getTooltipsColor(param.color),
+          },
+        ]
+      })
+      // Collect reasons from the original samples even if ECharts omits nulls from the tooltip.
+      const reasons = new Set<string>()
+      if (titles.has(index)) {
+        for (const samples of values) {
+          const item = samples[index] as LineChartDataItem | undefined
+          if (item?.missingReason && measurement(item) === undefined)
+            reasons.add(item.missingReason)
+        }
       }
-    }
-    const title = band ? (titles.get(index) ?? categories[index]!) : categories[index]!
-    const details = [...reasons].map(reason => `<div>${escape(reason)}</div>`).join('')
-    return (
-      useTooltipsFormatter(title, rows, 10) +
-      (details
-        ? `<div style="max-width: 240px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; font-size: 12px; opacity: 0.72;">${details}</div>`
-        : '')
-    )
-  }
+      const title = band ? (titles.get(index) ?? categories[index]!) : categories[index]!
+      return { title, rows, notes: [...reasons] }
+    },
+    { rowsPerColumn: 10 },
+  )
 }
