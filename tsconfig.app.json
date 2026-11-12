@@ -13,6 +13,7 @@
   "compilerOptions": {
     "composite": true,
     "paths": {
+      "@idux/charts": ["./packages/charts/index.ts"],
       "@idux/charts-plots/dist/*": ["./packages/plots/*"]
     },
     "lib": ["ES2020", "DOM", "DOM.Iterable"]
