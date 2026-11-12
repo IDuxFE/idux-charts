@@ -47,6 +47,6 @@ const lineOption: LineChartProps = {
 {
   "title": "无坐标轴+阴影效果",
   "description": "无坐标轴+阴影效果的配置与使用示例。",
-  "index": 11
+  "index": 7
 }
 </archive-meta>

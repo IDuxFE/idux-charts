@@ -103,6 +103,6 @@ onBeforeUnmount(cancel)
 {
   "title": "基础数值型",
   "description": "同一组件呈现四种业务颜色，支持大小、零值、空态、加载和重试。",
-  "index": 1
+  "index": 0
 }
 </archive-meta>

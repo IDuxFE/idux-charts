@@ -26,6 +26,6 @@ const metrics = [
 {
   "title": "多指标与风险颜色",
   "description": "业务侧维护阈值与语义色；0 保留灰色底图，多个单指标组件自由排列。",
-  "index": 2
+  "index": 1
 }
 </archive-meta>

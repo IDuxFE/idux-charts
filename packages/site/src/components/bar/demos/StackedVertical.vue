@@ -171,6 +171,6 @@ const chart = computed<BarChartProps>(() => {
 {
   "title": "堆叠柱状图-竖向",
   "description": "用于展示同一时间维度下各子系列的累加总量与内部构成比例的场景。例如展示每日的总告警数（高度代表总量），同时观察其中包含的“严重/高危/中危”各级别告警的堆叠构成。",
-  "index": 6
+  "index": 5
 }
 </archive-meta>

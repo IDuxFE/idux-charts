@@ -79,6 +79,6 @@ const legend: PieChartProps['legend'] = {
 {
   "title": "九宫格对齐",
   "description": "start / 居中采用左图右文，end 采用左文右图；切换位置不重建图表。",
-  "index": 10
+  "index": 7
 }
 </archive-meta>

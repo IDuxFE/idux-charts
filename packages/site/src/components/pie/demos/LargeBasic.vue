@@ -58,6 +58,6 @@ const shapeOption = computed<PieChartProps>(() => ({
 {
   "title": "大尺寸：基础形态与加载",
   "description": "在 600 × 300 容器中切换实心、环形与面积模式玫瑰图；loading 控制组件加载效果，align 保留自动布局。",
-  "index": 90
+  "index": 9
 }
 </archive-meta>

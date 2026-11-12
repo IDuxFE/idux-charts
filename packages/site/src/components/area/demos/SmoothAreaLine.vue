@@ -38,6 +38,6 @@ const lineOption: LineChartProps = {
 {
   "title": "平滑面积图+阴影效果",
   "description": "平滑面积图+阴影效果的配置与使用示例。",
-  "index": 10
+  "index": 6
 }
 </archive-meta>

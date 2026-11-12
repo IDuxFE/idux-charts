@@ -212,6 +212,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "双 Y 轴平滑折线图",
   "description": "用于双指标对比，且需要弱化局部波动、强调两条曲线宏观趋势差异的场景。如对比不同网络环境（WEB/非WEB）下的平滑业务量走势。",
-  "index": -16
+  "index": 4
 }
 </archive-meta>

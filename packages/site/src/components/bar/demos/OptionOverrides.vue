@@ -41,6 +41,6 @@ const overrides: BarChartProps = {
 {
   "title": "外部配置覆盖默认值",
   "description": "开启开关后覆盖柱宽、配色、绘图区左边距、数值轴上限和提示框的数值文案。关闭后恢复分类布局的默认配置。",
-  "index": 11
+  "index": 10
 }
 </archive-meta>

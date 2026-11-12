@@ -184,6 +184,6 @@ const chart = computed<BarChartProps>(() => {
 {
   "title": "堆叠柱状图-横向",
   "description": "用于分类名称较长，且需要展示各子系列累加总量与内部构成的场景。适合展示如长资产名/长路径的总风险评分及各项子指标的得分构成。",
-  "index": 7
+  "index": 6
 }
 </archive-meta>

@@ -51,6 +51,6 @@ const chart = computed<BarChartProps>(() => ({
 {
   "title": "图例多列排列（以分组柱状图为例）",
   "description": "图例最多显示两行，溢出时可用右侧上下箭头或滚轮逐行浏览。30 或 50 个系列时，缩略轴默认显示前 3 个分类。",
-  "index": 8
+  "index": 7
 }
 </archive-meta>

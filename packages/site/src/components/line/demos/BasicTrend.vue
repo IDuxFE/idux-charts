@@ -189,6 +189,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "基础折线图",
   "description": "用于展示单一数据系列随时间或连续维度的变化趋势，如展示过去 7 天的告警发生趋势、系统 CPU 使用率波动等。底部可配合缩略图进行时间轴的缩放与刷选。",
-  "index": -20
+  "index": 0
 }
 </archive-meta>

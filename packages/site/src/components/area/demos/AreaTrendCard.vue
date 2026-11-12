@@ -54,6 +54,6 @@ const option: LineChartProps = {
 {
   "title": "卡片化展示",
   "description": "将趋势图嵌入仪表盘卡片，图表和图例随卡片宽度调整。",
-  "index": -6
+  "index": 5
 }
 </archive-meta>

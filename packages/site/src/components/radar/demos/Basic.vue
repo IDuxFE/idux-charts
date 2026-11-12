@@ -238,6 +238,6 @@ onBeforeUnmount(cancelReload)
 {
   "title": "基础型",
   "description": "支持 1–4 个对象、3–12 个维度、线面/线框网格、20/30/40px 径向间距及线性/面性图形切换。固定五等分与 0–25 量程，支持正常、全零、空状态、加载中及模拟重试，窄容器可横向滚动。",
-  "index": 1
+  "index": 0
 }
 </archive-meta>

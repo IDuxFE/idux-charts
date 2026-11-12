@@ -52,6 +52,6 @@ const legend: PieChartProps['legend'] = {
 {
   "title": "大尺寸：风险分布",
   "description": "为风险等级绑定语义颜色；悬浮扇区或图例查看风险数量、占全部风险的比例和统计口径。",
-  "index": 91
+  "index": 10
 }
 </archive-meta>

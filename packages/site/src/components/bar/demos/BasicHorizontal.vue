@@ -176,6 +176,6 @@ const options = computed<BarChartProps>(() => {
 {
   "title": "基础柱状图-横向",
   "description": "用于分类名称较长（如完整的资产IP地址、长路径或长资产名）的场景。横向排布能提供充足的标签展示空间，避免文字被截断或折叠。",
-  "index": 2
+  "index": 1
 }
 </archive-meta>

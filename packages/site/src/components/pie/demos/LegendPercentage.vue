@@ -178,6 +178,6 @@ const presentation = computed<PieChartProps>(() => ({
 {
   "title": "图例自定义 Formatter",
   "description": "通过 legend.formatter 自定义图例内容，以数值和百分比展示为例。",
-  "index": 7
+  "index": 4
 }
 </archive-meta>

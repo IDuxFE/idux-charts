@@ -69,6 +69,6 @@ const option: LineChartProps = {
 {
   "title": "卡片化展示",
   "description": "用于仪表盘的数据概览。将图表封装在卡片容器内（可含标题与操作区），图表与图例在卡片内自适应排布，适合大屏或工作台中并排展示多个核心指标趋势。",
-  "index": -6
+  "index": 7
 }
 </archive-meta>

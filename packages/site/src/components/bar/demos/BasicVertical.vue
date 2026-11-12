@@ -164,6 +164,6 @@ const options = computed<BarChartProps>(() => {
 {
   "title": "基础柱状图-竖向",
   "description": "用于对单一数据系列的各分类进行直观的数值对比，如对比不同日期的告警趋势、不同短名称业务线的漏洞数量分布。",
-  "index": 1
+  "index": 0
 }
 </archive-meta>
