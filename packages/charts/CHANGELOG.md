@@ -1,5 +1,20 @@
 # @idux/charts
 
+## 1.4.0
+
+### Minor Changes
+
+- 5ce1ad3: Add ESM subpath imports for individual chart families and the base chart utilities, so applications can bundle only the chart modules they use.
+
+### Patch Changes
+
+- Updated dependencies [0139b71]
+- Updated dependencies [5ce1ad3]
+- Updated dependencies [6c78c3f]
+- Updated dependencies [2598246]
+  - @idux/charts-core@1.4.0
+  - @idux/charts-plots@1.4.0
+
 ## 1.3.0
 
 ### Patch Changes
