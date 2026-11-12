@@ -7,6 +7,7 @@ import { convertArray } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 
 import type { BarChartProps } from './useBarOption'
+import { targetsCategoryZoomAxis } from '../../shared/categoryZoom'
 
 function barColumnKey(bar: BarSeriesOption, index: number) {
   return bar.stack ? `stack:${bar.stack}` : index
@@ -56,24 +57,13 @@ export function categoryBarId(index: number) {
   return `ix-category-bar-${index}`
 }
 
-export function targetsBarZoomAxis(
-  zoom: DataZoomComponentOption,
-  axis: 'x' | 'y',
-  id?: string | number,
-) {
-  const axisIndex = axis === 'x' ? zoom.xAxisIndex : zoom.yAxisIndex
-  const axisId = axis === 'x' ? zoom.xAxisId : zoom.yAxisId
-  if (axisIndex != null) return axisIndex === 'all' || convertArray(axisIndex).includes(0)
-  return id != null && convertArray(axisId).some(target => String(target) === String(id))
-}
-
 export function getCategoryZoom(
   zoom: ChartProps['dataZoom'],
   horizontal: boolean,
   categoryAxisId?: string | number,
 ) {
   return convertArray(zoom).find(item =>
-    targetsBarZoomAxis(item, horizontal ? 'y' : 'x', categoryAxisId),
+    targetsCategoryZoomAxis(item, horizontal ? 'y' : 'x', categoryAxisId),
   )
 }
 

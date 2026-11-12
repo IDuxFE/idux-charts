@@ -204,6 +204,7 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
     await expect
       .poll(async () => (await state()).every((chart, i) => chart.id && chart.id !== before[i].id))
       .toBe(true)
+    expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await page.getByTestId('mount').click()
     await expect.poll(state).toEqual([])
     await expect.poll(() => page.evaluate(() => window.allDisposed())).toBe(true)
