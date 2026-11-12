@@ -4,80 +4,65 @@ title: API
 
 ### IxChart
 
-基础组件，可以使用此组件实现所有 `ECharts` 的图表。
+从 `@idux/charts` 导入。将 ECharts option 通过 `v-bind` 传给组件，设置图表宽高。使用按需版 ECharts 时，通过 `echarts/core` 的 `use` 注册所用模块。基础组件内置 SVG 渲染器及网格、图例、提示框、标题、缩略轴和标记组件。使用 `dataset`、其他系列或 Canvas 渲染器时注册相应模块。
 
-#### ChartProps
+```vue
+<script setup lang="ts">
+import { IxChart, type ChartProps } from '@idux/charts'
+import { BarChart } from 'echarts/charts'
+import { use } from 'echarts/core'
 
-支持 `ECharts` 的[所有配置](https://echarts.apache.org/zh/option.html)。
+use([BarChart])
 
-```ts
-export interface ChartProps extends ChartOption, AdditionalChartOption {}
+const option = {
+  xAxis: { type: 'category', data: ['北京', '深圳', '上海'] },
+  yAxis: { type: 'value' },
+  series: [{ type: 'bar', data: [4, 7, 5] }],
+} satisfies ChartProps
+</script>
 
-export type ChartOption = ComposeOption<
-  | DatasetComponentOption
-  | DataZoomComponentOption
-  | GridComponentOption
-  | LegendComponentOption
-  | TitleComponentOption
-  | TooltipComponentOption
-  | BarSeriesOption
-  | PieSeriesOption
-  | LineSeriesOption
->
+<template>
+  <IxChart v-bind="option" style="height: 300px" />
+</template>
 ```
 
-#### AdditionalChartOption
+`ChartProps` 组合 `ChartOption` 和 `AdditionalChartOption`。`ChartOption` 声明库内置系列的类型。使用额外系列时，可用 ECharts 的 `ComposeOption` 描述对应配置。
 
-| 名称            | 说明                            | 类型                           | 默认值   | 全局配置 | 备注                                                                                                         |
-| --------------- | ------------------------------- | ------------------------------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `autoResize`    | 是否开启自动 resize             | `boolean`                      | `true`   | ✅       | -                                                                                                            |
-| `group`         | 图表的分组                      | `string`                       | -        | -        | -                                                                                                            |
-| `initOption`    | 图表用于初始化的配置            | `ChartInitOption`              | -        | ✅       | 也就是 `ECharts.init` 的第三个参数，参见 [echarts.init](https://echarts.apache.org/zh/api.html#echarts.init) |
-| `loading`       | 是否显示加载中状态              | `boolean \| object`            | -        | -        | -                                                                                                            |
-| `setOptionOpts` | 图表实例 setOption 的第二个参数 | `SetOptionOpts`                | -        | -        | 参见 [echartsInstance.setOption](https://echarts.apache.org/zh/api.html#echartsInstance.setOption)           |
-| `theme`         | 图表的主题                      | `ChartTheme`                   | `'seer'` | ✅       | -                                                                                                            |
-| `onReady`       | 图表渲染完成执行回调            | `(chart: EChartsType) => void` | -        | -        | 可以通过该回调函数拿获取到图表实例                                                                           |
+### AdditionalChartOption
+
+所有图表组件共用以下配置。ECharts 事件可通过 `@click`、`@legendselectchanged` 等监听，回调参数沿用 ECharts。
+
+| 属性            | 类型                           | 默认值            | 行为                                                                                                                                       |
+| --------------- | ------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoResize`    | `boolean`                      | `true`            | 随容器尺寸变化调整图表。                                                                                                                   |
+| `group`         | `string`                       | —                 | 设置实例的分组 ID，调用 ECharts 的 `connect(group)` 后联动同组图表。                                                                       |
+| `initOption`    | `ChartInitOption`              | —                 | ECharts `init` 的第三个参数。变化时重建实例。                                                                                              |
+| `loading`       | `boolean \| object`            | —                 | 显示原生加载遮罩，传对象可配置 `text`、`maskColor` 等。默认文案为 `Loading...`，生效的 ECharts option 含 `darkMode: true` 时使用深色遮罩。 |
+| `setOptionOpts` | `SetOptionOpts`                | 由图表决定        | 传给 ECharts `setOption` 的第二个参数。                                                                                                    |
+| `theme`         | `ChartTheme`                   | 注入值或 `'seer'` | ECharts 主题名或主题对象。变化时重建实例。                                                                                                 |
+| `onReady`       | `(chart: EChartsType) => void` | —                 | 创建实例并提交初始 option 后调用。重建时再次调用。                                                                                         |
 
 ### useChart
 
-创建图表配置的函数，可以更加灵活的处理图表的配置
+在 `setup` 中调用 `useChart(options)`，传入配置对象或 ref。将返回的 `containerRef` 绑定到有宽高的 `div`，通过 `chartRef` 访问实例。实例在挂载时创建，在卸载前销毁。ECharts 模块按所用配置注册；直接使用组合式 API 时也需确保渲染器、组件和主题已注册。
 
-```ts
-export function useChart(options: MaybeRef<ChartProps>): {
-  containerRef: ShallowRef<HTMLDivElement | undefined>
-  chartRef: ShallowRef<EChartsType | undefined>
-}
+```vue
+<script setup lang="ts">
+import { seerTheme, useChart } from '@idux/charts'
+import { TitleComponent } from 'echarts/components'
+import { registerTheme, use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+
+use([TitleComponent, SVGRenderer])
+registerTheme('seer', seerTheme)
+
+const { containerRef } = useChart({
+  title: { text: '资产分布' },
+  onReady: chart => chart.resize(),
+})
+</script>
+
+<template>
+  <div ref="containerRef" style="height: 160px" />
+</template>
 ```
-
-### 主题边界
-
-`IxChart` 原样消费 ECharts option 与 `AdditionalChartOption`，不解释 `plotTheme`、`layoutMode`、`seriesStyle` 或测量图的文字角色属性。使用 `theme` 切换 ECharts 初始化主题，使用 `textStyle`、各组件/系列样式调整文字；`theme` 或 `initOption` 改变时会重建实例。Plots 层的纯构建器输出可交给 IxChart，但需自行注册相应 ECharts 图表模块。
-
-### 应用级主题
-
-通过 `CHART_THEME_TOKEN` 提供主题名称或响应式主题对象，所有未显式设置 `theme` 的图表都会继承。优先级为组件 `theme` → 注入主题 → 内置 `seer`。主题变化沿用组件生命周期，会重新创建图表实例。
-
-```ts
-import { computed, provide, ref } from 'vue'
-import { CHART_THEME_TOKEN, PLOT_THEME_TOKEN } from '@idux/charts'
-
-const dark = ref(false)
-provide(
-  CHART_THEME_TOKEN,
-  computed(() => (dark.value ? 'dark' : 'seer')),
-)
-provide(
-  PLOT_THEME_TOKEN,
-  computed(() =>
-    dark.value
-      ? { textColor: '#f4f8ff', secondaryTextColor: '#8b949e', splitLineColor: '#30363d' }
-      : {},
-  ),
-)
-```
-
-`CHART_THEME_TOKEN` 控制 ECharts 主题；`PLOT_THEME_TOKEN` 控制饼图自动布局、雷达图、仪表盘和水波图生成的文字与辅助图形。显式配置的颜色优先，业务自定义文字或富文本应随应用主题同步更新。
-
-主题切换会重新触发 `onReady`，实例内的图例选中和缩放状态可能重置。若只调整生成的文字或辅助图形，可仅更新 `PLOT_THEME_TOKEN`。`darkMode: true` 时原生加载遮罩自动使用深色；`loading` 对象中的 `textColor`、`maskColor` 可显式覆盖。站点切换入口和完整接入说明见[快速上手](../../0-guide/GettingStarted.page.md)。
-
-内置柱状图、折线图和饼图的提示框背景由 ECharts 主题提供；默认 `seer` 保持原有浅色背景。显式 `tooltip.backgroundColor` 优先于主题。
