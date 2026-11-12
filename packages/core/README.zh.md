@@ -63,11 +63,13 @@ const option: ChartProps = {
 - `useReactiveAttrs`、`createInstall` 和 `withChartProps` 用于自定义图表开发。
 - `ChartProps`、`ChartPublicProps`、`ChartOption`：公开配置类型。
 
+图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。
+
 此包不提供独立 CSS 文件；共享 HTML 提示框样式由 `@idux/charts/dist/style.css` 提供。
 
 ## 应用级主题
 
-可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。注入主题变化沿用已有主题生命周期，重新创建图表实例。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。
+可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。修改 `theme` 或 `initOption` 会重建实例，并恢复兼容的缩放范围和图例选择。显式变更范围或选择时采用新配置。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。
 
 ## 自定义 Tooltip
 

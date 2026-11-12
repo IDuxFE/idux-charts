@@ -61,7 +61,9 @@ const lineOption: LineChartProps = {
 </template>
 ```
 
-See [Getting Started](https://idux.site/guide/getting-started/en) for more details.
+For ESM builds, import individual chart families from subpaths such as `@idux/charts/line` and shared utilities from `@idux/charts/core`. See the [package README](packages/charts/README.md) for the full list.
+
+See [Getting Started](packages/site/src/0-guide/GettingStarted.page.md) for more details.
 
 ### TypeScript prop types
 
@@ -111,7 +113,7 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 
 ### Visual customization
 
-All charts can inherit a reactive ECharts theme through `CHART_THEME_TOKEN`. Explicit `theme` props take precedence, and theme changes recreate the instance. The documentation site includes a light/dark toggle, follows the system until manually selected, and remembers the selection. See the configuration guide below for coordinating ECharts and plot themes.
+All charts can inherit a reactive ECharts theme through `CHART_THEME_TOKEN`. Explicit `theme` props take precedence, and theme changes recreate the instance. Recreated charts restore compatible zoom ranges and legend selections. The documentation site includes a light/dark toggle, follows the system until manually selected, and remembers the selection. See the configuration guide below for coordinating ECharts and plot themes.
 
 Category Bar, Line and Area, automatic Pie, Radar, Gauge, and LiquidFill support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
 

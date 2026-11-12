@@ -63,11 +63,13 @@ const option: ChartProps = {
 - `useReactiveAttrs`, `createInstall`, and `withChartProps` support custom chart development.
 - `ChartProps`, `ChartPublicProps`, and `ChartOption`: public configuration types.
 
+Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
+
 This package does not ship a separate CSS file. Shared HTML tooltip styles are provided by `@idux/charts/dist/style.css`.
 
 ## Application themes
 
-Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing the inherited theme recreates the chart, following the existing theme lifecycle. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).
+Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing `theme` or `initOption` recreates the instance and restores compatible zoom ranges and legend selections. Explicit changes to the range or selection take precedence. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).
 
 ## Custom tooltips
 

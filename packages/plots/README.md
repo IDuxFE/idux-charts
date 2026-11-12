@@ -60,6 +60,8 @@ const option: LineChartProps = {
 
 Chart components register their required ECharts modules. Global registration is also supported: use `app.use(IxLineChart)` in Vue 3 or `Vue.use(IxLineChart)` in Vue 2.
 
+To import individual chart families in an ESM build, use the [`@idux/charts` subpaths](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.md#quick-start), such as `@idux/charts/line`.
+
 ## Configuration and themes
 
 - `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, and `createLiquidFillOption` are pure option builders.
@@ -69,7 +71,11 @@ Chart components register their required ECharts modules. Global registration is
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point. This package does not emit CSS itself. To use these styles, install `@idux/charts` and import that stylesheet, or supply equivalent application styles.
 
-- All plots inherit `CHART_THEME_TOKEN` from `@idux/charts-core` (also re-exported by `@idux/charts`). Explicit ECharts `theme` props override this default; switching it recreates the chart. Pair it with `PLOT_THEME_TOKEN` for generated labels and graphics.
+- All plots inherit `CHART_THEME_TOKEN` from `@idux/charts-core` (also re-exported by `@idux/charts`). Explicit ECharts `theme` props override this default; switching it recreates the chart and restores compatible zoom ranges and legend selections. Pair it with `PLOT_THEME_TOKEN` for generated labels and graphics.
+
+When data is appended and the zoom configuration is unchanged, category Bar, Line, and Area charts keep the historical window. A window at the end follows the newest data and keeps the same number of points. A full-range view continues to show all data.
+
+Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
 
 ## Custom tooltips
 

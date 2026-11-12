@@ -63,10 +63,16 @@ Vue 2.7 and Vue 3 check declarations with
 `skipLibCheck: false`, including inferred props, events, scoped slots, setup
 bindings, data, computed values, and methods. Vue 2.6 checks the adapter prop
 aliases with its existing `skipLibCheck: true` boundary. Pass `--runtime` to also
-test the packed JS in Chromium: rendering, data updates, theme changes, disposal,
-remounting, and composable-only tree shaking. Each compatibility CI job runs this additional smoke test.
+test the packed JS in Chromium: rendering, data updates, theme recreation and
+zoom preservation, chart container attributes, disposal, and remounting. It also
+checks composable-only imports, shared instances across aggregate and modular
+imports, and that the line subpath excludes unrelated series and produces a
+smaller gzip-compressed JS bundle. Each compatibility CI job runs these checks.
 `IDUX_DECLARATION_TARGET=2.7.16/5.4.3` selects one combination; without it, local
 runs retain the complete compatibility matrix.
+
+Use `pnpm benchmark:charts` for a local Chromium performance run. See the
+[performance baseline](../e2e/PERFORMANCE.md) for the workload and reference results.
 
 Root dependency lockfiles also remain untracked. CI and release jobs install with
 `pnpm install --no-lockfile --no-frozen-lockfile`, resolving dependencies within their declared

@@ -60,6 +60,8 @@ const option: LineChartProps = {
 
 图表组件会注册自身所需的 ECharts 模块。组件也支持全局注册：Vue 3 使用 `app.use(IxLineChart)`，Vue 2 使用 `Vue.use(IxLineChart)`。
 
+ESM 项目可通过 [`@idux/charts` 的图表子入口](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.zh.md#快速上手)按需导入，例如 `@idux/charts/line`。
+
 ## 配置与主题
 
 - `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption` 提供纯配置构建函数。
@@ -69,7 +71,11 @@ const option: LineChartProps = {
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。此包自身不输出 CSS；需要这些样式时，安装 `@idux/charts` 并导入该样式文件，或由应用提供对应样式。
 
-- 所有图表继承 `@idux/charts-core`（也由 `@idux/charts` 导出）的 `CHART_THEME_TOKEN`。显式 ECharts `theme` 属性优先，切换时重建实例；生成的文字和辅助图形需配合 `PLOT_THEME_TOKEN` 同步更新。
+- 所有图表继承 `@idux/charts-core`（也由 `@idux/charts` 导出）的 `CHART_THEME_TOKEN`。显式 ECharts `theme` 属性优先，切换时重建实例，并恢复兼容的缩放范围和图例选择。生成的文字和辅助图形需配合 `PLOT_THEME_TOKEN` 同步更新。
+
+在分类末尾追加数据且缩放配置未变时，柱状图、折线图和面积图会保留回看窗口。末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
+
+图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。
 
 ## 自定义 Tooltip
 
