@@ -28,3 +28,5 @@ export {
 export { getBarLinearColors, getBarLinearColor, LinearDirection } from './src/getBarLinearColors'
 
 export type { BarReferenceLine } from './src/createCategoryBarOption'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

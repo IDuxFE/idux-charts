@@ -61,6 +61,8 @@ const option: LineChartProps = {
 
 Chart components register their required ECharts modules. Global registration is also supported: use `app.use(IxLineChart)` in Vue 3 or `Vue.use(IxLineChart)` in Vue 2.
 
+Use an ESM subpath such as `@idux/charts/line` to import one chart family and its types. The available subpaths are `bar`, `line` (including area), `pie`, `radar`, `gauge`, and `liquid-fill`. Import the base component, ECharts theme token, and shared tooltip helpers from `@idux/charts/core`. Each chart subpath also exports the plot theme token. The aggregate entry registers the full set of charts.
+
 ## Configuration and themes
 
 - `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, and `createLiquidFillOption` are pure option builders.

@@ -4,6 +4,7 @@
   "exclude": ["dist", "node_modules", "**/__tests__/**", "vite.config.ts"],
   "compilerOptions": {
     "composite": false,
+    "paths": {},
     "noUncheckedSideEffectImports": false
   }
 }

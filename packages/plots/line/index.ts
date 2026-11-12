@@ -35,3 +35,5 @@ export {
 } from './src/useLineChartAreaStripe'
 
 export type { LineChartDataItem } from './src/categoryLineData'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

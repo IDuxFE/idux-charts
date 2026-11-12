@@ -9,3 +9,5 @@ export const IxRadarChart: InstallableChart<typeof Radar> = createInstall(Radar,
 ])
 export { createRadarOption } from './src/createRadarOption'
 export type { RadarChartProps, RadarChartPublicProps } from './src/createRadarOption'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

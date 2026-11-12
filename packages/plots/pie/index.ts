@@ -18,3 +18,5 @@ export {
   type PieChartDataItem,
   type PieChartPublicProps,
 } from './src/usePieOption'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

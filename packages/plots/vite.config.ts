@@ -1,5 +1,7 @@
 import { resolve } from 'path'
 
+import { chartEntries } from '../../build/chartEntries.ts'
+
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
@@ -16,13 +18,16 @@ const globalsMap: Record<string, string> = {
   'vue-demi': 'VueDemi',
 }
 
-export default defineConfig({
-  plugins: [dts(chartDeclarations(resolve(import.meta.dirname, 'tsconfig.json'))), vue()],
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    mode !== 'modular' && dts(chartDeclarations(resolve(import.meta.dirname, 'tsconfig.json'))),
+    vue(),
+  ],
   build: {
+    emptyOutDir: mode !== 'modular',
     lib: {
-      entry: resolve(import.meta.dirname, 'index.ts'),
+      ...chartEntries(import.meta.dirname, mode, '/index.ts'),
       name: 'IduxChartsPlots',
-      fileName: 'index',
     },
     rollupOptions: {
       external: (id: string) => externalDeps.some(k => new RegExp('^' + k).test(id)),
@@ -36,4 +41,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

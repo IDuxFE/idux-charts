@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "build": "rimraf dist && vite build"
+    "build": "rimraf dist && vite build && vite build --mode modular"
   },
   "dependencies": {
     "@idux/charts-core": "workspace:*",
