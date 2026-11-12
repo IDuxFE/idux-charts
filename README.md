@@ -118,3 +118,5 @@ All charts can inherit a reactive ECharts theme through `CHART_THEME_TOKEN`. Exp
 Category Bar, Line and Area, automatic Pie, Radar, Gauge, and LiquidFill support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
 
 Before each commit, Husky runs `pnpm check:staged`: lint and formatting checks target Git-staged files only; code changes also run related unit tests and project-wide type checking (which cannot safely run per file). Failures block the commit without auto-fixing files. Documentation-only changes run formatting checks only. Run `pnpm check` for the full suite. Installing dependencies initializes the hooks automatically.
+
+Before each push, Husky runs repository-wide lint and forces a full TypeScript check. A failure stops the push.
