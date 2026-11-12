@@ -9,3 +9,5 @@ export const IxGaugeChart: InstallableChart<typeof Gauge> = createInstall(Gauge,
 export { createGaugeOption } from './src/createGaugeOption'
 export type { GaugeChartProps, GaugeChartPublicProps } from './src/createGaugeOption'
 export type { GaugeSegment } from './src/createGaugeOption'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

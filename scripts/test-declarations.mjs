@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { gzipSync } from 'node:zlib'
 import ts from 'typescript'
 import { chromium, expect } from '@playwright/test'
 import { build, preview } from 'vite'
@@ -86,8 +87,20 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, PLOT_THEME_TOKEN } from '@idux/charts';
+import { IxChart as Core } from '@idux/charts/core';
+import { IxBarChart as Bar } from '@idux/charts/bar';
+import { IxLineChart as Line, PLOT_THEME_TOKEN as LineTheme } from '@idux/charts/line';
+import { IxPieChart as Pie } from '@idux/charts/pie';
+import { IxRadarChart as Radar } from '@idux/charts/radar';
+import { IxGaugeChart as Gauge } from '@idux/charts/gauge';
+import { IxLiquidFillChart as LiquidFill } from '@idux/charts/liquid-fill';
 import { getInstanceByDom } from 'echarts/core';
+if ([Bar, Line, Pie, Radar, Gauge, LiquidFill].some((component, index) => component !==
+    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart][index]) ||
+    Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN) {
+  throw new Error('Modular and aggregate imports must share the same component instances');
+}
 const revision = ref(0), dark = ref(false), mounted = ref(true);
 const instances = [];
 const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
@@ -216,6 +229,49 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
   }
 }
 
+async function checkLineBundle(app) {
+  const entry = join(app, 'line-entry.js')
+  const sizes = {}
+  for (const [label, path, imports] of [
+    ['line', '@idux/charts/line', 'IxLineChart'],
+    [
+      'all',
+      '@idux/charts',
+      'IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart',
+    ],
+  ]) {
+    writeFileSync(
+      entry,
+      `import { createApp, h } from 'vue-demi';
+import { ${imports} } from '${path}';
+createApp({render: () => h('div', [${imports}].map(component => h(component)))}).mount('#app');`,
+    )
+    const output = await build({
+      root: app,
+      configFile: false,
+      logLevel: 'error',
+      build: { write: false, rollupOptions: { input: entry } },
+    })
+    const chunks = [output]
+      .flat()
+      .flatMap(result => result.output)
+      .filter(item => item.type === 'chunk')
+    const size = chunks.reduce((bytes, chunk) => bytes + gzipSync(chunk.code).length, 0)
+    sizes[label] = size
+    console.log(`Bundle ${label}: ${(size / 1024).toFixed(1)} KiB gzip (JS including Vue)`)
+    if (label === 'line') {
+      const modules = chunks.flatMap(chunk => Object.keys(chunk.modules))
+      assert.ok(modules.some(id => id.endsWith('/echarts/lib/chart/line/install.js')))
+      assert.deepEqual(
+        modules.filter(id => /\/echarts\/lib\/chart\/(bar|pie|radar|gauge)\/install\.js$/.test(id)),
+        [],
+        'The line subpath must exclude unrelated ECharts series',
+      )
+    }
+  }
+  assert.ok(sizes.line < sizes.all, 'The line subpath must produce a smaller JS bundle')
+}
+
 async function smokeHooks(app) {
   writeFileSync(
     join(app, 'hook-only.html'),
@@ -280,6 +336,8 @@ provide(CHART_THEME_TOKEN, { darkMode: true, textStyle: { color: '#fff' } });
 // @ts-expect-error themes must be names or objects, not numbers
 provide(CHART_THEME_TOKEN, 42);
 import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps } from '@idux/charts';
+import type { LineChartPublicProps as ModularLineProps } from '@idux/charts/line';
+const modularLine: ModularLineProps = { categories: ['A', 'B'], data: [1, 2] };
 const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
 const gauge: GaugeChartPublicProps = { value: 20, segments: [{upper: 1, color: 'red'}], plotTheme: { textColor: 'red' }, valueTextStyle: { fontSize: 24 } };
 const themedPie: PieChartPublicProps = { layoutMode: 'auto', plotTheme: { palette: ['red'] }, seriesStyle: { emphasis: { scale: false } } };
@@ -445,6 +503,7 @@ defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxPieChart, Ix
   if (process.argv.includes('--runtime')) {
     await smokeRuntime(app)
     await smokeHooks(app)
+    await checkLineBundle(app)
     console.log(
       `PASS Vue ${version} / ECharts ${echartsVersion}: packed JS render/update/theme/unmount/remount and composable-only tree shaking`,
     )

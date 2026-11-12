@@ -7,3 +7,5 @@ export const IxLiquidFillChart: InstallableChart<typeof LiquidFill> = createInst
 ])
 export { createLiquidFillOption } from './src/createLiquidFillOption'
 export type { LiquidFillChartProps, LiquidFillChartPublicProps } from './src/createLiquidFillOption'
+
+export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

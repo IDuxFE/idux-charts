@@ -37,7 +37,7 @@
   ],
   "scripts": {
     "clean": "rimraf dist node_modules",
-    "build": "rimraf dist && vite build"
+    "build": "rimraf dist && vite build && vite build --mode modular"
   },
   "dependencies": {
     "@idux/charts-core": "workspace:*",
@@ -56,5 +56,71 @@
   },
   "devDependencies": {
     "echarts": "^6.1.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./bar": {
+      "types": "./dist/bar.d.ts",
+      "import": "./dist/bar.js"
+    },
+    "./line": {
+      "types": "./dist/line.d.ts",
+      "import": "./dist/line.js"
+    },
+    "./pie": {
+      "types": "./dist/pie.d.ts",
+      "import": "./dist/pie.js"
+    },
+    "./radar": {
+      "types": "./dist/radar.d.ts",
+      "import": "./dist/radar.js"
+    },
+    "./gauge": {
+      "types": "./dist/gauge.d.ts",
+      "import": "./dist/gauge.js"
+    },
+    "./liquid-fill": {
+      "types": "./dist/liquid-fill.d.ts",
+      "import": "./dist/liquid-fill.js"
+    },
+    "./types": {
+      "types": "./types.d.ts"
+    },
+    "./types.d.ts": "./types.d.ts",
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "core": [
+        "dist/core.d.ts"
+      ],
+      "bar": [
+        "dist/bar.d.ts"
+      ],
+      "line": [
+        "dist/line.d.ts"
+      ],
+      "pie": [
+        "dist/pie.d.ts"
+      ],
+      "radar": [
+        "dist/radar.d.ts"
+      ],
+      "gauge": [
+        "dist/gauge.d.ts"
+      ],
+      "liquid-fill": [
+        "dist/liquid-fill.d.ts"
+      ]
+    }
   }
 }

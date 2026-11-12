@@ -42,6 +42,8 @@ const data = [123, 324, 156]
 
 导入图表组件时会注册该组件内置的 ECharts 模块。Vue 3 可在 `<script setup>` 中直接使用，或通过 `app.use(IxLineChart)` 全局注册。Vue 2 可用 `components: { IxLineChart }` 局部注册，或通过 `Vue.use(IxLineChart)` 全局注册。`app.component` 和 `Vue.component` 也可以用于全局注册。
 
+使用 ESM 构建时，可以通过子入口按需导入组件及其类型。例如，将折线图的导入改为 `import { IxLineChart, type LineChartProps } from '@idux/charts/line'`。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge` 和 `liquid-fill`。总入口会注册全套图表模块。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。
+
 ## 应用主题
 
 | 配置                             | 用途                                                                                                                                                                                 |
