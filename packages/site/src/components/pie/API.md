@@ -54,3 +54,7 @@ const option: PieChartProps = {
 ### usePieOption
 
 在 `setup` 中调用 `usePieOption(seriesProps, attrs)` 可得到 `ComputedRef<PieChartProps>`。该函数读取 `PIE_CHART_TOKEN`，生成原生饼图配置。组件的自适应布局通过 `layoutMode` 或 `align` 启用。
+
+风险分布示例用同一个函数组装风险数量、占比和统计口径，再分别交给扇区与图例的 formatter。
+
+自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。

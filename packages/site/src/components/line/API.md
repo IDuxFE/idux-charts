@@ -48,3 +48,5 @@ const option: LineChartProps = {
 省略 `categories` 可使用 ECharts 时间轴、多坐标系和 `dataset`，额外 ECharts 模块按需注册。顶层系列简写为 `data`、`name`、`areaStyle`、`label`、`markArea`、`smooth` 和 `stack`。
 
 在 `setup` 中调用 `useLineOption(seriesProps, attrs)` 可得到 `ComputedRef<LineChartProps>`。`LINE_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的默认 Tooltip 向 `tooltip.valueFormatter` 传入数据所在值轴的测量值。
+
+自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。

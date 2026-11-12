@@ -49,3 +49,22 @@ const option: BarChartProps = {
 省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。额外 ECharts 模块按需注册。
 
 在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
+
+原生条纹柱图可将 `useStripeBarTooltip` 的结果展开到轴触发 Tooltip 中。传入 `useStripeBarSeries` 的业务系列需要提供 `name`，以便提示框显示该系列。
+
+```ts
+import { useStripeBarSeries, useStripeBarTooltip } from '@idux/charts'
+import type { BarChartProps } from '@idux/charts'
+
+const option = {
+  xAxis: { type: 'category', data: ['周一', '周二', '周三'] },
+  yAxis: { type: 'value' },
+  series: useStripeBarSeries({
+    series: { name: '访问量', data: [4, 7, 5] },
+    color: '#458FFF',
+  }),
+  tooltip: { trigger: 'axis', ...useStripeBarTooltip('次') },
+} satisfies BarChartProps
+```
+
+自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。

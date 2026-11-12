@@ -87,6 +87,10 @@ provide(
 | `splitLineColor`、`splitAreaColor`     | 分隔线和背景颜色。                                   |
 | `errorColor`、`missingBackgroundColor` | 异常色，以及分类柱状图、折线图和面积图的缺报底纹色。 |
 
+## 自定义提示框
+
+只改柱状图、折线图或面积图的数值格式时，使用 `tooltip.valueFormatter`。需要自定义标题和数据行时，可在 `tooltip.formatter` 中调用 `useTooltipsFormatter` 复用内置排版。工具参数和完整用法见<a href="../components/core">基础组件 API 的「自定义 Tooltip」</a>。
+
 ## TypeScript 配置类型
 
 从 `@idux/charts` 导入 `BarChartProps`、`LineChartProps` 等类型来声明配置对象。编写二次封装时，可用对应的 `*ChartPublicProps` 提取具名属性类型。

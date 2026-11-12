@@ -48,3 +48,5 @@ const option: RadarChartProps = {
 `createRadarOption(props)` 与组件使用同样的配置合并规则。例如传入 `radar: { splitNumber: 3 }` 可修改网格分段数并保留 `indicator` 和其他默认值。直接调用函数时可显式传入 `plotTheme`。
 
 `radar` 和 `tooltip` 等原生对象按字段合并。显式传入 `series` 会使用指定的系列及其原始数据顺序。组件支持<a href="./core">基础组件</a> API 中的公共图表选项。
+
+自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。
