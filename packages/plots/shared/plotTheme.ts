@@ -1,5 +1,7 @@
 import { computed, inject, unref } from 'vue-demi'
 import type { InjectionKey, Ref } from 'vue-demi'
+import { CHART_THEME_TOKEN } from '@idux/charts-core'
+import type { ChartProps } from '@idux/charts-core'
 
 /** Visual defaults for built-in plot layouts. */
 export interface PlotTheme {
@@ -44,6 +46,18 @@ export function mergePlotTheme(...sources: (PlotTheme | undefined)[]): PlotTheme
 export function usePlotTheme(local: () => PlotTheme | undefined) {
   const provided = inject(PLOT_THEME_TOKEN, undefined)
   return computed(() => mergePlotTheme(unref(provided), local()))
+}
+
+export function usePlotDark(attrs: () => ChartProps) {
+  const provided = inject(CHART_THEME_TOKEN, undefined)
+  return computed(() => {
+    const { darkMode, theme = unref(provided) } = attrs()
+    if (typeof darkMode === 'boolean') return darkMode
+    return (
+      theme === 'dark' ||
+      (!!theme && typeof theme === 'object' && 'darkMode' in theme && theme.darkMode === true)
+    )
+  })
 }
 
 /** Convert the public text color to the custom-series graphic fill property. */

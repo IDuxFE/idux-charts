@@ -49,7 +49,7 @@ const option: PieChartProps = {
 
 自动布局的标题和中心摘要由业务计算。用 `title.text`、`title.subtext` 显示总数及说明。点击图例筛选后，业务文案保持原值。
 
-支持<a href="./core">基础组件</a> API 中的公共图表选项。需要清除 ECharts 合并保留的配置时，可设置 `setOptionOpts: { notMerge: true }`，这也可能重置图例选择等状态。
+支持<a href="./core">基础组件</a> API 中的公共图表选项。自动布局清理已移除的样式，图例配置和数据名称相同时保留图例选择。原生布局的默认合计取最终生效的系列数据，可用 `title: null` 移除标题。
 
 ### usePieOption
 

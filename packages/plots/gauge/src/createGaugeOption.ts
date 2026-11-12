@@ -5,6 +5,27 @@ import { graphic } from 'echarts/core'
 import { getAlphaColor } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 import { valueRatio } from '../../shared/value'
+import { mergeNativePlotOptions } from '../../shared/plotOptions'
+
+export const gaugeProps = [
+  'value',
+  'min',
+  'max',
+  'segments',
+  'label',
+  'valueFormatter',
+  'color',
+  'size',
+  'valueFontSize',
+  'valueFontFamily',
+  'labelColor',
+  'textColor',
+  'backgroundColor',
+  'trackColor',
+  'valueTextStyle',
+  'labelTextStyle',
+  'plotTheme',
+] as const
 
 export interface GaugeSegment {
   /** Inclusive normalized upper bound. Strictly increasing; the final bound must be 1. */
@@ -30,6 +51,8 @@ export interface GaugeChartProps
   valueFontFamily?: string
   labelColor?: string
   textColor?: string
+  trackColor?: string
+  /** @deprecated Use trackColor for the track or chartBackgroundColor for the chart. */
   backgroundColor?: string
 }
 export type GaugeChartPublicProps = KnownProps<GaugeChartProps>
@@ -48,12 +71,15 @@ export function createGaugeOption(
         segment.upper <= 1,
     ) &&
     (!segments.length || segments[segments.length - 1]!.upper === 1)
-  if (ratio === undefined || !validSegments) return { series: [] }
+  if (ratio === undefined || !validSegments) {
+    return mergeNativePlotOptions({ series: [] }, props, gaugeProps)
+  }
   const active = segments.find(segment => ratio <= segment.upper)
   const color = active?.color ?? props.color ?? theme.color ?? '#4089FF'
   const textColor = props.textColor ?? theme.textColor ?? '#1F2329'
   const text = props.valueFormatter?.(props.value!) ?? String(props.value)
   const label = props.label ?? active?.label ?? ''
+  const trackColor = props.trackColor ?? props.backgroundColor ?? theme.borderColor ?? '#D8DDE5'
   const gradient = new graphic.LinearGradient(0, 0, 1, 0, [
     { offset: 0, color: getAlphaColor(color, 0.65) },
     { offset: 1, color },
@@ -116,15 +142,11 @@ export function createGaugeOption(
       })
       return {
         type: 'group',
+        // The set of segments may shrink even while the custom series is merged.
+        $mergeChildren: false,
         children: [
-          sector(
-            0,
-            1,
-            getAlphaColor(props.backgroundColor ?? theme.borderColor ?? '#D8DDE5', 0.3),
-            radius + shadow,
-            stroke + shadow * 2,
-          ),
-          sector(0, 1, props.backgroundColor ?? theme.borderColor ?? '#D8DDE5'),
+          sector(0, 1, getAlphaColor(trackColor, 0.3), radius + shadow, stroke + shadow * 2),
+          sector(0, 1, trackColor),
           ...(segments.length
             ? segments.map((segment, i) =>
                 sector(
@@ -204,5 +226,5 @@ export function createGaugeOption(
       }
     },
   }
-  return { animation: false, series: [series] }
+  return mergeNativePlotOptions({ animation: false, series: [series] }, props, gaugeProps)
 }

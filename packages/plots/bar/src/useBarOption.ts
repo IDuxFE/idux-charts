@@ -1,9 +1,16 @@
-import { mergeAxisOption, createCartesianTooltip } from '../../shared/cartesian'
+import {
+  applyCartesianLegend,
+  applyCartesianTooltip,
+  cartesianGridBounds,
+  mergeAxisOption,
+  reserveCartesianSpace,
+} from '../../shared/cartesian'
+import { mergePlotOptions, resolvePlotInput } from '../../shared/plotOptions'
 import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
 import type { BarSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, set, merge } from 'lodash-es'
+import { get, omit, set } from 'lodash-es'
 
 import { isVertical, convertArray, filterEmptyProps } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
@@ -27,6 +34,7 @@ export const barChartProps = [
   'markArea',
   'stack',
 ] as const
+export const barPlotProps = [...barChartProps, ...categoryBarProps] as const
 
 type NativeBarData = NonNullable<BarSeriesOption['data']>
 
@@ -58,7 +66,7 @@ const defaultProps: BarChartProps = {
     bottom: 32,
     left: 32,
     right: 32,
-    containLabel: true,
+    ...cartesianGridBounds,
   },
   legend: {
     bottom: 0,
@@ -85,56 +93,21 @@ export function useBarOption(
   attrsInput: BarChartProps | ShallowRef<BarChartProps>,
 ): ComputedRef<BarChartProps> {
   const injectProps = inject(BAR_CHART_TOKEN, null)
-  const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
-
-  const mergedSeriesOption = computed<BarSeriesOption>(() => {
-    const option = filterEmptyProps(unref(props))
-    option.type = 'bar'
-
-    // Disable the native hover highlight unless the caller configures it.
-    if (!option.emphasis) {
-      option.emphasis = {
-        disabled: true,
-      }
-    }
-
-    return option
-  })
-
-  const mergedOption = computed(() => {
-    const attrs = unref(attrsInput)
-    const option = merge({}, mergedDefaultProps, attrs)
-    if (attrs.title && !get(attrs, ['grid', 'top'])) {
-      // Reserve room for the title.
-      const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
-      set(option, ['grid', 'top'], top)
-    }
-    if (attrs.dataZoom && !get(attrs, ['grid', 'bottom'])) {
-      // Reserve room for the zoom slider.
-      const bottom = get(mergedDefaultProps, ['grid', 'bottom'], 32) + 32
-      set(option, ['grid', 'bottom'], bottom)
-    }
-    const legend = get(attrs, ['legend'])
-    const series = convertArray(get(attrs, ['series']))
-    // @ts-ignore
-    if (legend === false || series.length <= 1) {
-      set(option, ['legend'], undefined)
-    }
-    if (!get(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'])) {
-      const seriesLength = convertArray(attrs.series).length || 1
-      const axisPointerWidth = seriesLength * defaultBarWidth * (1 + defaultBarGap) + 8
-      set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
-    }
-
-    return option
-  })
-
   return computed(() => {
-    const option = { ...mergedOption.value }
-    const seriesOption = mergedSeriesOption.value
-
+    const { props: seriesProps, attrs } = resolvePlotInput(
+      injectProps,
+      filterEmptyProps(unref(props)) as BarChartProps,
+      unref(attrsInput),
+      barPlotProps,
+    )
+    const option = mergePlotOptions<BarChartProps>(defaultProps, attrs)
+    const seriesOption = {
+      emphasis: { disabled: true },
+      ...omit(seriesProps, categoryBarProps),
+      type: 'bar',
+    } as BarSeriesOption
+    reserveCartesianSpace(option, defaultProps, attrs)
     const { xAxis, yAxis, series } = option
-
     const [defaultXAxis, defaultYAxis] = isVertical(option)
       ? [defaultCategoryAxis, defaultValueAxis]
       : [defaultValueAxis, defaultCategoryAxis]
@@ -142,15 +115,20 @@ export function useBarOption(
     option.xAxis = mergeAxisOption(defaultXAxis, xAxis)
     option.yAxis = mergeAxisOption(defaultYAxis, yAxis)
 
-    if (!series) {
-      option.series = seriesOption ? [seriesOption] : []
-    } else {
-      option.series = convertArray(series).map(item => merge({}, seriesOption, item))
+    option.series =
+      series === undefined
+        ? [seriesOption]
+        : convertArray(series).map(item => mergePlotOptions(seriesOption, item))
+    applyCartesianLegend(option, attrs.legend)
+    if (
+      !Array.isArray(option.tooltip) &&
+      get(option, ['tooltip', 'axisPointer', 'lineStyle', 'width']) === undefined
+    ) {
+      const axisPointerWidth =
+        (option.series.length || 1) * defaultBarWidth * (1 + defaultBarGap) + 8
+      set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
     }
-
-    if (!get(option, ['tooltip', 'formatter'])) {
-      option.tooltip = { ...option.tooltip, formatter: createCartesianTooltip(option) }
-    }
+    applyCartesianTooltip(option)
 
     return option
   })

@@ -2,12 +2,13 @@ import type { XAXisComponentOption } from 'echarts'
 import type { ChartProps } from '@idux/charts-core'
 import type { LineSeriesOption } from 'echarts/charts'
 import type { EChartsType } from 'echarts/core'
-import { color as echartsColor, version as echartsVersion } from 'echarts/core'
+import { color as echartsColor } from 'echarts/core'
 import { convertArray, getAlphaColor } from '@idux/charts-core'
-import { merge, pick } from 'lodash-es'
+import { pick } from 'lodash-es'
 
 import { appendLegendGraphics, createCategoryLegend } from '../../shared/categoryLegend'
-import { mergeAxisOption } from '../../shared/cartesian'
+import { cartesianGridBounds, mergeAxisOption } from '../../shared/cartesian'
+import { mergePlotOptions } from '../../shared/plotOptions'
 import { seerGradientStartColors } from '../../shared/linearColors'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
 import type { PlotTheme } from '../../shared/plotTheme'
@@ -48,10 +49,9 @@ export function createCategoryLineOption(
   const { categories = [], area, referenceLine, zeroText } = props
   const { series, xAxis, yAxis, legend, grid, tooltip, dataZoom, graphic, ...rest } = attrs
   const tooltipInput = convertArray(tooltip)[0]
-  // The category layout owns its generated components, including when they are removed.
-  const runtime = { ...rest, setOptionOpts: { ...attrs.setOptionOpts, notMerge: true } }
+  const runtime = rest
   const inputs = series === undefined ? [{}] : convertArray(series)
-  const lines = inputs.map(item => ({ ...baseSeries, ...item }))
+  const lines = inputs.map(item => mergePlotOptions<LineSeriesOption>(baseSeries, item))
   if (!categories.length || !lines.some(line => line.data?.length)) {
     return { option: runtime as ChartProps, wheel: undefined }
   }
@@ -308,24 +308,21 @@ export function createCategoryLineOption(
     | undefined
   const option: ChartProps = {
     ...runtime,
-    grid: merge(
+    grid: mergePlotOptions<NonNullable<ChartProps['grid']>>(
       {
         top: attrs.title ? 56 : 36,
         bottom: 12 + legendHeight + (hasSlider ? 24 : 0),
         left: 18,
         right: 20,
-        // ECharts 5 uses containLabel to reserve space for the value labels.
-        ...(Number.parseInt(echartsVersion, 10) < 6
-          ? { containLabel: true }
-          : { outerBoundsMode: 'same', outerBoundsContain: 'axisLabel' }),
+        ...cartesianGridBounds,
       },
       grid,
     ),
-    xAxis: {
-      ...merge({ boundaryGap: false, axisLabel: { hideOverlap: true } }, categoryAxis),
-      type: 'category',
-      data: categories,
-    },
+    xAxis: mergePlotOptions<XAXisComponentOption>(
+      { boundaryGap: false, axisLabel: { hideOverlap: true } },
+      categoryAxis,
+      { type: 'category', data: categories },
+    ),
     yAxis: valueAxis,
     legend: layoutLegend,
     dataZoom: zoom,
@@ -342,19 +339,21 @@ export function createCategoryLineOption(
         ? [createMissingBands(missing, bandSlots, missingColor, bandLayer, maskLines)]
         : []),
     ],
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'line', lineStyle: { type: 'dashed' } },
-      formatter: createCategoryLineTooltip(
-        categories,
-        lineSeries,
-        values,
-        valueAxis,
-        missing,
-        tooltipInput?.valueFormatter,
-      ),
-      ...tooltipInput,
-    },
+    tooltip: mergePlotOptions<NonNullable<ChartProps['tooltip']>>(
+      {
+        trigger: 'axis',
+        axisPointer: { type: 'line', lineStyle: { type: 'dashed' } },
+        formatter: createCategoryLineTooltip(
+          categories,
+          lineSeries,
+          values,
+          valueAxis,
+          missing,
+          tooltipInput?.valueFormatter,
+        ),
+      },
+      tooltipInput,
+    ),
   }
   return { option, wheel }
 }

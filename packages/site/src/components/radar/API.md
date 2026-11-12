@@ -41,10 +41,10 @@ const option: RadarChartProps = {
 | `radius`      | `RadarComponentOption['radius']`    | `'65%'`          | 支持像素或百分比。                                            |
 | `plotTheme`   | `PlotTheme`                         | 注入值           | 色板、轴文字和网格样式，继承 `PLOT_THEME_TOKEN`。             |
 
-数值数组的顺序须与 `indicator` 一致。开启 `clockwise` 后，ECharts 回调中的 `value` 使用绘制顺序。要读取业务原始数据，可按 `dataIndex` 索引传入的 `data`。
+数值数组的顺序须与 `indicator` 一致。维度尚未就绪时渲染空态。开启 `clockwise` 后，ECharts 回调中的 `value` 使用绘制顺序。要读取业务原始数据，可按 `dataIndex` 索引传入的 `data`。
 
 ### createRadarOption
 
-`createRadarOption(props)` 生成 ECharts option。局部定制时，先生成配置，再展开要修改的字段。例如用 `{ ...base, radar: { ...base.radar, shape: 'circle' as const } }` 保留原有维度和网格配置。将结果传给 `IxRadarChart` 可复用模块注册和实例管理。直接调用函数时显式传入 `plotTheme`。
+`createRadarOption(props)` 与组件使用同样的配置合并规则。例如传入 `radar: { splitNumber: 3 }` 可修改网格分段数并保留 `indicator` 和其他默认值。直接调用函数时可显式传入 `plotTheme`。
 
-额外 ECharts 顶层字段整体替换生成配置，例如 `radar`、`series` 或 `tooltip`。支持<a href="./core">基础组件</a> API 中的公共图表选项，`setOptionOpts.notMerge` 默认是 `true`，可显式覆盖。
+`radar` 和 `tooltip` 等原生对象按字段合并。显式传入 `series` 会使用指定的系列及其原始数据顺序。组件支持<a href="./core">基础组件</a> API 中的公共图表选项。

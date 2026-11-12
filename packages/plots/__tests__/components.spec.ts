@@ -21,6 +21,7 @@ const instances: {
   getOption: ReturnType<typeof vi.fn>
   setOption: ReturnType<typeof vi.fn>
   dispose: ReturnType<typeof vi.fn>
+  isDisposed: ReturnType<typeof vi.fn>
   showLoading: ReturnType<typeof vi.fn>
   hideLoading: ReturnType<typeof vi.fn>
   on: ReturnType<typeof vi.fn>
@@ -36,6 +37,7 @@ beforeEach(() => {
         getOption: vi.fn(() => ({ darkMode: false })),
         setOption: vi.fn(),
         dispose: vi.fn(),
+        isDisposed: vi.fn(() => false),
         showLoading: vi.fn(),
         hideLoading: vi.fn(),
         on: vi.fn(),
@@ -138,7 +140,7 @@ it('radar toggles direction without mutating data and restores defaults after an
   expect(option().series[0].areaStyle.opacity).toBe(0)
   attrs.radar = { indicator: [{ name: 'Override', max: 50 }] }
   await nextTick()
-  expect(option().radar).toEqual(attrs.radar)
+  expect(option().radar).toMatchObject({ ...attrs.radar, splitNumber: 5, axisNameGap: 16 })
   delete attrs.radar
   attrs.data = []
   await nextTick()

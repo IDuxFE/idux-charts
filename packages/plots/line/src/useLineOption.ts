@@ -1,9 +1,16 @@
-import { mergeAxisOption, createCartesianTooltip } from '../../shared/cartesian'
+import {
+  applyCartesianLegend,
+  applyCartesianTooltip,
+  cartesianGridBounds,
+  mergeAxisOption,
+  reserveCartesianSpace,
+} from '../../shared/cartesian'
+import { mergePlotOptions, resolvePlotInput } from '../../shared/plotOptions'
 import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
 import type { LineSeriesOption } from 'echarts/charts'
-import { cloneDeep, get, merge, set } from 'lodash-es'
+import { get, omit, set } from 'lodash-es'
 
 import { isVertical, convertArray, filterEmptyProps, CHART_THEME_TOKEN } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
@@ -23,6 +30,8 @@ export const lineChartProps = [
   'smooth',
   'stack',
 ] as const
+const lineLayoutProps = ['categories', 'area', 'referenceLine', 'zeroText', 'plotTheme'] as const
+export const linePlotProps = [...lineChartProps, ...lineLayoutProps] as const
 
 export interface LineChartProps
   extends
@@ -44,7 +53,7 @@ const defaultProps: LineChartProps = {
     bottom: 32,
     left: 32,
     right: 32,
-    containLabel: true,
+    ...cartesianGridBounds,
   },
   legend: {
     // Use a color swatch in place of the native line legend icon.
@@ -76,48 +85,25 @@ export function useLineOption(
 ): ComputedRef<LineChartProps> {
   const providedTheme = inject(CHART_THEME_TOKEN, undefined)
   const injectProps = inject(LINE_CHART_TOKEN, null)
-  const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
-
-  const mergedSeriesOption = computed<LineSeriesOption>(() => {
-    const option = filterEmptyProps(unref(props))
-    option.type = 'line'
-    return option
-  })
-
-  const mergedOption = computed(() => {
-    const attrs = unref(attrsInput)
-    const option = merge({}, mergedDefaultProps, attrs)
+  return computed(() => {
+    const { props: seriesProps, attrs } = resolvePlotInput(
+      injectProps,
+      filterEmptyProps(unref(props)) as LineChartProps,
+      unref(attrsInput),
+      linePlotProps,
+    )
+    const option = mergePlotOptions<LineChartProps>(defaultProps, attrs)
+    const seriesOption = { ...omit(seriesProps, lineLayoutProps), type: 'line' } as LineSeriesOption
     // Preserve Seer's original light pointer; other themes own their colors.
     if (
       (option.theme ?? unref(providedTheme) ?? 'seer') === 'seer' &&
+      !Array.isArray(option.tooltip) &&
       get(option, ['tooltip', 'axisPointer', 'lineStyle', 'color']) === undefined
     ) {
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'color'], '#D3D7DE')
     }
 
-    if (attrs.title && !get(attrs, ['grid', 'top'])) {
-      // Reserve room for the title.
-      const top = get(mergedDefaultProps, ['grid', 'top'], 32) + 24
-      set(option, ['grid', 'top'], top)
-    }
-    if (attrs.dataZoom && !get(attrs, ['grid', 'bottom'])) {
-      // Reserve room for the zoom slider.
-      const bottom = get(mergedDefaultProps, ['grid', 'bottom'], 32) + 32
-      set(option, ['grid', 'bottom'], bottom)
-    }
-    const legend = get(attrs, ['legend'])
-    const series = convertArray(get(attrs, ['series']))
-    // @ts-ignore
-    if (legend === false || series.length <= 1) {
-      set(option, ['legend'], undefined)
-    }
-
-    return option
-  })
-
-  return computed(() => {
-    const option = { ...mergedOption.value }
-    const seriesOption = mergedSeriesOption.value
+    reserveCartesianSpace(option, defaultProps, attrs)
     const { xAxis, yAxis, series } = option
     const [defaultXAxis, defaultYAxis] = isVertical(option)
       ? [defaultCategoryAxis, defaultValueAxis]
@@ -125,15 +111,12 @@ export function useLineOption(
 
     option.xAxis = mergeAxisOption(defaultXAxis, xAxis)
     option.yAxis = mergeAxisOption(defaultYAxis, yAxis)
-    if (!series) {
-      option.series = seriesOption ? [seriesOption] : []
-    } else {
-      option.series = convertArray(series).map(item => merge({}, seriesOption, item))
-    }
-
-    if (!get(option, ['tooltip', 'formatter'])) {
-      option.tooltip = { ...option.tooltip, formatter: createCartesianTooltip(option) }
-    }
+    option.series =
+      series === undefined
+        ? [seriesOption]
+        : convertArray(series).map(item => mergePlotOptions(seriesOption, item))
+    applyCartesianLegend(option, attrs.legend)
+    applyCartesianTooltip(option)
 
     return option
   })

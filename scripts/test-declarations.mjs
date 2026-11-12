@@ -92,7 +92,7 @@ const revision = ref(0), dark = ref(false), mounted = ref(true);
 const instances = [];
 const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
-createApp({setup() { return () => h('main', {}, [
+const root = createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
   button('theme', () => { dark.value = !dark.value }),
   button('mount', () => { mounted.value = !mounted.value }),
@@ -107,7 +107,8 @@ createApp({setup() { return () => h('main', {}, [
         kind === 'radar' ? { indicator: ['A', 'B', 'C'].map(name => ({name, max: 100})), data: [{name: 'One', value: data}] } :
         kind === 'gauge' || kind === 'liquid-fill' ? {value: data[0]} :
         kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} :
-        kind === 'area' ? {categories: ['A', 'B', 'C', 'D', 'E', 'F'], area: 'striped', series: [
+        kind === 'area' ? {categories: ['A', 'B', 'C', 'D', 'E', 'F'], area: 'striped',
+          dataZoom: {id: 'area-zoom', type: 'inside'}, series: [
           {name: 'Area', stack: 'total', data: revision.value ? [...data, 40, 50, 60] : [data[0], null, null, 40, {value: null, missingReason: 'Offline'}, 60]},
           ...(revision.value ? [] : [{name: 'Comparison', data: [...data, 40, 50, 60]}]),
         ], tooltip: {formatter: params => {
@@ -116,13 +117,13 @@ createApp({setup() { return () => h('main', {}, [
         }}} : {data, xAxis: {data: ['A', 'B', 'C']}}),
     };
     return h('section', isVue2 ? {attrs: {'data-kind': kind}, style: {width: '400px', height: '240px'}} : {'data-kind': kind, style: {width: '400px', height: '240px'}},
-      [h(component, isVue2 ? {attrs: props} : props)]);
+      [h(component, isVue2 ? {attrs: props, ref: kind} : {...props, ref: kind})]);
   }) : []),
 ]) }}).mount('#app');
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
   const el = section.querySelector('[_echarts_instance_]');
   const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
-  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0};
+  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
 const areaChart = () => {
@@ -131,6 +132,8 @@ const areaChart = () => {
 };
 window.areaSeriesCount = () => areaChart()?.getOption().series?.length;
 window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIndex: 0, dataIndex: 4});
+window.zoomArea = () => areaChart().dispatchAction({type: 'dataZoom', dataZoomId: 'area-zoom', start: 0, end: 80});
+window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
 `,
   )
   await build({ root: app, configFile: false, logLevel: 'error' })
@@ -154,6 +157,7 @@ window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIn
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
       .toEqual([true, true, true, true, true, true, true, true])
+    expect((await state()).map(chart => chart.exposed)).toEqual(Array(8).fill(true))
     const area = page.locator('[data-kind="area"]')
     await expect(area.locator('svg pattern[width="4"][height="240"]').first()).toBeAttached()
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(3)
@@ -161,6 +165,9 @@ window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIn
     await expect(area).toContainText(
       '{"data":{"value":null,"missingReason":"Offline"},"value":null}',
     )
+    await page.evaluate(() => window.zoomArea())
+    const areaZoom = await page.evaluate(() => window.areaZoom())
+    expect(areaZoom).toBeLessThan(100)
     await page.getByTestId('update').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
@@ -178,6 +185,7 @@ window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIn
       .poll(async () => (await state()).map(chart => chart.value))
       .toEqual([11, 11, 11, 11, 11, 11, 0.11, 0.11])
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(1)
+    expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
@@ -293,6 +301,7 @@ const chart: ChartPublicProps = { autoResize: true };
 const bar: BarChartPublicProps = { data: [1, 2], barWidth: 10 };
 const line: LineChartPublicProps = { autoResize: true, smooth: true, data: [1, 2] };
 const pie: PieChartPublicProps = { data: [{ value: 1 }], roseType: 'radius', align: 'top-end' };
+const hiddenPie: PieChartPublicProps = { title: null };
 // @ts-expect-error align only accepts nine named positions
 const badAlign: PieChartPublicProps = { align: 'left' };
 // @ts-expect-error autoResize must retain its boolean type
@@ -369,6 +378,12 @@ import type { GlobalComponents } from 'vue';
 import Fixture from './inferred-fixture';
 import { defineComponent } from 'vue';
 import type { VNode } from 'vue';
+import type { EChartsType } from 'echarts/core';
+${version.startsWith('2.') ? "import Vue from 'vue'; const app = Vue;" : "import { createApp } from 'vue'; const app = createApp({});"}
+const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart] as const;
+for (const component of chartComponents) app.use(component);
+declare const chartInstance: InstanceType<(typeof chartComponents)[number]>;
+const echartsInstance: EChartsType | undefined = chartInstance.getEChartsInstance();
 type BarProps = InstanceType<typeof IxBarChart>['$props'];
 const globalProps: InstanceType<GlobalComponents['IxBarChart']>['$props'] = { autoResize: true };
 // @ts-expect-error global component props must remain typed

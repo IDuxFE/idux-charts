@@ -2,8 +2,20 @@ import type { PlotTheme, PlotTextStyle } from '../../shared/plotTheme'
 import type { RadarSeriesOption } from 'echarts/charts'
 import type { RadarComponentOption } from 'echarts/components'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
-import { useTooltipsFormatter, getTooltipsColor } from '@idux/charts-core'
-import { format } from 'echarts/core'
+import { convertArray, useTooltipsFormatter, getTooltipsColor } from '@idux/charts-core'
+import { mergeNativePlotOptions, mergePlotOptions } from '../../shared/plotOptions'
+
+export const radarProps = [
+  'indicator',
+  'data',
+  'area',
+  'gridStyle',
+  'splitNumber',
+  'radius',
+  'center',
+  'clockwise',
+  'plotTheme',
+] as const
 
 export interface RadarChartProps
   extends BaseChartOption<RadarSeriesOption | RadarComponentOption>, AdditionalChartOption {
@@ -27,34 +39,13 @@ export function createRadarOption(
   const theme = props.plotTheme ?? {}
   const reorder = <T extends unknown[]>(items: T): T =>
     (items.length > 1 ? [items[0]!, ...items.slice(1).reverse()] : [...items]) as T
-  const indicator = props.indicator ?? []
+  const primaryRadar = Array.isArray(props.radar) ? props.radar[0] : props.radar
+  const indicator = primaryRadar?.indicator ?? props.indicator ?? []
   const data = props.data ?? []
-  const orderedIndicator = props.clockwise ? reorder(indicator) : indicator
-  return {
-    ...(theme.palette ? { color: theme.palette } : theme.color ? { color: [theme.color] } : {}),
-    ...(theme.fontFamily || theme.textColor
-      ? { textStyle: { fontFamily: theme.fontFamily, color: theme.textColor } }
-      : {}),
-    tooltip: {
-      trigger: 'item',
-      confine: true,
-      formatter: params => {
-        const item = Array.isArray(params) ? params[0] : params
-        if (!item || !Array.isArray(item.value)) return ''
-        const values = item.value
-        return useTooltipsFormatter(
-          format.encodeHTML(item.name ?? ''),
-          orderedIndicator.map((axis, index) => ({
-            name: format.encodeHTML(axis.name ?? ''),
-            value: format.encodeHTML(String(values[index] ?? '-')),
-            color: getTooltipsColor(item.color),
-          })),
-        )
-      },
-    },
-    legend: { bottom: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12 },
-    radar: {
-      indicator: orderedIndicator,
+  const clockwise = props.clockwise && props.series === undefined
+  const orderedIndicator = clockwise ? reorder(indicator) : indicator
+  const firstRadar = mergePlotOptions<RadarComponentOption>(
+    {
       center: props.center ?? ['50%', '50%'],
       axisNameGap: 16,
       radius: props.radius ?? '65%',
@@ -72,22 +63,60 @@ export function createRadarOption(
         areaStyle: { color: [theme.splitAreaColor ?? '#F6F8FA', 'transparent'] },
       },
     },
-    series: [
-      {
-        id: 'radar',
-        type: 'radar',
-        symbol: 'circle',
-        symbolSize: 7,
-        lineStyle: { width: 2 },
-        areaStyle: { opacity: props.area ? 0.12 : 0 },
-        data: props.clockwise
-          ? data.map(item =>
-              Array.isArray(item)
-                ? reorder(item)
-                : { ...item, value: item.value ? reorder(item.value) : item.value },
-            )
-          : data,
-      },
-    ],
+    primaryRadar,
+    { indicator: orderedIndicator },
+  )
+  const radar = Array.isArray(props.radar)
+    ? props.radar.map((axis, index) => (index === 0 ? firstRadar : axis))
+    : firstRadar
+  const coordinates = convertArray(radar)
+  const radarFor = (series?: RadarSeriesOption) =>
+    series?.radarId === undefined
+      ? coordinates[series?.radarIndex ?? 0]
+      : coordinates.find(item => String(item.id) === String(series.radarId))
+  const defaultSeries: RadarSeriesOption = {
+    id: 'radar',
+    type: 'radar',
+    symbol: 'circle',
+    symbolSize: 7,
+    lineStyle: { width: 2 },
+    areaStyle: { opacity: props.area ? 0.12 : 0 },
+    data: clockwise
+      ? data.map(item =>
+          Array.isArray(item)
+            ? reorder(item)
+            : { ...item, value: item.value ? reorder(item.value) : item.value },
+        )
+      : data,
   }
+  const series = (props.series === undefined ? [defaultSeries] : convertArray(props.series)).filter(
+    item => radarFor(item)?.indicator?.length,
+  )
+  const generated: BaseChartOption<RadarSeriesOption | RadarComponentOption> = {
+    ...(theme.palette ? { color: theme.palette } : theme.color ? { color: [theme.color] } : {}),
+    ...(theme.fontFamily || theme.textColor
+      ? { textStyle: { fontFamily: theme.fontFamily, color: theme.textColor } }
+      : {}),
+    tooltip: {
+      trigger: 'item',
+      confine: true,
+      formatter: params => {
+        const item = Array.isArray(params) ? params[0] : params
+        if (!item || !Array.isArray(item.value)) return ''
+        const values = item.value
+        return useTooltipsFormatter(
+          item.name ?? '',
+          (radarFor(series[item.seriesIndex ?? 0])?.indicator ?? []).map((axis, index) => ({
+            name: axis.name ?? '',
+            value: String(values[index] ?? '-'),
+            color: getTooltipsColor(item.color),
+          })),
+        )
+      },
+    },
+    legend: { bottom: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12 },
+    radar,
+    series,
+  }
+  return mergeNativePlotOptions(generated, props, [...radarProps, 'radar', 'series'])
 }

@@ -61,7 +61,9 @@ for (const [name, presentation] of [
         props.data = [{ name: 'A', value }]
         await nextTick()
         expect(current.automatic.value).toBe(false)
-        expect(serializable(current.option.value)).toEqual(serializable(baseline.value))
+        const expected = serializable(baseline.value)
+        if (name === 'hidden title') expected.setOptionOpts = { replaceMerge: ['title'] }
+        expect(serializable(current.option.value)).toEqual(expected)
         const params = { name: 'A', seriesName: 'Total', value, color: 'red' }
         expect((current.option.value.tooltip as any).formatter(params)).toEqual(
           (baseline.value.tooltip as any).formatter(params),
@@ -73,7 +75,7 @@ for (const [name, presentation] of [
   })
 }
 
-it('preserves 1.0.0 injected defaults until new layout controls opt in', () => {
+it('applies injected radius to the native series and still opts into automatic layout explicitly', () => {
   const props = shallowReactive<LegacyPieProps & Pick<PieChartProps, 'align' | 'layoutMode'>>({
     data: [{ name: 'A', value: 10 }],
   })
@@ -98,7 +100,9 @@ it('preserves 1.0.0 injected defaults until new layout controls opt in', () => {
   )
   try {
     expect(current.automatic.value).toBe(false)
-    expect(serializable(current.option.value)).toEqual(serializable(baseline.value))
+    const { radius, ...expected } = serializable(baseline.value)
+    expected.series[0].radius = radius
+    expect(serializable(current.option.value)).toEqual(expected)
     props.align = 'center'
     expect(current.automatic.value).toBe(true)
     props.layoutMode = 'native'

@@ -129,8 +129,8 @@ export function createCategoryLineTooltip(
         valueFormatter?.(value, index) ?? (axis?.name ? `${value} ${axis.name}` : value)
       return [
         {
-          name: escape(String(series.name)),
-          value: escape(String(formatted)),
+          name: String(series.name),
+          value: String(formatted),
           color: getTooltipsColor(param.color),
         },
       ]
@@ -143,7 +143,7 @@ export function createCategoryLineTooltip(
         if (item?.missingReason && measurement(item) === undefined) reasons.add(item.missingReason)
       }
     }
-    const title = escape(band ? (titles.get(index) ?? categories[index]!) : categories[index]!)
+    const title = band ? (titles.get(index) ?? categories[index]!) : categories[index]!
     const details = [...reasons].map(reason => `<div>${escape(reason)}</div>`).join('')
     return (
       useTooltipsFormatter(title, rows, 10) +

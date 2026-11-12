@@ -1,5 +1,6 @@
 import type { Color } from 'echarts'
 import { TinyColor } from '@ctrl/tinycolor'
+import { escape } from 'lodash-es'
 
 interface GradientColorStop {
   offset?: number
@@ -50,14 +51,15 @@ function renderTooltipItems(items: TooltipsFormatItem[]) {
     .map(
       item => `
 					<div class="charts-tooltips-item">
-						<span class="charts-tooltips-item-border" style="background: ${getTooltipsColor(item.color)}"></span>
-						<span class="charts-tooltips-item-name">${item.name}</span>
-						<span class="charts-tooltips-item-value">${item.value}</span>
+							<span class="charts-tooltips-item-border" style="background: ${escape(getTooltipsColor(item.color))}"></span>
+							<span class="charts-tooltips-item-name">${escape(item.name)}</span>
+							<span class="charts-tooltips-item-value">${escape(String(item.value ?? ''))}</span>
 					</div>`,
     )
     .join('')
 }
 
+/** Build tooltip markup from plain-text labels and values. */
 export function useTooltipsFormatter(
   title: string,
   list: TooltipsFormatItem[],
@@ -74,7 +76,7 @@ export function useTooltipsFormatter(
       : renderTooltipItems(list)
   return `
     <div class="charts-tooltips">
-      <div class="charts-tooltips-title">${title}</div>
+      <div class="charts-tooltips-title">${escape(title)}</div>
       ${content}
     </div>`
 }

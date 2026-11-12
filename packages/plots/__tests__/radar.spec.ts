@@ -11,9 +11,9 @@ describe('radar clockwise layout', () => {
       center: ['50%', 145],
     })
     expect(option.series).toMatchObject([{ data: [{ ...data[0], value: [1, 4, 3, 2] }] }])
-    expect(createRadarOption({ clockwise: true, data: [[1, 2, 3, 4]] }).series).toMatchObject([
-      { data: [[1, 4, 3, 2]] },
-    ])
+    expect(
+      createRadarOption({ indicator, clockwise: true, data: [[1, 2, 3, 4]] }).series,
+    ).toMatchObject([{ data: [[1, 4, 3, 2]] }])
     expect(data[0]!.value).toEqual([1, 2, 3, 4])
     expect(indicator.map(item => item.name)).toEqual(['A', 'B', 'C', 'D'])
     expect(createRadarOption({ indicator, data }).series).toMatchObject([{ data }])
@@ -21,9 +21,14 @@ describe('radar clockwise layout', () => {
 
   it('preserves zero measurements and handles empty inputs', () => {
     expect(createRadarOption({ clockwise: true }).radar).toMatchObject({ indicator: [] })
-    expect(createRadarOption({ clockwise: true, data: [] }).series).toMatchObject([{ data: [] }])
+    expect(createRadarOption({ clockwise: true, data: [] }).series).toEqual([])
+    expect(createRadarOption({ clockwise: true, data: [[1, 2, 3]] }).series).toEqual([])
     expect(
-      createRadarOption({ clockwise: true, data: [{ value: [0, 0, 0] }] }).series,
+      createRadarOption({
+        indicator: ['A', 'B', 'C'].map(name => ({ name })),
+        clockwise: true,
+        data: [{ value: [0, 0, 0] }],
+      }).series,
     ).toMatchObject([{ data: [{ value: [0, 0, 0] }] }])
   })
 })

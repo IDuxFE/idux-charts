@@ -1,12 +1,14 @@
-import { computed, defineComponent, h } from 'vue-demi'
+import { computed, defineComponent, inject } from 'vue-demi'
 
 import type { LineSeriesOption } from 'echarts/charts'
 import { pick } from 'lodash-es'
 
-import { IxChart, mergeAttrs, useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { resolvePlotInput } from '../../shared/plotOptions'
+import { plotInstanceMethods, renderPlot } from '../../shared/usePlotRender'
 
 import { useCategoryLineOption } from './useCategoryLineOption'
-import { lineChartProps, useLineOption } from './useLineOption'
+import { lineChartProps, linePlotProps, LINE_CHART_TOKEN, useLineOption } from './useLineOption'
 import type { LineChartProps } from './useLineOption'
 
 export default withChartProps<LineChartProps>()(
@@ -21,24 +23,21 @@ export default withChartProps<LineChartProps>()(
       zeroText: String,
       plotTheme: Object,
     },
+    methods: plotInstanceMethods,
     // @ts-ignore
-    setup(props, { attrs, listeners }) {
-      const reactiveAttrs = useReactiveAttrs(attrs)
+    setup(props, context) {
+      const reactiveAttrs = useReactiveAttrs(context.attrs)
       const legacy = useLineOption(
         computed(() => pick(props, lineChartProps) as LineSeriesOption),
         reactiveAttrs,
       )
-      const preset = useCategoryLineOption(
-        props as LineChartProps,
-        () => reactiveAttrs.value,
-        listeners?.ready,
+      const defaults = inject(LINE_CHART_TOKEN, null)
+      const input = computed(() =>
+        resolvePlotInput(defaults, props as LineChartProps, reactiveAttrs.value, linePlotProps),
       )
+      const preset = useCategoryLineOption(() => input.value, context)
       return () =>
-        h(IxChart, {
-          ...mergeAttrs(preset.value ?? legacy.value, listeners),
-          ref: 'chart',
-          key: preset.value ? 'category' : 'native',
-        })
+        renderPlot(preset.value ?? legacy.value, context, preset.value ? 'category' : 'native')
     },
   }),
 )

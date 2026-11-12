@@ -14,7 +14,9 @@ for (const width of [768, 1280, 1920]) {
       .toBeLessThanOrEqual(1)
 
     await page.getByRole('radio', { name: 'API', exact: true }).click()
-    await expect(page.getByRole('heading', { name: 'ChartProps', exact: true })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'AdditionalChartOption', exact: true }),
+    ).toBeVisible()
     await expect
       .poll(() => content.evaluate(element => element.scrollWidth - element.clientWidth))
       .toBeLessThanOrEqual(1)
