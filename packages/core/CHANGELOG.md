@@ -1,5 +1,15 @@
 # @idux/charts-core
 
+## 1.4.0
+
+### Minor Changes
+
+- 0139b71: Forward role, ARIA, tab order, and data attributes to the chart container for accessible labels, descriptions, and keyboard integration.
+
+### Patch Changes
+
+- 6c78c3f: Preserve compatible legend and zoom state across chart reinitialization. Category charts keep historical zoom windows and follow the latest data when a window is pinned to the end.
+
 ## 1.3.0
 
 ### Patch Changes
