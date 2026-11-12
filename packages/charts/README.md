@@ -64,9 +64,9 @@ Chart components register their required ECharts modules. Global registration is
 ## Configuration and themes
 
 - `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, and `createLiquidFillOption` are pure option builders.
-- Use Vue `provide` with `BAR_CHART_TOKEN`, `LINE_CHART_TOKEN`, or `PIE_CHART_TOKEN` for shared chart configuration.
-- Pie automatic layout, Radar, Gauge, and LiquidFill support `plotTheme`. Provide reactive shared defaults with `PLOT_THEME_TOKEN`; pure option builders require an explicit `plotTheme`.
-- All charts support the ECharts `theme`. Bar and Line use ECharts styling options and do not consume `plotTheme`.
+- Use Vue `provide` with `BAR_CHART_TOKEN`, `LINE_CHART_TOKEN`, or `PIE_CHART_TOKEN` to set defaults for the corresponding native and built-in layouts.
+- Category Bar, Line / Area, automatic Pie, Radar, Gauge, and LiquidFill support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`, or pass `plotTheme` explicitly to a pure option builder.
+- Option objects merge by field and arrays replace in full. Every chart component exposes `getEChartsInstance()` on its template ref.
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point.
 

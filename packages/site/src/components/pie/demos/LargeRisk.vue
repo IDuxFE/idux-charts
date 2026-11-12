@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { format } from 'echarts/core'
 import { seerColorsForRisk, useTooltipsFormatter } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 
@@ -18,8 +17,7 @@ const total = data.reduce((sum, item) => sum + item.value, 0)
 const formatRiskTooltip = (name: string) => {
   const item = data.find(item => item.name === name)
   if (!item) return ''
-  // formatter 返回 HTML，业务文本在插入前转义。
-  return useTooltipsFormatter(format.encodeHTML(item.name), [
+  return useTooltipsFormatter(item.name, [
     { name: '风险数量', value: item.value, color: item.itemStyle.color },
     { name: '占全部风险', value: `${total ? ((item.value / total) * 100).toFixed(1) : '0.0'}%` },
     { name: '统计口径', value: '当前筛选范围' },

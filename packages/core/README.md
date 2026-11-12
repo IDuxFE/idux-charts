@@ -56,10 +56,11 @@ const option: ChartProps = {
 
 ## Core API
 
-- `IxChart`: supports `autoResize` (enabled by default), `loading`, `theme`, `group`, `initOption`, `setOptionOpts`, and `onReady`.
+- `IxChart` supports `autoResize` (enabled by default), `chartBackgroundColor`, `loading`, `theme`, `group`, `initOption`, `setOptionOpts`, and `onReady`. Call `getEChartsInstance()` on the mounted template ref. Changing `setOptionOpts` alone reapplies the current option. Use `title: null` to remove the title.
 - `useChart(options, listeners?)`: manages initialization, reactive updates, events, resizing, and disposal. Call it in component `setup`; it returns `containerRef` and `chartRef`.
 - `seerTheme`: the built-in theme, registered as the default theme `seer`.
-- `useTooltipsFormatter`, `useReactiveAttrs`, `createInstall`, and `withChartProps`: helpers for custom charts.
+- `useTooltipsFormatter` accepts plain text and escapes it when generating tooltip HTML.
+- `useReactiveAttrs`, `createInstall`, and `withChartProps` support custom chart development.
 - `ChartProps`, `ChartPublicProps`, and `ChartOption`: public configuration types.
 
 This package does not ship a separate CSS file. Shared HTML tooltip styles are provided by `@idux/charts/dist/style.css`.

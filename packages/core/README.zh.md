@@ -56,10 +56,11 @@ const option: ChartProps = {
 
 ## 核心 API
 
-- `IxChart`：支持 `autoResize`（默认开启）、`loading`、`theme`、`group`、`initOption`、`setOptionOpts` 和 `onReady`。
+- `IxChart` 支持 `autoResize`（默认开启）、`chartBackgroundColor`、`loading`、`theme`、`group`、`initOption`、`setOptionOpts` 和 `onReady`。挂载后可通过模板 ref 调用 `getEChartsInstance()`。单独更新 `setOptionOpts` 也会应用到当前配置，传入 `title: null` 可清除标题。
 - `useChart(options, listeners?)`：管理初始化、响应式更新、事件、尺寸变化和销毁，返回 `containerRef` 与 `chartRef`；在组件 `setup` 中调用。
 - `seerTheme`：内置主题，默认主题名称为 `seer`。
-- `useTooltipsFormatter`、`useReactiveAttrs`、`createInstall`、`withChartProps`：自定义图表开发工具。
+- `useTooltipsFormatter` 接收原始文本并转义后生成 Tooltip HTML。
+- `useReactiveAttrs`、`createInstall` 和 `withChartProps` 用于自定义图表开发。
 - `ChartProps`、`ChartPublicProps`、`ChartOption`：公开配置类型。
 
 此包不提供独立 CSS 文件；共享 HTML 提示框样式由 `@idux/charts/dist/style.css` 提供。
