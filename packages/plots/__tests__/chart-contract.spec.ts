@@ -364,3 +364,39 @@ it.each([IxChart, IxLineChart])(
     expect(item.option.legend[0].selected.Beta).toBe(true)
   },
 )
+
+it.each([
+  IxChart,
+  IxBarChart,
+  IxLineChart,
+  IxPieChart,
+  IxRadarChart,
+  IxGaugeChart,
+  IxLiquidFillChart,
+])(
+  'forwards HTML attributes to the chart container without sending them to ECharts',
+  async component => {
+    const item = mountChart(component, {
+      role: 'img',
+      'aria-label': 'Usage',
+      'aria-describedby': 'usage-description',
+      tabIndex: 0,
+      'data-testid': 'usage-chart',
+    })
+    const element = item.chart.getDom()
+    expect(element.getAttribute('role')).toBe('img')
+    expect(element.getAttribute('aria-label')).toBe('Usage')
+    expect(element.getAttribute('aria-describedby')).toBe('usage-description')
+    expect(element.getAttribute('tabindex')).toBe('0')
+    expect(element.getAttribute('data-testid')).toBe('usage-chart')
+    expect(item.option).not.toHaveProperty('aria-label')
+    expect(item.option).not.toHaveProperty('data-testid')
+    expect(item.option).not.toHaveProperty('role')
+
+    delete item.props['aria-label']
+    item.props.tabIndex = -1
+    await nextTick()
+    expect(element.hasAttribute('aria-label')).toBe(false)
+    expect(element.getAttribute('tabindex')).toBe('-1')
+  },
+)

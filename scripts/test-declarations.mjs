@@ -113,6 +113,7 @@ const root = createApp({setup() { return () => h('main', {}, [
     const data = [10 + revision.value, 20, 30];
     const props = {
       title: {text: kind + ' ' + revision.value}, animation: false, autoResize: true,
+      role: 'img', 'aria-label': kind + ' chart', tabindex: 0,
       initOption: {renderer: 'svg', width: 400, height: 240},
       setOptionOpts: {notMerge: kind !== 'area'},
       theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
@@ -136,7 +137,7 @@ const root = createApp({setup() { return () => h('main', {}, [
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
   const el = section.querySelector('[_echarts_instance_]');
   const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
-  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart};
+  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart, domAttrs: el?.getAttribute('role') === 'img' && el?.getAttribute('aria-label') === section.dataset.kind + ' chart' && el?.getAttribute('tabindex') === '0' && option?.role === undefined};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
 const areaChart = () => {
@@ -171,6 +172,7 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
       .poll(async () => (await state()).map(chart => chart.paths > 0))
       .toEqual([true, true, true, true, true, true, true, true])
     expect((await state()).map(chart => chart.exposed)).toEqual(Array(8).fill(true))
+    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(8).fill(true))
     const area = page.locator('[data-kind="area"]')
     await expect(area.locator('svg pattern[width="4"][height="240"]').first()).toBeAttached()
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(3)

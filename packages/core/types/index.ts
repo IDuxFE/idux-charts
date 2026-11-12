@@ -32,6 +32,15 @@ export type KnownProps<Props> = {
 }
 
 export interface AdditionalChartOption<T extends EChartsType = EChartsType> {
+  /** Accessibility role of the chart container. */
+  role?: string
+  /** Tab order of the chart container. */
+  tabindex?: number | string
+  tabIndex?: number | string
+  'aria-label'?: string
+  'aria-labelledby'?: string
+  'aria-describedby'?: string
+  'aria-hidden'?: boolean | 'true' | 'false'
   /**
    * Whether to resize when the container changes size.
    */
