@@ -118,3 +118,5 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 分类柱状图、分类折线图和面积图、自动饼图、雷达图、仪表盘及水波图支持 `plotTheme`，可通过 `PLOT_THEME_TOKEN` 注入响应式默认值。组件的模板 ref 提供 `getEChartsInstance()`。配置合并规则、背景色属性和升级注意事项见[配置指南](packages/site/src/0-guide/GettingStarted.page.md)。两个[兼容性 playground](playgrounds/README.zh.md) 均可通过 `/?theme` 体验主题切换。
 
 提交前会通过 Husky 自动执行 `pnpm check:staged`：lint 和格式检查仅针对 Git 暂存文件，代码变更运行相关单元测试及项目类型检查（类型检查不能安全地按单文件执行）。检查失败会阻止提交，不会自动修复文件。纯文档变更只检查格式。可手动运行 `pnpm check` 执行完整检查；安装依赖时会自动初始化 hooks。
+
+推送前，Husky 会运行全仓库 lint 并强制重新执行完整的 TypeScript 检查。任一检查失败都会阻止推送。

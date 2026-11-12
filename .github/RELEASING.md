@@ -30,7 +30,8 @@ Use `pnpm exec changeset status --output /tmp/idux-charts-release-plan.json`
 to inspect the planned versions before merging a release-bearing PR. Do not use
 `linked` groups for this policy: they do not require every member to be published.
 
-CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
+The local pre-push hook runs repository-wide lint and forces a fresh TypeScript
+check. CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
 and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
 with two workers per shard and independent HTML reports. Both Vue playgrounds
 run in separate macOS jobs. The five Vue/ECharts compatibility combinations build
