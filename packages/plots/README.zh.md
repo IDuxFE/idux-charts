@@ -71,6 +71,12 @@ const option: LineChartProps = {
 
 - 所有图表继承 `@idux/charts-core`（也由 `@idux/charts` 导出）的 `CHART_THEME_TOKEN`。显式 ECharts `theme` 属性优先，切换时重建实例；生成的文字和辅助图形需配合 `PLOT_THEME_TOKEN` 同步更新。
 
+## 自定义 Tooltip
+
+在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。
+
+[查看参数与完整组装示例](https://github.com/IDuxFE/idux-charts/blob/main/packages/site/src/components/core/API.tab.md#自定义-tooltip)。
+
 ## TypeScript
 
 `*ChartProps` 用于图表配置，允许扩展字段；`*ChartPublicProps` 提供具名公开属性类型，保留属性的类型及可选性，便于编写组件类型适配。具体适配说明见[仓库 README](https://github.com/IDuxFE/idux-charts/blob/main/README.zh.md#typescript-属性类型)。

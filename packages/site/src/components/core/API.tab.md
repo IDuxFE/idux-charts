@@ -53,6 +53,58 @@ const option = {
 
 `IxChart` 与 Bar、Line、Pie 的原生模式沿用 ECharts 的默认合并策略。内置布局默认使用 `notMerge: true`。显式传入 `notMerge: false` 时，安全的更新沿用 ECharts 合并。移除配置时会应用完整配置以清理旧状态。分类 Bar、Line 和 Area 在缩放与图例配置未变时会保留用户选择，自动 Pie 和 Radar 在图例选择配置及名称未变时会保留图例选择。
 
+### 自定义 Tooltip
+
+分类和原生 Bar、Line / Area 可用 `tooltip.valueFormatter` 修改数值显示，同时沿用内置标题、色标和缺报提示。需要自己组织标题、数据行或输出格式时，用 `tooltip.formatter` 提供完整内容。回调参数来自 ECharts，单项提示通常收到一个数据项，轴触发提示通常收到数据项数组。
+
+以下工具均可从 `@idux/charts` 或 `@idux/charts-core` 导入。
+
+| 工具                                                | 用法                                                                                                                                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `useTooltipsFormatter(title, rows, rowsPerColumn?)` | 把标题和 `{ name: string, value: string \| number, color? }[]` 渲染成内置样式的 HTML 字符串。`color` 可传纯色或渐变。传入正整数 `rowsPerColumn` 可按行数分列。标题、名称和数值传原始文本，由工具转义。 |
+| `getTooltipsColor(color)`                           | 传入纯色时返回原值。传入渐变时，从可见色标中优先取不透明度最高的颜色，同透明度取较深的颜色。无可用色标时返回空字符串。                                                                                 |
+| `useStripeBarTooltip(unit)`                         | 返回原生条纹柱图的 `tooltip` 配置片段，包含 `formatter` 和 `axisPointer`。在 `trigger: 'axis'` 下使用，可追加单位并过滤没有系列名的辅助项。                                                            |
+
+使用内置 HTML 排版时，在应用入口导入一次 `@idux/charts/dist/style.css`。下面的折线图从轴触发回调中取出业务数据行，再补一行说明。
+
+```vue
+<script setup lang="ts">
+import { getTooltipsColor, IxLineChart, useTooltipsFormatter } from '@idux/charts'
+import type { LineChartProps } from '@idux/charts'
+
+const option = {
+  categories: ['周一', '周二', '周三'],
+  data: [24, 30, 36],
+  name: '延迟',
+  tooltip: {
+    trigger: 'axis',
+    renderMode: 'html',
+    formatter(params) {
+      const points = Array.isArray(params) ? params : [params]
+      const lines = points.filter(point => point.seriesType === 'line')
+      if (!lines.length) return ''
+
+      const rows = lines.map(point => ({
+        name: point.seriesName ?? '',
+        value: typeof point.value === 'number' ? `${point.value} ms` : '–',
+        color: getTooltipsColor(point.color),
+      }))
+      return useTooltipsFormatter(lines[0]!.name, [
+        ...rows,
+        { name: '统计口径', value: '最近 24 小时' },
+      ])
+    },
+  },
+} satisfies LineChartProps
+</script>
+
+<template>
+  <IxLineChart v-bind="option" style="height: 320px" />
+</template>
+```
+
+自动 Pie 可分别通过 `tooltip.formatter` 和 `legend.tooltip.formatter` 配置扇区和图例提示，两处可共用一个内容组装函数。Gauge、LiquidFill 的内置系列默认静默，`valueFormatter` 用于图内数值文字。
+
 ### useChart
 
 在 `setup` 中调用 `useChart(options)`，传入配置对象或 ref。将返回的 `containerRef` 绑定到有宽高的 `div`，通过 `chartRef` 访问实例。实例在挂载时创建，在卸载前销毁。ECharts 模块按所用配置注册；直接使用组合式 API 时也需确保渲染器、组件和主题已注册。
