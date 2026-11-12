@@ -17,6 +17,6 @@ const value = ref(48)
 {
   "title": "自定义量程",
   "description": "容量范围为 0–64 GB，超量程时指示位置停在端点，文字保留实际数值。",
-  "index": 4
+  "index": 3
 }
 </archive-meta>

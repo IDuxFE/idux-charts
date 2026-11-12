@@ -210,6 +210,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "双 Y 轴折线图",
   "description": "用于在同一个图表中对比两个不同量级或不同单位的指标趋势，如对比同一时间段内的“上行流量”与“下行流量”。",
-  "index": -19
+  "index": 1
 }
 </archive-meta>

@@ -57,6 +57,6 @@ const option = computed<RadarChartProps>(() => ({
 {
   "title": "样式与提示框定制",
   "description": "使用 createRadarOption 保留默认配置，定制圆形网格、虚线目标轮廓与原始顺序的分值提示。数据项样式优先于系列默认样式。",
-  "index": 3
+  "index": 2
 }
 </archive-meta>

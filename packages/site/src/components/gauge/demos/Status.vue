@@ -103,6 +103,6 @@ onBeforeUnmount(cancel)
 {
   "title": "纯状态型",
   "description": "使用数值决定指示位置，使用格式化函数显示风险状态。",
-  "index": 2
+  "index": 1
 }
 </archive-meta>

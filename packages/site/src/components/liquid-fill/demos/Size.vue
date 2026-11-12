@@ -27,6 +27,6 @@
 {
   "title": "尺寸与静态模式",
   "description": "radius 设置最大半径，容器变小时自动收缩。关闭 waveAnimation 可保留双层波形用于静态展示。",
-  "index": 4
+  "index": 3
 }
 </archive-meta>

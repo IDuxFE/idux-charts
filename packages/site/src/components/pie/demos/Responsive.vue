@@ -102,6 +102,6 @@ const businessTitle = computed(() => ({
 {
   "title": "形态与自适应",
   "description": "通过宽高、数据量、形态及可见性控件验证自适应布局。",
-  "index": 11
+  "index": 8
 }
 </archive-meta>

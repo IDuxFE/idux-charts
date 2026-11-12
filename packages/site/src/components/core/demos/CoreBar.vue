@@ -26,6 +26,6 @@ const option: ChartProps = {
 {
   "title": "柱状图",
   "description": "柱状图的配置与使用示例。",
-  "index": 4
+  "index": 1
 }
 </archive-meta>

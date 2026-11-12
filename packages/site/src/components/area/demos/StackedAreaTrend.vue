@@ -222,6 +222,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "堆叠面积图（状态示例）",
   "description": "展示总量变化和各应用的构成，也可查看单点和连续区间缺报。",
-  "index": -13
+  "index": 2
 }
 </archive-meta>

@@ -27,6 +27,6 @@ const option: ChartProps = {
 {
   "title": "折线图",
   "description": "折线图的配置与使用示例。",
-  "index": 1
+  "index": 0
 }
 </archive-meta>

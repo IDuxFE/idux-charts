@@ -175,6 +175,6 @@ const chart = computed<BarChartProps>(() => {
 {
   "title": "分组柱状图-竖向",
   "description": "用于在同一时间维度或短分类维度下，对比多个子系列的数值差异场景。例如对比不同业务线下的“高危/中危/低危”漏洞数量分布。",
-  "index": 4
+  "index": 3
 }
 </archive-meta>

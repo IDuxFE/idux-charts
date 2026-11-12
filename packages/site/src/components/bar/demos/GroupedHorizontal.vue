@@ -181,6 +181,6 @@ const chart = computed<BarChartProps>(() => {
 {
   "title": "分组柱状图-横向",
   "description": "用于分类名称较长，且同一分类下存在多个子系列需要进行对比的场景。例如对比多个长 IP 资产的“成功/失败”请求次数，横向排布保证标签完整展示，同组柱子相邻对比。",
-  "index": 5
+  "index": 4
 }
 </archive-meta>

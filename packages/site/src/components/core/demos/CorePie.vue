@@ -48,6 +48,6 @@ const option: ChartProps = {
 {
   "title": "饼图",
   "description": "饼图的配置与使用示例。",
-  "index": 7
+  "index": 2
 }
 </archive-meta>

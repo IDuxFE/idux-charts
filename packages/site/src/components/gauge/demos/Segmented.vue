@@ -122,6 +122,6 @@ onBeforeUnmount(cancel)
 {
   "title": "分段仪表盘",
   "description": "阈值由业务提供，精确边界属于前一段；切换存储和评分场景。",
-  "index": 3
+  "index": 2
 }
 </archive-meta>

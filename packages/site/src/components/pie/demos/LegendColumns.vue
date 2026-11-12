@@ -199,6 +199,6 @@ const presentation = computed<PieChartProps>(() => ({
 {
   "title": "多列图例",
   "description": "业务声明数据和展示文案，组件内置图形装饰、自适应尺寸和图例布局。",
-  "index": 6
+  "index": 3
 }
 </archive-meta>

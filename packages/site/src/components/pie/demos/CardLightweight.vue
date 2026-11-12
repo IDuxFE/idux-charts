@@ -39,6 +39,6 @@ const tooltip: PieChartProps['tooltip'] = {
 {
   "title": "轻量卡片饼图",
   "description": "紧凑容器中设置半径并声明 align，背景和圆心由组件计算。",
-  "index": 9
+  "index": 6
 }
 </archive-meta>

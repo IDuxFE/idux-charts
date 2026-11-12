@@ -202,6 +202,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "多系列折线图",
   "description": "用于在同一图表中对比多组数据系列的趋势走向，如对比多个不同应用（微信、QQ、飞书等）的流量变化。由于线条较多，需依赖图例的颜色进行区分。",
-  "index": -18
+  "index": 2
 }
 </archive-meta>

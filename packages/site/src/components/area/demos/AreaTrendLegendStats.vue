@@ -73,6 +73,6 @@ const option: LineChartProps = {
 {
   "title": "图例带数值与百分比（以堆叠面积图为例）",
   "description": "使用图例 formatter 展示各系列最后一个采样值以及占同期合计的比例。",
-  "index": -7
+  "index": 4
 }
 </archive-meta>

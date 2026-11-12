@@ -196,6 +196,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "基础面积图（状态示例）",
   "description": "用渐变条纹填充展示单系列随时间变化的趋势。",
-  "index": -15
+  "index": 0
 }
 </archive-meta>

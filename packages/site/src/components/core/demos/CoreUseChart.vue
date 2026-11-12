@@ -36,6 +36,6 @@ onUnmounted(() => clearTimeout(timer))
 {
   "title": "函数用法",
   "description": "函数用法的配置与使用示例。",
-  "index": 11
+  "index": 3
 }
 </archive-meta>

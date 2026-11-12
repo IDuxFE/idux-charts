@@ -198,6 +198,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "平滑面积图",
   "description": "用平滑连线和条纹填充展示变化趋势。",
-  "index": -14
+  "index": 1
 }
 </archive-meta>

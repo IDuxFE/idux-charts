@@ -168,6 +168,6 @@ const pieOption = computed<PieChartProps>(() => ({
 {
   "title": "大尺寸：多层装饰环图",
   "description": "高级定制：通过多层 series、渐变和装饰圈组合环图；显式配置 series 使用手动布局，不使用自动布局。",
-  "index": 92
+  "index": 11
 }
 </archive-meta>

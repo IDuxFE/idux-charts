@@ -81,6 +81,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "图例多列排列（以堆叠面积图为例）",
   "description": "图例优先使用单行，空间不足时排成两行，继续溢出时可滚轮或点击箭头翻页。",
-  "index": -8
+  "index": 3
 }
 </archive-meta>

@@ -195,6 +195,6 @@ const option = computed<LineChartProps>(() => ({
 {
   "title": "基础平滑折线图",
   "description": "用于弱化局部数据的剧烈波动（毛刺），强调数据的整体走向与宏观趋势。适合对波动不敏感、更看重长期趋势的场景，如平滑后的流量趋势或整体资源占用趋势。",
-  "index": -17
+  "index": 3
 }
 </archive-meta>
