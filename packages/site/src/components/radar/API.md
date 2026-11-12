@@ -4,6 +4,8 @@ title: API
 
 ### IxRadarChart
 
+使用 ESM 构建时，可从 `@idux/charts/radar` 按需导入组件和类型。
+
 ```vue
 <script setup lang="ts">
 import { IxRadarChart, type RadarChartProps } from '@idux/charts'

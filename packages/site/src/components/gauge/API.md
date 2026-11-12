@@ -4,6 +4,8 @@ title: API
 
 ### IxGaugeChart
 
+使用 ESM 构建时，可从 `@idux/charts/gauge` 按需导入组件和类型。
+
 ```vue
 <script setup lang="ts">
 import { IxGaugeChart, type GaugeChartProps } from '@idux/charts'

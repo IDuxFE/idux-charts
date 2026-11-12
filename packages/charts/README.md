@@ -72,7 +72,11 @@ Use an ESM subpath such as `@idux/charts/line` to import one chart family and it
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point.
 
-- `CHART_THEME_TOKEN` supplies a reactive ECharts theme name/object to all charts. Explicit `theme` props override it; the fallback is `seer`. Theme changes recreate instances; coordinate `PLOT_THEME_TOKEN` for generated labels and graphics. Dark charts use a dark native loading mask unless explicitly overridden.
+- `CHART_THEME_TOKEN` supplies a reactive ECharts theme name/object to all charts. Explicit `theme` props override it; the fallback is `seer`. Theme changes recreate instances and restore compatible zoom ranges and legend selections. Coordinate `PLOT_THEME_TOKEN` for generated labels and graphics. Dark charts use a dark native loading mask unless explicitly overridden.
+
+When data is appended and the zoom configuration is unchanged, category Bar, Line, and Area charts keep the historical window. A window at the end follows the newest data and keeps the same number of points. A full-range view continues to show all data.
+
+Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
 
 ## Custom tooltips
 

@@ -61,7 +61,9 @@ const lineOption: LineChartProps = {
 </template>
 ```
 
-参考[快速上手](https://idux.site/docs/getting-started/zh)以了解更多。
+ESM 项目可从 `@idux/charts/line` 等子入口按需导入图表，从 `@idux/charts/core` 导入共享工具。完整入口列表见[包说明](packages/charts/README.zh.md)。
+
+参考[快速上手](packages/site/src/0-guide/GettingStarted.page.md)以了解更多。
 
 ### TypeScript 属性类型
 
@@ -111,7 +113,7 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 
 ### 视觉定制
 
-所有图表可通过 `CHART_THEME_TOKEN` 继承响应式 ECharts 主题；显式 `theme` 属性优先，主题变化会重建实例。文档站支持明暗切换，首次跟随系统，手动选择后保存偏好。ECharts 与图形主题的联动方式见下面的配置指南。
+所有图表可通过 `CHART_THEME_TOKEN` 继承响应式 ECharts 主题；显式 `theme` 属性优先，主题变化会重建实例。重建时会恢复兼容的缩放范围和图例选择。文档站支持明暗切换，首次跟随系统，手动选择后保存偏好。ECharts 与图形主题的联动方式见下面的配置指南。
 
 分类柱状图、分类折线图和面积图、自动饼图、雷达图、仪表盘及水波图支持 `plotTheme`，可通过 `PLOT_THEME_TOKEN` 注入响应式默认值。组件的模板 ref 提供 `getEChartsInstance()`。配置合并规则、背景色属性和升级注意事项见[配置指南](packages/site/src/0-guide/GettingStarted.page.md)。两个[兼容性 playground](playgrounds/README.zh.md) 均可通过 `/?theme` 体验主题切换。
 

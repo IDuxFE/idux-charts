@@ -4,6 +4,8 @@ title: API
 
 ### IxPieChart
 
+使用 ESM 构建时，可从 `@idux/charts/pie` 按需导入组件和类型。
+
 ```vue
 <script setup lang="ts">
 import { IxPieChart, type PieChartProps } from '@idux/charts'

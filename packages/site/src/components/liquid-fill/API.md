@@ -4,6 +4,8 @@ title: API
 
 ### IxLiquidFillChart
 
+使用 ESM 构建时，可从 `@idux/charts/liquid-fill` 按需导入组件和类型。
+
 ```vue
 <script setup lang="ts">
 import { IxLiquidFillChart, type LiquidFillChartProps } from '@idux/charts'
