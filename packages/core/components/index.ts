@@ -13,8 +13,9 @@ import { SVGRenderer } from 'echarts/renderers'
 
 import Chart from './Chart'
 import { createInstall } from '../utils'
+import type { InstallableChart } from '../utils'
 
-const IxChart = createInstall(Chart, [
+const IxChart: InstallableChart<typeof Chart> = createInstall(Chart, [
   DataZoomComponent,
   LegendComponent,
   GridComponent,

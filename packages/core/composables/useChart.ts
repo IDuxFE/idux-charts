@@ -14,7 +14,7 @@ import type { Ref, ShallowRef } from 'vue-demi'
 
 import { PictorialBarChart } from 'echarts/charts'
 import { init, use } from 'echarts/core'
-import type { EChartsType } from 'echarts/core'
+import type { EChartsType, SetOptionOpts } from 'echarts/core'
 import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
 
 // Register the pictorial series used by stripe helpers.
@@ -24,6 +24,7 @@ import { createTooltipTheme } from './tooltipTheme'
 import { useResizeObserver } from './useResizeObserver'
 import type { ChartProps } from '../types'
 import { CHART_THEME_TOKEN } from '../themes/token'
+import { isChartEvent, replaceChartComponent, splitChartOptions } from '../utils/chartOptions'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -40,12 +41,16 @@ export function useChart<U extends ChartProps>(
   const containerRef = shallowRef<HTMLDivElement>()
   const chartRef = shallowRef<EChartsType>()
   const prevRestOptions = shallowRef<U>()
+  let prevSetOptionOpts: SetOptionOpts | undefined
 
   const mergedAutoResize = computed(() => unref(options).autoResize ?? true)
   const mergedGroup = computed(() => unref(options).group)
   const mergedInitOption = computed(() => unref(options).initOption)
   const mergedLoading = computed(() => unref(options).loading)
-  const mergedSetOptionOpts = computed(() => unref(options).setOptionOpts)
+  const mergedSetOptionOpts = computed(() => {
+    const { setOptionOpts, title } = unref(options)
+    return title === null ? replaceChartComponent(setOptionOpts, 'title') : setOptionOpts
+  })
   const providedTheme = inject(CHART_THEME_TOKEN, undefined)
   const mergedTheme = computed(() => unref(options).theme ?? unref(providedTheme) ?? 'seer')
 
@@ -94,20 +99,20 @@ export function useChart<U extends ChartProps>(
     instance.on('rendered', tooltipTheme.rendered)
 
     const currOptions = unref(options)
-    const { restOptions, events } = processOptions(currOptions, getListeners(), false)
+    const { restOptions, events } = processOptions(currOptions, getListeners())
 
     instance.setOption(tooltipTheme.prepare(restOptions), mergedSetOptionOpts.value)
     tooltipTheme.sync(instance)
     prevRestOptions.value = cloneDeep(restOptions) as U
+    prevSetOptionOpts = cloneDeep(mergedSetOptionOpts.value)
 
     syncEvents(instance, events)
+    chartRef.value = instance
 
     const onReady = currOptions.onReady || getListeners()?.ready
     if (onReady) {
       onReady(instance)
     }
-
-    chartRef.value = instance
   }
 
   const destroyChart = () => {
@@ -123,7 +128,7 @@ export function useChart<U extends ChartProps>(
   // Vue attrs and Vue 2 listeners are refreshed during component updates.
   onUpdated(() => {
     if (chartRef.value) {
-      syncEvents(chartRef.value, processOptions(unref(options), getListeners(), false).events)
+      syncEvents(chartRef.value, processOptions(unref(options), getListeners()).events)
     }
   })
 
@@ -135,17 +140,20 @@ export function useChart<U extends ChartProps>(
         return
       }
 
-      const { restOptions, events } = processOptions(currOptions, getListeners(), false)
+      const { restOptions, events } = processOptions(currOptions, getListeners())
       syncEvents(instance, events)
 
-      if (!isEqual(restOptions, prevRestOptions.value)) {
-        instance.setOption(tooltipTheme.prepare(restOptions), mergedSetOptionOpts.value)
-        if (restOptions.darkMode !== prevRestOptions.value?.darkMode) {
+      const setOptionOpts = mergedSetOptionOpts.value
+      const updateChanged = !isEqual(setOptionOpts, prevSetOptionOpts)
+      if (updateChanged || !isEqual(restOptions, prevRestOptions.value)) {
+        instance.setOption(tooltipTheme.prepare(restOptions), setOptionOpts)
+        if (updateChanged || restOptions.darkMode !== prevRestOptions.value?.darkMode) {
           tooltipTheme.sync(instance)
         } else {
           tooltipTheme.rendered()
         }
         prevRestOptions.value = cloneDeep(restOptions) as U
+        prevSetOptionOpts = cloneDeep(setOptionOpts)
       }
     },
     {
@@ -195,52 +203,25 @@ export function useChart<U extends ChartProps>(
   return { containerRef, chartRef }
 }
 
-function isEvent(key: string) {
-  return /^on[^a-z]/.test(key)
-}
-
-const ignoreOptions = [
-  'class',
-  'style',
-  'autoResize',
-  'initOption',
-  'group',
-  'loading',
-  'setOptionOpts',
-  'theme',
-  'onReady',
-]
-
-function processOptions(
-  options: ChartProps,
-  listeners: Record<string, Function> = {},
-  isIgnoreEvent = true,
-) {
-  const restOptions: ChartProps = {}
+function processOptions(options: ChartProps, listeners: Record<string, Function> = {}) {
+  const { option: restOptions, controls } = splitChartOptions(options)
+  if (restOptions.title === null) delete restOptions.title
   const events: [string, Function, boolean][] = []
-  Object.keys(options).forEach(key => {
-    if (ignoreOptions.includes(key)) {
+  Object.keys(controls).forEach(key => {
+    if (key === 'onReady' || !isChartEvent(key)) {
       return
     }
-    if (isEvent(key)) {
-      if (isIgnoreEvent) {
-        return
-      }
-      const handler = options[key] as Function
-      if (handler) {
-        const isOnce = key.endsWith('Once')
-        // onClick => click
-        // onClickOnce => click
-        const endIndex = isOnce ? key.length - 4 : undefined
-        const eventName = key.charAt(2).toLowerCase() + key.substring(3, endIndex)
-        events.push([eventName, handler, isOnce])
-      }
-      return
+    const handler = controls[key] as Function
+    if (handler) {
+      const isOnce = key.endsWith('Once')
+      // onClick => click; onClickOnce => click
+      const endIndex = isOnce ? key.length - 4 : undefined
+      const eventName = key.charAt(2).toLowerCase() + key.substring(3, endIndex)
+      events.push([eventName, handler, isOnce])
     }
-    restOptions[key] = options[key]
   })
 
-  if (isVue2 && !isIgnoreEvent) {
+  if (isVue2) {
     Object.keys(listeners).forEach(key => {
       if (key === 'ready' || key === '~ready') {
         return

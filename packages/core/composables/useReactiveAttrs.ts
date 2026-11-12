@@ -1,14 +1,13 @@
 import { computed, getCurrentInstance, isVue2, onBeforeUpdate, shallowRef } from 'vue-demi'
 import type { ComputedRef, ShallowRef } from 'vue-demi'
 
-const controlAttrs: Record<string, string> = {
-  'auto-resize': 'autoResize',
-  'init-option': 'initOption',
-  'set-option-opts': 'setOptionOpts',
+function normalizeAttr(key: string) {
+  if (key.startsWith('aria-') || key.startsWith('data-')) return key
+  return key.replace(/-([a-z])/g, (_, char: string) => char.toUpperCase())
 }
 
-// Undeclared attrs retain kebab-case names. Normalize wrapper controls and
-// expose a ref that updates for attribute changes in both Vue versions.
+// Vue leaves undeclared template bindings in kebab-case. Normalize native
+// ECharts options and wrapper controls before any plot reads the snapshot.
 export function useReactiveAttrs(
   attrs: Record<string, unknown>,
 ): ComputedRef<Record<string, unknown>> | ShallowRef<Record<string, unknown>> {
@@ -16,7 +15,7 @@ export function useReactiveAttrs(
   const read = () =>
     Object.fromEntries(
       Object.entries(isVue2 && instance ? instance.$attrs : attrs).map(([key, value]) => [
-        controlAttrs[key] ?? key,
+        normalizeAttr(key),
         value,
       ]),
     )

@@ -1,22 +1,27 @@
 import { defineComponent, h } from 'vue-demi'
+import type { ShallowRef } from 'vue-demi'
 
 import { useChart, useReactiveAttrs } from '../composables'
-import type { ChartProps } from '../types'
+import type { ChartInstanceMethods, ChartProps } from '../types'
 import { withChartProps } from '../utils/withChartProps'
+
+interface ChartBindings extends ChartInstanceMethods {
+  containerRef: ShallowRef<HTMLDivElement | undefined>
+}
 
 export default withChartProps<ChartProps>()(
   defineComponent({
     name: 'IxChart',
     inheritAttrs: false,
     // @ts-ignore
-    setup(_, context) {
-      const { containerRef } = useChart(
+    setup(_, context): ChartBindings {
+      const { containerRef, chartRef } = useChart(
         useReactiveAttrs(context.attrs),
         () =>
           (context as typeof context & { listeners?: Record<string, Function> }).listeners ?? {},
       )
 
-      return { containerRef }
+      return { containerRef, getEChartsInstance: () => chartRef.value }
     },
     render() {
       const { class: className, style } = this.$attrs

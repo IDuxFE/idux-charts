@@ -1,8 +1,8 @@
 export { withChartProps } from './withChartProps'
 export type { ChartComponent } from './withChartProps'
+export { replaceChartComponent, splitChartOptions } from './chartOptions'
 
 import { isVue2 } from 'vue-demi'
-import type { App } from 'vue-demi'
 
 import { TinyColor } from '@ctrl/tinycolor'
 
@@ -53,20 +53,24 @@ export const getAlphaColor = (baseColor: string, alpha: number) => {
   return new TinyColor(baseColor).setAlpha(alpha).toRgbString()
 }
 
-export function createInstall<Component>(
+interface ChartInstall {
+  install(app: { component(name: string, component: any): unknown }): void
+}
+export type InstallableChart<Component> = Component & ChartInstall
+
+export function createInstall<Component extends { name?: string }>(
   Chart: Component,
   ext: Parameters<typeof use>[0],
-): Component {
+): InstallableChart<Component> {
   use(ext)
 
   registerTheme('seer', seerTheme)
 
-  const install = (app: App) => {
-    app.component((Chart as any).name, Chart as any)
+  const install: ChartInstall['install'] = app => {
+    app.component(Chart.name!, Chart)
   }
 
-  ;(Chart as any).install = install
   // Keep registration in the exported value dependency graph, including when
   // consumers tree-shake packages marked sideEffects: false.
-  return Chart
+  return Object.assign(Chart, { install })
 }
