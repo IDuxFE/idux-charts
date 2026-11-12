@@ -3,11 +3,12 @@ import { BarChart, CustomChart, LineChart } from 'echarts/charts'
 import { GraphicComponent } from 'echarts/components'
 
 import { createInstall } from '@idux/charts-core'
+import type { InstallableChart } from '@idux/charts-core'
 
 import Bar from './src/Bar'
 import { installBarShadow } from './src/barShadow'
 
-const IxBarChart = createInstall(Bar, [
+const IxBarChart: InstallableChart<typeof Bar> = createInstall(Bar, [
   BarChart,
   CustomChart,
   LineChart,

@@ -1,4 +1,4 @@
-<!-- Frozen pre-1.0 demo: keep legacy native options and visual baseline intact. -->
+<!-- Pre-1.0 demo options used to verify the rendering of explicit native series. -->
 <script setup lang="ts">
 import { IxPieChart } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'

@@ -1,8 +1,9 @@
-import { defineComponent, h } from 'vue-demi'
+import { defineComponent } from 'vue-demi'
 
 import type { PieSeriesOption } from 'echarts/charts'
 
-import { IxChart, mergeAttrs, useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { plotInstanceMethods, renderPlot } from '../../shared/usePlotRender'
 
 import { useDefaultPieOption } from './useDefaultPieOption'
 
@@ -14,21 +15,18 @@ export default withChartProps<PieChartProps>()(
     name: 'IxPieChart',
     inheritAttrs: false,
     props: pieChartProps as any,
+    methods: plotInstanceMethods,
     // @ts-ignore
-    setup(props, { attrs, listeners }) {
-      const reactiveAttrs = useReactiveAttrs(attrs)
+    setup(props, context) {
+      const reactiveAttrs = useReactiveAttrs(context.attrs)
       const legacy = usePieOption(props as PieSeriesOption, reactiveAttrs)
       const { option, automatic } = useDefaultPieOption(
         props as PieChartProps,
         reactiveAttrs,
         legacy,
+        context,
       )
-      return () =>
-        h(IxChart, {
-          ...mergeAttrs(option.value, listeners),
-          ref: 'chart',
-          key: automatic.value ? 'automatic' : 'explicit',
-        })
+      return () => renderPlot(option.value, context, automatic.value ? 'automatic' : 'explicit')
     },
   }),
 )

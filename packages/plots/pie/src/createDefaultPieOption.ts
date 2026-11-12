@@ -8,6 +8,7 @@ import type { LegendComponentOption, TitleComponentOption } from 'echarts/compon
 import { getAlphaColor, seerColors, seerTheme, useTooltipsFormatter } from '@idux/charts-core'
 import type { PieChartProps, PieChartAlign, PieSeriesStyle } from './usePieOption'
 import { getLinearColors } from '../../shared/linearColors'
+import { mergePlotOptions } from '../../shared/plotOptions'
 
 export interface PieDisplayTokens {
   fontFamily: string
@@ -502,12 +503,10 @@ export function createDefaultPieOption(
     if (!item) return ''
 
     const missing = item.value === null
-    const content = useTooltipsFormatter(format.encodeHTML(item.name), [
+    const content = useTooltipsFormatter(item.name, [
       {
-        name: format.encodeHTML(seriesName),
-        value: missing
-          ? format.encodeHTML(missingValueLabel)
-          : format.encodeHTML(String(item.value)),
+        name: seriesName,
+        value: missing ? missingValueLabel : String(item.value),
         color: item.markerColor,
       },
     ])
@@ -551,7 +550,7 @@ export function createDefaultPieOption(
         return formatItemTooltip(item.name)
       },
     },
-    title: merge({}, presentation.title, {
+    title: mergePlotOptions<TitleComponentOption>(presentation.title, {
       show: showTitle,
       left: layout.summaryLeft,
       top: layout.titleTop,
@@ -566,7 +565,7 @@ export function createDefaultPieOption(
       const last = column === columns - 1
       const scroll = paged && last
       const start = column * rowCount
-      return merge({}, legend, {
+      return mergePlotOptions<LegendComponentOption>(legend, {
         id: `ix-pie-legend-${column}`,
         show: showLegend && column < columns,
         type: scroll ? 'scroll' : 'plain',
@@ -842,7 +841,10 @@ export function createDefaultPieOption(
     ] as const) {
       if (style[key] !== undefined) {
         Object.assign(main, {
-          [key]: typeof style[key] === 'object' ? merge({}, main[key], style[key]) : style[key],
+          [key]:
+            typeof style[key] === 'object'
+              ? mergePlotOptions<object>(main[key] as object | undefined, style[key])
+              : style[key],
         })
       }
     }

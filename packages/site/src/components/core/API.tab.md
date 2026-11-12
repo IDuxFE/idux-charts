@@ -32,15 +32,26 @@ const option = {
 
 所有图表组件共用以下配置。ECharts 事件可通过 `@click`、`@legendselectchanged` 等监听，回调参数沿用 ECharts。
 
-| 属性            | 类型                           | 默认值            | 行为                                                                                                                                       |
-| --------------- | ------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `autoResize`    | `boolean`                      | `true`            | 随容器尺寸变化调整图表。                                                                                                                   |
-| `group`         | `string`                       | —                 | 设置实例的分组 ID，调用 ECharts 的 `connect(group)` 后联动同组图表。                                                                       |
-| `initOption`    | `ChartInitOption`              | —                 | ECharts `init` 的第三个参数。变化时重建实例。                                                                                              |
-| `loading`       | `boolean \| object`            | —                 | 显示原生加载遮罩，传对象可配置 `text`、`maskColor` 等。默认文案为 `Loading...`，生效的 ECharts option 含 `darkMode: true` 时使用深色遮罩。 |
-| `setOptionOpts` | `SetOptionOpts`                | 由图表决定        | 传给 ECharts `setOption` 的第二个参数。                                                                                                    |
-| `theme`         | `ChartTheme`                   | 注入值或 `'seer'` | ECharts 主题名或主题对象。变化时重建实例。                                                                                                 |
-| `onReady`       | `(chart: EChartsType) => void` | —                 | 创建实例并提交初始 option 后调用。重建时再次调用。                                                                                         |
+| 属性                   | 类型                               | 默认值            | 行为                                                                                                                                       |
+| ---------------------- | ---------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `chartBackgroundColor` | `EChartsOption['backgroundColor']` | —                 | 设置整个 ECharts 绘图区的背景，优先于顶层原生 `backgroundColor`。                                                                          |
+| `autoResize`           | `boolean`                          | `true`            | 随容器尺寸变化调整图表。                                                                                                                   |
+| `group`                | `string`                           | —                 | 设置实例的分组 ID，调用 ECharts 的 `connect(group)` 后联动同组图表。                                                                       |
+| `initOption`           | `ChartInitOption`                  | —                 | ECharts `init` 的第三个参数。变化时重建实例。                                                                                              |
+| `loading`              | `boolean \| object`                | —                 | 显示原生加载遮罩，传对象可配置 `text`、`maskColor` 等。默认文案为 `Loading...`，生效的 ECharts option 含 `darkMode: true` 时使用深色遮罩。 |
+| `setOptionOpts`        | `SetOptionOpts`                    | 由图表决定        | 传给 ECharts `setOption` 的第二个参数。单独修改此项也会应用到当前配置。                                                                    |
+| `theme`                | `ChartTheme`                       | 注入值或 `'seer'` | ECharts 主题名或主题对象。变化时重建实例。                                                                                                 |
+| `onReady`              | `(chart: EChartsType) => void`     | —                 | 创建实例并提交初始 option 后调用。重建时再次调用。                                                                                         |
+
+### 实例访问
+
+所有图表组件均可通过模板 ref 调用 `getEChartsInstance()`。组件挂载后返回当前 ECharts 实例，主题或初始化参数变化后返回新实例。`onReady(chart)` 会在每次初始化后收到实例。
+
+### 配置合并与更新
+
+图表在生成配置时按字段合并对象，数组由优先级更高的配置整体替换。组件属性覆盖图表注入默认值。图表各自负责内置布局所需的轴、数据和辅助图形。
+
+`IxChart` 与 Bar、Line、Pie 的原生模式沿用 ECharts 的默认合并策略。内置布局默认使用 `notMerge: true`。显式传入 `notMerge: false` 时，安全的更新沿用 ECharts 合并。移除配置时会应用完整配置以清理旧状态。分类 Bar、Line 和 Area 在缩放与图例配置未变时会保留用户选择，自动 Pie 和 Radar 在图例选择配置及名称未变时会保留图例选择。
 
 ### useChart
 

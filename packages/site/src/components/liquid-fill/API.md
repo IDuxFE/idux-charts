@@ -33,14 +33,16 @@ const option: LiquidFillChartProps = {
 | `radius`                                            | `number`                    | 最大半径，默认 64px，实际半径随容器缩小。                        |
 | `waveAnimation`                                     | `boolean`                   | 默认 `true`，传 `false` 保留静态波形。零水位和满水位为静态。     |
 | `color`、`zeroColor`                                | `string`                    | 水波色与零水位颜色，默认 `#20C997`、`#E8EAED`。                  |
-| `textColor`、`backgroundColor`                      | `string`                    | 文字颜色和底色，默认 `#1F2329`、`transparent`。                  |
+| `textColor`、`containerColor`                       | `string`                    | 文字颜色和底色，默认 `#1F2329`、`transparent`。                  |
 | `valueTextStyle`、`labelTextStyle`、`unitTextStyle` | `PlotTextStyle`             | 分别调整数值、底部说明和默认单位的颜色、字体、字号、字重与行高。 |
 | `plotTheme`                                         | `PlotTheme`                 | 继承 `PLOT_THEME_TOKEN`。                                        |
 
 水位按量程计算，越界时限制到空或满。默认文字显示原值及单位。示例显示 `48 GB`，水位为 75%。传入 `value: 0.5, max: 1` 时，可用 `valueFormatter: value => String(value * 100) + '%'` 显示 `50%`。无效量程清空图形。
 
+用 `chartBackgroundColor` 设置整张图的背景。`backgroundColor` 兼容旧版容器底色，`containerColor` 优先。
+
 主文字及底部说明的样式优先级为 `textColor`、对应角色样式、`textStyle`、`plotTheme`、组件默认值。数字字体默认使用 `D-DIN-PRO, sans-serif`，由应用加载字体资源。
 
 ### createLiquidFillOption
 
-`createLiquidFillOption(props)` 生成 ECharts option，可显式传入 `plotTheme`。组件支持<a href="./core">基础组件</a> API 中的公共图表选项，额外 ECharts 顶层字段整体替换生成配置，`setOptionOpts.notMerge` 默认是 `true`。内置自定义系列为静默图形。
+`createLiquidFillOption(props)` 生成 ECharts option，可显式传入 `plotTheme`。组件支持<a href="./core">基础组件</a> API 中的公共图表选项，额外 ECharts 配置对象按字段合并，显式 `series` 整体替换生成的系列。内置自定义系列为静默图形。

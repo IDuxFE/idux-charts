@@ -5,6 +5,27 @@ import { graphic } from 'echarts/core'
 import { getAlphaColor } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 import { valueRatio } from '../../shared/value'
+import { mergeNativePlotOptions } from '../../shared/plotOptions'
+
+export const liquidFillProps = [
+  'value',
+  'min',
+  'max',
+  'label',
+  'unit',
+  'valueFormatter',
+  'color',
+  'zeroColor',
+  'radius',
+  'waveAnimation',
+  'textColor',
+  'backgroundColor',
+  'containerColor',
+  'valueTextStyle',
+  'labelTextStyle',
+  'unitTextStyle',
+  'plotTheme',
+] as const
 
 export interface LiquidFillChartProps
   extends BaseChartOption<CustomSeriesOption>, AdditionalChartOption {
@@ -23,6 +44,8 @@ export interface LiquidFillChartProps
   radius?: number
   waveAnimation?: boolean
   textColor?: string
+  containerColor?: string
+  /** @deprecated Use containerColor for the vessel or chartBackgroundColor for the chart. */
   backgroundColor?: string
 }
 export type LiquidFillChartPublicProps = KnownProps<LiquidFillChartProps>
@@ -32,7 +55,7 @@ export function createLiquidFillOption(
 ): BaseChartOption<CustomSeriesOption> {
   const theme = props.plotTheme ?? {}
   const ratio = valueRatio(props.value, props.min, props.max)
-  if (ratio === undefined) return { series: [] }
+  if (ratio === undefined) return mergeNativePlotOptions({ series: [] }, props, liquidFillProps)
   const color =
     ratio === 0
       ? (props.zeroColor ?? theme.mutedColor ?? '#E8EAED')
@@ -100,7 +123,7 @@ export function createLiquidFillOption(
             type: 'circle',
             shape: { cx: 0, cy: 0, r: radius },
             style: {
-              fill: props.backgroundColor ?? 'transparent',
+              fill: props.containerColor ?? props.backgroundColor ?? 'transparent',
               stroke: getAlphaColor(color, 0.3),
               lineWidth: 2,
             },
@@ -186,5 +209,9 @@ export function createLiquidFillOption(
       }
     },
   }
-  return { animationDuration: 0, animationDurationUpdate: 0, series: [series] }
+  return mergeNativePlotOptions(
+    { animationDuration: 0, animationDurationUpdate: 0, series: [series] },
+    props,
+    liquidFillProps,
+  )
 }

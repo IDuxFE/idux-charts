@@ -3,13 +3,14 @@ import { CustomChart, LineChart } from 'echarts/charts'
 import { GraphicComponent } from 'echarts/components'
 
 import { createInstall } from '@idux/charts-core'
+import type { InstallableChart } from '@idux/charts-core'
 
 import Line from './src/Line'
 import { installCategoryLineGapClipping } from './src/categoryLineGapClipping'
 import { installCategoryLineInterpolation } from './src/categoryLineInterpolation'
 import { installSingleAreaStripe } from './src/useLineChartAreaStripe'
 
-const IxLineChart = createInstall(Line, [
+const IxLineChart: InstallableChart<typeof Line> = createInstall(Line, [
   LineChart,
   CustomChart,
   GraphicComponent,

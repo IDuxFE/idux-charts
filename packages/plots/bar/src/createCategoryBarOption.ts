@@ -1,7 +1,11 @@
-import type { DefaultLabelFormatterCallbackParams } from 'echarts'
+import type {
+  DefaultLabelFormatterCallbackParams,
+  XAXisComponentOption,
+  YAXisComponentOption,
+} from 'echarts'
 import type { EChartsType } from 'echarts/core'
 import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
-import { escape, merge, pick } from 'lodash-es'
+import { escape, pick } from 'lodash-es'
 import {
   convertArray,
   filterEmptyProps,
@@ -11,6 +15,8 @@ import {
 } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
+import { cartesianGridBounds } from '../../shared/cartesian'
+import { mergePlotOptions } from '../../shared/plotOptions'
 import type { PlotTheme } from '../../shared/plotTheme'
 import { createReferenceSeries, referenceLegendIcon } from '../../shared/referenceLine'
 import type { ReferenceLine } from '../../shared/referenceLine'
@@ -55,7 +61,7 @@ function scalarValue(item: unknown) {
 function isMissing(value: unknown) {
   return (
     value == null ||
-    value === '' ||
+    (typeof value === 'string' && !value.trim()) ||
     ((typeof value === 'number' || typeof value === 'string') && !Number.isFinite(Number(value)))
   )
 }
@@ -104,14 +110,12 @@ export function createCategoryBarOption(
   } = attrs
   const tooltip = convertArray(tooltipInput)[0]
   const tooltipRowsPerColumn = 10
-  const bars = (series === undefined ? [{}] : convertArray(series)).map(item => ({
-    ...filterEmptyProps(seriesProps),
-    ...item,
-    type: 'bar' as const,
-  }))
+  const bars = (series === undefined ? [{}] : convertArray(series)).map(item =>
+    mergePlotOptions<BarSeriesOption>(filterEmptyProps(seriesProps), item, { type: 'bar' }),
+  )
   const hasData = bars.some(bar => bar.data?.length)
   const multiColumnTooltip = bars.length > tooltipRowsPerColumn && !tooltip?.formatter
-  const runtime = { ...rest, setOptionOpts: { notMerge: true, ...attrs.setOptionOpts } }
+  const runtime = rest
   if (!categories.length || !hasData) return { option: { ...runtime, loading } }
 
   const columns = countBarColumns(bars)
@@ -162,7 +166,16 @@ export function createCategoryBarOption(
       data,
     }
   })
-  const allZero = barSeries.every(bar => bar.data?.every(item => scalarValue(item) === 0))
+  const allZero = barSeries.every(bar =>
+    bar.data?.every(item => {
+      const value = scalarValue(item)
+      return (
+        (typeof value === 'number' || typeof value === 'string') &&
+        !isMissing(value) &&
+        Number(value) === 0
+      )
+    }),
+  )
   const missingIndices = new Set(
     categories.flatMap((_, index) =>
       barSeries.some(bar => isMissing(scalarValue(bar.data?.[index]))) ? [index] : [],
@@ -298,10 +311,7 @@ export function createCategoryBarOption(
   const rightSlider = zoom?.some(item => item.type === 'slider' && item.orient === 'vertical')
   const barThickness = getBarHoverWidth(barSeries, undefined) - 12
   const aboveMissingRows =
-    above &&
-    missingIndices.size &&
-    categoryInput?.axisLabel?.padding === undefined &&
-    !('data' in (categoryInput ?? {}))
+    above && missingIndices.size && categoryInput?.axisLabel?.padding === undefined
       ? new Map(
           Array.from(missingIndices, index => [
             index,
@@ -358,6 +368,7 @@ export function createCategoryBarOption(
       : {}),
   }
   const value = horizontal ? xAxisInput : yAxisInput
+  const categoryLabels = { type: 'category' as const, data: categoryAxis.data }
   const graphic: ChartProps['graphic'] =
     attrs.graphic ??
     (allZero && !above && zeroText
@@ -378,19 +389,22 @@ export function createCategoryBarOption(
     ...runtime,
     loading,
     color: attrs.color ?? theme.palette ?? colors,
-    grid: merge(
+    grid: mergePlotOptions<NonNullable<ChartProps['grid']>>(
       {
         top: attrs.title ? 44 : 24,
         bottom: 12 + legendBottom + (bottomSlider ? 24 : 0),
         left: 16,
         right: rightSlider ? 44 : 20,
-        outerBoundsMode: 'same' as const,
-        outerBoundsContain: 'axisLabel' as const,
+        ...cartesianGridBounds,
       },
       grid,
     ),
-    xAxis: merge({}, horizontal ? valueAxis : categoryAxis, xAxisInput),
-    yAxis: merge({}, horizontal ? categoryAxis : valueAxis, yAxisInput),
+    xAxis: horizontal
+      ? mergePlotOptions<XAXisComponentOption>(valueAxis, xAxisInput)
+      : mergePlotOptions<XAXisComponentOption>(categoryAxis, xAxisInput, categoryLabels),
+    yAxis: horizontal
+      ? mergePlotOptions<YAXisComponentOption>(categoryAxis, yAxisInput, categoryLabels)
+      : mergePlotOptions<YAXisComponentOption>(valueAxis, yAxisInput),
     dataZoom: zoom,
     legend: mergedLegend,
     ...(pager ? { graphic: appendLegendGraphics(graphic, pager) } : graphic ? { graphic } : {}),
@@ -399,74 +413,76 @@ export function createCategoryBarOption(
       ...referenceSeries,
       ...bands,
     ],
-    tooltip: {
-      trigger: 'axis',
-      ...(multiColumnTooltip
-        ? {
-            enterable: true,
-            position: (point, _params, _dom, _rect, { viewSize, contentSize }) => [
-              Math.min(point[0]! + 12, Math.max(0, viewSize[0] - contentSize[0])),
-              Math.min(point[1]! + 12, viewSize[1] - legendBottom - contentSize[1] - 4),
-            ],
-          }
-        : {}),
-      axisPointer: {
-        type: 'line',
-        z: backgroundZ,
-        lineStyle: {
-          type: 'solid',
-          width: getBarHoverWidth(barSeries, mergedLegend),
-          color: missingIndices.size
-            ? 'transparent'
-            : dark
-              ? getAlphaColor(secondaryText, 0.25)
-              : 'rgba(129,130,136,0.2)',
+    tooltip: mergePlotOptions<NonNullable<ChartProps['tooltip']>>(
+      {
+        trigger: 'axis',
+        ...(multiColumnTooltip
+          ? {
+              enterable: true,
+              position: (point, _params, _dom, _rect, { viewSize, contentSize }) => [
+                Math.min(point[0]! + 12, Math.max(0, viewSize[0] - contentSize[0])),
+                Math.min(point[1]! + 12, viewSize[1] - legendBottom - contentSize[1] - 4),
+              ],
+            }
+          : {}),
+        axisPointer: {
+          type: 'line',
+          z: backgroundZ,
+          lineStyle: {
+            type: 'solid',
+            width: getBarHoverWidth(barSeries, mergedLegend),
+            color: missingIndices.size
+              ? 'transparent'
+              : dark
+                ? getAlphaColor(secondaryText, 0.25)
+                : 'rgba(129,130,136,0.2)',
+          },
+        },
+        formatter: (
+          input: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[],
+        ) => {
+          const params = convertArray(input).filter(param => param.seriesType === 'bar')
+          if (!params.length) return ''
+          const reasons: string[] = []
+          const rows = params.flatMap(param => {
+            const measurement = scalarValue(param.data)
+            if (isMissing(measurement)) {
+              const reason = missingReason(param.data)
+              const prefix = bars.length > 1 ? `${escape(param.seriesName)}: ` : ''
+              reasons.push(`<div>${prefix}${escape(reason || '–')}</div>`)
+              return []
+            }
+            const formatted =
+              (typeof measurement === 'number' || typeof measurement === 'string') &&
+              typeof tooltip?.valueFormatter === 'function'
+                ? tooltip.valueFormatter(Number(measurement), param.dataIndex)
+                : value?.name
+                  ? `${measurement} ${value.name}`
+                  : measurement
+            return [
+              {
+                name: param.seriesName ?? '',
+                value: String(formatted),
+                color: getTooltipsColor(param.color),
+              },
+            ]
+          })
+          const title = params[0]!.name
+          const reasonsHtml = reasons.length
+            ? `<div style="max-width: 220px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; font-size: 12px; opacity: 0.72;">${reasons.join('')}</div>`
+            : ''
+          return rows.length
+            ? useTooltipsFormatter(title, rows, tooltipRowsPerColumn) + reasonsHtml
+            : `<div class="charts-tooltips"><div class="charts-tooltips-title">${escape(title)}</div>${reasonsHtml}</div>`
         },
       },
-      formatter: (
-        input: DefaultLabelFormatterCallbackParams | DefaultLabelFormatterCallbackParams[],
-      ) => {
-        const params = convertArray(input).filter(param => param.seriesType === 'bar')
-        if (!params.length) return ''
-        const reasons: string[] = []
-        const rows = params.flatMap(param => {
-          const measurement = scalarValue(param.data)
-          if (isMissing(measurement)) {
-            const reason = missingReason(param.data)
-            const prefix = bars.length > 1 ? `${escape(param.seriesName)}: ` : ''
-            reasons.push(`<div>${prefix}${escape(reason || '–')}</div>`)
-            return []
-          }
-          const formatted =
-            (typeof measurement === 'number' || typeof measurement === 'string') &&
-            typeof tooltip?.valueFormatter === 'function'
-              ? tooltip.valueFormatter(measurement, param.dataIndex)
-              : value?.name
-                ? `${measurement} ${value.name}`
-                : measurement
-          return [
-            {
-              name: escape(param.seriesName),
-              value: escape(String(formatted)),
-              color: getTooltipsColor(param.color),
-            },
-          ]
-        })
-        const title = escape(params[0]!.name)
-        const reasonsHtml = reasons.length
-          ? `<div style="max-width: 220px; white-space: normal; overflow-wrap: anywhere; margin-top: 8px; font-size: 12px; opacity: 0.72;">${reasons.join('')}</div>`
-          : ''
-        return rows.length
-          ? useTooltipsFormatter(title, rows, tooltipRowsPerColumn) + reasonsHtml
-          : `<div class="charts-tooltips"><div class="charts-tooltips-title">${title}</div>${reasonsHtml}</div>`
-      },
-      ...tooltip,
-      ...(multiColumnTooltip && width > 24
+      tooltip,
+      multiColumnTooltip && width > 24
         ? {
             extraCssText: `--ix-chart-tooltip-columns-max-width: ${width - 24}px;${tooltip?.extraCssText ?? ''}`,
           }
-        : {}),
-    },
+        : undefined,
+    ),
   }
   return { option, wheel, aboveMissingRows }
 }

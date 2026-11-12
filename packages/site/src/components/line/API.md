@@ -41,10 +41,10 @@ const option: LineChartProps = {
 
 分类布局使用第一项 `xAxis` 的样式，类型和标签由 `categories` 决定。`dataZoom` 默认绑定 X 轴，显式指定目标轴时沿用该绑定。多系列默认显示图例，空间不足时分页。用 `tooltip.valueFormatter` 改写数值，用 `tooltip.formatter` 改写整个提示框。
 
-支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局强制使用 `setOptionOpts.notMerge: true`，清空数据时移除旧系列及辅助图形。
+支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局在数据清空时移除旧系列及辅助图形。仅刷新数值时保留缩放范围和图例选择。
 
 ### 原生配置与 useLineOption
 
 省略 `categories` 可使用 ECharts 时间轴、多坐标系和 `dataset`，额外 ECharts 模块按需注册。顶层系列简写为 `data`、`name`、`areaStyle`、`label`、`markArea`、`smooth` 和 `stack`。
 
-在 `setup` 中调用 `useLineOption(seriesProps, attrs)` 可得到 `ComputedRef<LineChartProps>`。原生路径和该组合式函数使用 `LINE_CHART_TOKEN` 提供默认配置。
+在 `setup` 中调用 `useLineOption(seriesProps, attrs)` 可得到 `ComputedRef<LineChartProps>`。`LINE_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的默认 Tooltip 向 `tooltip.valueFormatter` 传入数据所在值轴的测量值。

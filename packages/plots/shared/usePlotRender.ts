@@ -2,33 +2,70 @@ import { usePlotTheme } from './plotTheme'
 import type { PlotTheme } from './plotTheme'
 import { computed, h } from 'vue-demi'
 import type { SetupContext } from 'vue-demi'
-import type { SetOptionOpts } from 'echarts/core'
-import { IxChart, mergeAttrs, useReactiveAttrs } from '@idux/charts-core'
-import type { ChartOption } from '@idux/charts-core'
+import {
+  filterEmptyProps,
+  convertArray,
+  IxChart,
+  mergeAttrs,
+  splitChartOptions,
+  useReactiveAttrs,
+} from '@idux/charts-core'
+import type { ChartInstanceMethods, ChartOption, ChartProps } from '@idux/charts-core'
+import type { EChartsType } from 'echarts/core'
+import { createPlotUpdater } from './plotOptions'
+import {
+  createPlotInteraction,
+  legendSelectionConfig,
+  restoreLegendSelection,
+} from './usePlotLayout'
 
-/**
- * Adapter for plots whose builders produce a complete option on every update.
- * Native attrs replace generated top-level sections; replacement updates clear
- * removed series and overrides. Callers can explicitly opt into ECharts merging.
- */
+export type PlotContext = Pick<SetupContext, 'attrs'> & { listeners?: Record<string, Function> }
+
+export function renderPlot(option: ChartProps, context: PlotContext, key?: string) {
+  return h(IxChart, { ...mergeAttrs(option, context.listeners), ref: 'chart', key })
+}
+
+export const plotInstanceMethods: ChartInstanceMethods = {
+  getEChartsInstance(this: { $refs: Record<string, unknown> }) {
+    return (this.$refs.chart as ChartInstanceMethods | undefined)?.getEChartsInstance()
+  },
+}
+
 export function usePlotRender(
-  context: Pick<SetupContext, 'attrs'> & { listeners?: Record<string, Function> },
-  createOption: (attrs: Readonly<Record<string, unknown>>) => ChartOption,
+  context: PlotContext,
+  props: () => ChartProps,
+  createOption: (input: ChartProps) => ChartOption,
 ) {
   const attrs = useReactiveAttrs(context.attrs)
   const theme = usePlotTheme(
-    () => (attrs.value.plotTheme ?? attrs.value['plot-theme']) as PlotTheme | undefined,
+    () => (props().plotTheme ?? attrs.value.plotTheme) as PlotTheme | undefined,
   )
+  const update = createPlotUpdater()
+  const interaction = createPlotInteraction()
+  const onReady = (chart: EChartsType) => {
+    interaction.setChart(chart)
+    const ready = attrs.value.onReady ?? context.listeners?.ready
+    if (typeof ready === 'function') ready(chart)
+  }
   const option = computed(() => {
-    const { plotTheme: _theme, 'plot-theme': _kebabTheme, ...nativeAttrs } = attrs.value
-    return {
-      ...createOption({ ...nativeAttrs, plotTheme: theme.value }),
-      ...nativeAttrs,
-      setOptionOpts: {
-        notMerge: true,
-        ...(attrs.value.setOptionOpts as SetOptionOpts | undefined),
+    const input = { ...attrs.value, ...filterEmptyProps(props()), plotTheme: theme.value }
+    const generated = createOption(input)
+    const { legend } = interaction.read({
+      legend: generated.legend && {
+        option: legendSelectionConfig(input.legend),
+        names: convertArray(generated.series).map(series => ({
+          name: series.name,
+          items: Array.isArray(series.data)
+            ? series.data.map(item =>
+                item && typeof item === 'object' && 'name' in item ? item.name : undefined,
+              )
+            : undefined,
+        })),
       },
-    }
+    })
+    restoreLegendSelection(generated, legend)
+    const { controls } = splitChartOptions(input)
+    return { ...update({ ...generated, ...controls })!, onReady }
   })
-  return () => h(IxChart, mergeAttrs(option.value, context.listeners))
+  return () => renderPlot(option.value, context)
 }

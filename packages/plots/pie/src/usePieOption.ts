@@ -3,7 +3,7 @@ import { computed, inject, unref } from 'vue-demi'
 import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 
 import type { PieSeriesOption } from 'echarts/charts'
-import { merge, get, set, cloneDeep } from 'lodash-es'
+import { clearChartComponent, mergePlotOptions, resolvePlotInput } from '../../shared/plotOptions'
 
 import {
   convertArray,
@@ -11,7 +11,12 @@ import {
   useTooltipsFormatter,
   getTooltipsColor,
 } from '@idux/charts-core'
-import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
+import type {
+  AdditionalChartOption,
+  BaseChartOption,
+  ChartProps,
+  KnownProps,
+} from '@idux/charts-core'
 
 export const pieChartProps = [
   'align',
@@ -30,7 +35,7 @@ export const pieChartProps = [
 
 export interface PieChartProps
   extends
-    BaseChartOption<PieSeriesOption>,
+    Omit<KnownProps<BaseChartOption<PieSeriesOption>>, 'title'>,
     AdditionalChartOption,
     Pick<
       PieSeriesOption,
@@ -45,6 +50,7 @@ export interface PieChartProps
   layoutMode?: 'auto' | 'native'
   seriesStyle?: PieSeriesStyle
   plotTheme?: PlotTheme
+  title?: ChartProps['title']
   data?: Array<NonNullable<PieSeriesOption['data']>[number] | PieChartDataItem>
 }
 
@@ -112,69 +118,49 @@ export function usePieOption(
   attrsInput: PieChartProps | ShallowRef<PieChartProps>,
 ): ComputedRef<PieChartProps> {
   const injectProps = inject(PIE_CHART_TOKEN, null)
-  const mergedDefaultProps = merge(cloneDeep(defaultProps), injectProps)
-
-  const mergedSeriesOption = computed<PieSeriesOption>(() => {
+  return computed(() => {
+    const { props: input, attrs } = resolvePlotInput(
+      injectProps,
+      filterEmptyProps(props as PieChartProps),
+      unref(attrsInput),
+      pieChartProps,
+    )
     const {
+      align: _align,
       layoutMode: _mode,
       seriesStyle,
       plotTheme: _theme,
       ...nativeProps
-    } = props as PieChartProps
-    const option = merge(
-      {},
-      seriesStyle ?? injectProps?.seriesStyle,
-      filterEmptyProps(nativeProps),
-    ) as PieSeriesOption
-    delete (option as PieChartProps).align
-    option.type = 'pie'
-    return option
-  })
-
-  const total = computed(() => {
-    const attrs = unref(attrsInput)
-    const data =
-      mergedSeriesOption.value.data ??
-      convertArray(attrs.series).flatMap(series => series.data ?? [])
-    return data.reduce<number>((sum, item) => {
-      const value = Number(
-        typeof item === 'object' && item !== null && 'value' in item ? item.value : item,
-      )
-      return sum + (Number.isFinite(value) ? value : 0)
-    }, 0)
-  })
-
-  const mergedOption = computed(() => {
-    const attrs = unref(attrsInput)
-    const option = merge({}, mergedDefaultProps, attrs)
-    delete option.align
-    delete option.layoutMode
-    delete option.seriesStyle
-    delete option.plotTheme
-    if (attrs.title !== null) {
-      if (!get(option, ['title', 'text'])) {
-        set(option, ['title', 'text'], `${total.value}`)
-      }
-      if (!get(option, ['title', 'subtext'])) {
-        set(option, ['title', 'subtext'], `${mergedSeriesOption.value.name || ''}`)
-      }
-    } else {
-      option.title = undefined
-    }
-    return option
-  })
-
-  return computed(() => {
-    const option = { ...mergedOption.value }
-    const seriesOption = mergedSeriesOption.value
-    const { series } = unref(attrsInput)
-    if (!series) {
-      option.series = [seriesOption]
-    } else {
-      option.series = convertArray(series).map(item => merge({}, seriesOption, item))
-    }
+    } = input
+    const option = mergePlotOptions<PieChartProps>(defaultProps, attrs)
+    const seriesOption = mergePlotOptions<PieSeriesOption>(
+      seriesStyle,
+      nativeProps as PieSeriesOption,
+      { type: 'pie' },
+    )
+    const { series } = option
+    option.series =
+      series === undefined
+        ? [seriesOption]
+        : convertArray(series).map(item => mergePlotOptions(seriesOption, item))
     for (const item of option.series ?? []) {
       if (item.roseType && item.clockwise === undefined) item.clockwise = true
+    }
+    if (attrs.title === null) {
+      clearChartComponent(option, 'title')
+    } else if (option.title && !Array.isArray(option.title)) {
+      if (option.title.text === undefined) {
+        const total = option.series
+          .flatMap(item => item.data ?? [])
+          .reduce<number>((sum, item) => {
+            const value = Number(
+              typeof item === 'object' && item !== null && 'value' in item ? item.value : item,
+            )
+            return sum + (Number.isFinite(value) ? value : 0)
+          }, 0)
+        option.title.text = String(total)
+      }
+      option.title.subtext ??= String(seriesOption.name ?? '')
     }
     return option
   })

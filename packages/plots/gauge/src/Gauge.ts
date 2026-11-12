@@ -2,8 +2,8 @@ import type { PropType } from 'vue-demi'
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
-import { usePlotRender } from '../../shared/usePlotRender'
-import { createGaugeOption } from './createGaugeOption'
+import { plotInstanceMethods, usePlotRender } from '../../shared/usePlotRender'
+import { createGaugeOption, gaugeProps } from './createGaugeOption'
 import type { GaugeChartProps } from './createGaugeOption'
 
 export default withChartProps<GaugeChartProps>()(
@@ -11,29 +11,16 @@ export default withChartProps<GaugeChartProps>()(
     name: 'IxGaugeChart',
     inheritAttrs: false,
     props: {
+      ...Object.fromEntries(gaugeProps.map(key => [key, null])),
       valueTextStyle: Object as PropType<PlotTextStyle>,
       labelTextStyle: Object as PropType<PlotTextStyle>,
-      value: null,
-      min: null,
-      max: null,
-      segments: null,
-      label: null,
-      valueFormatter: null,
-      color: null,
-      size: null,
-      valueFontSize: null,
-      valueFontFamily: null,
-      labelColor: null,
-      textColor: null,
-      backgroundColor: null,
     },
+    methods: plotInstanceMethods,
     setup(props, context) {
-      return usePlotRender(context, attrs =>
-        createGaugeOption({
-          ...props,
-          plotTheme: attrs.plotTheme,
-          textStyle: attrs.textStyle,
-        } as GaugeChartProps),
+      return usePlotRender(
+        context,
+        () => props,
+        input => createGaugeOption(input as GaugeChartProps),
       )
     },
   }),

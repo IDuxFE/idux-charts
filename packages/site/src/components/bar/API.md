@@ -40,12 +40,12 @@ const option: BarChartProps = {
 
 `0` 为有效值。缺少对应数据项、空值或非有限数值时保留分类并显示缺报底条，可用 `missingReason` 补充提示。缺少分类或全部系列的数据数组为空时，清除生成的图形。
 
-`grid`、`xAxis`、`yAxis` 与默认值合并。分类布局使用每个轴的第一项配置。`dataZoom` 默认绑定分类轴，显式指定目标轴时沿用该绑定。用 `tooltip.valueFormatter` 改写数值，用 `tooltip.formatter` 改写整个提示框。显式指定图例类型或位置时使用 ECharts 图例布局。
+`grid`、`xAxis`、`yAxis` 与默认值合并。分类布局使用每个轴的第一项配置，分类轴类型和标签由 `categories` 决定。`dataZoom` 默认绑定分类轴，显式指定目标轴时沿用该绑定。用 `tooltip.valueFormatter` 改写数值，用 `tooltip.formatter` 改写整个提示框。显式指定图例类型或位置时使用 ECharts 图例布局。
 
-支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局的 `setOptionOpts.notMerge` 默认是 `true`。显式设置为 `false` 时，由调用方处理 ECharts 合并留下的旧配置。
+支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局在数据清空时移除旧系列及辅助图形。仅刷新数值时保留缩放范围和图例选择。
 
 ### 原生配置与 useBarOption
 
 省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。额外 ECharts 模块按需注册。
 
-在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。原生路径和该组合式函数使用 `BAR_CHART_TOKEN` 提供默认配置。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
+在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。

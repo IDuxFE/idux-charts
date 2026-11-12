@@ -2,8 +2,8 @@ import type { PropType } from 'vue-demi'
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
-import { usePlotRender } from '../../shared/usePlotRender'
-import { createLiquidFillOption } from './createLiquidFillOption'
+import { plotInstanceMethods, usePlotRender } from '../../shared/usePlotRender'
+import { createLiquidFillOption, liquidFillProps } from './createLiquidFillOption'
 import type { LiquidFillChartProps } from './createLiquidFillOption'
 
 export default withChartProps<LiquidFillChartProps>()(
@@ -11,29 +11,17 @@ export default withChartProps<LiquidFillChartProps>()(
     name: 'IxLiquidFillChart',
     inheritAttrs: false,
     props: {
+      ...Object.fromEntries(liquidFillProps.map(key => [key, null])),
       valueTextStyle: Object as PropType<PlotTextStyle>,
       labelTextStyle: Object as PropType<PlotTextStyle>,
       unitTextStyle: Object as PropType<PlotTextStyle>,
-      value: null,
-      min: null,
-      max: null,
-      label: null,
-      unit: null,
-      valueFormatter: null,
-      color: null,
-      zeroColor: null,
-      radius: null,
-      waveAnimation: null,
-      textColor: null,
-      backgroundColor: null,
     },
+    methods: plotInstanceMethods,
     setup(props, context) {
-      return usePlotRender(context, attrs =>
-        createLiquidFillOption({
-          ...props,
-          textStyle: attrs.textStyle,
-          plotTheme: attrs.plotTheme,
-        } as LiquidFillChartProps),
+      return usePlotRender(
+        context,
+        () => props,
+        input => createLiquidFillOption(input as LiquidFillChartProps),
       )
     },
   }),
