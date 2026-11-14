@@ -15,6 +15,8 @@ export default mergeConfig(
     },
     test: {
       environment: 'jsdom',
+      // The full test command runs browser tests and builds alongside Vitest.
+      testTimeout: 10_000,
       exclude: [...configDefaults.exclude, 'e2e/**', 'playgrounds/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
     },
