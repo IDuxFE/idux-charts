@@ -1,5 +1,11 @@
 <h1 align="center">iDux Charts</h1>
 
+[![Release](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
+[![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
+[![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+
 > [ECharts](https://echarts.apache.org/) 的 `Vue` 组件, 支持 `v2.x` 和 `v3.x`, 查看 [文档](https://charts.idux.site) 了解更多.
 
 [English](README.md) | 简体中文
@@ -103,13 +109,15 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/IDuxFE/idux-charts/pulls)
 
-在任何形式的参与前，请先阅读 [贡献者文档](https://github.com/IDuxFE/idux/blob/main/packages/site/src/docs/Contributing.zh.md)。如果你希望参与贡献，欢迎 [Pull Request](https://github.com/IDuxFE/idux-charts/pulls)，或给我们 [报告 Bug](https://github.com/IDuxFE/idux-charts/issues)。
+在任何形式的参与前，请先阅读 [贡献者文档](CONTRIBUTING.zh.md)。如果你希望参与贡献，欢迎 [Pull Request](https://github.com/IDuxFE/idux-charts/pulls)，或给我们 [报告 Bug](https://github.com/IDuxFE/idux-charts/issues)。
 
 > 强烈推荐阅读 [《提问的智慧》](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way)、[《如何向开源社区提问题》](https://github.com/seajs/seajs/issues/545) 和 [《如何有效地报告 Bug》](http://www.chiark.greenend.org.uk/%7Esgtatham/bugs-cn.html)、[《如何向开源项目提交无法解答的问题》](https://zhuanlan.zhihu.com/p/25795393)，更好的问题更容易获得帮助。
 
+参与前请阅读[行为准则](CODE_OF_CONDUCT.md)和[安全政策](SECURITY.md)。覆盖率、依赖更新和安全扫描的维护者接入方式见[开源集成指南](.github/OPEN_SOURCE.md)。
+
 ## ☀️ 授权协议
 
-[MIT](https://github.com/IDuxFE/idux/blob/main/LICENSE) © 2023-present IDuxFE
+[MIT](LICENSE) © 2023-present IDuxFE
 
 ### 视觉定制
 
@@ -120,3 +128,11 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 提交前会通过 Husky 自动执行 `pnpm check:staged`：lint 和格式检查仅针对 Git 暂存文件，代码变更运行相关单元测试及项目类型检查（类型检查不能安全地按单文件执行）。检查失败会阻止提交，不会自动修复文件。纯文档变更只检查格式。可手动运行 `pnpm check` 执行完整检查；安装依赖时会自动初始化 hooks。
 
 推送前，Husky 会运行全仓库 lint 并强制重新执行完整的 TypeScript 检查。任一检查失败都会阻止推送。
+
+## 贡献者
+
+感谢所有为 iDux Charts 作出贡献的开发者！
+
+[![贡献者头像](https://contrib.rocks/image?repo=IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+
+由 [contributors-img](https://contrib.rocks) 生成。

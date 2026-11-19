@@ -1,0 +1,50 @@
+name: Bug report / 问题反馈
+description: Report a reproducible problem in iDux Charts / 反馈可复现的问题
+title: '[Bug]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. English and Chinese reports are welcome.
+        请先搜索已有 Issue，支持使用中文或英文反馈。
+        For security vulnerabilities, follow https://github.com/IDuxFE/idux-charts/security/policy instead of posting details publicly.
+  - type: input
+    id: version
+    attributes:
+      label: iDux Charts version / 图表库版本
+      placeholder: '@idux/charts@1.4.0'
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: Vue, ECharts, browser, operating system, and build tool versions / Vue、ECharts、浏览器、系统和构建工具版本
+    validations:
+      required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: Minimal reproduction / 最小复现
+      description: Link to a public repository or runnable example, without private data / 公开仓库或可运行示例链接，请勿包含私密数据
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / 复现步骤
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / 实际结果
+      description: Include relevant error messages or screenshots / 可补充错误信息或截图
+    validations:
+      required: true

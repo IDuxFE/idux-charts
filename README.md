@@ -1,5 +1,11 @@
 <h1 align="center">iDux Charts</h1>
 
+[![Release](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml)
+[![npm version](https://img.shields.io/npm/v/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
+[![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
+[![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+
 > [ECharts](https://echarts.apache.org/) for `Vue`, both `v2.x` and `v3.x`, see [documentation](https://charts.idux.site) for more.
 
 English | [简体中文](README.zh.md)
@@ -103,13 +109,15 @@ Run `pnpm benchmark:charts` to measure initial rendering, refresh, and zoom in C
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/IDuxFE/idux-charts/pulls)
 
-We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/IDuxFE/idux/blob/main/packages/site/src/docs/Contributing.en.md) first. You can submit any ideas as [Pull Request](https://github.com/IDuxFE/idux-charts/pulls) or as [GitHub issues](https://github.com/IDuxFE/idux-charts/issues).
+We welcome all contributions. Please read our [CONTRIBUTING.md](CONTRIBUTING.md) first. You can submit any ideas as [Pull Request](https://github.com/IDuxFE/idux-charts/pulls) or as [GitHub issues](https://github.com/IDuxFE/idux-charts/issues).
 
 > If you're new to posting issues, we ask that you read [_How To Ask Questions The Smart Way_](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Ask a Question in Open Source Community](https://github.com/seajs/seajs/issues/545) and [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
+See our [Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md). Maintainer setup for coverage, dependency updates, and security scanning is documented in [Open source integrations](.github/OPEN_SOURCE.md).
+
 ## ☀️ License
 
-[MIT](https://github.com/IDuxFE/idux/blob/main/LICENSE) © 2023-present IDuxFE
+[MIT](LICENSE) © 2023-present IDuxFE
 
 ### Visual customization
 
@@ -120,3 +128,11 @@ Category Bar, Line and Area, automatic Pie, Radar, Gauge, and LiquidFill support
 Before each commit, Husky runs `pnpm check:staged`: lint and formatting checks target Git-staged files only; code changes also run related unit tests and project-wide type checking (which cannot safely run per file). Failures block the commit without auto-fixing files. Documentation-only changes run formatting checks only. Run `pnpm check` for the full suite. Installing dependencies initializes the hooks automatically.
 
 Before each push, Husky runs repository-wide lint and forces a full TypeScript check. A failure stops the push.
+
+## Contributors
+
+Thanks to everyone who has contributed to iDux Charts!
+
+[![Contributor avatars](https://contrib.rocks/image?repo=IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+
+Made with [contributors-img](https://contrib.rocks).
