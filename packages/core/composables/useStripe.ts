@@ -27,6 +27,7 @@ export function useStripe({
       opacity: 0,
     },
     emphasis: {
+      disabled: false,
       itemStyle: {
         opacity: 1,
       },
@@ -38,7 +39,7 @@ export function useStripe({
     symbolSize: size,
     symbolPosition: 'start',
     symbolOffset: offset,
-    z: 1,
+    z: 3,
     animationEasing: 'elasticOut',
   }
 }
@@ -83,6 +84,8 @@ export function useStripeBarSeries({
   series: {
     name: string
     data: number[]
+    z?: number
+    zlevel?: number
   }
   // Stripe color.
   color: string
@@ -96,16 +99,20 @@ export function useStripeBarSeries({
   return [
     {
       type: 'bar',
-      z: 0,
+      z: 2,
       ...series,
     },
-    useStripe({
-      data: series.data,
-      offset: offset,
-      color,
-      rotate,
-      size,
-    }),
+    {
+      ...useStripe({
+        data: series.data,
+        offset,
+        color,
+        rotate,
+        size,
+      }),
+      z: (series.z ?? 2) + 1,
+      ...(series.zlevel === undefined ? {} : { zlevel: series.zlevel }),
+    },
   ]
 }
 

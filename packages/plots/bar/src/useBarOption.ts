@@ -129,6 +129,14 @@ export function useBarOption(
         (option.series.length || 1) * defaultBarWidth * (1 + defaultBarGap) + 8
       set(option, ['tooltip', 'axisPointer', 'lineStyle', 'width'], axisPointerWidth)
     }
+    // Keep the hover band behind every data series, including legacy/custom z values.
+    const backgroundZ = Math.min(2, ...option.series.map(item => item.z ?? 2)) - 1
+    const tooltips = convertArray(option.tooltip)
+    for (const tooltip of tooltips) {
+      if (tooltip.axisPointer?.z === undefined) {
+        set(tooltip, ['axisPointer', 'z'], backgroundZ)
+      }
+    }
     applyCartesianTooltip(option)
 
     return option
