@@ -1,9 +1,11 @@
+import lineLoadingIcon from '../assets/loading-line.svg?raw'
+import areaLoadingIcon from '../assets/loading-area.svg?raw'
 import { computed, defineComponent, inject } from 'vue-demi'
 
 import type { LineSeriesOption } from 'echarts/charts'
 import { pick } from 'lodash-es'
 
-import { useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { convertArray, useReactiveAttrs, withChartProps } from '@idux/charts-core'
 import { resolvePlotInput } from '../../shared/plotOptions'
 import { plotInstanceMethods, renderPlot } from '../../shared/usePlotRender'
 
@@ -36,8 +38,21 @@ export default withChartProps<LineChartProps>()(
         resolvePlotInput(defaults, props as LineChartProps, reactiveAttrs.value, linePlotProps),
       )
       const preset = useCategoryLineOption(() => input.value, context)
-      return () =>
-        renderPlot(preset.value ?? legacy.value, context, preset.value ? 'category' : 'native')
+      return () => {
+        const option = preset.value ?? legacy.value
+        const area =
+          convertArray(option.series).some(
+            series => series.type === 'line' && !!series.areaStyle,
+          ) ||
+          input.value.props.area ||
+          input.value.props.areaStyle
+        return renderPlot(
+          option,
+          context,
+          preset.value ? 'category' : 'native',
+          area ? areaLoadingIcon : lineLoadingIcon,
+        )
+      }
     },
   }),
 )

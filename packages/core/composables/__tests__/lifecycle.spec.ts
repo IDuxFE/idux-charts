@@ -136,38 +136,36 @@ describe('useChart lifecycle', () => {
     expect(instances[0].setOption).toHaveBeenCalledTimes(3)
   })
 
-  it('uses a dark loading mask and preserves explicit loading styles', async () => {
+  it('uses a dark loading illustration and preserves explicit styles', async () => {
     const options = reactive<any>({ loading: false })
-    setup(options)
-    const instance = instances[0]
-    instance.getOption.mockReturnValue({ darkMode: true })
+    const { wrapper } = setup(options)
+    instances[0].getOption.mockReturnValue({ darkMode: true })
     options.loading = true
     await nextTick()
-    expect(instance.showLoading).toHaveBeenLastCalledWith({
-      text: 'Loading...',
-      textColor: '#F4F8FF',
-      maskColor: 'rgba(10, 12, 15, 0.8)',
-    })
+    const overlay = wrapper.get('.ix-chart-loading')
+    expect(overlay.attributes('style')).toContain('background: rgb(10, 12, 15)')
+    expect(overlay.attributes('style')).toContain('color: rgb(244, 248, 255)')
+    expect(decodeURIComponent(overlay.get('img').attributes('src')!)).toContain('#465163')
     options.loading = { maskColor: 'transparent', textColor: 'red' }
     await nextTick()
-    expect(instance.showLoading).toHaveBeenLastCalledWith({
-      text: 'Loading...',
-      textColor: 'red',
-      maskColor: 'transparent',
-    })
+    expect(overlay.attributes('style')).toContain('background: transparent')
+    expect(overlay.attributes('style')).toContain('color: red')
   })
 
-  it('shows default and custom loading without pushing loading to setOption', async () => {
+  it('shows default and custom loading without updating or recreating the chart', async () => {
     const options = reactive<any>({ loading: true })
-    setup(options)
+    const { wrapper } = setup(options)
     await nextTick()
-    expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: 'Loading...' })
+    expect(wrapper.get('[role="status"]').text()).toBe('Loading...')
     options.loading = { text: 'Working', color: 'red' }
     await nextTick()
-    expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: 'Working', color: 'red' })
+    expect(wrapper.get('[role="status"]').text()).toBe('Working')
+    expect(decodeURIComponent(wrapper.get('img').attributes('src')!)).toContain('fill="red"')
     options.loading = false
     await nextTick()
-    expect(instances[0].hideLoading).toHaveBeenCalledTimes(1)
+    expect(wrapper.find('[role="status"]').exists()).toBe(false)
+    expect(wrapper.attributes('aria-busy')).toBeUndefined()
+    expect(instances).toHaveLength(1)
     expect(instances[0].setOption).toHaveBeenCalledTimes(1)
   })
 
@@ -183,14 +181,15 @@ describe('useChart lifecycle', () => {
         onReady: ready,
         onClick: click,
       })
-      const { chart } = setup(options)
+      const { chart, wrapper } = setup(options)
       options[key] = key === 'theme' ? 'dark' : { renderer: 'canvas' }
       await nextTick()
       expect(instances).toHaveLength(2)
       expect(instances[0].dispose).toHaveBeenCalledTimes(1)
       expect(chart.chartRef.value).toBe(instances[1])
       expect(instances[1].setOption.mock.lastCall?.[0]).toEqual({ series: options.series })
-      expect(instances[1].showLoading).toHaveBeenCalledWith({ text: 'Loading...' })
+      expect(wrapper.findAll('.ix-chart-loading')).toHaveLength(1)
+      expect(wrapper.get('[role="status"]').text()).toBe('Loading...')
       expect(instances[1].group).toBe('linked')
       instances[1].emit('click', { name: 'A', value: 2 })
       expect(click).toHaveBeenCalledExactlyOnceWith({ name: 'A', value: 2 })

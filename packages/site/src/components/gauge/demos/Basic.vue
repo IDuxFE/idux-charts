@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { Empty, Loading, addIconDefinitions } from '@idux/components/icon'
+import { Empty, addIconDefinitions } from '@idux/components/icon'
 
-addIconDefinitions([Empty, Loading])
+addIconDefinitions([Empty])
 const { themeTokens } = useThemeToken()
 const size = ref<'lg' | 'md'>('lg')
 const state = ref('normal')
@@ -52,17 +52,9 @@ onBeforeUnmount(cancel)
       <IxEmpty v-if="state === 'empty'" simple description="暂无数据">
         <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
       </IxEmpty>
-      <div
-        v-else-if="state === 'loading'"
-        class="loading"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <IxIcon name="loading" :size="24" />图表正在加载中，请稍后...
-      </div>
       <template v-else>
         <IxGaugeChart
+          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
           v-for="(item, index) in data"
           :key="index"
           :value="valueOf(item.value)"
@@ -91,12 +83,6 @@ onBeforeUnmount(cancel)
   gap: 24px;
   min-height: 110px;
   padding: 24px 0;
-}
-.loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ix-color-text-info);
 }
 </style>
 <archive-meta lang="json">

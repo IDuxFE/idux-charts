@@ -21,8 +21,12 @@ export function useLegendWheel(getRegion: () => LegendWheelRegion | undefined) {
       Math.abs(event.deltaX) > Math.abs(event.deltaY)
     )
       return
-    // A scrollable tooltip can sit over part of the legend.
-    if (event.target instanceof Element && event.target.closest('.charts-tooltips-columns')) return
+    // Loading overlays and scrollable tooltips can sit over the legend.
+    if (
+      event.target instanceof Element &&
+      event.target.closest('.ix-chart-loading, .charts-tooltips-columns')
+    )
+      return
     const region = getRegion()
     if (!region) return
 

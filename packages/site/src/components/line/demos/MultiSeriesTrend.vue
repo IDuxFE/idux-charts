@@ -2,12 +2,10 @@
 import { computed, ref } from 'vue'
 import type { LineChartProps } from '@idux/charts'
 import { IxEmpty } from '@idux/components/empty'
-import { addIconDefinitions, Empty, IxIcon, LineChart } from '@idux/components/icon'
+import { addIconDefinitions, Empty } from '@idux/components/icon'
 import { IxRadio, IxRadioGroup } from '@idux/components/radio'
-import { useThemeToken } from '@idux/components/theme'
 
-addIconDefinitions([Empty, LineChart])
-const { themeTokens } = useThemeToken()
+addIconDefinitions([Empty])
 const scenarios = [
   {
     key: 'normal',
@@ -23,7 +21,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色折线骨架图，配合“图表正在加载中”的提示，稳定页面布局。',
+    description: '由组件展示折线加载图标，配合“图表正在加载中”的提示，稳定页面布局。',
   },
   {
     key: 'point',
@@ -141,28 +139,18 @@ const option = computed<LineChartProps>(() => ({
       }}</IxRadio>
     </IxRadioGroup>
     <p class="trend-description">{{ description }}</p>
-    <div
-      v-if="selected === 'loading'"
-      class="trend-loading"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <IxIcon
-        name="line-chart"
-        :size="60"
-        :color="themeTokens.colorInfoContainerBgDisabled"
-        aria-hidden="true"
-      />
-      <span>图表正在加载中，请稍后...</span>
-    </div>
     <IxEmpty
-      v-else-if="selected === 'empty'"
+      v-if="selected === 'empty'"
       simple
       class="trend-empty"
       description="未配置数据源，请先配置采集任务"
     />
-    <IxLineChart v-else v-bind="option" style="width: 100%; height: 320px" />
+    <IxLineChart
+      v-else
+      :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
+      v-bind="option"
+      style="width: 100%; height: 320px"
+    />
   </div>
 </template>
 
@@ -181,20 +169,10 @@ const option = computed<LineChartProps>(() => ({
   color: var(--ix-color-text-info, #6a707d);
   line-height: 22px;
 }
-.trend-loading,
 .trend-empty {
   width: 100%;
   height: 320px;
   margin: 0;
-}
-.trend-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 16px;
-  color: var(--ix-color-text-info, #6a707d);
-  font-size: 12px;
 }
 </style>
 

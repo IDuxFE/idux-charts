@@ -1,8 +1,11 @@
+import loadingIcon from '../assets/loading.svg?raw'
+import ringLoadingIcon from '../assets/loading-ring.svg?raw'
+import roseLoadingIcon from '../assets/loading-rose.svg?raw'
 import { defineComponent } from 'vue-demi'
 
 import type { PieSeriesOption } from 'echarts/charts'
 
-import { useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { convertArray, useReactiveAttrs, withChartProps } from '@idux/charts-core'
 import { plotInstanceMethods, renderPlot } from '../../shared/usePlotRender'
 
 import { useDefaultPieOption } from './useDefaultPieOption'
@@ -26,7 +29,21 @@ export default withChartProps<PieChartProps>()(
         legacy,
         context,
       )
-      return () => renderPlot(option.value, context, automatic.value ? 'automatic' : 'explicit')
+      return () => {
+        const allSeries = convertArray(option.value.series)
+        // Automatic layouts prepend background and zero-state decoration series.
+        const series = (
+          automatic.value ? allSeries.find(series => series.id === 'ix-pie-data') : allSeries[0]
+        ) as PieSeriesOption | undefined
+        const radius = series?.radius ?? (props as PieChartProps).radius
+        const rose = series?.roseType ?? (props as PieChartProps).roseType
+        const icon = rose
+          ? roseLoadingIcon
+          : Array.isArray(radius) && parseFloat(String(radius[0])) > 0
+            ? ringLoadingIcon
+            : loadingIcon
+        return renderPlot(option.value, context, automatic.value ? 'automatic' : 'explicit', icon)
+      }
     },
   }),
 )

@@ -15,7 +15,8 @@ import type { Ref, ShallowRef } from 'vue-demi'
 import { PictorialBarChart } from 'echarts/charts'
 import { init, use } from 'echarts/core'
 import type { EChartsType, SetOptionOpts } from 'echarts/core'
-import { isEqual, cloneDeep, isBoolean } from 'lodash-es'
+import { isEqual, cloneDeep } from 'lodash-es'
+import { createChartLoading } from './chartLoading'
 
 // Register the pictorial series used by stripe helpers.
 use([PictorialBarChart])
@@ -28,8 +29,6 @@ import { isChartEvent, replaceChartComponent, splitChartOptions } from '../utils
 import { restoreChartInteraction } from '../utils/chartInteraction'
 
 export type MaybeRef<T> = T | Ref<T>
-
-const defaultLoading = { text: 'Loading...' }
 
 export function useChart<U extends ChartProps>(
   options: MaybeRef<U>,
@@ -88,6 +87,7 @@ export function useChart<U extends ChartProps>(
   }
 
   const tooltipTheme = createTooltipTheme(() => containerRef.value)
+  const loadingOverlay = createChartLoading()
 
   const initChart = (initialOption?: ChartProps) => {
     const container = containerRef.value
@@ -120,6 +120,7 @@ export function useChart<U extends ChartProps>(
   }
 
   const destroyChart = () => {
+    loadingOverlay.remove()
     if (chartRef.value) {
       chartRef.value.dispose()
       chartRef.value = undefined
@@ -193,17 +194,17 @@ export function useChart<U extends ChartProps>(
       return
     }
 
-    const loading = mergedLoading.value
-
-    if (loading) {
-      const defaults =
-        instance.getOption().darkMode === true
-          ? { ...defaultLoading, textColor: '#F4F8FF', maskColor: 'rgba(10, 12, 15, 0.8)' }
-          : defaultLoading
-      instance.showLoading(isBoolean(loading) ? defaults : { ...defaults, ...loading })
-    } else {
-      instance.hideLoading()
+    if (!mergedLoading.value) {
+      loadingOverlay.remove()
+      return
     }
+    // Track option changes too: SVG colors must update when darkMode changes in place.
+    const currentOptions = unref(options)
+    loadingOverlay.update(containerRef.value!, mergedLoading.value, {
+      ...currentOptions,
+      ...instance.getOption(),
+    })
+    instance.dispatchAction?.({ type: 'hideTip' })
   })
 
   useResizeObserver(containerRef, chartRef, mergedAutoResize)

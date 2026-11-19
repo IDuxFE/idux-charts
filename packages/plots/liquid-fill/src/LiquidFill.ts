@@ -1,3 +1,4 @@
+import loadingIcon from '../assets/loading.svg?raw'
 import type { PropType } from 'vue-demi'
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { defineComponent } from 'vue-demi'
@@ -22,6 +23,7 @@ export default withChartProps<LiquidFillChartProps>()(
         context,
         () => props,
         input => createLiquidFillOption(input as LiquidFillChartProps),
+        loadingIcon,
       )
     },
   }),

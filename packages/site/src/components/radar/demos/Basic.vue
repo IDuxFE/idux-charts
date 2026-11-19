@@ -3,12 +3,12 @@ import type { RadarChartProps } from '@idux/charts'
 import { seerColors } from '@idux/charts'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { Empty, Down, Loading, addIconDefinitions } from '@idux/components/icon'
+import { Empty, Down, addIconDefinitions } from '@idux/components/icon'
 import { GraphicComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 
 use([GraphicComponent])
-addIconDefinitions([Empty, Down, Loading])
+addIconDefinitions([Empty, Down])
 const { themeTokens } = useThemeToken()
 const objectCount = ref(2)
 const dimensionCount = ref(5)
@@ -59,7 +59,7 @@ const values = [
   [21, 19, 12, 15, 18, 16, 23, 14, 11, 20, 22, 17],
 ]
 const data = computed(() =>
-  chartStatus.value === 'empty' || chartStatus.value === 'loading'
+  chartStatus.value === 'empty'
     ? []
     : values.slice(0, objectCount.value).map((row, index) => ({
         name: `攻击${String.fromCharCode(65 + index)}`,
@@ -191,24 +191,12 @@ onBeforeUnmount(cancelReload)
             </template></IxEmpty
           >
         </div>
-        <div
-          v-else-if="chartStatus === 'loading'"
-          class="radar-demo-placeholder"
-          role="status"
-          aria-live="polite"
-          aria-busy="true"
-        >
-          <svg width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
-            <g fill="none" stroke="currentColor">
-              <path d="M40 4 74 29 61 69 19 69 6 29Z" />
-              <path d="M40 16 63 33 54 60 26 60 17 33Z" />
-              <path d="M40 28 51 36 47 50 33 50 29 36Z" />
-              <path d="M40 40V4M40 40 74 29M40 40 61 69M40 40 19 69M40 40 6 29" />
-            </g>
-          </svg>
-          <span>图表正在加载中，请稍后...</span>
-        </div>
-        <IxRadarChart v-else style="width: 100%; height: 100%" v-bind="chartBindings" />
+        <IxRadarChart
+          v-else
+          :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
+          style="width: 100%; height: 100%"
+          v-bind="chartBindings"
+        />
       </div>
     </div>
   </IxSpace>

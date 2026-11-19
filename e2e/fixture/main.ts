@@ -18,6 +18,11 @@ fontReady.then(async () => {
     mountPieVariants()
     return
   }
+  if (location.search === '?loading') {
+    const { default: Loading } = await import('./Loading.vue')
+    createApp(Loading).mount('#app')
+    return
+  }
   createApp(
     legacy
       ? LegacyRiskPie

@@ -1,3 +1,4 @@
+import loadingIcon from '../assets/loading.svg?raw'
 import type { PropType } from 'vue-demi'
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { defineComponent } from 'vue-demi'
@@ -21,6 +22,7 @@ export default withChartProps<GaugeChartProps>()(
         context,
         () => props,
         input => createGaugeOption(input as GaugeChartProps),
+        loadingIcon,
       )
     },
   }),

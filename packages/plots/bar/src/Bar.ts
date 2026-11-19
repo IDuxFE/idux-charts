@@ -1,8 +1,10 @@
+import horizontalLoadingIcon from '../assets/loading-horizontal.svg?raw'
+import verticalLoadingIcon from '../assets/loading-vertical.svg?raw'
 import { computed, defineComponent, inject, watch } from 'vue-demi'
 import { pick } from 'lodash-es'
 import type { EChartsType } from 'echarts/core'
 
-import { useReactiveAttrs, withChartProps } from '@idux/charts-core'
+import { isVertical, useReactiveAttrs, withChartProps } from '@idux/charts-core'
 
 import { createCategoryBarOption } from './createCategoryBarOption'
 import { withBarShadows } from './barShadow'
@@ -103,6 +105,10 @@ export default withChartProps<BarChartProps>()(
           preset.value ? { ...option.value, onReady: onCategoryReady } : option.value,
           context,
           preset.value ? 'category' : 'native',
+          resolved.value.props.layout?.startsWith('horizontal') ||
+            (!preset.value && !isVertical(option.value))
+            ? horizontalLoadingIcon
+            : verticalLoadingIcon,
         )
     },
   }),

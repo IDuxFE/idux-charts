@@ -91,3 +91,9 @@ const option: ChartProps = {
 ## 许可证
 
 MIT © 2023-present IDuxFE
+
+### 加载状态
+
+使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 在没有系列类型时使用饼图兜底，其他系列类型使用通用图标。图标和遮罩均适配深浅主题。
+
+传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。

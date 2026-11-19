@@ -144,21 +144,24 @@ test('nine-position controls follow iDux themes and support keyboard interaction
   await expect(buttons.last()).toHaveCSS('background-color', 'rgb(10, 12, 15)')
 })
 
-test('dark native loading uses a dark mask and resets when switching back to light', async ({
-  page,
-}) => {
+test('loading illustration and mask follow dark and light themes', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
   await page.goto('components/radar')
   const demo = page.locator('.radar-scale-demo')
-  await demo.getByText('原生加载遮罩', { exact: true }).click()
-  const label = demo.locator('svg text').filter({ hasText: '正在更新评估数据' })
-  await expect(label).toHaveAttribute('fill', '#F4F8FF')
-  await expect(demo.locator('svg path[fill="rgb(10,12,15)"][fill-opacity="0.8"]')).toHaveCount(1)
+  await demo.getByText('内置加载状态', { exact: true }).click()
+  const loading = demo.getByRole('status')
+  await expect(loading).toContainText('正在更新评估数据')
+  await expect(loading).toHaveCSS('color', 'rgb(244, 248, 255)')
+  await expect(loading).toHaveCSS('background-color', 'rgb(10, 12, 15)')
+  const icon = loading.locator('img')
+  await expect(icon).toBeVisible()
+  expect(decodeURIComponent((await icon.getAttribute('src'))!)).toContain('#465163')
   await page.getByRole('button', { name: '切换到亮色模式' }).click()
-  await expect(label).toHaveCSS('fill', 'rgb(60, 60, 65)')
-  await expect(demo.locator('svg path[fill="rgb(10,12,15)"][fill-opacity="0.8"]')).toHaveCount(0)
+  await expect(loading).toHaveCSS('color', 'rgb(106, 112, 125)')
+  await expect(loading).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+  expect(decodeURIComponent((await icon.getAttribute('src'))!)).toContain('#E1E5EB')
   await demo.getByText('展示数据', { exact: true }).click()
-  await expect(label).toHaveCount(0)
+  await expect(loading).toHaveCount(0)
 })
 
 test('manual preferences synchronize across tabs and clearing storage restores the system', async ({

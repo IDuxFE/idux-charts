@@ -72,7 +72,7 @@ Use an ESM subpath such as `@idux/charts/line` to import one chart family and it
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point.
 
-- `CHART_THEME_TOKEN` supplies a reactive ECharts theme name/object to all charts. Explicit `theme` props override it; the fallback is `seer`. Theme changes recreate instances and restore compatible zoom ranges and legend selections. Coordinate `PLOT_THEME_TOKEN` for generated labels and graphics. Dark charts use a dark native loading mask unless explicitly overridden.
+- `CHART_THEME_TOKEN` supplies a reactive ECharts theme name/object to all charts. Explicit `theme` props override it; the fallback is `seer`. Theme changes recreate instances and restore compatible zoom ranges and legend selections. Coordinate `PLOT_THEME_TOKEN` for generated labels and graphics. Dark charts use a dark loading illustration and mask unless explicitly overridden.
 
 When data is appended and the zoom configuration is unchanged, category Bar, Line, and Area charts keep the historical window. A window at the end follows the newest data and keeps the same number of points. A full-range view continues to show all data.
 
@@ -98,3 +98,9 @@ Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter
 ## License
 
 MIT © 2023-present IDuxFE
+
+### Loading
+
+Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge and LiquidFill select their illustration automatically. `IxChart` and `useChart` use a pie fallback when no series type is available, and a generic illustration for other series types. Both light and dark palettes are built in.
+
+Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.
