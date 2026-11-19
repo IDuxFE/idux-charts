@@ -23,6 +23,7 @@ for (const name of ['basic', 'status', 'segmented']) {
     await expect(charts).toHaveCount(0)
     await demo.getByRole('button', { name: '重新加载' }).click()
     await expect(demo.getByRole('status').first()).toHaveAttribute('aria-busy', 'true')
+    await expect(demo.getByRole('status')).toHaveCount(0)
     await expect(charts.first().locator('svg')).toBeVisible()
     await demo.getByText('加载中', { exact: true }).click()
     await expect(demo.getByRole('status').first()).toBeVisible()

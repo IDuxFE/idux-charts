@@ -61,6 +61,12 @@ const option = {
 
 图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。可用 `role="img"` 和 `aria-label` 为图表提供名称，用 `aria-describedby` 关联说明。需要操作图例或查看具体数据时，可在容器外提供键盘可操作的控件和数据表。
 
+### 默认图例与提示框样式
+
+内置 Plot 的分类色标默认使用圆角为 1px 的矩形，`seer` 主题也使用该色标。原生图例可通过 `legend.icon` 指定其他图标，分类布局可通过 `legend.data` 指定图例项及图标。`createLegendIcon(width = 12, height = 12)` 返回 ECharts `path://` 图标字符串，可从 `@idux/charts` 或 `@idux/charts-core` 导入。自定义图例尺寸时可同时设置 `legend.itemWidth`、`legend.itemHeight`，并用相同尺寸调用该函数。
+
+`seer` 主题的浅色提示框背景为 `rgba(251, 253, 255, 0.72)`。导入 `@idux/charts/dist/style.css` 后，HTML 提示框带有 4px 背景模糊；不支持背景模糊的浏览器仍显示半透明背景。显式设置的 `tooltip.backgroundColor` 优先。
+
 ### 自定义 Tooltip
 
 分类和原生 Bar、Line / Area 可用 `tooltip.valueFormatter` 修改数值显示，同时沿用内置标题、色标和缺报提示。需要自己组织标题、数据行或输出格式时，用 `tooltip.formatter` 提供完整内容。回调参数来自 ECharts，单项提示通常收到一个数据项，轴触发提示通常收到数据项数组。

@@ -7,7 +7,7 @@ for (const title of [
   '多列图例',
   '图例自定义 Formatter',
   '卡片环形图',
-  '轻量卡片饼图',
+  '轻量卡片环形图',
   '九宫格对齐',
   '形态与自适应',
   '大尺寸：基础形态与加载',
@@ -47,7 +47,7 @@ for (const title of [
       }).toPass({ timeout: 5000 })
       await expect(tooltip).toHaveCSS(
         'background-color',
-        dark ? 'rgb(10, 12, 15)' : 'rgba(251, 253, 255, 0.88)',
+        dark ? 'rgb(10, 12, 15)' : 'rgba(251, 253, 255, 0.72)',
       )
       if (dark) {
         await expect(tooltip).toHaveCSS('color', 'rgb(244, 248, 255)')

@@ -113,3 +113,5 @@ provide(
 - **背景色和实例**。Gauge 和 LiquidFill 兼容旧的 `backgroundColor`。新代码可分别使用 `trackColor` 和 `containerColor`，整张图的背景使用 `chartBackgroundColor`。组件挂载后可通过模板 ref 调用 `getEChartsInstance()`。切换主题或初始化配置后，使用 `onReady` 回调或模板 ref 获取新实例。
 
 - **加载状态**。`loading` 使用内置 DOM 图标及文案，不包含在 ECharts 导出的图片中。原生旋转动画选项（如 `showSpinner`、`spinnerRadius`）不再改变图标，可通过 `icon` 指定图片 URL 或 SVG 源码。
+
+- **视觉默认值**。内置分类色标改为 1px 圆角矩形，`seer` 浅色提示框改为 0.72 不透明度，HTML 提示框样式增加背景模糊。分类柱图和折线/面积图的多行图例默认行间距为 16px，自动饼图按每列行数和高度选择行间距。右侧 Y 轴顶部的水平轴名与刻度标签左边缘对齐。显式图标、图例布局、间距和轴名样式可按各图表 API 覆盖。

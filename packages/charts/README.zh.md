@@ -84,6 +84,12 @@ ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及�
 
 传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。
 
+## 视觉默认值
+
+内置 Plot 使用 1px 圆角矩形分类色标，`seer` 主题使用相同色标。`seer` 浅色提示框背景为 `rgba(251, 253, 255, 0.72)`，共享 HTML 提示框样式提供 4px 背景模糊。原生图例可通过 `legend.icon` 自定义色标，分类布局可通过 `legend.data` 指定图例项及图标；显式 `tooltip.backgroundColor` 优先。
+
+分类柱图和折线/面积图的自动多行图例行间距为 16px。自动饼图的默认行间距按初始每列行数选择 20px（不超过 3 行）或 16px，再随布局高度缩放；显式 `legend.itemGap` 不缩放。折线/面积图右侧 Y 轴顶部的水平轴名默认与刻度标签左边缘对齐，显式轴名样式优先。
+
 ## 自定义 Tooltip
 
 在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。

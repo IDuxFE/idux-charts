@@ -38,7 +38,11 @@ const option: BarChartProps = {
 | `zeroText`           | `string`                                           | 全部数值为 0 时的可选提示。上方标签布局使用轨道表达零值。                                                  |
 | `plotTheme`          | `PlotTheme`                                        | 分类布局的色板和辅助元素颜色，继承 `PLOT_THEME_TOKEN`。                                                    |
 
+未显式指定图例类型或位置时，分类布局的多行图例采用 16px 行间距。
+
 并排柱默认宽 6px。单列柱按可见分类数取宽度，1–3 项为 20px，4–5 项为 10px，6 项以上为 6px。
+
+`zeroText` 默认使用浅色 `#A1A7B3`、深色 `#808999`，`plotTheme.secondaryTextColor` 可覆盖。柱体默认阴影随实际柱宽和长度调整，显式 `itemStyle.shadow*` 配置优先。
 
 `0` 为有效值。缺少对应数据项、空值或非有限数值时保留分类并显示缺报底条，可用 `missingReason` 补充提示。缺少分类或全部系列的数据数组为空时，清除生成的图形。
 
@@ -51,6 +55,8 @@ const option: BarChartProps = {
 省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。额外 ECharts 模块按需注册。
 
 在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
+
+轴触发的悬浮背景默认位于业务系列下方，显式 `tooltip.axisPointer.z` 优先。`useStripeBarSeries` 返回业务柱系列与悬浮条纹系列：业务系列默认 `z: 2`，条纹在其上方一层。可通过 `series.z` 调整业务层级，通过 `series.zlevel` 指定画布层；条纹自动跟随。
 
 原生条纹柱图可将 `useStripeBarTooltip` 的结果展开到轴触发 Tooltip 中。传入 `useStripeBarSeries` 的业务系列需要提供 `name`，以便提示框显示该系列。
 

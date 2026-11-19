@@ -79,6 +79,12 @@ const option: ChartProps = {
 
 使用 `useChart` 时，将 `loading` 放在响应式配置（如 `computed` 或 `ref`）中，更新配置即可切换加载状态。基础图表示例的「函数用法」提供了开关，可查看通用加载图标。
 
+## 视觉默认值
+
+内置 Plot 使用 1px 圆角矩形分类色标，`seer` 主题使用相同色标。`seer` 浅色提示框背景为 `rgba(251, 253, 255, 0.72)`，共享 HTML 提示框样式提供 4px 背景模糊。原生图例可通过 `legend.icon` 自定义色标，分类布局可通过 `legend.data` 指定图例项及图标；显式 `tooltip.backgroundColor` 优先。
+
+`createLegendIcon(width = 12, height = 12)` 返回 ECharts `path://` 图标，可配合相同尺寸的 `legend.itemWidth`、`legend.itemHeight` 使用。
+
 ## 自定义 Tooltip
 
 在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。

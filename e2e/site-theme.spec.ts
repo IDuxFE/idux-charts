@@ -239,6 +239,7 @@ for (const [kind, title] of [
     const lightBox = await chart.boundingBox()
     await page.mouse.move(lightBox!.x + lightBox!.width / 2, lightBox!.y + lightBox!.height / 2)
     await expect(tooltip).toBeVisible()
-    await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgba(251, 253, 255, 0.88)')
+    await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgba(251, 253, 255, 0.72)')
+    await expect(tooltip.locator('..')).toHaveCSS('backdrop-filter', 'blur(4px)')
   })
 }

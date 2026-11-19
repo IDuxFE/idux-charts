@@ -4,10 +4,12 @@ import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
 
-test('automatic pie preserves the original Basic proportions and presentation', async ({
+test('automatic pie preserves the original Basic presentation with explicit legacy styles', async ({
   page,
 }, testInfo) => {
-  await page.goto('?basic')
+  // Compare geometry against the frozen reference while explicitly restoring
+  // the legend spacing, icon and summary weight changed by the new defaults.
+  await page.goto('?basic&legacy-presentation')
   const reference = page.getByTestId('reference').locator('[_echarts_instance_]')
   const actual = page.getByTestId('actual').locator('[_echarts_instance_]')
   await expect(actual.locator('svg')).toBeVisible()

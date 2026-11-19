@@ -1,16 +1,11 @@
-import { readFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { test, expect } from './helpers'
-import { comparePixels } from './comparePixels'
 import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
-const font = readFileSync(
-  new URL('../packages/site/assets/D-DIN-PRO-Regular.ttf', import.meta.url),
-).toString('base64')
-const fontStyle = `<style>@font-face{font-family:D-DIN-PRO;src:url(data:font/ttf;base64,${font})}</style>`
-
-// Rose defaults intentionally differ from the frozen CLI; pie-layout.spec.ts verifies their new design.
+// Current site demos intentionally change the frozen CLI's spacing, dimensions,
+// ordering and lightweight chart shape. Check their new rendered contract here;
+// pie-basic.spec.ts separately compares explicit legacy styles to the frozen drawing.
 for (const variant of [
   'BasicTotal',
   'RingPie',
@@ -20,77 +15,79 @@ for (const variant of [
   'CardPie',
   'CardLightweight',
 ]) {
-  test(`${variant} matches the frozen CLI drawing in normal, zero and missing states`, async ({
+  test(`${variant} renders the revised layout and retains category positions across states`, async ({
     page,
   }, testInfo) => {
     await page.goto('?variants')
     await page.getByRole('combobox', { name: 'Variant', exact: true }).selectOption(variant)
     const actual = page.getByTestId('actual')
-    if (['BasicTotal', 'RingExternal', 'RoseTotal'].includes(variant))
+    if (['BasicTotal', 'RingExternal'].includes(variant))
       await actual.getByText('重总数', { exact: true }).click()
+    const chart = actual.locator('[_echarts_instance_]')
+    await expect(chart.locator('svg')).toBeVisible()
+    const instance = await chart.getAttribute('_echarts_instance_')
+    const values =
+      variant === 'LegendColumns'
+        ? [172, 160, 149, 145, 138, 126, 124, 118, 115, 106, 95, 92]
+        : [145, 124, 118, 92, 54, 21]
+    const lightweight = variant === 'CardLightweight'
+    await expect(chart).toHaveCSS(
+      'width',
+      lightweight ? '84px' : variant.startsWith('Legend') ? '720px' : '480px',
+    )
+    await expect(chart).toHaveCSS('height', lightweight ? '84px' : '180px')
     for (const [state, caption] of [
       ['normal', '正常'],
       ['allZero', '全部数值为 0'],
       ['missing', '数据缺失'],
     ] as const) {
-      if (variant === 'CardLightweight' && state !== 'normal') continue
-      await page.getByRole('combobox', { name: 'Reference state', exact: true }).selectOption(state)
-      if (variant !== 'CardLightweight') await actual.getByText(caption, { exact: true }).click()
-      await expect(actual.locator('[_echarts_instance_] svg')).toBeVisible()
-      await page.mouse.move(0, 0)
-      // ECharts uses requestAnimationFrame, not CSS animations. Wait for both
-      // rendered charts before serializing their SVGs into static comparison images.
+      if (lightweight && state !== 'normal') continue
+      if (!lightweight) await actual.getByText(caption, { exact: true }).click()
+      const expected = values.map((value, index) => ({
+        name: `图例${index + 1}`,
+        value: state === 'allZero' || (state === 'missing' && index === 3) ? 0 : value,
+      }))
       await expect
-        .poll(() => page.evaluate(() => (window as any).variantAnimationsFinished?.()))
-        .toBe(true)
-      // Rasterize both SVG outputs on the same opaque surface. Direct captures
-      // across the demo's different DOM ancestors can change SVG gradient rasterization.
-      const capture = async (id: string) => {
-        const svg = await page
-          .getByTestId(id)
-          .locator('[_echarts_instance_] svg')
-          .evaluate(el => el.outerHTML)
-        await page.evaluate(
-          async svg => {
-            document.getElementById('comparison-surface')?.remove()
-            const image = document.createElement('img')
-            image.id = 'comparison-surface'
-            image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`
-            image.style.cssText = 'position:fixed;left:8px;top:50px;z-index:99999;background:white'
-            document.body.append(image)
-            await image.decode()
-          },
-          svg.replace('</svg>', `${fontStyle}</svg>`),
+        .poll(() =>
+          page.evaluate(() => {
+            const option = (window as any).variantState()[1]
+            const series = option?.series.find((item: any) => item.id === 'ix-pie-data')
+            return series?.data.map(({ name, value }: any) => ({ name, value }))
+          }),
         )
-        const image = await page.locator('#comparison-surface').screenshot()
-        await page.locator('#comparison-surface').evaluate(el => el.remove())
-        return image
-      }
-      let reference: Buffer | undefined, result: Buffer | undefined
-      try {
-        await expect
-          .poll(
-            async () => {
-              reference = await capture('reference')
-              result = await capture('actual')
-              return comparePixels(reference, result).matches
-            },
-            { message: `${variant}/${state} rendered pixels`, timeout: 5000 },
-          )
-          .toBe(true)
-      } finally {
-        if (reference && result) {
-          await testInfo.attach(`${state}-diff`, {
-            body: comparePixels(reference, result).diff,
-            contentType: 'image/png',
+        .toEqual(expected)
+      await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+      if (state === 'missing') await expect(chart).toContainText('数据缺失')
+      await expect
+        .poll(() => page.evaluate(() => (window as any).variantAnimationsFinished()))
+        .toBe(true)
+      // Check real text bounds so compact layouts cannot silently clip their labels.
+      const overflow = await chart.locator('svg').evaluate(svg => {
+        const box = svg.getBoundingClientRect()
+        return [...svg.querySelectorAll('text')]
+          .filter(text => {
+            const rect = text.getBoundingClientRect()
+            return (
+              rect.width > 0 &&
+              (rect.left < box.left - 1 ||
+                rect.right > box.right + 1 ||
+                rect.top < box.top - 1 ||
+                rect.bottom > box.bottom + 1)
+            )
           })
-          await testInfo.attach(`${state}-reference`, {
-            body: reference,
-            contentType: 'image/png',
-          })
-          await testInfo.attach(`${state}-actual`, { body: result, contentType: 'image/png' })
-        }
-      }
+          .map(text => text.textContent)
+      })
+      expect(overflow, `${variant}/${state}: clipped text`).toEqual([])
+      const radius = await page.evaluate(
+        () =>
+          (window as any).variantState()[1].series.find((item: any) => item.id === 'ix-pie-data')
+            .radius,
+      )
+      expect(Array.isArray(radius) ? radius[0] > 0 : false).toBe(variant !== 'BasicTotal')
+      await testInfo.attach(`${variant}-${state}`, {
+        body: await chart.screenshot({ animations: 'disabled' }),
+        contentType: 'image/png',
+      })
     }
   })
 }
