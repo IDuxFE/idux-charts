@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ChartProps } from '@idux/charts'
 
+// 饼图数据建议按数值从大到小排序后再展示。
 const data = [
   { value: 145, name: '图例A' },
   { value: 124, name: '图例B' },
@@ -12,7 +13,7 @@ const data = [
   { value: 72, name: '图例H' },
   { value: 60, name: '图例I' },
   { value: 52, name: '图例J' },
-]
+].sort((a, b) => b.value - a.value)
 
 const option: ChartProps = {
   title: {

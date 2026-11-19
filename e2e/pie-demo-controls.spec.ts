@@ -129,7 +129,7 @@ test('multi-column legend paging icons align with the values', async ({ page }) 
   await chart.scrollIntoViewIfNeeded()
   const arrows = chart.locator('svg image')
   await expect(arrows).toHaveCount(2)
-  const value = chart.locator('svg text').filter({ hasText: /^126$/ })
+  const value = chart.locator('svg text').filter({ hasText: /^56$/ })
   await expect(async () => {
     const iconBox = (await arrows.last().boundingBox())!
     const valueBox = (await value.boundingBox())!
