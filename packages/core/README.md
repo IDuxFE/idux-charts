@@ -79,6 +79,12 @@ Pass an object to localize or customize the state: `:loading="pending && { text:
 
 With `useChart`, include `loading` in reactive options such as a `computed` or `ref`, then update the options to toggle the loading state. The core chart “Function usage” demo includes a switch for the generic illustration.
 
+## Visual defaults
+
+Built-in Plots use rectangular category swatches with 1px rounded corners; the `seer` theme uses the same swatch. Seer light tooltips use `rgba(251, 253, 255, 0.72)`, and the shared HTML tooltip stylesheet adds a 4px backdrop blur. Customize native legend swatches with `legend.icon`, or supply category legend entries and icons through `legend.data`. Explicit `tooltip.backgroundColor` takes precedence.
+
+`createLegendIcon(width = 12, height = 12)` returns an ECharts `path://` icon. Match these dimensions to `legend.itemWidth` and `legend.itemHeight` when customizing the swatch.
+
 ## Custom tooltips
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.

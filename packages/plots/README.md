@@ -83,6 +83,12 @@ All Plot components support `:loading="pending"` and automatically select horizo
 
 Pass `pending && { text: 'Updating...' }` to customize the message. See [Core loading](https://github.com/IDuxFE/idux-charts/blob/main/packages/core/README.md#loading) for all options and image export limitations.
 
+## Visual defaults
+
+Built-in Plots use rectangular category swatches with 1px rounded corners; the `seer` theme uses the same swatch. Seer light tooltips use `rgba(251, 253, 255, 0.72)`, and the shared HTML tooltip stylesheet adds a 4px backdrop blur. Customize native legend swatches with `legend.icon`, or supply category legend entries and icons through `legend.data`. Explicit `tooltip.backgroundColor` takes precedence.
+
+Automatic multi-row legends for category Bar and Line/Area charts use a 16px row gap. Automatic Pie layouts use a base gap of 20px for up to three initial rows per column and 16px for more rows, scaled to the layout height; explicit `legend.itemGap` is not scaled. Horizontal names at the top of right Y axes in Line/Area charts align with the left edge of the tick labels unless overridden.
+
 ## Custom tooltips
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.

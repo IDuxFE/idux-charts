@@ -4,6 +4,30 @@ import { fixtureBaseURL } from './environment'
 const state = (page: import('@playwright/test').Page) =>
   page.evaluate(() => (window as any).loadingState())
 
+test('useChart demo toggles the generic loading state without replacing the chart', async ({
+  page,
+}) => {
+  await page.goto('components/core')
+  const demo = page.locator('.archive-app-demo').filter({
+    has: page.getByRole('heading', { name: /^函数用法\s*#?\s*$/ }),
+  })
+  const chart = demo.locator('[_echarts_instance_]')
+  await expect(chart.locator('svg')).toBeVisible()
+  const instance = await chart.getAttribute('_echarts_instance_')
+  const toggle = demo.getByRole('button', { name: '加载中', exact: true })
+  await toggle.click()
+  const overlay = chart.locator('.ix-chart-loading')
+  await expect(overlay).toBeVisible()
+  await expect(overlay).toHaveText('图表正在加载中，请稍后...')
+  await expect(overlay).toHaveCSS('gap', '0px')
+  await expect
+    .poll(() => overlay.locator('img').evaluate(image => (image as HTMLImageElement).naturalWidth))
+    .toBe(90)
+  await toggle.click()
+  await expect(overlay).toHaveCount(0)
+  await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+})
+
 test('all loading illustrations render, adapt to dark mode, and work before data arrives', async ({
   page,
 }, testInfo) => {

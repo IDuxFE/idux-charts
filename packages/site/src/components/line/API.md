@@ -43,6 +43,10 @@ const option: LineChartProps = {
 
 分类布局使用第一项 `xAxis` 的样式，类型和标签由 `categories` 决定。`dataZoom` 默认绑定 X 轴，显式指定目标轴时沿用该绑定。多系列默认显示图例，空间不足时分页。用 `tooltip.valueFormatter` 改写数值，用 `tooltip.formatter` 改写整个提示框。
 
+分类布局的多行图例默认采用 16px 行间距；显式指定图例类型或位置时使用 ECharts 图例布局。`zeroText` 默认使用浅色 `#A1A7B3`、深色 `#808999`，`plotTheme.secondaryTextColor` 可覆盖。
+
+分类和原生布局中，右侧 Y 轴顶部的水平轴名默认与刻度标签左边缘对齐。可通过 `yAxis.nameTextStyle.align`、`padding` 覆盖；居中或旋转的轴名沿用传入配置。
+
 支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局在数据清空时移除旧系列及辅助图形。仅刷新数值时保留缩放范围和图例选择。若缩放配置未变，在分类末尾追加数据时保留回看窗口，末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
 
 ### 原生配置与 useLineOption

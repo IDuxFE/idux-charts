@@ -26,6 +26,7 @@ Object.assign(window, {
   },
 })
 const referenceSize = new URLSearchParams(location.search).has('reference')
+const legacyPresentation = new URLSearchParams(location.search).has('legacy-presentation')
 const explicit = ref(false)
 const styled = ref(false)
 const hideLegend = ref(false)
@@ -64,10 +65,14 @@ const presentation = computed(() => {
       textStyle: {
         fontSize: 30,
         lineHeight: 16,
-        rich: { value: { fontFamily: 'D-DIN-PRO' } },
+        rich: {
+          value: { fontFamily: 'D-DIN-PRO' },
+          ...(legacyPresentation ? { label: { fontWeight: 500 } } : {}),
+        },
       },
     },
     legend: {
+      ...(legacyPresentation ? { icon: 'roundRect', itemGap: (16 * height.value) / 180 } : {}),
       formatter: (name: string) => {
         const item = data.value.find(item => item.name === name)
         return item?.value == null

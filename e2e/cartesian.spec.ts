@@ -62,7 +62,7 @@ for (const portal of ['', 'body', 'host']) {
         })
         expect(colors.title).toBe(colors.parent)
         expect(colors.row).toBe(colors.parent)
-        if (dark) expect(colors.background).not.toBe('rgba(251, 253, 255, 0.88)')
+        if (dark) expect(colors.background).not.toBe('rgba(251, 253, 255, 0.72)')
         await page.locator('#theme').click()
       }
     })
