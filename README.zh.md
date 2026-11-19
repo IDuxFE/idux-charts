@@ -5,6 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
 [![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
 
 > [ECharts](https://echarts.apache.org/) 的 `Vue` 组件, 支持 `v2.x` 和 `v3.x`, 查看 [文档](https://charts.idux.site) 了解更多.
 
@@ -136,3 +137,9 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 [![贡献者头像](https://contrib.rocks/image?repo=IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
 
 由 [contributors-img](https://contrib.rocks) 生成。
+
+## 依赖扫描
+
+依赖许可证、安全和质量检查结果见 FOSSA。
+
+[![FOSSA 扫描报告](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)

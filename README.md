@@ -5,6 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
 [![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
 
 > [ECharts](https://echarts.apache.org/) for `Vue`, both `v2.x` and `v3.x`, see [documentation](https://charts.idux.site) for more.
 
@@ -136,3 +137,9 @@ Thanks to everyone who has contributed to iDux Charts!
 [![Contributor avatars](https://contrib.rocks/image?repo=IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
 
 Made with [contributors-img](https://contrib.rocks).
+
+## Dependency scanning
+
+See FOSSA for dependency license, security, and quality findings.
+
+[![FOSSA report](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)
