@@ -140,7 +140,6 @@ export function createDefaultPieOption(
         ? requestedRadius / pieConfig.radius
         : Infinity,
     )
-  const itemGap = legend.itemGap ?? 16 * scaleY
   const customFormatter = legend.formatter
   const formatLegend = (name: string) =>
     typeof customFormatter === 'function'
@@ -330,6 +329,7 @@ export function createDefaultPieOption(
   resolvedLegendStyle.lineHeight = legendLineHeight
   const titleLegendGap = showTitle && showLegend ? 8 * scaleY : 0
   let rowCount = columns === 1 ? data.length : Math.min(4, Math.ceil(data.length / columns))
+  const itemGap = legend.itemGap ?? (rowCount <= 3 ? 20 : 16) * scaleY
   const needsSingleColumn =
     showLegend &&
     (legend.type === 'scroll' ||

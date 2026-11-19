@@ -35,7 +35,7 @@ watch(chartStatus, status => {
   if (status !== 'loading') cancelReload()
 })
 onBeforeUnmount(cancelReload)
-const chartSize = ref({ width: 720, height: 240 })
+const chartSize = ref({ width: 720, height: 180 })
 const chartStyle = computed(() => ({
   width: `${chartSize.value.width}px`,
   height: `${chartSize.value.height}px`,
@@ -67,7 +67,6 @@ const total = computed(() => data.value.reduce((sum, item) => sum + (item.value 
 const presentation = computed<PieChartProps>(() => ({
   name: '分类统计',
   legend: {
-    itemGap: 16,
     formatter: name => {
       const item = data.value.find(item => item.name === name)
       return item?.value == null
@@ -75,7 +74,7 @@ const presentation = computed<PieChartProps>(() => ({
         : `{label|${name}}{value|${item.value}}`
     },
   },
-  radius: [52.8, 60],
+  radius: ['88%', '100%'],
   title: { show: false },
   label: {
     show: true,
