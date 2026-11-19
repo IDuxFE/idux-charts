@@ -21,7 +21,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -157,7 +157,7 @@ const chart = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "分组柱状图-横向",
-  "description": "用于分类名称较长，且同一分类下存在多个子系列需要进行对比的场景。例如对比多个长 IP 资产的“成功/失败”请求次数，横向排布保证标签完整展示，同组柱子相邻对比。",
+  "description": "用于分类名称较长，且同一分类下存在多个子系列需要进行对比的场景。例如对比多个长 IP 资产的“成功/失败”请求次数，横向排布保证标签完整展示，同组柱子相邻对比。默认隐藏数值标签，避免分组标签过密。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 4
 }
 </archive-meta>

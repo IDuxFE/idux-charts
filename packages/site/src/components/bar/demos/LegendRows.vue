@@ -50,7 +50,7 @@ const chart = computed<BarChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "图例多列排列（以分组柱状图为例）",
-  "description": "图例最多显示两行，溢出时可用右侧上下箭头或滚轮逐行浏览。30 或 50 个系列时，缩略轴默认显示前 3 个分类。",
+  "description": "切换系列数量验证图例布局：优先单行，空间不足时采用两行及 16px 行间距，列位置保持对齐；超过两行时可点击右侧箭头或滚轮翻页，分组柱默认隐藏数值标签。",
   "index": 7
 }
 </archive-meta>

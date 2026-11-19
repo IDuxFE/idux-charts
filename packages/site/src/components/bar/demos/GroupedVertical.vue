@@ -21,7 +21,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -152,7 +152,7 @@ const chart = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "分组柱状图-竖向",
-  "description": "用于在同一时间维度或短分类维度下，对比多个子系列的数值差异场景。例如对比不同业务线下的“高危/中危/低危”漏洞数量分布。",
+  "description": "用于在同一时间维度或短分类维度下，对比多个子系列的数值差异场景。例如对比不同业务线下的“高危/中危/低危”漏洞数量分布。默认隐藏数值标签，避免分组标签过密。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 3
 }
 </archive-meta>

@@ -177,7 +177,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "双系列平滑折线图",
-  "description": "用于双指标对比，且需要弱化局部波动、强调两条曲线宏观趋势差异的场景。如对比不同网络环境（WEB/非WEB）下的平滑业务量走势。",
+  "description": "双系列共用左侧数值轴，以统一单位和刻度对比 WEB / 非 WEB 的平滑趋势；支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 4
 }
 </archive-meta>

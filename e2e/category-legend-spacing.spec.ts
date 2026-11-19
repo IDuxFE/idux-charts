@@ -23,7 +23,13 @@ for (const [chart, title, labels] of [
       const rows = await legendLabels.evaluateAll(nodes => {
         const rows = new Map<number, number[]>()
         for (const node of nodes) {
-          const { x, y } = node.getBoundingClientRect()
+          // Glyph bounds vary by script in Firefox; compare the SVG layout anchors.
+          const text = node as SVGTextElement
+          const point = new DOMPoint(
+            Number(text.getAttribute('x') ?? 0),
+            Number(text.getAttribute('y') ?? 0),
+          ).matrixTransform(text.getCTM()!)
+          const { x, y } = point
           const key = Math.round(y)
           rows.set(key, [...(rows.get(key) ?? []), x])
         }

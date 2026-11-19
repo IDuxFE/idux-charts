@@ -20,7 +20,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示面积图加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'point',
@@ -195,7 +195,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "堆叠面积图（状态示例）",
-  "description": "展示总量变化和各应用的构成，也可查看单点和连续区间缺报。",
+  "description": "共用左侧数值轴展示总量变化和各应用构成，支持单点与区间缺报、参考线、零值、空状态及组件内置加载插图。",
   "index": 2
 }
 </archive-meta>

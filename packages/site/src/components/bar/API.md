@@ -62,7 +62,7 @@ const option: BarChartProps = {
 
 在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
 
-原生配置沿用基础图、分组图和堆叠图的标签默认规则。自动堆叠总数根据 `series[].data`（含顶层 `data` 简写）计算；使用 `dataset` 时通过 `label.formatter` 自行提供总数。直接调用 `useBarOption` 时，可传入第三个参数 `getChart: () => EChartsType | undefined`，以便总数读取实例当前的图例选择。组件会自动提供该回调。
+原生配置沿用基础图、分组图和堆叠图的标签默认规则；条纹等非 bar 辅助系列不参与柱组数量及总数计算，也不应用柱图的默认标签。自动堆叠总数根据 `series[].data`（含顶层 `data` 简写）计算；使用 `dataset` 时通过 `label.formatter` 自行提供总数。直接调用 `useBarOption` 时，可传入第三个参数 `getChart: () => EChartsType | undefined`，以便总数读取实例当前的图例选择。组件会自动提供该回调。
 
 轴触发的悬浮背景默认位于业务系列下方，显式 `tooltip.axisPointer.z` 优先。`useStripeBarSeries` 返回业务柱系列与悬浮条纹系列：业务系列默认 `z: 2`，条纹在其上方一层。可通过 `series.z` 调整业务层级，通过 `series.zlevel` 指定画布层；条纹自动跟随。
 

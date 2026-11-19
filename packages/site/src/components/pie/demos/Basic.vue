@@ -179,7 +179,7 @@ const legend = computed<PieChartProps['legend']>(() => ({
 <archive-meta lang="json">
 {
   "title": "实心饼图",
-  "description": "切换轻总数和重总数；业务明确配置标题字号、合计及缺失文案，组件负责绘制和布局。",
+  "description": "切换轻总数和重总数，业务声明标题、合计及缺失文案。数据降序传入，模拟缺失时保留原位置；支持零值、缺报、空状态、内置加载插图及重试。",
   "index": 0
 }
 </archive-meta>

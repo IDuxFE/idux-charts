@@ -179,7 +179,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "多系列折线图",
-  "description": "用于在同一图表中对比多组数据系列的趋势走向，如对比多个不同应用（微信、QQ、飞书等）的流量变化。由于线条较多，需依赖图例的颜色进行区分。",
+  "description": "多系列共用左侧数值轴和统一单位，对比不同应用的流量趋势，通过图例区分系列；支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 2
 }
 </archive-meta>

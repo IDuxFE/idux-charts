@@ -21,7 +21,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -137,7 +137,7 @@ const options = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "基础柱状图-竖向",
-  "description": "用于对单一数据系列的各分类进行直观的数值对比，如对比不同日期的告警趋势、不同短名称业务线的漏洞数量分布。",
+  "description": "用于对单一数据系列的各分类进行直观的数值对比，如对比不同日期的告警趋势、不同短名称业务线的漏洞数量分布。默认在柱顶显示数值。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 0
 }
 </archive-meta>

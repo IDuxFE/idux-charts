@@ -26,7 +26,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -164,7 +164,7 @@ const chart = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "堆叠柱状图-横向",
-  "description": "用于分类名称较长，且需要展示各子系列累加总量与内部构成的场景。适合展示如长资产名/长路径的总风险评分及各项子指标的得分构成。",
+  "description": "用于分类名称较长，且需要展示各子系列累加总量与内部构成的场景。适合展示如长资产名/长路径的总风险评分及各项子指标的得分构成。默认在整条柱子右侧显示可见系列总数，点击图例后同步更新。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 6
 }
 </archive-meta>
