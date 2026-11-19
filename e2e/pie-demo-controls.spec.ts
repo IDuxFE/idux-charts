@@ -172,16 +172,23 @@ test('multi-column legend paging icons align with the values', async ({ page }) 
   const value = chart.locator('svg text').filter({ hasText: /^56$/ })
   await expect(value).toHaveAttribute('text-anchor', 'end')
   await expect(async () => {
-    const iconBox = (await arrows.last().boundingBox())!
-    // Firefox glyphs can overhang their anchor; compare the right-aligned layout edge.
+    // Compare both layout edges in SVG coordinates: glyph overhang and WebKit's
+    // screen transforms should not change this alignment contract.
+    const iconRight = await arrows.last().evaluate(node => {
+      const image = node as SVGImageElement
+      return new DOMPoint(
+        Number(image.getAttribute('x') ?? 0) + Number(image.getAttribute('width') ?? 0),
+        Number(image.getAttribute('y') ?? 0),
+      ).matrixTransform(image.getCTM()!).x
+    })
     const valueRight = await value.evaluate(node => {
       const text = node as SVGTextElement
       return new DOMPoint(
         Number(text.getAttribute('x') ?? 0),
         Number(text.getAttribute('y') ?? 0),
-      ).matrixTransform(text.getScreenCTM()!).x
+      ).matrixTransform(text.getCTM()!).x
     })
-    expect(iconBox.x + iconBox.width).toBeCloseTo(valueRight, 0)
+    expect(iconRight).toBeCloseTo(valueRight, 0)
   }).toPass()
   await arrows.last().click()
   await expect(chart.locator('svg text').filter({ hasText: /^图例17$/ })).toBeVisible()
