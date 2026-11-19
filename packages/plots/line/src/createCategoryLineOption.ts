@@ -60,7 +60,6 @@ export function createCategoryLineOption(
     ? (attrs.color as Array<NonNullable<NonNullable<LineSeriesOption['itemStyle']>['color']>>)
     : theme.palette
   const errorColor = theme.errorColor ?? (dark ? '#FF957B' : '#F5654F')
-  const textColor = theme.secondaryTextColor ?? (dark ? '#C2C7D1' : '#6F7785')
   const missingCounts = new Uint32Array(categories.length)
   let allZero = true
   const values = lines.map(line =>
@@ -310,7 +309,11 @@ export function createCategoryLineOption(
             top: 'middle',
             silent: true,
             z: 3,
-            style: { text: zeroText, fill: textColor, fontSize: 12 },
+            style: {
+              text: zeroText,
+              fill: theme.secondaryTextColor ?? (dark ? '#808999' : '#A1A7B3'),
+              fontSize: 12,
+            },
           },
         ]
       : []

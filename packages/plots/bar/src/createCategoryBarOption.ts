@@ -384,7 +384,11 @@ export function createCategoryBarOption(
               top: 'middle',
               silent: true,
               z: 3,
-              style: { text: zeroText, fill: secondaryText, fontSize: 12 },
+              style: {
+                text: zeroText,
+                fill: theme.secondaryTextColor ?? (dark ? '#808999' : '#A1A7B3'),
+                fontSize: 12,
+              },
             },
           ],
         }
