@@ -77,6 +77,12 @@ ESM 项目可通过 [`@idux/charts` 的图表子入口](https://github.com/IDuxF
 
 图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。
 
+## 加载状态
+
+所有 Plot 组件均支持 `:loading="pending"`，自动选择横向/竖向柱图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘或水波图的加载图标，并适配深浅主题。加载期间保留实例及已有数据，无需自行绘制占位内容。
+
+可传入 `pending && { text: '正在加载...' }` 定制文案；完整配置和导出限制见 [Core 加载状态](https://github.com/IDuxFE/idux-charts/blob/main/packages/core/README.zh.md#加载状态)。
+
 ## 自定义 Tooltip
 
 在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。

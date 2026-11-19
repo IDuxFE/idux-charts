@@ -71,6 +71,14 @@ This package does not ship a separate CSS file. Shared HTML tooltip styles are p
 
 Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing `theme` or `initOption` recreates the instance and restores compatible zoom ranges and legend selections. Explicit changes to the range or selection take precedence. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).
 
+## Loading
+
+Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge and LiquidFill select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
+
+Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.
+
+With `useChart`, include `loading` in reactive options such as a `computed` or `ref`, then update the options to toggle the loading state. The core chart “Function usage” demo includes a switch for the generic illustration.
+
 ## Custom tooltips
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.
@@ -91,9 +99,3 @@ Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter
 ## License
 
 MIT © 2023-present IDuxFE
-
-### Loading
-
-Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge and LiquidFill select their illustration automatically. `IxChart` and `useChart` use a pie fallback when no series type is available, and a generic illustration for other series types. Both light and dark palettes are built in.
-
-Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.

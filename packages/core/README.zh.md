@@ -71,6 +71,14 @@ const option: ChartProps = {
 
 可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。修改 `theme` 或 `initOption` 会重建实例，并恢复兼容的缩放范围和图例选择。显式变更范围或选择时采用新配置。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。
 
+## 加载状态
+
+使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 使用首个系列判断：饼图或没有系列类型时使用饼图兜底，其余类型使用通用图标。图标和遮罩均适配深浅主题。
+
+传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。
+
+使用 `useChart` 时，将 `loading` 放在响应式配置（如 `computed` 或 `ref`）中，更新配置即可切换加载状态。基础图表示例的「函数用法」提供了开关，可查看通用加载图标。
+
 ## 自定义 Tooltip
 
 在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。
@@ -91,9 +99,3 @@ const option: ChartProps = {
 ## 许可证
 
 MIT © 2023-present IDuxFE
-
-### 加载状态
-
-使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 在没有系列类型时使用饼图兜底，其他系列类型使用通用图标。图标和遮罩均适配深浅主题。
-
-传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。

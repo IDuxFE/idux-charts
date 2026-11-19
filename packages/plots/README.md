@@ -77,6 +77,12 @@ When data is appended and the zoom configuration is unchanged, category Bar, Lin
 
 Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
 
+## Loading
+
+All Plot components support `:loading="pending"` and automatically select horizontal/vertical bar, line/area, pie/ring/rose, radar, gauge, or liquid fill illustrations with light and dark palettes. Loading retains the chart instance and data, so applications do not need custom placeholders.
+
+Pass `pending && { text: 'Updating...' }` to customize the message. See [Core loading](https://github.com/IDuxFE/idux-charts/blob/main/packages/core/README.md#loading) for all options and image export limitations.
+
 ## Custom tooltips
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.

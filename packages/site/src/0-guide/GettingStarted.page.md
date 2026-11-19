@@ -44,6 +44,12 @@ const data = [123, 324, 156]
 
 使用 ESM 构建时，可以通过子入口按需导入组件及其类型。例如，将折线图的导入改为 `import { IxLineChart, type LineChartProps } from '@idux/charts/line'`。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge` 和 `liquid-fill`。总入口会注册全套图表模块。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。
 
+## 加载状态
+
+所有图表支持 `:loading="pending"`，自动显示内置加载图标与 `Loading...` 文案，图标和遮罩适配深浅主题。加载期间保留实例及已有数据。定制文案可用 `:loading="pending && { text: '图表正在加载中，请稍后...' }"`。
+
+使用 `useChart` 时，将 `loading` 放入响应式配置中。完整选项和函数用法见<a href="../components/core">基础组件 API</a>。
+
 ## 应用主题
 
 | 配置                             | 用途                                                                                                                                                                                 |
@@ -105,3 +111,5 @@ provide(
 - **Tooltip**。调用 `useTooltipsFormatter` 时传原始文本，由工具统一转义。需要渲染自定义 HTML 时，可直接提供 `tooltip.formatter`。Bar 和 Line 原生布局的默认 Tooltip 向 `tooltip.valueFormatter` 传入数值轴上的测量值。时间轴数据如 `['2026-01-01', 10]` 会传入 `10`。
 - **默认配置和更新**。`BAR_CHART_TOKEN` 和 `LINE_CHART_TOKEN` 也会作用于分类布局。内置布局在删除配置时会应用完整配置清理旧图形。即使显式设置 `notMerge: false`，需要清理时仍会替换更新。单独修改 `setOptionOpts` 也会应用到当前配置。
 - **背景色和实例**。Gauge 和 LiquidFill 兼容旧的 `backgroundColor`。新代码可分别使用 `trackColor` 和 `containerColor`，整张图的背景使用 `chartBackgroundColor`。组件挂载后可通过模板 ref 调用 `getEChartsInstance()`。切换主题或初始化配置后，使用 `onReady` 回调或模板 ref 获取新实例。
+
+- **加载状态**。`loading` 使用内置 DOM 图标及文案，不包含在 ECharts 导出的图片中。原生旋转动画选项（如 `showSpinner`、`spinnerRadius`）不再改变图标，可通过 `icon` 指定图片 URL 或 SVG 源码。
