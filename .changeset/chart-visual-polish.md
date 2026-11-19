@@ -14,3 +14,5 @@ Refine chart visual defaults and preserve explicit customization.
 - Align horizontal names at the top of right Line/Area Y axes with their tick labels, respecting axis grids, label margins, and explicit name styles. Use `#A1A7B3` / `#808999` for light/dark category zero-state text unless the plot theme overrides it.
 - Reduce Seer light tooltip background opacity to 0.72 and add 4px backdrop blur through the shared HTML tooltip stylesheet. Preserve explicit tooltip backgrounds and existing tooltip classes.
 - Align demo titles and grids, use a shared left axis for same-unit trend comparisons, and update pie sorting examples while preserving missing-category positions and semantic risk ordering. Refresh API guides, English/Chinese package documentation, and demo metadata; retain explicit legacy-style pie comparisons and add regression coverage for the new defaults.
+
+Verify legend columns and paging alignment with SVG layout anchors across Chromium, Firefox, and WebKit, avoiding false regressions from glyph overhang and browser screen-transform differences.
