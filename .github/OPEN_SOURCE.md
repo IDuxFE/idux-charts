@@ -138,6 +138,42 @@ has been invented.
 
 ## FOSSA / 依赖许可证扫描
 
+### Compatibility and test-only exceptions / 兼容性与测试依赖例外
+
+Keep Vue 2.6.14 in the private Vue 2 playground and packed-consumer fixtures.
+Do not upgrade that fixture to Vue 3 to clear a security warning: it verifies an
+explicitly supported consumer environment. Vue is a peer dependency and is not
+bundled into the published chart packages.
+
+For CVE-2024-9506 on `vue@2.6.14`, record an accepted-risk exception in FOSSA using
+**In this project → Selected version**, scoped to that CVE only. Explain that the
+version is intentionally retained in non-production compatibility fixtures, and
+review the exception when the Vue 2.6 support policy changes. This is not a claim
+that production applications using Vue 2 are unaffected.
+
+For the `Outdated version` quality issues on `jsdom@28.1.0` and
+`@types/node@22.20.5`, select the individual issue rows and use
+**Actions → Ignore → In this project → Selected version**. These versions belong
+to the validated test environment and Node.js 22 tooling baseline. Keep security
+issue scanning enabled. If the package version changes, review the new warning
+rather than hiding all future issues for the package.
+
+FOSSA quality issues do not support all-version auto-ignore rules. To change
+project-wide outdated-version enforcement, adjust the project's quality policy
+and its Stale Package Prevention rule where the account plan permits it. That
+policy change affects all dependencies using the policy, not just these two
+test tools. See [Reviewing quality issues](https://docs.fossa.com/docs/quality/reviewing-quality-issues).
+
+私有 Vue 2 playground 和打包消费端保留 Vue 2.6.14，用于验证旧版本兼容性；
+Vue 作为 peer dependency，不打入已发布图表包。
+在 FOSSA 中仅为 `vue@2.6.14` 的 CVE-2024-9506 记录“接受兼容性测试风险”例外，
+范围选当前项目和当前版本，并在 Vue 2.6 支持策略变更时复核；这不代表生产环境使用 Vue 2 没有风险。
+
+`jsdom@28.1.0`、`@types/node@22.20.5` 的过期质量提醒同样按具体问题、当前项目、当前版本忽略，
+原因分别为已验证的测试环境和 Node.js 22 工具链基线。保留安全扫描，版本变化后重新评估提醒。
+质量问题不支持“所有版本自动忽略”；如需改变整个项目的过期版本检查，在套餐权限允许时调整项目质量策略的
+Stale Package Prevention 规则。该策略会影响使用它的全部依赖，不仅这两个测试工具。
+
 FOSSA is opt-in because it needs an organization account and API key:
 
 1. Sign in to [FOSSA](https://app.fossa.com) and use the intended organization.
