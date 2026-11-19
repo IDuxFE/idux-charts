@@ -5,7 +5,7 @@ type PieDataItemOption = Extract<NonNullable<PieSeriesOption['data']>[number], {
 import { format } from 'echarts/core'
 import { merge } from 'lodash-es'
 import type { LegendComponentOption, TitleComponentOption } from 'echarts/components'
-import { getAlphaColor, seerColors, seerTheme } from '@idux/charts-core'
+import { createLegendIcon, getAlphaColor, seerColors, seerTheme } from '@idux/charts-core'
 import type { PieChartProps, PieChartAlign, PieSeriesStyle } from './usePieOption'
 import { getLinearColors } from '../../shared/linearColors'
 import { mergePlotOptions } from '../../shared/plotOptions'
@@ -598,7 +598,7 @@ export function createDefaultPieOption(
         pageTextStyle: { fontSize: 24, color: 'transparent' },
         pageIconSize: 0,
         pageButtonItemGap: 8,
-        icon: legend.icon ?? 'roundRect',
+        icon: legend.icon ?? createLegendIcon(iconWidth, iconHeight),
         itemWidth: iconWidth,
         itemHeight: iconHeight,
         itemGap,

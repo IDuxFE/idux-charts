@@ -3,7 +3,13 @@ import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
 import type { EChartsType } from 'echarts/core'
 import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
 import { pick } from 'lodash-es'
-import { convertArray, filterEmptyProps, getAlphaColor, getTooltipsColor } from '@idux/charts-core'
+import {
+  createLegendIcon,
+  convertArray,
+  filterEmptyProps,
+  getAlphaColor,
+  getTooltipsColor,
+} from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
 import { mergeCartesianGrid } from '../../shared/cartesian'
@@ -249,7 +255,13 @@ export function createCategoryBarOption(
     (Array.isArray(legend) || legend?.show !== false) &&
     (bars.length > 1 || !!reference?.name || !!legend)
   const legendData = [
-    ...barSeries.map(bar => ({ name: String(bar.name), icon: 'roundRect' })),
+    ...barSeries.map(bar => ({
+      name: String(bar.name),
+      icon: createLegendIcon(
+        Array.isArray(legend) ? undefined : legend?.itemWidth,
+        Array.isArray(legend) ? undefined : legend?.itemHeight,
+      ),
+    })),
     ...(reference?.name ? [{ name: reference.name, icon: referenceLegendIcon }] : []),
   ]
   const {

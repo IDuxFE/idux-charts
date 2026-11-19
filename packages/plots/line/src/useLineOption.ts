@@ -12,7 +12,13 @@ import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 import type { LineSeriesOption } from 'echarts/charts'
 import { get, omit, set } from 'lodash-es'
 
-import { isVertical, convertArray, filterEmptyProps, CHART_THEME_TOKEN } from '@idux/charts-core'
+import {
+  createLegendIcon,
+  isVertical,
+  convertArray,
+  filterEmptyProps,
+  CHART_THEME_TOKEN,
+} from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 import type { CategoryLineProps } from './createCategoryLineOption'
@@ -56,7 +62,7 @@ const defaultProps: LineChartProps = {
   },
   legend: {
     // Use a color swatch in place of the native line legend icon.
-    icon: 'rect',
+    icon: createLegendIcon(),
     bottom: 0,
     itemGap: 40,
   },

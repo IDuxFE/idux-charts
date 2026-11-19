@@ -6,7 +6,12 @@ import type { PieSeriesOption } from 'echarts/charts'
 import { clearChartComponent, mergePlotOptions, resolvePlotInput } from '../../shared/plotOptions'
 import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
 import type { PlotTooltipParams } from '../../shared/plotTooltip'
-import { convertArray, filterEmptyProps, getTooltipsColor } from '@idux/charts-core'
+import {
+  createLegendIcon,
+  convertArray,
+  filterEmptyProps,
+  getTooltipsColor,
+} from '@idux/charts-core'
 import type {
   AdditionalChartOption,
   BaseChartOption,
@@ -77,6 +82,7 @@ export const PIE_CHART_TOKEN: InjectionKey<PieChartProps> = Symbol('PIE_CHART_TO
 
 const defaultProps: PieChartProps = {
   legend: {
+    icon: createLegendIcon(),
     orient: 'vertical',
     itemGap: 16,
     right: '0',
