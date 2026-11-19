@@ -133,7 +133,7 @@ const presentation = computed<PieChartProps>(() => ({
           v-else
           style="width: 100%; height: 100%"
           :data="data"
-          align="center-start"
+          align="center"
           v-bind="presentation"
         />
       </div>
