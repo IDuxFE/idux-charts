@@ -102,12 +102,13 @@ test('lightweight card tooltip uses 12px text', async ({ page }) => {
   await page.goto('components/pie')
   await page.getByRole('radio', { name: '示例', exact: true }).click()
   const block = page.locator('.archive-app-demo').filter({
-    has: page.getByRole('heading', { name: heading('轻量卡片饼图') }),
+    has: page.getByRole('heading', { name: heading('轻量卡片环形图') }),
   })
   const chart = block.locator('[_echarts_instance_]')
   await chart.scrollIntoViewIfNeeded()
   const box = await chart.boundingBox()
-  await page.mouse.move(box!.x + 55, box!.y + 30)
+  // Hover the ring itself; the center is intentionally empty.
+  await page.mouse.move(box!.x + box!.width / 2 + 34, box!.y + box!.height / 2 + 1)
   const tooltip = chart
     .locator('div')
     .filter({ hasText: /^图例\d: \d+$/ })
