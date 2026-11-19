@@ -1,5 +1,50 @@
 # @idux/charts
 
+## 1.5.0
+
+### Minor Changes
+
+- fba2efa: Add theme-aware loading illustrations to all chart components and `useChart`.
+
+  - Select illustrations for horizontal/vertical bars, lines/areas, pies/rings/roses, radar, gauge, and liquid fill. Core charts use the pie illustration for pie or unspecified series and a generic illustration for other series.
+  - Keep the chart instance, existing data, zoom window, and legend selection while loading. Update illustration colors and masks when the effective light/dark theme changes, and keep the overlay aligned during resize.
+  - Export `ChartLoadingOptions` with `text`, `textColor`, `maskColor`, `color`, `fontSize`, `fontFamily`, and `icon` options. Custom icons accept image URLs or SVG source; an undefined icon retains the plot-specific default. The default message is `Loading...`.
+  - Announce loading through a status region, mark the chart busy, hide active tooltips, and prevent legend wheel paging through the overlay. Remove the overlay on cleanup and restore container positioning and its prior busy state without overwriting positioning changed by the application.
+  - Replace demo placeholders with the shared loading state and document localized messages, custom icons, and reactive `useChart` options.
+
+  Migration: `loading` now renders a DOM illustration and message instead of the ECharts spinner. Native spinner-specific settings such as `showSpinner` and `spinnerRadius` no longer affect its appearance. Loading content is excluded from ECharts image exports. Use `icon` and the supported appearance options to customize the new state.
+
+### Patch Changes
+
+- b5b4884: Provide layout-aware default value labels in category and native bar charts.
+
+  - Show basic vertical values at `top` and horizontal values at `right`, including `horizontal-above`. Hide labels for grouped bars and multiple side-by-side stack groups.
+  - Show one total per category for a single stack, above vertical stacks and at the right of horizontal stacks. Recalculate totals and move the label to the last valid visible segment when legend selection changes. Include valid zero values, ignore missing/non-finite measurements, and omit labels when the entire category is missing.
+  - Preserve top-level, series, and data-item label overrides. Exclude non-bar helper series, including stripe overlays, from group detection and stack totals, and leave their labels unchanged.
+  - Use opaque `#B2B8C2` for dark `horizontal-above` value labels unless an explicit label color is supplied.
+  - Allow direct `useBarOption` consumers to provide an optional third `getChart` callback so stack totals can read live legend selection. Automatic totals read series data; dataset users should supply a custom `label.formatter`.
+
+  Update the demos, metadata, design/API guidance, and English/Chinese READMEs to describe these defaults, with unit and browser coverage for labels, missing values, legend selection, and loading transitions.
+
+- 7333ad7: Refine chart visual defaults and preserve explicit customization.
+
+  - Use category legend swatches with 1px rounded corners in built-in plots and the Seer theme. Export `createLegendIcon(width, height)` for matching custom legend dimensions; custom native icons and category legend data remain configurable.
+  - Give category Bar and Line/Area multi-row legends a 16px row gap while keeping columns aligned and paging controls within the reserved legend region.
+  - Make automatic Pie legend spacing depend on the initial rows per column: 20px for up to three rows and 16px for more rows, scaled with the layout height. Preserve explicit `legend.itemGap` without scaling. Use normal weight for summary captions and align paging icons with the value column.
+  - Soften bar shadows on every side and adapt the blur to the rendered bar geometry, including thin and short bars. Preserve explicit shadow overrides.
+  - Keep native bar hover backgrounds below data series and hover stripes above their bars. `useStripeBarSeries` defaults to bar `z: 2`, places stripes one level above the configured bar `z`, and propagates `zlevel`; explicit axis-pointer layers take precedence.
+  - Align horizontal names at the top of right Line/Area Y axes with their tick labels, respecting axis grids, label margins, and explicit name styles. Use `#A1A7B3` / `#808999` for light/dark category zero-state text unless the plot theme overrides it.
+  - Reduce Seer light tooltip background opacity to 0.72 and add 4px backdrop blur through the shared HTML tooltip stylesheet. Preserve explicit tooltip backgrounds and existing tooltip classes.
+  - Align demo titles and grids, use a shared left axis for same-unit trend comparisons, and update pie sorting examples while preserving missing-category positions and semantic risk ordering. Refresh API guides, English/Chinese package documentation, and demo metadata; retain explicit legacy-style pie comparisons and add regression coverage for the new defaults.
+
+  Verify legend columns and paging alignment with SVG layout anchors across Chromium, Firefox, and WebKit, avoiding false regressions from glyph overhang and browser screen-transform differences.
+
+- Updated dependencies [b5b4884]
+- Updated dependencies [fba2efa]
+- Updated dependencies [7333ad7]
+  - @idux/charts-plots@1.5.0
+  - @idux/charts-core@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes
