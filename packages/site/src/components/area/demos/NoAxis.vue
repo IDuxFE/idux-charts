@@ -10,7 +10,7 @@ const lineOption: LineChartProps = {
   areaStyle: {
     color: useLinearGradient(),
   },
-  title: { text: '折线图标题' },
+  title: { text: '折线图标题', left: 0 },
   grid: { left: 12, right: 12 },
   xAxis: {
     show: false,

@@ -4,7 +4,7 @@ import { useChart } from '@idux/charts'
 import type { ChartProps } from '@idux/charts'
 
 const option: ChartProps = {
-  title: { text: '柱状图标题' },
+  title: { text: '柱状图标题', left: 0 },
   xAxis: {
     type: 'category',
     data: ['星期一', '星期二', '星期三', '星期四', '星期五'],
