@@ -24,6 +24,11 @@ updates:
           - minor
           - patch
     ignore:
+      # Keep the Node.js 22 and validated jsdom test baselines under manual control.
+      # Security alerts remain enabled; these packages do not get automatic PRs.
+      - dependency-name: '@types/node'
+      - dependency-name: jsdom
+      - dependency-name: '@types/jsdom'
       # Upgrade all three pinned Playwright copies and reviewed baselines together.
       - dependency-name: '@playwright/test'
       # Declaration generation depends on the TypeScript 6 compiler API.
