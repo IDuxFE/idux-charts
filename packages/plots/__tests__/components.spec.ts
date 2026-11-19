@@ -85,10 +85,10 @@ for (const [name, component] of [
       attrs.loading = { text: 'Waiting' }
       await nextTick()
       expect(instances[0].setOption.mock.lastCall?.[0].title.text).toBe('After')
-      expect(instances[0].showLoading).toHaveBeenLastCalledWith({ text: 'Waiting' })
+      expect(wrapper.get('[role="status"]').text()).toBe('Waiting')
       attrs.loading = false
       await nextTick()
-      expect(instances[0].hideLoading).toHaveBeenCalledTimes(2)
+      expect(wrapper.find('[role="status"]').exists()).toBe(false)
       const click = vi.fn()
       attrs.onClick = click
       await nextTick()
@@ -253,3 +253,112 @@ it('applies local Pie styles in native mode without leaking wrapper controls', a
     expect(option.series[0]).not.toHaveProperty(key)
   }
 })
+
+it.each([
+  ['pie', Pie, { data: [{ name: 'A', value: 1 }] }, 'pie/loading.svg'],
+  [
+    'ring',
+    Pie,
+    { data: [{ name: 'A', value: 1 }], radius: ['40%', '70%'] },
+    'pie/loading-ring.svg',
+  ],
+  [
+    'automatic ring',
+    Pie,
+    { data: [{ name: 'A', value: 1 }], align: 'center', radius: ['40%', '70%'] },
+    'pie/loading-ring.svg',
+  ],
+  [
+    'empty automatic ring',
+    Pie,
+    { data: [], align: 'center', radius: ['40%', '70%'] },
+    'pie/loading-ring.svg',
+  ],
+  [
+    'automatic rose',
+    Pie,
+    { data: [{ name: 'A', value: 1 }], align: 'center', roseType: 'area' },
+    'pie/loading-rose.svg',
+  ],
+  ['rose', Pie, { data: [{ name: 'A', value: 1 }], roseType: 'area' }, 'pie/loading-rose.svg'],
+  ['vertical bar', Bar, { data: [1], xAxis: { type: 'category' } }, 'bar/loading-vertical.svg'],
+  ['horizontal bar', Bar, { data: [1], yAxis: { type: 'category' } }, 'bar/loading-horizontal.svg'],
+  [
+    'horizontal above bar',
+    Bar,
+    { data: [1], layout: 'horizontal-above' },
+    'bar/loading-horizontal.svg',
+  ],
+  ['line', Line, { data: [1] }, 'line/loading-line.svg'],
+  ['area', Line, { data: [1], areaStyle: {} }, 'line/loading-area.svg'],
+  ['area from series', Line, { series: [{ data: [1], areaStyle: {} }] }, 'line/loading-area.svg'],
+  ['radar', Radar, { indicator: [{ name: 'A', max: 100 }], data: [] }, 'radar/loading.svg'],
+  ['gauge', Gauge, { value: 20 }, 'gauge/loading.svg'],
+  ['liquid fill', LiquidFill, { value: 20 }, 'liquid-fill/loading.svg'],
+] as const)(
+  'selects the %s loading illustration and retains its instance',
+  async (_name, component, props, asset) => {
+    const attrs = reactive<any>({ ...props, loading: true })
+    const wrapper = mount(defineComponent({ setup: () => () => h(component, attrs) }))
+    wrappers.push(wrapper)
+    await nextTick()
+    const assets = import.meta.glob('../*/assets/*.svg', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    })
+    const [folder, file] = asset.split('/')
+    const expected = assets[`../${folder}/assets/${file}`]
+    const image = wrapper.get('.ix-chart-loading img')
+    expect(decodeURIComponent(image.attributes('src')!.split(',')[1]!)).toBe(expected)
+    expect(wrapper.get('[role="status"]').text()).toBe('Loading...')
+    attrs.loading = false
+    await nextTick()
+    expect(wrapper.find('.ix-chart-loading').exists()).toBe(false)
+    attrs.loading = true
+    await nextTick()
+    expect(instances).toHaveLength(1)
+    expect(instances[0].dispose).not.toHaveBeenCalled()
+  },
+)
+
+it.each([
+  ['area', Line, { data: [1], areaStyle: {} }, 'line/loading-area.svg'],
+  [
+    'ring',
+    Pie,
+    { data: [{ name: 'A', value: 1 }], radius: ['40%', '70%'] },
+    'pie/loading-ring.svg',
+  ],
+  ['radar', Radar, { indicator: [{ name: 'A', max: 100 }], data: [] }, 'radar/loading.svg'],
+] as const)(
+  'uses the %s default for an undefined icon and honors explicit overrides',
+  async (_name, component, props, asset) => {
+    const loading = reactive<{ text: string; icon: string | undefined }>({
+      text: 'Waiting',
+      icon: undefined,
+    })
+    const wrapper = mount(
+      defineComponent({ setup: () => () => h(component, { ...props, loading }) }),
+    )
+    wrappers.push(wrapper)
+    await nextTick()
+    const assets = import.meta.glob('../*/assets/*.svg', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    })
+    const [folder, file] = asset.split('/')
+    const expected = assets[`../${folder}/assets/${file}`]
+    const source = () => wrapper.get('.ix-chart-loading img').attributes('src')!
+    expect(decodeURIComponent(source().split(',')[1]!)).toBe(expected)
+    loading.icon = '/custom-loading.svg'
+    await nextTick()
+    expect(source()).toBe('/custom-loading.svg')
+    loading.icon = undefined
+    await nextTick()
+    expect(decodeURIComponent(source().split(',')[1]!)).toBe(expected)
+    expect(wrapper.get('[role="status"]').text()).toBe('Waiting')
+    expect(instances).toHaveLength(1)
+  },
+)

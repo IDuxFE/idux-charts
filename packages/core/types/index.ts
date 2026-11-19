@@ -26,6 +26,20 @@ export type ChartInstanceMethods = {
   getEChartsInstance(): EChartsType | undefined
 }
 
+export interface ChartLoadingOptions {
+  /** Localize the loading message. Defaults to Loading... */
+  text?: string
+  textColor?: string
+  maskColor?: string
+  /** Optional tint for the illustration. */
+  color?: string
+  fontSize?: number
+  fontFamily?: string
+  /** Custom image URL or SVG source. Built-in plots select their own illustration. */
+  icon?: string
+  [key: string]: any
+}
+
 /** Retain declared properties and their modifiers without broad index signatures. */
 export type KnownProps<Props> = {
   [Key in keyof Props as string extends Key ? never : number extends Key ? never : Key]: Props[Key]
@@ -56,9 +70,9 @@ export interface AdditionalChartOption<T extends EChartsType = EChartsType> {
    */
   initOption?: ChartInitOption
   /**
-   * Show a loading overlay. Pass an object to customize the overlay, including its text.
+   * Show an illustration and message while retaining the chart instance. Pass an object to customize text and appearance.
    */
-  loading?: boolean | object
+  loading?: boolean | ChartLoadingOptions
   /**
    * Options passed as the second argument to ECharts setOption.
    */

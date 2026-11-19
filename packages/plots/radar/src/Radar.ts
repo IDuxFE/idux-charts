@@ -1,3 +1,4 @@
+import loadingIcon from '../assets/loading.svg?raw'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
 import { plotInstanceMethods, usePlotRender } from '../../shared/usePlotRender'
@@ -20,6 +21,7 @@ export default withChartProps<RadarChartProps>()(
             area: input.area === '' || input.area === true,
             clockwise: input.clockwise === '' || input.clockwise === true,
           } as RadarChartProps),
+        loadingIcon,
       )
     },
   }),

@@ -2,5 +2,5 @@
   "extends": "../../tsconfig.app.json",
   "include": ["**/*.ts"],
   "exclude": ["dist", "node_modules", "**/__tests__/**", "vite.config.ts"],
-  "compilerOptions": { "composite": false }
+  "compilerOptions": { "composite": false, "types": ["vite/client"] }
 }

@@ -134,7 +134,7 @@ test('radar examples demonstrate independent ranges, loading and custom options'
   await expect
     .poll(async () => (await axis.boundingBox())?.x ?? Number.POSITIVE_INFINITY)
     .toBeLessThan(clockwiseX)
-  await scale.getByText('原生加载遮罩', { exact: true }).click()
+  await scale.getByText('内置加载状态', { exact: true }).click()
   await expect(chart).toContainText('正在更新评估数据')
   await scale.getByText('展示数据', { exact: true }).click()
   await expect(chart).not.toContainText('正在更新评估数据')

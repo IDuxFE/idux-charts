@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
-import { Empty, Loading, addIconDefinitions } from '@idux/components/icon'
+import { Empty, addIconDefinitions } from '@idux/components/icon'
 
-addIconDefinitions([Empty, Loading])
+addIconDefinitions([Empty])
 
 const { themeTokens } = useThemeToken()
 const value = ref(50)
@@ -68,19 +68,15 @@ onBeforeUnmount(cancel)
           <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
         </IxEmpty>
       </div>
-      <div
-        v-else-if="state === 'loading'"
-        class="placeholder"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <IxIcon name="loading" :size="32" />
-        <span>图表正在加载中，请稍后...</span>
-      </div>
       <template v-else>
-        <span class="status" :style="{ color: themeTokens.colorPrimaryText }">{{ status }}</span>
+        <span
+          v-if="state !== 'loading'"
+          class="status"
+          :style="{ color: themeTokens.colorPrimaryText }"
+          >{{ status }}</span
+        >
         <IxLiquidFillChart
+          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
           :value="value"
           label="CPU"
           :color="color"

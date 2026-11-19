@@ -24,7 +24,7 @@ const data = [
       </IxRadioGroup>
       <IxRadioGroup v-model:value="status" buttoned size="sm">
         <IxRadio key="ready">展示数据</IxRadio>
-        <IxRadio key="loading">原生加载遮罩</IxRadio>
+        <IxRadio key="loading">内置加载状态</IxRadio>
       </IxRadioGroup>
     </IxSpace>
     <IxRadarChart
@@ -43,7 +43,7 @@ const data = [
 <archive-meta lang="json">
 {
   "title": "独立量程与方向",
-  "description": "每个维度使用独立量程，数值保持原始单位。切换方向无需手动反转数据；原生加载遮罩保留图表实例和已有数据。百分比半径随容器尺寸调整。",
+  "description": "每个维度使用独立量程，数值保持原始单位。切换方向无需手动反转数据；内置加载状态保留图表实例和已有数据。百分比半径随容器尺寸调整。",
   "index": 1
 }
 </archive-meta>

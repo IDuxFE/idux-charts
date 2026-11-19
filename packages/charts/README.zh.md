@@ -72,7 +72,7 @@ ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及�
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。
 
-- `CHART_THEME_TOKEN` 为所有图表提供响应式 ECharts 主题名称或对象；显式 `theme` 属性优先，默认回退到 `seer`。主题变化会重建实例，并恢复兼容的缩放范围和图例选择。生成的文字与辅助图形需同步设置 `PLOT_THEME_TOKEN`。暗色图表使用深色原生加载遮罩，显式配置仍优先。
+- `CHART_THEME_TOKEN` 为所有图表提供响应式 ECharts 主题名称或对象；显式 `theme` 属性优先，默认回退到 `seer`。主题变化会重建实例，并恢复兼容的缩放范围和图例选择。生成的文字与辅助图形需同步设置 `PLOT_THEME_TOKEN`。暗色图表使用深色加载图标和遮罩，显式配置仍优先。
 
 在分类末尾追加数据且缩放配置未变时，柱状图、折线图和面积图会保留回看窗口。末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
 
@@ -98,3 +98,9 @@ ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及�
 ## 许可证
 
 MIT © 2023-present IDuxFE
+
+### 加载状态
+
+使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 在没有系列类型时使用饼图兜底，其他系列类型使用通用图标。图标和遮罩均适配深浅主题。
+
+传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。

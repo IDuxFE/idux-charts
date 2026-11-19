@@ -113,7 +113,7 @@ window.chartState = () =>
       height: chart?.getHeight(),
       disposed: !chart,
       svg: !!el.querySelector('svg'),
-      loading: !!chart?._loadingFX,
+      loading: !!el.querySelector('.ix-chart-loading'),
       point:
         option?.series?.[0]?.type === 'bar'
           ? chart.convertToPixel({ seriesIndex: 0 }, [0, Number(option.series[0].data[0]) / 2])

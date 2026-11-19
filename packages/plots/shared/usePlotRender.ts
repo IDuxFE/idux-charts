@@ -21,8 +21,15 @@ import {
 
 export type PlotContext = Pick<SetupContext, 'attrs'> & { listeners?: Record<string, Function> }
 
-export function renderPlot(option: ChartProps, context: PlotContext, key?: string) {
-  return h(IxChart, { ...mergeAttrs(option, context.listeners), ref: 'chart', key })
+export function renderPlot(
+  option: ChartProps,
+  context: PlotContext,
+  key?: string,
+  loadingIcon?: string,
+) {
+  const settings = typeof option.loading === 'object' ? option.loading : undefined
+  const loading = option.loading && { ...settings, icon: settings?.icon ?? loadingIcon }
+  return h(IxChart, { ...mergeAttrs({ ...option, loading }, context.listeners), ref: 'chart', key })
 }
 
 export const plotInstanceMethods: ChartInstanceMethods = {
@@ -35,6 +42,7 @@ export function usePlotRender(
   context: PlotContext,
   props: () => ChartProps,
   createOption: (input: ChartProps) => ChartOption,
+  loadingIcon?: string,
 ) {
   const attrs = useReactiveAttrs(context.attrs)
   const theme = usePlotTheme(
@@ -67,5 +75,5 @@ export function usePlotRender(
     const { controls } = splitChartOptions(input)
     return { ...update({ ...generated, ...controls })!, onReady }
   })
-  return () => renderPlot(option.value, context)
+  return () => renderPlot(option.value, context, undefined, loadingIcon)
 }

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import type { PieChartProps } from '@idux/charts'
-import { PieChart, Empty, addIconDefinitions } from '@idux/components/icon'
+import { Empty, addIconDefinitions } from '@idux/components/icon'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { useThemeToken } from '@idux/components/theme'
 
-addIconDefinitions([PieChart, Empty])
+addIconDefinitions([Empty])
 
 type ChartStatus = 'normal' | 'allZero' | 'missing' | 'empty' | 'loading'
 const chartStatus = ref<ChartStatus>('normal')
@@ -15,9 +14,8 @@ const statusDescriptions: Record<ChartStatus, string> = {
   missing: '文字标红，按有效数据渲染，悬浮提示原因。',
   empty:
     '用于图表无数据或加载异常时，涵盖无权限、未配置、报错等情况，展示对应占位图与操作引导，避免页面空白。',
-  loading: '展示灰色饼图图标及加载文案。',
+  loading: '由组件展示对应的加载图标及提示文案。',
 }
-const { themeTokens } = useThemeToken()
 
 let reloadTimer: ReturnType<typeof setTimeout> | undefined
 const cancelReload = () => {
@@ -130,18 +128,9 @@ const presentation = computed<PieChartProps>(() => ({
           </template>
         </IxEmpty>
       </div>
-      <div
-        v-else-if="chartStatus === 'loading'"
-        class="basic-pie-demo-placeholder"
-        role="status"
-        aria-live="polite"
-        aria-busy="true"
-      >
-        <IxIcon name="pie-chart" :size="60" :color="themeTokens.colorInfoContainerBgDisabled" />
-        <span>图表正在加载中，请稍后...</span>
-      </div>
       <IxPieChart
         v-else
+        :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
         style="width: 100%; height: 100%"
         :data="data"
         align="center-start"

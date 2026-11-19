@@ -4,10 +4,8 @@ import type { LineChartProps } from '@idux/charts'
 import { IxEmpty } from '@idux/components/empty'
 import { addIconDefinitions, Empty } from '@idux/components/icon'
 import { IxRadio, IxRadioGroup } from '@idux/components/radio'
-import { useThemeToken } from '@idux/components/theme'
 
 addIconDefinitions([Empty])
-const { themeTokens } = useThemeToken()
 const scenarios = [
   {
     key: 'normal',
@@ -157,32 +155,18 @@ const option = computed<LineChartProps>(() => ({
       }}</IxRadio>
     </IxRadioGroup>
     <p class="trend-description">{{ description }}</p>
-    <div
-      v-if="selected === 'loading'"
-      class="trend-loading"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <svg
-        viewBox="0 0 80 56"
-        width="80"
-        height="56"
-        aria-hidden="true"
-        :fill="themeTokens.colorInfoContainerBgDisabled"
-      >
-        <path d="M2 18l12 10 10-4 12-1 11-9 12 6 9-3 10-10v40H2z" opacity=".55" />
-        <path d="M2 41l12-1 10-4 12-1 11-7 12 3 9-5 10-9v30H2z" />
-      </svg>
-      <span>图表正在加载中，请稍后...</span>
-    </div>
     <IxEmpty
-      v-else-if="selected === 'empty'"
+      v-if="selected === 'empty'"
       simple
       class="trend-empty"
       description="未配置数据源，请先配置采集任务"
     />
-    <IxLineChart v-else v-bind="option" style="width: 100%; height: 320px" />
+    <IxLineChart
+      v-else
+      :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
+      v-bind="option"
+      style="width: 100%; height: 320px"
+    />
   </div>
 </template>
 
@@ -201,20 +185,10 @@ const option = computed<LineChartProps>(() => ({
   color: var(--ix-color-text-info, #6a707d);
   line-height: 22px;
 }
-.trend-loading,
 .trend-empty {
   width: 100%;
   height: 320px;
   margin: 0;
-}
-.trend-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 16px;
-  color: var(--ix-color-text-info, #6a707d);
-  font-size: 12px;
 }
 </style>
 

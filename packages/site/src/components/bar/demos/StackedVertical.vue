@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import type { BarChartProps } from '@idux/charts'
-import { BarChart, Empty, addIconDefinitions } from '@idux/components/icon'
-import { useThemeToken } from '@idux/components/theme'
+import { Empty, addIconDefinitions } from '@idux/components/icon'
 
-addIconDefinitions([BarChart, Empty])
-const { themeTokens } = useThemeToken()
+addIconDefinitions([Empty])
 
 const scenarios = [
   { key: 'normal', label: '正常', description: '展示柱体与分类标签，鼠标悬浮可查看具体数值。' },
@@ -110,28 +108,18 @@ const chart = computed<BarChartProps>(() => {
       </IxRadio>
     </IxRadioGroup>
     <p class="bar-demo-description">{{ description }}</p>
-    <div
-      v-if="selected === 'loading'"
-      class="bar-demo-loading"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <IxIcon
-        name="bar-chart"
-        :size="60"
-        :color="themeTokens.colorInfoContainerBgDisabled"
-        aria-hidden="true"
-      />
-      <span>图表正在加载中，请稍后...</span>
-    </div>
     <IxEmpty
-      v-else-if="selected === 'empty'"
+      v-if="selected === 'empty'"
       simple
       class="bar-demo-empty"
       description="未配置数据源，请先配置采集任务"
     />
-    <IxBarChart v-else v-bind="chart" style="width: 100%; height: 300px" />
+    <IxBarChart
+      v-else
+      :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
+      v-bind="chart"
+      style="width: 100%; height: 300px"
+    />
   </div>
 </template>
 
@@ -150,20 +138,10 @@ const chart = computed<BarChartProps>(() => {
   color: var(--ix-color-text-info, #6a707d);
   line-height: 22px;
 }
-.bar-demo-loading,
 .bar-demo-empty {
   width: 100%;
   height: 300px;
   margin: 0;
-}
-.bar-demo-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  color: var(--ix-color-text-info, #6a707d);
-  font-size: 12px;
 }
 </style>
 
