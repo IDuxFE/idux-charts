@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation / 使用文档
+    url: https://charts.idux.site
+    about: Read the guides and examples / 查看指南和示例
+  - name: Security policy / 安全政策
+    url: https://github.com/IDuxFE/idux-charts/security/policy
+    about: Report vulnerabilities privately / 私下报告安全漏洞
