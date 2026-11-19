@@ -1,4 +1,12 @@
-import { test, expect } from '@playwright/test'
+import { createRequire } from 'node:module'
+import { test, expect } from '../fixture.js'
+
+const { version: packageVersion } = createRequire(import.meta.url)('@idux/charts/package.json')
+
+test('exports the version declared by the installed package', async ({ page }) => {
+  await page.goto('/')
+  expect(await page.evaluate(() => window.chartPackageVersion)).toBe(packageVersion)
+})
 
 test('renders charts and preserves dynamic behavior', async ({ page }, testInfo) => {
   const errors = []

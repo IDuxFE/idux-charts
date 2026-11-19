@@ -88,6 +88,8 @@ jobs:
 
   playground-tests:
     name: Playground (${{ matrix.vue }})
+    env:
+      CHARTS_COVERAGE: '1'
     runs-on: macos-15-intel
     timeout-minutes: 15
     strategy:
@@ -103,6 +105,14 @@ jobs:
       - run: pnpm playgrounds:prepare ${{ matrix.vue }}
       - run: pnpm --dir playgrounds/${{ matrix.vue }} exec playwright install --with-deps chromium
       - run: pnpm --dir playgrounds/${{ matrix.vue }} test:e2e
+      - name: Upload playground coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playground-coverage-${{ matrix.vue }}
+          path: coverage/playgrounds/${{ matrix.vue }}/
+          retention-days: 7
+          if-no-files-found: error
       - name: Upload playground reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -113,6 +123,32 @@ jobs:
             playgrounds/${{ matrix.vue }}/test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+  combined-coverage:
+    name: Combined coverage
+    needs: [checks, playground-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v6
+        with:
+          name: unit-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage/
+      - uses: actions/download-artifact@v6
+        with:
+          pattern: playground-coverage-*
+          path: coverage/playgrounds/
+      - run: pnpm coverage:merge
+      - uses: actions/upload-artifact@v7
+        with:
+          name: combined-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage/combined/
+          retention-days: 7
+          if-no-files-found: error
 
   compatibility:
     name: Compatibility (Vue ${{ matrix.vue }}, ECharts ${{ matrix.echarts }})
@@ -178,7 +214,7 @@ jobs:
   ci:
     name: CI result
     if: ${{ always() }}
-    needs: [checks, browser-tests, playground-tests, compatibility, pages-smoke]
+    needs: [checks, browser-tests, playground-tests, combined-coverage, compatibility, pages-smoke]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

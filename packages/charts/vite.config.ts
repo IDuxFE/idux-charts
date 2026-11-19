@@ -1,3 +1,4 @@
+import { playgroundCoverage } from '../../build/playgroundCoverage.ts'
 import { resolve } from 'path'
 
 import { chartEntries } from '../../build/chartEntries.ts'
@@ -22,6 +23,7 @@ export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build'
   return {
     plugins: [
+      playgroundCoverage(),
       mode !== 'modular' && dts({ tsconfigPath: resolve(import.meta.dirname, 'tsconfig.json') }),
       vue(),
     ],

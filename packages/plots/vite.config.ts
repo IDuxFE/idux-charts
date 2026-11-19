@@ -1,3 +1,4 @@
+import { playgroundCoverage } from '../../build/playgroundCoverage.ts'
 import { resolve } from 'path'
 
 import { chartEntries } from '../../build/chartEntries.ts'
@@ -20,6 +21,7 @@ const globalsMap: Record<string, string> = {
 
 export default defineConfig(({ mode }) => ({
   plugins: [
+    playgroundCoverage(),
     mode !== 'modular' && dts(chartDeclarations(resolve(import.meta.dirname, 'tsconfig.json'))),
     vue(),
   ],

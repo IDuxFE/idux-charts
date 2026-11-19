@@ -1,7 +1,7 @@
 import Theme from './theme.js'
 import Basic from './basic.js'
 import { createApp, h } from 'vue'
-import { IxBarChart, IxLineChart, IxPieChart } from '@idux/charts'
+import { IxBarChart, IxLineChart, IxPieChart, version } from '@idux/charts'
 import { getInstanceByDom, use } from 'echarts/core'
 import { GraphicComponent } from 'echarts/components'
 use([GraphicComponent])
@@ -98,7 +98,8 @@ const App = {
   },
 }
 
-// Expose only read-only diagnostics for assertions against real ECharts instances.
+// Expose only read-only diagnostics for assertions against the packaged library.
+window.chartPackageVersion = version
 window.chartState = () =>
   Array.from(document.querySelectorAll('.chart')).map(el => {
     const chart = getInstanceByDom(el)
