@@ -15,7 +15,7 @@ const lineOption: LineChartProps = {
   areaStyle: {
     color: useLinearGradient(),
   },
-  title: { text: '折线图标题' },
+  title: { text: '折线图标题', left: 0 },
   xAxis: {
     boundaryGap: false,
     data: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'],
