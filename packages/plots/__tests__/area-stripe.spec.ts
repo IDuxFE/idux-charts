@@ -80,3 +80,38 @@ it('supplies usable image dimensions before decode and when the container is hid
   expect(custom.width).toBe(6)
   expect(custom.height).toBe(180)
 })
+
+it('accepts component refs and absent elements, and keeps fallback dimensions for invalid stripe widths', async () => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe = vi.fn()
+      disconnect = vi.fn()
+    },
+  )
+  const element = document.createElement('div')
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue({ height: 125 } as DOMRect)
+  const target = shallowRef<HTMLElement | { $el: HTMLElement }>()
+  let stripe!: ReturnType<typeof useLineChartAreaStripe>
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        stripe = useLineChartAreaStripe(target as never)
+        return () => h('div')
+      },
+    }),
+  )
+  try {
+    expect(stripe.lineChartAreaStripeConfig.value.areaStyle.color.imageHeight).toBe(90)
+    target.value = { $el: element }
+    await nextTick()
+    expect(stripe.lineChartAreaStripeConfig.value.areaStyle.color.imageHeight).toBe(125)
+    target.value = undefined
+    await nextTick()
+    expect(stripe.lineChartAreaStripeConfig.value.areaStyle.color.imageHeight).toBe(90)
+    for (const width of [0, -1, Infinity, NaN])
+      expect(getLineChartAreaStripeImgEl({ width }).width).toBe(4)
+  } finally {
+    wrapper.unmount()
+  }
+})

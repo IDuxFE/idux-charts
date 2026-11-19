@@ -126,3 +126,21 @@ describe('bar label defaults', () => {
     ).toEqual({ show: false, position: 'inside', formatter })
   })
 })
+
+it.each([false, true])(
+  'reads tuple values, rejects blank measurements and skips non-bar overlays (horizontal=%s)',
+  horizontal => {
+    const bars = withBarLabels(
+      [
+        { stack: 's', data: [[5, 8], { value: [3, 7] }, ' ', { value: [] }] },
+        { type: 'line', stack: 'other', data: [100] } as unknown as BarSeriesOption,
+      ],
+      horizontal,
+      () => undefined,
+    )
+    expect(format(bars[0]!, 0)).toBe(horizontal ? '5' : '8')
+    expect(format(bars[0]!, 1)).toBe(horizontal ? '3' : '7')
+    expect(format(bars[0]!, 2)).toBe('')
+    expect(format(bars[0]!, 3)).toBe('')
+  },
+)

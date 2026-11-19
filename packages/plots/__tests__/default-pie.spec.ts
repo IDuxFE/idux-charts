@@ -1,6 +1,6 @@
 import type { PieChartProps } from '../pie/src/usePieOption'
 import { mount } from '@vue/test-utils'
-import { defineComponent, h, shallowRef, shallowReactive } from 'vue'
+import { defineComponent, h, shallowRef, shallowReactive, onMounted, nextTick } from 'vue'
 import { useDefaultPieOption } from '../pie/src/useDefaultPieOption'
 import { PIE_CHART_TOKEN } from '../pie/src/usePieOption'
 import { describe, expect, it, vi } from 'vitest'
@@ -745,4 +745,181 @@ it('checks the full intended column width before selecting a multi-column layout
   expect(legends).toHaveLength(2)
   expect(legends[0].formatter(data[0]!.name)).toContain(data[0]!.name)
   expect(legends[0].textStyle.rich.label.width).toBeGreaterThan(100)
+})
+
+it('renders custom rich values, missing items, center labels and safe unknown tooltips', () => {
+  const formatter = vi.fn((name: string) => `{label|${name}}{value|123456}{missing|offline}`)
+  const option = createDefaultPieOption(
+    [
+      { name: 'A', value: null },
+      { name: 'B', value: 2 },
+    ],
+    size,
+    tokens,
+    'Traffic',
+    '',
+    'center',
+    {
+      legend: { formatter },
+      label: {
+        position: 'center',
+        rich: { number: { color: 'red' } },
+        formatter: params => `${params.name}:${params.value}`,
+      },
+    },
+  ) as any
+  expect(option.legend[0].formatter('A')).toContain('123456')
+  expect(formatter).toHaveBeenCalledWith('B')
+  const center = option.graphic.find((item: any) => item.id === 'ix-pie-center-label')
+  expect(center.style).toMatchObject({ text: 'A:0', rich: { number: { fill: 'red' } } })
+  expect(option.tooltip.formatter({ name: 'unknown' })).toBe('')
+  expect(option.legend[0].formatter('unknown')).toContain('unknown')
+  const empty = createDefaultPieOption([], size, tokens, 'Total', '', undefined, {
+    label: { position: 'center', formatter: '{a}/{b}/{c}' },
+  }) as any
+  expect(empty.graphic.find((item: any) => item.id === 'ix-pie-center-label').style.text).toBe(
+    'Total//0',
+  )
+})
+
+it('clamps pie pager controls and reports wheel regions independently of rendering', () => {
+  const data = Array.from({ length: 30 }, (_, i) => ({ name: `Long metric ${i}`, value: i }))
+  const onChange = vi.fn()
+  const onWheelRegion = vi.fn()
+  const buildPage = (row: number) =>
+    createDefaultPieOption(data, { width: 300, height: 130 }, tokens, '', '', undefined, {
+      page: { row, onChange, onWheelRegion },
+    }) as any
+  const option = buildPage(0)
+  const previous = option.graphic.find((item: any) => item.id === 'ix-pie-pager-0')
+  const next = option.graphic.find((item: any) => item.id === 'ix-pie-pager-1')
+  previous.onclick()
+  expect(onChange).not.toHaveBeenCalled()
+  next.onclick()
+  expect(onChange).toHaveBeenCalledWith(expect.any(Number))
+  expect(onChange.mock.lastCall![0]).toBeGreaterThan(0)
+  onChange.mockClear()
+  onWheelRegion.mock.lastCall![0].scrollBy(1)
+  expect(onChange).toHaveBeenLastCalledWith(1)
+  const last = buildPage(1000)
+  last.graphic.find((item: any) => item.id === 'ix-pie-pager-1').onclick()
+  expect(onChange).toHaveBeenCalledTimes(1)
+  last.graphic.find((item: any) => item.id === 'ix-pie-pager-0').onclick()
+  expect(onChange).toHaveBeenCalledTimes(2)
+})
+
+it('preserves automatic selection, pages and resets renamed data, and forwards the ready listener', async () => {
+  const props = shallowReactive<PieChartProps>({
+    align: 'center',
+    data: Array.from({ length: 30 }, (_, i) => ({ name: `Metric ${i}`, value: i })),
+    seriesStyle: { selectedMode: 'multiple' },
+  })
+  const attrs = shallowRef<PieChartProps>({})
+  const ready = vi.fn()
+  let result!: ReturnType<typeof useDefaultPieOption>
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        result = useDefaultPieOption(props, attrs, shallowRef({}), {
+          listeners: { ready },
+        } as never)
+        return () => h('div')
+      },
+    }),
+  )
+  const chart = {
+    isDisposed: () => false,
+    getOption: () => ({
+      legend: [{ selected: { 'Metric 0': false } }],
+      series: [{ id: 'ix-pie-data', selectedMap: { 'Metric 1': true } }],
+    }),
+  }
+  try {
+    expect(result.automatic.value).toBe(true)
+    const initial = result.option.value as any
+    initial.onReady(chart)
+    expect(ready).toHaveBeenCalledExactlyOnceWith(chart)
+    initial.graphic.find((item: any) => item.id === 'ix-pie-pager-1').onclick()
+    const paged = result.option.value as any
+    expect(paged.legend.some((legend: any) => legend.scrollDataIndex > 0)).toBe(true)
+    expect(paged.series[2].selectedMap).toEqual({ 'Metric 1': true })
+    props.data = [{ name: 'Changed', value: 2 }]
+    await import('vue').then(({ nextTick }) => nextTick())
+    expect((result.option.value as any).legend[0].data).toMatchObject([{ name: 'Changed' }])
+    attrs.value = { legend: null as never }
+    expect((result.option.value as any).legend.every((legend: any) => !legend.show)).toBe(true)
+    attrs.value = { title: { left: 20 } }
+    expect(result.automatic.value).toBe(false)
+    attrs.value = { graphic: [] }
+    expect(result.automatic.value).toBe(false)
+  } finally {
+    wrapper.unmount()
+  }
+})
+
+it('returns empty tooltips for absent items and runs center formatters with empty data', () => {
+  const formatter = vi.fn(params => `${params.name}:${params.value}`)
+  const option = createDefaultPieOption([], size, tokens, '', '', undefined, {
+    label: { show: true, position: 'center', formatter },
+  }) as any
+  expect(option.tooltip.formatter([])).toBe('')
+  expect(formatter).toHaveBeenCalledWith(expect.objectContaining({ name: '', value: 0 }))
+  expect(option.graphic.find((item: any) => item.id === 'ix-pie-center-label').style.text).toBe(
+    ':0',
+  )
+  expect((build([{ name: 'A', value: 1 }]) as any).legend[0].formatter('unknown')).toContain(
+    '{value|}',
+  )
+})
+
+it('pages an automatic pie with a real wheel event and reads typography from its chart root', async () => {
+  const Child = defineComponent({
+    setup() {
+      const root = shallowRef<HTMLElement>()
+      onMounted(() =>
+        Object.defineProperties(root.value!, {
+          clientWidth: { value: 480 },
+          clientHeight: { value: 180 },
+        }),
+      )
+      return () =>
+        h('div', { ref: root, style: { fontFamily: 'Example', '--ix-color-text-info': '#123456' } })
+    },
+  })
+  let result!: ReturnType<typeof useDefaultPieOption>
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        result = useDefaultPieOption(
+          {
+            layoutMode: 'auto',
+            data: Array.from({ length: 30 }, (_, i) => ({ name: `Metric ${i}`, value: i })),
+          },
+          shallowRef({}),
+          shallowRef({}),
+        )
+        return () => h(Child, { ref: 'chart' })
+      },
+    }),
+  )
+  try {
+    await nextTick()
+    const option = result.option.value as any
+    expect(option.legend[0].textStyle.fontFamily).toBe('Example')
+    const legend = option.legend.find((item: any) => item.type === 'scroll' && item.show)
+    vi.spyOn(wrapper.element, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 480, 180))
+    const event = new WheelEvent('wheel', {
+      deltaY: 120,
+      cancelable: true,
+      clientX: legend.left + 5,
+      clientY: legend.top + 5,
+    })
+    wrapper.element.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(true)
+    expect((result.option.value as any).legend.some((item: any) => item.scrollDataIndex > 0)).toBe(
+      true,
+    )
+  } finally {
+    wrapper.unmount()
+  }
 })

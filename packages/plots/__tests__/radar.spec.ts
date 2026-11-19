@@ -98,3 +98,34 @@ it('uses the shared gradient marker color for radar tooltips', () => {
     }),
   ).toContain('background: red')
 })
+
+it('resolves multiple radar coordinates by numeric ID or index and filters unbound series', () => {
+  const radar = [
+    { id: 'primary', indicator: [{ name: 'A' }] },
+    { id: '42', indicator: [{ name: 'B' }, { name: 'C' }] },
+  ]
+  const series = [
+    { radarId: 42, data: [{ value: [2, 3] }] },
+    { radarIndex: 0, data: [{ value: [1] }] },
+    { radarId: 'unknown', data: [] },
+  ]
+  const before = structuredClone({ radar, series })
+  const option = createRadarOption({ radar, series, clockwise: true })
+  expect(option.series).toHaveLength(2)
+  expect(option.radar).toMatchObject(radar)
+  const tooltip = option.tooltip as { formatter: (params: unknown) => string }
+  const result = tooltip.formatter({ value: [2, 3], seriesIndex: 0 })
+  expect(result).toContain('>B<')
+  expect(result).toContain('>C<')
+  expect(tooltip.formatter({ value: [1], seriesIndex: 99 })).toContain('>A<')
+  expect({ radar, series }).toEqual(before)
+  const single = createRadarOption({
+    clockwise: true,
+    indicator: [{ name: 'A' }],
+    data: [[0], {}],
+    plotTheme: { color: 'red', textColor: 'blue' },
+  })
+  expect(single.series).toMatchObject([{ data: [[0], {}] }])
+  expect(single.color).toEqual(['red'])
+  expect(single.textStyle).toMatchObject({ color: 'blue' })
+})

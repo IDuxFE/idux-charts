@@ -362,3 +362,15 @@ it.each([
     expect(instances).toHaveLength(1)
   },
 )
+
+it('leaves wheel events available to the page when a category bar needs no legend pager', async () => {
+  const wrapper = mount(Bar, {
+    props: { categories: ['A'], data: [1] },
+    global: { stubs: { IxChart: { name: 'IxChart', render: () => h('div') } } },
+  })
+  wrappers.push(wrapper)
+  await nextTick()
+  const event = new WheelEvent('wheel', { deltaY: 100, cancelable: true })
+  wrapper.element.dispatchEvent(event)
+  expect(event.defaultPrevented).toBe(false)
+})
