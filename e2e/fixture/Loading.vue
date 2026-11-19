@@ -128,8 +128,7 @@ Object.assign(window, {
     <button data-testid="empty" @click="empty = !empty">Toggle empty data</button>
     <div class="loading-grid">
       <section v-for="item in cases" :key="item.name" :data-case="item.name">
-        <h3>{{ item.name }}</h3
-        ><ChartCase :item="item" />
+        <h3>{{ item.name }}</h3><ChartCase :item="item" />
       </section>
     </div>
   </main>
