@@ -20,8 +20,11 @@ export function withBarLabels(
   horizontal: boolean,
   getLegend: () => ChartProps['legend'],
 ): BarSeriesOption[] {
-  const grouped = countBarColumns(bars) > 1
+  // Native options may also contain stripe overlays or other chart series.
+  const isBar = (bar: BarSeriesOption) => bar.type === undefined || bar.type === 'bar'
+  const grouped = countBarColumns(bars.filter(isBar)) > 1
   return bars.map((bar, index) => {
+    if (!isBar(bar)) return bar
     let label: BarSeriesOption['label'] = {
       show: !grouped,
       position: horizontal ? 'right' : 'top',
@@ -34,7 +37,7 @@ export function withBarLabels(
           let total = 0
           let last = -1
           bars.forEach((item, i) => {
-            if (item.stack !== bar.stack) return
+            if (!isBar(item) || item.stack !== bar.stack) return
             if (item.name && legends.some(legend => legend.selected?.[item.name!] === false)) return
             const value = measurement(item.data?.[params.dataIndex], horizontal)
             if (value === undefined) return
