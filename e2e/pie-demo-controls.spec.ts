@@ -117,6 +117,30 @@ test('lightweight card tooltip uses 12px text', async ({ page }) => {
   await expect(tooltip).toHaveCSS('font-size', '12px')
 })
 
+test('multi-column legend paging icons align with the values', async ({ page }) => {
+  await page.goto('components/pie')
+  await page.getByRole('radio', { name: '示例', exact: true }).click()
+  const block = page.locator('.archive-app-demo').filter({
+    has: page.getByRole('heading', { name: heading('多列图例') }),
+  })
+  for (let i = 0; i < 8; i++) await block.getByRole('slider').press('ArrowRight')
+  await expect(block).toContainText('20 个分类')
+  const chart = block.locator('[_echarts_instance_]')
+  await chart.scrollIntoViewIfNeeded()
+  const arrows = chart.locator('svg image')
+  await expect(arrows).toHaveCount(2)
+  const value = chart.locator('svg text').filter({ hasText: /^126$/ })
+  await expect(async () => {
+    const iconBox = (await arrows.last().boundingBox())!
+    const valueBox = (await value.boundingBox())!
+    expect(iconBox.x + iconBox.width).toBeCloseTo(valueBox.x + valueBox.width, 0)
+  }).toPass()
+  await arrows.last().click()
+  await expect(chart.locator('svg text').filter({ hasText: /^图例17$/ })).toBeVisible()
+  await arrows.first().click()
+  await expect(value).toBeVisible()
+})
+
 test('single-column legend shares compact paging controls and pages both ways', async ({
   page,
 }) => {

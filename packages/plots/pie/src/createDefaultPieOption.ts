@@ -687,12 +687,14 @@ export function createDefaultPieOption(
           type: 'group' as const,
           ignore: !paged,
           silent: !enabled,
+          // Align the 16px icon's right edge with the values, allowing for
+          // its 4px inset within the 24px hit area.
           x:
             layout.summaryLeft +
             (columns - 1) * layout.columnStep +
             columnWidth -
             5 -
-            52 +
+            48 +
             index * 28,
           y: layout.legendTop + layout.legendHeight,
           z: 10,
