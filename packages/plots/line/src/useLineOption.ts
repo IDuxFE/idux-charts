@@ -23,6 +23,7 @@ import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/c
 
 import type { CategoryLineProps } from './createCategoryLineOption'
 import type { LineChartDataItem } from './categoryLineData'
+import { alignLineYAxisNames } from './lineYAxis'
 
 type LineChartData = Array<NonNullable<LineSeriesOption['data']>[number] | LineChartDataItem>
 type LineChartSeriesOption = Omit<LineSeriesOption, 'data'> & { data?: LineChartData }
@@ -116,7 +117,7 @@ export function useLineOption(
       : [defaultValueAxis, defaultCategoryAxis]
 
     option.xAxis = mergeAxisOption(defaultXAxis, xAxis)
-    option.yAxis = mergeAxisOption(defaultYAxis, yAxis)
+    option.yAxis = alignLineYAxisNames(mergeAxisOption(defaultYAxis, yAxis))
     option.series =
       series === undefined
         ? [seriesOption]
