@@ -15,31 +15,19 @@ const series = [
   {
     name: '下行流量',
     itemStyle: { color: '#20CC94' },
-    yAxisIndex: 1,
-    data: [1.18, 2.23, 2.14, 2.29, 2.08, 2.81, 2.92, 3.59],
+    data: [118, 223, 214, 229, 208, 281, 292, 359],
   },
 ]
 
 const option: LineChartProps = {
   categories,
   series,
-  yAxis: [
-    {
-      name: 'Kbps',
-      min: 0,
-      max: 400,
-      interval: 100,
-    },
-    {
-      name: 'Mbps',
-      min: 0,
-      max: 4,
-      interval: 1,
-      splitLine: {
-        show: false,
-      },
-    },
-  ],
+  yAxis: {
+    name: 'Kbps',
+    min: 0,
+    max: 400,
+    interval: 100,
+  },
   xAxis: {
     axisLabel: {
       formatter: (label: string) => label.slice(0, 5),

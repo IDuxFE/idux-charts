@@ -71,14 +71,13 @@ const samples = [
   {
     name: '下行流量',
     itemStyle: { color: '#20CC94' },
-    yAxisIndex: 1,
-    data: [1.18, 2.23, 2.14, 2.29, 2.08, 2.81, 2.92, 3.59],
+    data: [118, 223, 214, 229, 208, 281, 292, 359],
   },
 ]
 
 const option = computed<LineChartProps>(() => ({
   categories,
-  series: samples.map(({ data, ...series }) => {
+  series: samples.map(({ data, ...series }, seriesIndex) => {
     const recent = Array.from({ length: recentCount }, (_, index) => {
       const position = (index / (recentCount - 1)) * (data.length - 1)
       const before = Math.floor(position)
@@ -93,14 +92,14 @@ const option = computed<LineChartProps>(() => ({
         const state = selected.value
         if (state === 'zero') return 0
         const offset = index - recentStart
-        const partial = series.yAxisIndex !== 1
+        const partial = seriesIndex === 0
         const missingPoint = offset === 10 || (partial && offset === 4)
         const missingRange = (offset >= 8 && offset <= 9) || (partial && offset >= 3 && offset <= 4)
         if ((state === 'point' && missingPoint) || (state === 'range' && missingRange)) {
           return { value: null, missingReason: '数据缺失，采集任务未返回结果，请检查采集配置' }
         }
         const value = offset < 0 ? recent[index % (recentCount - 1)]! * 0.7 : recent[offset]!
-        return series.yAxisIndex === 1 ? Math.round(value * 1000) / 1000 : Math.round(value)
+        return Math.round(value)
       }),
     }
   }),
@@ -110,23 +109,12 @@ const option = computed<LineChartProps>(() => ({
       formatter: (label: string) => label.slice(0, 5),
     },
   },
-  yAxis: [
-    {
-      name: 'Kbps',
-      min: 0,
-      max: 400,
-      interval: 100,
-    },
-    {
-      name: 'Mbps',
-      min: 0,
-      max: 4,
-      interval: 1,
-      splitLine: {
-        show: false,
-      },
-    },
-  ],
+  yAxis: {
+    name: 'Kbps',
+    min: 0,
+    max: 400,
+    interval: 100,
+  },
   dataZoom: { type: 'slider', startValue: recentStart, endValue: categories.length - 1 },
   zeroText: '暂无数据',
   referenceLine: selected.value === 'reference' ? { name: '异常', value: 275 } : undefined,
@@ -208,8 +196,8 @@ const option = computed<LineChartProps>(() => ({
 
 <archive-meta lang="json">
 {
-  "title": "双 Y 轴折线图",
-  "description": "用于在同一个图表中对比两个不同量级或不同单位的指标趋势，如对比同一时间段内的“上行流量”与“下行流量”。",
+  "title": "流量对比折线图",
+  "description": "用于在同一个图表中以统一单位和刻度对比两个指标趋势，如对比同一时间段内的“上行流量”与“下行流量”。",
   "index": 1
 }
 </archive-meta>
