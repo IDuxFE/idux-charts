@@ -57,7 +57,10 @@ To activate Codecov:
 2. Save the repository upload token in the upstream Actions secret `CODECOV_TOKEN`.
    Use GitHub's secret UI or `gh secret set CODECOV_TOKEN --repo IDuxFE/idux-charts`;
    do not paste the token into source, issues, or pull requests.
-3. Set the upstream Actions variable `CODECOV_ENABLED=true` only after setup.
+3. Set the upstream Actions variable `CODECOV_ENABLED=true` after setup to enable
+   uploads from trusted branch pushes and main validation. Upstream pull requests
+   attempt uploads directly because fork PRs cannot read upstream configuration
+   variables; public fork PRs do not require the upload token.
 4. Run CI and confirm a main-branch report arrives. The reusable main validation
    explicitly receives only the Codecov secret. Public fork PRs use the action's
    tokenless fork support; Dependabot uploads use a `dependabot:` branch prefix.
@@ -66,6 +69,7 @@ To activate Codecov:
 
 启用 Codecov：为上游仓库安装 App 并激活仓库，将上传令牌存为 `CODECOV_TOKEN` Secret，
 完成后设置 `CODECOV_ENABLED=true`。确认 main 报告成功接收后，再同步添加中英文徽章。
+上游 PR 直接尝试上传，不依赖 fork PR 无法读取的上游配置变量；`CODECOV_ENABLED` 控制可信分支推送和 main 验证的上传。
 Fork 和 Dependabot PR 不获取上传令牌，使用公开仓库的无令牌分支上传，同时保留可下载报告。
 
 `codecov.yml` reports project and changed-code coverage as informational results.
