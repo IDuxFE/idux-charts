@@ -1,3 +1,5 @@
+import { createLegendIcon } from '../utils/legendIcon'
+
 export const seerColors = [
   '#458FFF',
   '#45D9A3',
@@ -87,6 +89,7 @@ export const seerTheme = {
   },
 
   legend: {
+    icon: createLegendIcon(),
     itemWidth: 12,
     itemHeight: 12,
     inactiveColor: '#BEC3CC',

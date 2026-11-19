@@ -12,7 +12,7 @@ import type { ComputedRef, InjectionKey, ShallowRef } from 'vue-demi'
 import type { BarSeriesOption } from 'echarts/charts'
 import { get, omit, set } from 'lodash-es'
 
-import { isVertical, convertArray, filterEmptyProps } from '@idux/charts-core'
+import { createLegendIcon, isVertical, convertArray, filterEmptyProps } from '@idux/charts-core'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 import type { CategoryBarProps } from './createCategoryBarOption'
@@ -68,6 +68,7 @@ const defaultProps: BarChartProps = {
     right: 32,
   },
   legend: {
+    icon: createLegendIcon(),
     bottom: 0,
     itemGap: 40,
   },

@@ -2,7 +2,7 @@ import type { PlotTheme, PlotTextStyle } from '../../shared/plotTheme'
 import type { RadarSeriesOption } from 'echarts/charts'
 import type { RadarComponentOption } from 'echarts/components'
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
-import { convertArray, getTooltipsColor } from '@idux/charts-core'
+import { createLegendIcon, convertArray, getTooltipsColor } from '@idux/charts-core'
 import { mergeNativePlotOptions, mergePlotOptions } from '../../shared/plotOptions'
 import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
 import type { PlotTooltipParams } from '../../shared/plotTooltip'
@@ -116,7 +116,7 @@ export function createRadarOption(
         }
       }),
     },
-    legend: { bottom: 0, icon: 'roundRect', itemWidth: 12, itemHeight: 12 },
+    legend: { bottom: 0, icon: createLegendIcon(), itemWidth: 12, itemHeight: 12 },
     radar,
     series,
   }

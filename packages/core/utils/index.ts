@@ -1,3 +1,4 @@
+export { createLegendIcon } from './legendIcon'
 export { withChartProps } from './withChartProps'
 export type { ChartComponent } from './withChartProps'
 export { replaceChartComponent, splitChartOptions } from './chartOptions'

@@ -14,9 +14,12 @@ import type { PieChartProps as LegacyPieProps } from './fixtures/usePieOption1_0
 const serializable = (option: unknown) => {
   const result = JSON.parse(JSON.stringify(option))
   // The former tooltip surface now lives in the default theme so dark themes can override it.
-  // Resolve that single default before comparing the remaining legacy options.
+  // Resolve theme defaults before comparing the remaining legacy options.
   if (result.tooltip && result.tooltip.backgroundColor === undefined) {
     result.tooltip.backgroundColor = seerTheme.tooltip.backgroundColor
+  }
+  if (result.legend && !Array.isArray(result.legend) && result.legend.icon === undefined) {
+    result.legend.icon = seerTheme.legend.icon
   }
   return result
 }

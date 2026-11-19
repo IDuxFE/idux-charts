@@ -88,7 +88,6 @@ const chartBindings = computed<RadarChartProps>(() => ({
   legend: {
     bottom: 8,
     left: 'center',
-    icon: 'roundRect',
     itemWidth: 12,
     itemHeight: 12,
     itemGap: 32,

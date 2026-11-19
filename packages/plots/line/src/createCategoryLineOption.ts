@@ -3,7 +3,7 @@ import type { ChartProps } from '@idux/charts-core'
 import type { LineSeriesOption } from 'echarts/charts'
 import type { EChartsType } from 'echarts/core'
 import { color as echartsColor } from 'echarts/core'
-import { convertArray, getAlphaColor } from '@idux/charts-core'
+import { createLegendIcon, convertArray, getAlphaColor } from '@idux/charts-core'
 import { pick } from 'lodash-es'
 
 import { appendLegendGraphics, createCategoryLegend } from '../../shared/categoryLegend'
@@ -225,7 +225,13 @@ export function createCategoryLineOption(
     (Array.isArray(legend) || legend?.show !== false) &&
     (lines.length > 1 || !!reference?.name || !!legend)
   const entries = [
-    ...lineSeries.map(line => ({ name: String(line.name), icon: 'roundRect' })),
+    ...lineSeries.map(line => ({
+      name: String(line.name),
+      icon: createLegendIcon(
+        Array.isArray(legend) ? undefined : legend?.itemWidth,
+        Array.isArray(legend) ? undefined : legend?.itemHeight,
+      ),
+    })),
     ...(reference?.name ? [{ name: reference.name, icon: referenceLegendIcon }] : []),
   ]
   const {
