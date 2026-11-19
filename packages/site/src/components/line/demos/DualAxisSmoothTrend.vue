@@ -71,14 +71,13 @@ const samples = [
   {
     name: '非WEB',
     itemStyle: { color: '#20CC94' },
-    yAxisIndex: 1,
     data: [50, 126, 92, 114, 248, 225, 214, 139, 171, 252, 331, 326, 205, 177, 240, 222, 340],
   },
 ]
 
 const option = computed<LineChartProps>(() => ({
   categories,
-  series: samples.map(({ data, ...series }) => {
+  series: samples.map(({ data, ...series }, seriesIndex) => {
     const recent = Array.from({ length: recentCount }, (_, index) => {
       const position = (index / (recentCount - 1)) * (data.length - 1)
       const before = Math.floor(position)
@@ -94,7 +93,7 @@ const option = computed<LineChartProps>(() => ({
         const state = selected.value
         if (state === 'zero') return 0
         const offset = index - recentStart
-        const partial = series.yAxisIndex !== 1
+        const partial = seriesIndex === 0
         const missingPoint = offset === 10 || (partial && offset === 4)
         const missingRange = (offset >= 8 && offset <= 9) || (partial && offset >= 3 && offset <= 4)
         if ((state === 'point' && missingPoint) || (state === 'range' && missingRange)) {
@@ -112,23 +111,12 @@ const option = computed<LineChartProps>(() => ({
       formatter: (label: string) => label.slice(0, 5),
     },
   },
-  yAxis: [
-    {
-      name: '个',
-      min: 0,
-      max: 400,
-      interval: 100,
-    },
-    {
-      name: '个',
-      min: 0,
-      max: 400,
-      interval: 100,
-      splitLine: {
-        show: false,
-      },
-    },
-  ],
+  yAxis: {
+    name: '个',
+    min: 0,
+    max: 400,
+    interval: 100,
+  },
   dataZoom: { type: 'slider', startValue: recentStart, endValue: categories.length - 1 },
   zeroText: '暂无数据',
   referenceLine: selected.value === 'reference' ? { name: '异常', value: 275 } : undefined,
@@ -210,7 +198,7 @@ const option = computed<LineChartProps>(() => ({
 
 <archive-meta lang="json">
 {
-  "title": "双 Y 轴平滑折线图",
+  "title": "双系列平滑折线图",
   "description": "用于双指标对比，且需要弱化局部波动、强调两条曲线宏观趋势差异的场景。如对比不同网络环境（WEB/非WEB）下的平滑业务量走势。",
   "index": 4
 }
