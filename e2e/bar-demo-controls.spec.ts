@@ -631,3 +631,34 @@ test('the responsive card fills the card body', async ({ page }) => {
   const container = (await card.locator('.ix-card-body').boundingBox())!
   expect(chart.width).toBeCloseTo(container.width - 32)
 })
+
+for (const [title, legend, total, selectedTotal, missingTotal] of [
+  ['堆叠柱状图-竖向', '终端', '270', '240', '40'],
+  ['堆叠柱状图-横向', '低危风险', '95', '65', '50'],
+] as const) {
+  test(`${title} updates total labels after selection and retains them through loading`, async ({
+    page,
+  }) => {
+    await page.goto('components/bar')
+    const demo = demoByTitle(page, title)
+    const chart = demo.locator('[_echarts_instance_]')
+    const svg = chart.locator('svg')
+    const instance = await chart.getAttribute('_echarts_instance_')
+    await expect(svg.getByText(total, { exact: true })).toHaveCount(1)
+    const toggle = svg.getByText(legend, { exact: true })
+    await toggle.click({ force: true })
+    await expect(svg.getByText(total, { exact: true })).toHaveCount(0)
+    await expect(svg.getByText(selectedTotal, { exact: true })).toHaveCount(1)
+    await selectState(demo, '加载中')
+    await expect(chart.locator('.ix-chart-loading')).toBeVisible()
+    await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+    await selectState(demo, '正常')
+    await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
+    await expect(svg.getByText(selectedTotal, { exact: true })).toHaveCount(1)
+    await toggle.click({ force: true })
+    await expect(svg.getByText(total, { exact: true })).toHaveCount(1)
+    await selectState(demo, missingState)
+    await expect(svg.getByText(missingTotal, { exact: true })).toHaveCount(1)
+    await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+  })
+}

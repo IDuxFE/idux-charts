@@ -7,7 +7,6 @@ const customized = ref(false)
 const categories = ['周一', '周二', '周三', '周四', '周五']
 const data = [120, 210, 160, 290, 240]
 const overrides: BarChartProps = {
-  label: { show: true },
   barWidth: 14,
   color: ['#8352cc'],
   grid: { left: 56 },

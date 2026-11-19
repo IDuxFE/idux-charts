@@ -22,6 +22,9 @@ test('external overrides keep the hover band behind the bar and stripes above it
   await expect(chart.locator('.charts-tooltips-item')).toHaveCount(1)
   await expect(chart.locator('.charts-tooltips')).toContainText('120 次')
 
+  // The silent stripe series must not hide or duplicate the bar's default value label.
+  await expect(chart.locator('svg').getByText('120', { exact: true })).toHaveCount(1)
+
   // SVG paints in document order. Check the rendered band, bar and stripes.
   await expect
     .poll(async () =>

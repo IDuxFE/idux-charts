@@ -26,6 +26,26 @@ function setup(
 }
 
 describe('native bar labels', () => {
+  it('ignores stripe overlays when choosing labels and preserves their explicit styles', () => {
+    const { option, wrapper } = setup(
+      useBarOption,
+      {},
+      {
+        xAxis: { data: ['A'] },
+        series: [
+          { type: 'bar', data: [12] },
+          { type: 'pictorialBar', data: [12], label: { show: false, position: 'inside' } },
+        ],
+      },
+    )
+    try {
+      expect(option.value.series[0].label).toMatchObject({ show: true, position: 'top' })
+      expect(option.value.series[1].label).toEqual({ show: false, position: 'inside' })
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it.each([false, true])('applies defaults and caller overrides (horizontal: %s)', horizontal => {
     const { option, wrapper } = setup(
       useBarOption,
