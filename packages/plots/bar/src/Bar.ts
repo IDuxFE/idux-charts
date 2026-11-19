@@ -29,7 +29,8 @@ export default withChartProps<BarChartProps>()(
       const reactiveAttrs = useReactiveAttrs(context.attrs)
       const input = props as BarChartProps
       const series = computed(() => pick(input, barChartProps))
-      const legacy = useBarOption(series, reactiveAttrs)
+      const interaction = createPlotInteraction()
+      const legacy = useBarOption(series, reactiveAttrs, interaction.getChart)
       const defaults = inject(BAR_CHART_TOKEN, null)
       const resolved = computed(() =>
         resolvePlotInput<BarChartProps>(defaults, input, reactiveAttrs.value, barPlotProps),
@@ -41,7 +42,6 @@ export default withChartProps<BarChartProps>()(
         () => preset.value,
         () => resolved.value.attrs.autoResize !== false,
       )
-      const interaction = createPlotInteraction()
       const update = createPlotUpdater()
       const layout = computed(() => {
         if (!preset.value) {
@@ -102,7 +102,16 @@ export default withChartProps<BarChartProps>()(
       }
       return () =>
         renderPlot(
-          preset.value ? { ...option.value, onReady: onCategoryReady } : option.value,
+          preset.value
+            ? { ...option.value, onReady: onCategoryReady }
+            : {
+                ...option.value,
+                onReady: (chart: EChartsType) => {
+                  interaction.setChart(chart)
+                  const onReady = resolved.value.attrs.onReady ?? context.listeners?.ready
+                  onReady?.(chart)
+                },
+              },
           context,
           preset.value ? 'category' : 'native',
           resolved.value.props.layout?.startsWith('horizontal') ||

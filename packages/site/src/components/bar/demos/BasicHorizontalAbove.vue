@@ -147,7 +147,7 @@ const options = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "基础柱状图-横向上方",
-  "description": "用于分类名称较长，且需要直接将具体数值展示在柱体上方以便用户精准读取的场景。无需借助坐标轴估算，降低阅读成本。",
+  "description": "用于分类名称较长的场景。分类标签显示在柱条上方，具体数值显示在柱条右侧，无需借助坐标轴估算。",
   "index": 2
 }
 </archive-meta>

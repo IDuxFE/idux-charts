@@ -1,4 +1,5 @@
 import type { DefaultLabelFormatterCallbackParams } from 'echarts'
+import type { EChartsType } from 'echarts/core'
 import { convertArray } from '@idux/charts-core'
 import { describe, expect, it } from 'vitest'
 
@@ -20,6 +21,63 @@ function build(attrs: BarChartProps, layout?: BarChartProps['layout']) {
 }
 
 describe('category bar option', () => {
+  it('uses opaque muted text on dark horizontal-above tracks and preserves label overrides', () => {
+    const labelFor = (dark: boolean, theme = {}, label: BarChartProps['label'] = undefined) => {
+      const { option } = createCategoryBarOption(
+        { categories: ['A'], layout: 'horizontal-above' },
+        { data: [10], label },
+        {},
+        600,
+        theme,
+        dark,
+        () => undefined,
+      )
+      const bar = convertArray(option.series)[0]!
+      return bar.type === 'bar' ? bar.label : undefined
+    }
+    expect(labelFor(true)).toMatchObject({
+      show: true,
+      position: 'right',
+      color: '#B2B8C2',
+    })
+    expect(labelFor(true, { textColor: '#FFFFFF' })).toHaveProperty('color', '#B2B8C2')
+    expect(
+      labelFor(true, { textColor: '#FFFFFF' }, { color: '#FFFF00', show: false }),
+    ).toMatchObject({ color: '#FFFF00', show: false })
+    expect(labelFor(false)).not.toHaveProperty('color')
+  })
+
+  it('keeps stack labels working while a theme change clears the chart model', () => {
+    const { option } = createCategoryBarOption(
+      { categories: ['A'] },
+      { stack: 'total' },
+      { series: [{ data: [2] }, { data: [3] }] },
+      600,
+      {},
+      false,
+      () => ({ getOption: () => null }) as unknown as EChartsType,
+    )
+    const bar = convertArray(option.series)[1]!
+    if (bar.type !== 'bar' || typeof bar.label?.formatter !== 'function')
+      throw new Error('Expected stack label formatter')
+    expect(bar.label.formatter({ dataIndex: 0 } as DefaultLabelFormatterCallbackParams)).toBe('5')
+  })
+
+  it.each(['vertical', 'horizontal', 'horizontal-above'] as const)(
+    'applies default labels in the %s layout and merges caller styles',
+    layout => {
+      const option = build({ series: [{ data: [1], label: { color: 'red' } }] }, layout)
+      expect(convertArray(option.series)[0]).toMatchObject({
+        label: { show: true, position: layout === 'vertical' ? 'top' : 'right', color: 'red' },
+      })
+      const grouped = build({ series: [{ data: [1] }, { data: [2] }] }, layout)
+      expect(convertArray(grouped.series).slice(0, 2)).toMatchObject([
+        { label: { show: false } },
+        { label: { show: false } },
+      ])
+    },
+  )
+
   it('keeps missing reasons and valid zero values across the bar and tooltip', () => {
     const missing = { missingReason: '<offline>', itemStyle: { color: '#123456' } }
     const data = [missing, NaN, Infinity, '-', { value: 0, missingReason: 'Ignore this' }]

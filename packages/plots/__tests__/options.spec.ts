@@ -25,6 +25,22 @@ function setup(
   return { option, wrapper }
 }
 
+describe('native bar labels', () => {
+  it.each([false, true])('applies defaults and caller overrides (horizontal: %s)', horizontal => {
+    const { option, wrapper } = setup(
+      useBarOption,
+      { data: [1], label: { color: 'red' } },
+      horizontal ? { yAxis: { data: ['A'] } } : { xAxis: { data: ['A'] } },
+    )
+    expect(option.value.series[0].label).toEqual({
+      show: true,
+      position: horizontal ? 'right' : 'top',
+      color: 'red',
+    })
+    wrapper.unmount()
+  })
+})
+
 for (const [name, useOption, token] of [
   ['bar', useBarOption, BAR_CHART_TOKEN],
   ['line', useLineOption, LINE_CHART_TOKEN],
