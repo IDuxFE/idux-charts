@@ -14,10 +14,13 @@ const positions: PieChartAlign[] = [
   'bottom-center',
   'bottom-end',
 ]
-const data = [145, 124, 118, 92, 54, 21].map((value, index) => ({
-  name: `图例${index + 1}`,
-  value,
-}))
+// 饼图数据建议按数值从大到小排序后再展示。
+const data = [145, 124, 118, 92, 54, 21]
+  .map((value, index) => ({
+    name: `图例${index + 1}`,
+    value,
+  }))
+  .sort((a, b) => b.value - a.value)
 // 统计口径和展示文案由示例明确提供，组件只负责绘制和布局。
 const total = data.reduce((sum, item) => sum + item.value, 0)
 const title: PieChartProps['title'] = {

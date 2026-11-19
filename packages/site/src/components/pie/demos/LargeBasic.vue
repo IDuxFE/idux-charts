@@ -4,6 +4,7 @@ import type { PieChartProps } from '@idux/charts'
 
 const shape = ref<'pie' | 'ring' | 'rose'>('pie')
 const loading = ref(false)
+// 饼图数据建议按数值从大到小排序后再展示。
 const data = [
   { value: 145, name: '图例 A' },
   { value: 124, name: '图例 B' },
@@ -11,7 +12,7 @@ const data = [
   { value: 110, name: '图例 D' },
   { value: 104, name: '图例 E' },
   { value: 92, name: '图例 F' },
-]
+].sort((a, b) => b.value - a.value)
 const shapeOption = computed<PieChartProps>(() => ({
   radius: shape.value === 'ring' ? ['70%', '80%'] : shape.value === 'rose' ? undefined : '80%',
   roseType: shape.value === 'rose' ? 'area' : undefined,

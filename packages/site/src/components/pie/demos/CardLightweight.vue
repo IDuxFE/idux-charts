@@ -2,10 +2,13 @@
 import type { PieChartProps } from '@idux/charts'
 import { format } from 'echarts/core'
 
-const data = [145, 124, 118, 92, 54, 21].map((value, index) => ({
-  name: `图例${index + 1}`,
-  value,
-}))
+// 饼图数据建议按数值从大到小排序后再展示。
+const data = [145, 124, 118, 92, 54, 21]
+  .map((value, index) => ({
+    name: `图例${index + 1}`,
+    value,
+  }))
+  .sort((a, b) => b.value - a.value)
 const tooltip: PieChartProps['tooltip'] = {
   textStyle: { fontSize: 12 },
   formatter: params => {

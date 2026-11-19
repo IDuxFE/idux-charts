@@ -50,6 +50,7 @@ const getDotData = () => {
   return dataArr
 }
 
+// 风险等级按业务语义顺序展示，不按数值排序。
 const data = [
   {
     value: 45,

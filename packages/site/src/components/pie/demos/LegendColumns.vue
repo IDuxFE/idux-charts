@@ -43,19 +43,23 @@ const chartStyle = computed(() => ({
 
 const categoryCount = ref(12)
 const values = [
-  145, 124, 118, 92, 54, 21, 38, 42, 56, 68, 72, 83, 95, 106, 115, 126, 138, 149, 160, 172,
+  172, 160, 149, 145, 138, 126, 124, 118, 115, 106, 95, 92, 83, 72, 68, 56, 54, 42, 38, 21,
 ]
+// 饼图数据建议按数值从大到小排序后再展示；先排序再模拟缺失，缺失项保留原位置。
 const data = computed(() =>
-  values.slice(0, categoryCount.value).map((value, index) => ({
-    name: `图例${index + 1}`,
-    value:
-      chartStatus.value === 'missing' && index === 3
-        ? null
-        : chartStatus.value === 'allZero'
-          ? 0
-          : value,
-    missingReason: '数据缺失，xxxxxxxx缺失原因，请进行xxx解决方案',
-  })),
+  values
+    .slice(0, categoryCount.value)
+    .sort((a, b) => b - a)
+    .map((value, index) => ({
+      name: `图例${index + 1}`,
+      value:
+        chartStatus.value === 'missing' && index === 3
+          ? null
+          : chartStatus.value === 'allZero'
+            ? 0
+            : value,
+      missingReason: '数据缺失，xxxxxxxx缺失原因，请进行xxx解决方案',
+    })),
 )
 
 const total = computed(() => data.value.reduce((sum, item) => sum + (item.value ?? 0), 0))

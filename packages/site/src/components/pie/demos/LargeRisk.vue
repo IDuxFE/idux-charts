@@ -3,6 +3,7 @@ import { seerColorsForRisk, useTooltipsFormatter } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
 
 // 将颜色绑定到等级，筛选或重排数据时仍保留对应的风险颜色。
+// 风险等级按业务语义顺序展示，不按数值排序。
 const data = [
   { value: 30, name: '严重' },
   { value: 60, name: '高危' },

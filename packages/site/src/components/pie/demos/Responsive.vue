@@ -7,8 +7,12 @@ const count = ref(6)
 const legend = ref(true)
 const title = ref(false)
 const shape = ref('pie')
+// 饼图数据建议按数值从大到小排序后再展示。
 const data = computed(() =>
-  Array.from({ length: count.value }, (_, i) => ({ name: `分类 ${i + 1}`, value: (i + 1) * 10 })),
+  Array.from({ length: count.value }, (_, i) => ({
+    name: `分类 ${i + 1}`,
+    value: (count.value - i) * 10,
+  })).sort((a, b) => b.value - a.value),
 )
 // 总数及标题文案由业务显式声明，随分类数量更新。
 const total = computed(() => data.value.reduce((sum, item) => sum + item.value, 0))
