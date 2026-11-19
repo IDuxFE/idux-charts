@@ -24,6 +24,7 @@ import { getLineSampleValue } from './categoryLineInterpolation'
 import type { InterpolatedLineItem, InterpolatedLineSeries } from './categoryLineInterpolation'
 import { createSingleAreaStripe, createStackedAreaStripe } from './useLineChartAreaStripe'
 import { useLineStyleColor } from './useLineStyleColor'
+import { alignLineYAxisNames } from './lineYAxis'
 import type { LineChartProps } from './useLineOption'
 
 export interface CategoryLineProps {
@@ -290,7 +291,7 @@ export function createCategoryLineOption(
         }))
   const hasSlider = zoom?.some(item => item.type === 'slider')
   const referenceValue = reference?.value ?? 0
-  const valueAxis = mergeAxisOption({ type: 'value' }, yAxis)
+  const valueAxis = alignLineYAxisNames(mergeAxisOption({ type: 'value' }, yAxis))
   const firstAxis = convertArray(valueAxis)[0]
   if (firstAxis) {
     if ((allZero || reference) && firstAxis.max === undefined) {
