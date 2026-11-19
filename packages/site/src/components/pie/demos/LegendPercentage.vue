@@ -35,7 +35,7 @@ watch(chartStatus, status => {
   if (status !== 'loading') cancelReload()
 })
 onBeforeUnmount(cancelReload)
-const chartSize = ref({ width: 480, height: 180 })
+const chartSize = ref({ width: 720, height: 180 })
 const chartStyle = computed(() => ({
   width: `${chartSize.value.width}px`,
   height: `${chartSize.value.height}px`,
