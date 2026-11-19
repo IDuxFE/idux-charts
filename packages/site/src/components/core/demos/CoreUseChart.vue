@@ -5,6 +5,7 @@ import type { ChartProps } from '@idux/charts'
 
 const option: ChartProps = {
   title: { text: '柱状图标题', left: 0 },
+  grid: { top: 48, bottom: 16, left: 12, right: 12, containLabel: true },
   xAxis: {
     type: 'category',
     data: ['星期一', '星期二', '星期三', '星期四', '星期五'],
