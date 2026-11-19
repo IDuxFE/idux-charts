@@ -1,3 +1,4 @@
+import { playgroundCoverage } from '../../build/playgroundCoverage.ts'
 import { resolve } from 'path'
 
 import vue from '@vitejs/plugin-vue'
@@ -16,7 +17,11 @@ const globalsMap: Record<string, string> = {
   'vue-demi': 'VueDemi',
 }
 export default defineConfig({
-  plugins: [dts(chartDeclarations(resolve(import.meta.dirname, 'tsconfig.json'))), vue()],
+  plugins: [
+    playgroundCoverage(),
+    dts(chartDeclarations(resolve(import.meta.dirname, 'tsconfig.json'))),
+    vue(),
+  ],
   css: {
     preprocessorOptions: {
       less: {

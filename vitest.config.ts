@@ -28,7 +28,7 @@ export default mergeConfig(
           '**/vite.config.ts',
           '**/dist/**',
         ],
-        reporter: ['text', 'html', 'lcov', 'json-summary'],
+        reporter: ['text', 'html', 'lcov', 'json-summary', 'json'],
         reportsDirectory: './coverage',
       },
     },

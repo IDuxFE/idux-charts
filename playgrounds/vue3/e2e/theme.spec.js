@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixture.js'
 
 test('reactive global theme, local styles and explicit Pie modes work in the packaged build', async ({
   page,

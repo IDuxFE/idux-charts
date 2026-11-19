@@ -50,6 +50,42 @@ reports produced during a failed check. Missing reports fail the artifact step.
 文档站和 playground 不在单元覆盖率范围。CI 将完整报告保留七天，检查失败时也尽量保留；
 缺失报告会使上传产物步骤失败。
 
+### Combined unit and playground coverage / 单测与 Playground 综合覆盖率
+
+```sh
+pnpm test:coverage:all
+# Rebuild reports from the current run's collected data:
+pnpm coverage:merge
+```
+
+The full command runs unit coverage, builds and packs coverage-enabled libraries,
+then runs both Vue 2 and Vue 3 Chromium playground suites. It retains the unit
+report at `coverage/index.html` and writes the combined report to
+`coverage/combined/index.html`. Both contain HTML, LCOV, JSON counters and a JSON
+summary. Per-test browser counters are stored under `coverage/playgrounds/`.
+The regular `pnpm test:coverage` command continues to produce unit coverage only.
+
+Coverage builds opt in with `CHARTS_COVERAGE=1`. The shared library build plugin
+instruments modules after TypeScript compilation and records source maps, so
+packaged browser execution is mapped back to the same library sources as unit
+tests. Normal builds do not include counters. Playground application code and
+third-party dependencies are excluded. Collection runs in fixture teardown,
+including failed tests, and flushes before navigation. A missing instrumented
+build fails the test instead of emitting an empty report.
+
+CI keeps unit and combined reports as separate artifacts. A merge job downloads
+the unit and both playground results, normalizes source paths across runners,
+and rejects missing Vue versions or a changed coverage denominator. The existing
+Codecov upload continues to use the unit report. A failed test run does not
+produce a successful combined-coverage check.
+
+完整命令保留 `coverage/index.html` 单测报告，并生成
+`coverage/combined/index.html` 综合报告；`pnpm test:coverage` 仍只运行单测。
+覆盖率构建使用 `CHARTS_COVERAGE=1`，正常构建不插入计数器。浏览器采集统计打包后
+实际执行的库源码，经 source map 回溯后合并，不将示例和第三方依赖加入分母。
+CI 分别保留两份报告；缺少任一 Vue 版本数据或合并后分母变化都会报错。
+现有 Codecov 上传继续采用单测报告。
+
 To activate Codecov:
 
 1. Install the [Codecov GitHub App](https://github.com/apps/codecov) for

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixture.js'
 
 test('automatic pie supports resize, shrinking, missing and empty data', async ({ page }) => {
   const errors = []

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixture.js'
 
 for (const theme of ['light', 'dark']) {
   test(`preserves ${theme} chart appearance`, async ({ page }) => {
