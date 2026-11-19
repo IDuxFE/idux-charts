@@ -40,6 +40,12 @@ const option: BarChartProps = {
 
 未显式指定图例类型或位置时，分类布局的多行图例采用 16px 行间距。
 
+默认数值标签：基础竖向柱状图显示在 `top`，基础横向（含上方分类标签布局）显示在 `right`；分组柱状图不显示；竖向堆叠柱状图在 `top` 显示当前可见系列的堆叠总数，横向堆叠柱状图在整条柱子的 `right` 显示当前可见系列的堆叠总数。可用顶层 `label` 或 `series[].label` 覆盖默认值，系列配置优先。
+
+堆叠总数忽略缺失项，某分类的全部系列缺报时不显示数值标签；`0` 参与计算。多个堆叠组并排时按分组图处理，默认不显示标签。
+
+暗黑模式下，`horizontal-above` 的数值标签使用不透明的柔和灰色 `#B2B8C2`，与灰色轨道区分并避免文字过亮；显式 `label.color` 优先。
+
 并排柱默认宽 6px。单列柱按可见分类数取宽度，1–3 项为 20px，4–5 项为 10px，6 项以上为 6px。
 
 `zeroText` 默认使用浅色 `#A1A7B3`、深色 `#808999`，`plotTheme.secondaryTextColor` 可覆盖。柱体默认阴影随实际柱宽和长度调整，显式 `itemStyle.shadow*` 配置优先。
@@ -55,6 +61,8 @@ const option: BarChartProps = {
 省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。额外 ECharts 模块按需注册。
 
 在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
+
+原生配置沿用基础图、分组图和堆叠图的标签默认规则。自动堆叠总数根据 `series[].data`（含顶层 `data` 简写）计算；使用 `dataset` 时通过 `label.formatter` 自行提供总数。直接调用 `useBarOption` 时，可传入第三个参数 `getChart: () => EChartsType | undefined`，以便总数读取实例当前的图例选择。组件会自动提供该回调。
 
 轴触发的悬浮背景默认位于业务系列下方，显式 `tooltip.axisPointer.z` 优先。`useStripeBarSeries` 返回业务柱系列与悬浮条纹系列：业务系列默认 `z: 2`，条纹在其上方一层。可通过 `series.z` 调整业务层级，通过 `series.zlevel` 指定画布层；条纹自动跟随。
 

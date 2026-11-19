@@ -35,6 +35,7 @@ import {
 } from './categoryBarWidth'
 import { getBarLinearColors, LinearDirection } from './getBarLinearColors'
 import type { BarChartProps } from './useBarOption'
+import { withBarLabels } from './barLabel'
 
 export type BarReferenceLine = ReferenceLine
 
@@ -147,23 +148,31 @@ export function createCategoryBarOption(
     columns > 1
       ? 6
       : getVisibleBarWidth(categories, getCategoryZoom(boundZoom, horizontal, categoryInput?.id))
-  const barSeries: BarSeriesOption[] = bars.map((bar, index) => {
-    const data = categories.map((_, i) => normalizeDataItem(bar.data?.[i]))
-    return {
-      barGap: '30%',
-      barMinHeight: 0,
-      emphasis: { disabled: true },
-      label: { show: false },
-      showBackground: above,
-      backgroundStyle: { color: trackColor },
-      z: 2,
-      ...bar,
-      id: bar.id ?? categoryBarId(index),
-      barWidth: bar.barWidth ?? defaultWidth,
-      name: bar.name ?? (bars.length === 1 ? 'Value' : `Series ${index + 1}`),
-      data,
-    }
-  })
+  const barSeries = withBarLabels(
+    bars.map((bar, index) => {
+      const data = categories.map((_, i) => normalizeDataItem(bar.data?.[i]))
+      return {
+        barGap: '30%',
+        barMinHeight: 0,
+        emphasis: { disabled: true },
+        showBackground: above,
+        backgroundStyle: { color: trackColor },
+        z: 2,
+        ...bar,
+        ...(above && dark
+          ? {
+              label: mergePlotOptions({ color: '#B2B8C2' }, bar.label),
+            }
+          : {}),
+        id: bar.id ?? categoryBarId(index),
+        barWidth: bar.barWidth ?? defaultWidth,
+        name: bar.name ?? (bars.length === 1 ? 'Value' : `Series ${index + 1}`),
+        data,
+      }
+    }),
+    horizontal,
+    () => (getChart()?.getOption()?.legend as ChartProps['legend']) ?? current.legend ?? legend,
+  )
   const allZero = barSeries.every(bar =>
     bar.data?.every(item => {
       const value = scalarValue(item)

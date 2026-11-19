@@ -90,6 +90,8 @@ ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及�
 
 分类柱图和折线/面积图的自动多行图例行间距为 16px。自动饼图的默认行间距按初始每列行数选择 20px（不超过 3 行）或 16px，再随布局高度缩放；显式 `legend.itemGap` 不缩放。折线/面积图右侧 Y 轴顶部的水平轴名默认与刻度标签左边缘对齐，显式轴名样式优先。
 
+柱状图的数值标签默认规则：基础竖向图显示在 `top`，基础横向图（含 `horizontal-above`）显示在 `right`，分组图不显示；堆叠图每个分类只显示当前可见系列的总数，竖向位于顶部，横向位于整条柱子的右侧。可通过 `label` 或 `series[].label` 覆盖。暗黑模式的 `horizontal-above` 数值标签使用不透明的 `#B2B8C2`，显式 `label.color` 优先。
+
 ## 自定义 Tooltip
 
 在 `tooltip.formatter` 中调用 `useTooltipsFormatter(title, rows, rowsPerColumn?)` 可复用内置 HTML 排版。`getTooltipsColor(color)` 提取纯色色标，`useStripeBarTooltip(unit)` 返回原生条纹柱图的提示框配置。工具从 `@idux/charts` 或 `@idux/charts-core` 导入。

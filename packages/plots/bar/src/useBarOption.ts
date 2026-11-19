@@ -16,6 +16,8 @@ import { createLegendIcon, isVertical, convertArray, filterEmptyProps } from '@i
 import type { AdditionalChartOption, BaseChartOption, KnownProps } from '@idux/charts-core'
 
 import type { CategoryBarProps } from './createCategoryBarOption'
+import { withBarLabels } from './barLabel'
+import type { EChartsType } from 'echarts/core'
 
 export const categoryBarProps = [
   'categories',
@@ -91,6 +93,7 @@ const defaultValueAxis = {
 export function useBarOption(
   props: BarSeriesOption | ComputedRef<BarSeriesOption>,
   attrsInput: BarChartProps | ShallowRef<BarChartProps>,
+  getChart?: () => EChartsType | undefined,
 ): ComputedRef<BarChartProps> {
   const injectProps = inject(BAR_CHART_TOKEN, null)
   return computed(() => {
@@ -120,6 +123,11 @@ export function useBarOption(
       series === undefined
         ? [seriesOption]
         : convertArray(series).map(item => mergePlotOptions(seriesOption, item))
+    option.series = withBarLabels(
+      option.series,
+      !isVertical(option),
+      () => (getChart?.()?.getOption()?.legend as BarChartProps['legend']) ?? option.legend,
+    )
     applyCartesianLegend(option, attrs.legend)
     if (
       !Array.isArray(option.tooltip) &&

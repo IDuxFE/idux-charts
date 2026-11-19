@@ -90,6 +90,8 @@ Built-in Plots use rectangular category swatches with 1px rounded corners; the `
 
 Automatic multi-row legends for category Bar and Line/Area charts use a 16px row gap. Automatic Pie layouts use a base gap of 20px for up to three initial rows per column and 16px for more rows, scaled to the layout height; explicit `legend.itemGap` is not scaled. Horizontal names at the top of right Y axes in Line/Area charts align with the left edge of the tick labels unless overridden.
 
+Bar value labels default to `top` for basic vertical bars and `right` for basic horizontal bars, including `horizontal-above`. Grouped bars hide labels. Stacked bars show one total of visible series per category, at the top for vertical stacks and at the right end for horizontal stacks. Override these defaults with `label` or `series[].label`. In dark `horizontal-above` layouts, value labels use opaque `#B2B8C2`; explicit `label.color` takes precedence.
+
 ## Custom tooltips
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.

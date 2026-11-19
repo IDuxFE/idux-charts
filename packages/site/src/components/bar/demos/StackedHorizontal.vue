@@ -7,7 +7,11 @@ import { Empty, addIconDefinitions } from '@idux/components/icon'
 addIconDefinitions([Empty])
 
 const scenarios = [
-  { key: 'normal', label: '正常', description: '展示柱体与分类标签，鼠标悬浮可查看具体数值。' },
+  {
+    key: 'normal',
+    label: '正常',
+    description: '展示堆叠柱条与右侧总数；点击图例可切换系列，总数随可见系列更新。',
+  },
   {
     key: 'limit',
     label: '极限场景',
