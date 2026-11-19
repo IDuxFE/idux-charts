@@ -116,11 +116,15 @@ for (const [title, seriesCount] of [
               return id ? svg.getElementById(id) : null
             }
             const shadow = linked('filter')?.querySelector('feDropShadow')
+            const box = (path as SVGGraphicsElement).getBBox()
+            const sigma = Math.min(6, Math.min(box.width, box.height) * 0.3)
+            const deviation = shadow?.getAttribute('stdDeviation')?.split(' ').map(Number)
             if (
               !shadow ||
               shadow.getAttribute('dx') !== '0' ||
-              shadow.getAttribute('dy') !== '-4' ||
-              shadow.getAttribute('stdDeviation') !== '5 5' ||
+              shadow.getAttribute('dy') !== '0' ||
+              deviation?.length !== 2 ||
+              deviation.some(value => Math.abs(value - sigma) > 0.01) ||
               Number(shadow.getAttribute('flood-opacity')) !== 0.16
             )
               return false
