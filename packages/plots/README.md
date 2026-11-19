@@ -12,7 +12,7 @@ For the unified entry point and shared tooltip styles, use [`@idux/charts`](http
 npm install @idux/charts-plots echarts
 ```
 
-Supports Vue 2 (including Vue 2.6) and Vue 3. Use in an existing Vue project with peer dependencies Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.0.0`. Vue 2.6 also requires `@vue/composition-api >=1.6.2` and plugin registration before creating the application.
+Supports Vue 2 (including Vue 2.6) and Vue 3. Use in an existing Vue project with peer dependencies Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.1.0`. Vue 2.6 also requires `@vue/composition-api >=1.6.2` and plugin registration before creating the application.
 
 ```bash
 npm install @vue/composition-api

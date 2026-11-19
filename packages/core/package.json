@@ -41,12 +41,12 @@
   },
   "dependencies": {
     "@ctrl/tinycolor": "^4.2.2",
-    "lodash-es": "^4.17.0",
+    "lodash-es": "^4.18.1",
     "vue-demi": "^0.14.10"
   },
   "peerDependencies": {
     "@vue/composition-api": ">=1.6.2",
-    "echarts": "^5.4.3 || ^6.0.0",
+    "echarts": "^5.4.3 || ^6.1.0",
     "vue": "^2.6.0 || ^3.2.5"
   },
   "peerDependenciesMeta": {

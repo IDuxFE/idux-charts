@@ -373,11 +373,11 @@ const invalidLine: LineChartPublicProps = { smooth: 'yes' };
 const unknownField: BarChartPublicProps = { unknownOption: true };
 `
 const targets = [
-  ...['5.4.3', '6.0.0'].flatMap(echarts => [
+  ...['5.4.3', '6.1.0'].flatMap(echarts => [
     ['2.7.16', echarts, false],
     ['3.5.44', echarts, false],
   ]),
-  ['2.6.14', '6.0.0', true],
+  ['2.6.14', '6.1.0', true],
 ]
 // CI isolates each consumer in its own job; local runs still cover the complete matrix.
 const target = process.env.IDUX_DECLARATION_TARGET
@@ -399,7 +399,7 @@ for (const [version, echartsVersion, adapter] of selectedTargets) {
           '@idux/charts-core': tarballs.core,
           '@idux/charts-plots': tarballs.plots,
           echarts: echartsVersion,
-          'lodash-es': '4.17.21',
+          'lodash-es': '4.18.1',
           vue: version,
           'vue-demi': '0.14.10',
           ...(adapter ? { '@vue/composition-api': '1.7.2' } : {}),

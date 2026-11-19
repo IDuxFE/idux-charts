@@ -7,6 +7,15 @@ have a separate security backport commitment; upgrade to the latest stable versi
 
 安全修复以最新已发布的稳定版为目标。旧版本不单独承诺安全补丁回移，请升级至最新稳定版。
 
+Use ECharts 6.1.0 or later and lodash-es 4.18.1 or later for patched dependency
+versions. The legacy ECharts 5 compatibility line remains available, but versions
+before ECharts 6.1.0 are affected by CVE-2026-45249; compatibility coverage is not
+a security guarantee for those legacy dependencies.
+
+修复版本应使用 ECharts 6.1.0 及以上、lodash-es 4.18.1 及以上。
+ECharts 5 的历史兼容范围仍保留，但低于 ECharts 6.1.0 的版本受 CVE-2026-45249 影响；
+历史版本的兼容性测试不代表其依赖漏洞已修复。
+
 ## Reporting a vulnerability / 报告漏洞
 
 Use GitHub's [private vulnerability reporting](https://github.com/IDuxFE/idux-charts/security/advisories/new)

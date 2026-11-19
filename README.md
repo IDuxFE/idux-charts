@@ -17,7 +17,7 @@ English | [简体中文](README.zh.md)
 npm install echarts @idux/charts
 ```
 
-Supports Vue 2 (including Vue 2.6) and Vue 3. Peer dependencies are Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.0.0`.
+Supports Vue 2 (including Vue 2.6) and Vue 3. Peer dependencies are Vue `^2.6.0 || ^3.2.5` and ECharts `^5.4.3 || ^6.1.0`.
 
 Vue 2.6 also requires `@vue/composition-api >=1.6.2`. Register the plugin with `Vue.use(VueCompositionAPI)` before creating the application:
 
