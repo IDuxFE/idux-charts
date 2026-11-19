@@ -202,6 +202,7 @@ export function createDefaultPieOption(
         label: {
           color: textStyle.color ?? theme.secondaryTextColor ?? seerTheme.title.subtextStyle.color,
           fontSize: 12,
+          fontWeight: 'normal',
           fontFamily: textStyle.fontFamily ?? theme.fontFamily ?? 'sans-serif',
         },
         value: {
