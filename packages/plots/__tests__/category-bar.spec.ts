@@ -1,4 +1,5 @@
 import type { DefaultLabelFormatterCallbackParams } from 'echarts'
+import type { CustomSeriesRenderItem } from 'echarts/types/dist/shared'
 import type { EChartsType } from 'echarts/core'
 import { convertArray } from '@idux/charts-core'
 import { describe, expect, it } from 'vitest'
@@ -135,5 +136,131 @@ describe('category bar option', () => {
     expect(valueZoom.dataZoom).toMatchObject([{ yAxisIndex: 0, orient: 'vertical' }])
     expect(valueZoom.grid).toMatchObject({ right: 44, bottom: 12 })
     expect(valueZoom.series).toMatchObject([{ type: 'bar', barWidth: 6 }])
+  })
+})
+
+describe('category bar rendering boundaries', () => {
+  it.each(['vertical', 'horizontal', 'horizontal-above'] as const)(
+    'draws missing bands with category geometry in the %s layout',
+    layout => {
+      const option = build({ series: [{ data: [1, null, 3, 4, 5, 6] }] }, layout)
+      const band = convertArray(option.series).find(series => series.type === 'custom')!
+      if (band.type !== 'custom' || typeof band.renderItem !== 'function')
+        throw new Error('Expected missing band')
+      const render = (
+        index: number,
+        size: unknown = [40, 30],
+        coord = [100, 70],
+        type = 'cartesian2d',
+      ) =>
+        (band.renderItem as CustomSeriesRenderItem)(
+          {
+            coordSys: { type, x: 10, y: 20, width: 400, height: 180 },
+          } as unknown as Parameters<CustomSeriesRenderItem>[0],
+          {
+            value: () => index,
+            coord: () => coord,
+            size: () => size,
+          } as unknown as Parameters<CustomSeriesRenderItem>[1],
+        )
+      const missing = render(1)
+      expect(missing).toMatchObject({ type: 'rect', emphasisDisabled: true })
+      expect(missing).toMatchObject(
+        layout === 'vertical'
+          ? { shape: { y: 20, height: 180 } }
+          : { shape: { x: 10, width: 400 } },
+      )
+      expect(render(1, null)).toBeUndefined()
+      expect(render(1, [40, 30], [], 'polar')).toBeUndefined()
+      expect(render(1, [40, 30], [])).toBeUndefined()
+      if (layout === 'horizontal-above') {
+        expect(convertArray(option.series)[0]).toMatchObject({ showBackground: false })
+        expect(render(0)).toMatchObject({
+          shape: { x: 10, width: 400 },
+          style: { fill: 'rgba(143, 162, 191, 0.18)' },
+        })
+        expect(render(0, [40, 0])).toMatchObject({ type: 'rect' })
+      }
+    },
+  )
+
+  it('keeps reference lines inside automatic bounds, including empty and negative ranges', () => {
+    for (const layout of ['vertical', 'horizontal-above'] as const) {
+      const { option } = createCategoryBarOption(
+        { categories: ['A'], layout, referenceLine: { value: -5 } },
+        { data: [0] },
+        {},
+        600,
+        {},
+        false,
+        () => undefined,
+      )
+      const axis = convertArray(layout === 'vertical' ? option.yAxis : option.xAxis)[0]!
+      if (typeof axis.max !== 'function' || typeof axis.min !== 'function')
+        throw new Error('Expected bounds')
+      expect(axis.min({ min: -2, max: 10 })).toBe(-5)
+      expect(axis.min({ min: NaN, max: 10 })).toBe(-5)
+      expect(axis.min({ min: -8, max: 10 })).toBe(-8)
+      expect(axis.max({ min: 0, max: NaN })).toBe(1)
+      expect(axis.max({ min: 0, max: 10 })).toBeCloseTo(layout === 'vertical' ? 10 : 11.3)
+    }
+  })
+
+  it('places multi-column tooltips inside the viewport and formats values and missing reasons', () => {
+    const series = Array.from({ length: 11 }, (_, index) => ({
+      name: `Series ${index}`,
+      data: [index],
+    }))
+    const option = build({
+      series,
+      tooltip: { valueFormatter: value => `${value} units`, extraCssText: 'color:red;' },
+    })
+    const tooltip = convertArray(option.tooltip)[0]!
+    expect(tooltip).toMatchObject({
+      enterable: true,
+      extraCssText: '--ix-chart-tooltip-columns-max-width: 576px;color:red;',
+    })
+    if (typeof tooltip.position !== 'function' || typeof tooltip.formatter !== 'function')
+      throw new Error('Expected tooltip callbacks')
+    expect(
+      tooltip.position([590, 290], {} as never, null as never, null as never, {
+        viewSize: [600, 300],
+        contentSize: [200, 100],
+      }),
+    ).toEqual([400, 130])
+    const tip = tooltip.formatter(
+      [
+        { seriesType: 'bar', seriesName: 'Series 0', data: 0, dataIndex: 0, name: 'A' },
+        {
+          seriesType: 'bar',
+          seriesName: 'Series 1',
+          data: { value: null, missingReason: '<offline>' },
+          dataIndex: 0,
+          name: 'A',
+        },
+        { seriesType: 'bar', data: null, dataIndex: 0, name: 'A' },
+        { seriesType: 'line', data: 99, dataIndex: 0, name: 'A' },
+      ] as DefaultLabelFormatterCallbackParams[],
+      '',
+      () => undefined,
+    )
+    expect(tip).toContain('0 units')
+    expect(tip).toContain('Series 1: &lt;offline&gt;')
+    expect(tip).toContain(': –')
+    expect(tip).not.toContain('99')
+    expect(
+      tooltip.formatter(
+        { seriesType: 'line' } as DefaultLabelFormatterCallbackParams,
+        '',
+        () => undefined,
+      ),
+    ).toBe('')
+    const custom = () => 'custom'
+    expect(
+      convertArray(build({ series, tooltip: { formatter: custom } }).tooltip)[0],
+    ).toMatchObject({ formatter: custom })
+    expect(
+      convertArray(build({ series, tooltip: { formatter: custom } }).tooltip)[0],
+    ).not.toHaveProperty('position')
   })
 })

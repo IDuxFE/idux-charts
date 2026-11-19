@@ -252,3 +252,21 @@ it('updates chart-local tooltip theme state from resolved ECharts options', asyn
   await nextTick()
   expect(wrapper.attributes('data-ix-chart-theme')).toBe('light')
 })
+
+it('ignores option/theme updates when the component has no chart container', async () => {
+  const options = reactive({ theme: 'light', title: { text: 'Before' } })
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        useChart(options)
+        return () => h('span', options.title.text)
+      },
+    }),
+  )
+  wrappers.push(wrapper)
+  options.theme = 'dark'
+  options.title.text = 'After'
+  await nextTick()
+  expect(init).not.toHaveBeenCalled()
+  expect(wrapper.text()).toBe('After')
+})

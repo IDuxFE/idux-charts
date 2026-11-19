@@ -1,9 +1,12 @@
+import { mount } from '@vue/test-utils'
+import { defineComponent, h, shallowReactive } from 'vue'
+import type { ChartProps } from '@idux/charts-core'
 import { describe, expect, it } from 'vitest'
 import type { CustomSeriesOption } from 'echarts/charts'
 import { createGaugeOption } from '../gauge'
 import { createLiquidFillOption } from '../liquid-fill'
 import { createRadarOption } from '../radar'
-import { mergePlotTheme } from '../shared/plotTheme'
+import { mergePlotTheme, usePlotDark } from '../shared/plotTheme'
 
 function children(option: { series?: unknown }) {
   const series = (option.series as CustomSeriesOption[])[0]!
@@ -101,4 +104,36 @@ it('allows radar root typography to override theme without losing axis defaults'
       textStyle: { fontFamily: 'Local', fontSize: 18, color: 'blue' },
     }).radar,
   ).toMatchObject({ axisName: { fontFamily: 'Local', fontSize: 18, color: 'blue' } })
+})
+
+it('uses explicit darkMode before theme names or theme objects', () => {
+  const input = shallowReactive<ChartProps>({ darkMode: false, theme: 'dark' })
+  let dark!: ReturnType<typeof usePlotDark>
+  const wrapper = mount(
+    defineComponent({
+      setup() {
+        dark = usePlotDark(() => input)
+        return () => h('div')
+      },
+    }),
+  )
+  try {
+    expect(dark.value).toBe(false)
+    input.darkMode = true
+    input.theme = 'light'
+    expect(dark.value).toBe(true)
+    input.darkMode = undefined
+    for (const [theme, expected] of [
+      [{ darkMode: true }, true],
+      [{ darkMode: false }, false],
+      [{}, false],
+      ['light', false],
+      ['dark', true],
+    ] as const) {
+      input.theme = theme
+      expect(dark.value).toBe(expected)
+    }
+  } finally {
+    wrapper.unmount()
+  }
 })

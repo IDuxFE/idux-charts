@@ -147,3 +147,39 @@ it('honors autoResize changes and cancels queued callbacks after cleanup', async
     vi.unstubAllGlobals()
   }
 })
+
+it('does not observe absent containers/instances or resize a replaced instance from a queued frame', async () => {
+  let delivery!: (entries: object[]) => void
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(callback: typeof delivery) {
+        delivery = callback
+      }
+      observe() {}
+      disconnect() {}
+    },
+  )
+  const host = shallowRef<HTMLElement>()
+  const instance = { resize: vi.fn() }
+  const chart = shallowRef<any>()
+  const scope = effectScope()
+  scope.run(() =>
+    useResizeObserver(
+      host,
+      chart,
+      computed(() => true),
+    ),
+  )
+  host.value = document.createElement('div')
+  await nextTick()
+  chart.value = instance
+  await nextTick()
+  delivery([{ target: host.value }])
+  chart.value = undefined
+  // Deliver the pending animation frame before Vue flushes watcher cleanup.
+  vi.advanceTimersByTime(16)
+  expect(instance.resize).not.toHaveBeenCalled()
+  await nextTick()
+  scope.stop()
+})
