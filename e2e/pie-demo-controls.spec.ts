@@ -117,6 +117,46 @@ test('lightweight card tooltip uses 12px text', async ({ page }) => {
   await expect(tooltip).toHaveCSS('font-size', '12px')
 })
 
+test('multi-column legend updates default row spacing when category count changes', async ({
+  page,
+}) => {
+  await page.goto('components/pie')
+  await page.getByRole('radio', { name: '示例', exact: true }).click()
+  const block = page.locator('.archive-app-demo').filter({
+    has: page.getByRole('heading', { name: heading('多列图例') }),
+  })
+  const chart = block.locator('[_echarts_instance_]')
+  await expect(chart.locator('svg')).toBeVisible()
+  const id = await chart.getAttribute('_echarts_instance_')
+  const slider = block.getByRole('slider')
+  let current = 12
+  for (const [count, gap] of [
+    [12, 16],
+    [6, 20],
+    [7, 16],
+    [3, 20],
+    [12, 16],
+  ] as const) {
+    while (current !== count) {
+      await slider.press(current > count ? 'ArrowLeft' : 'ArrowRight')
+      current += current > count ? -1 : 1
+    }
+    await expect(block).toContainText(`${count} 个分类`)
+    await expect(async () => {
+      const first = await chart
+        .locator('svg text')
+        .filter({ hasText: /^图例1$/ })
+        .boundingBox()
+      const second = await chart
+        .locator('svg text')
+        .filter({ hasText: /^图例2$/ })
+        .boundingBox()
+      expect(second!.y - first!.y).toBeCloseTo(12 + gap, 0)
+    }).toPass()
+    await expect(chart).toHaveAttribute('_echarts_instance_', id!)
+  }
+})
+
 test('multi-column legend paging icons align with the values', async ({ page }) => {
   await page.goto('components/pie')
   await page.getByRole('radio', { name: '示例', exact: true }).click()

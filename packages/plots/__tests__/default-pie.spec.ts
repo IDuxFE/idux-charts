@@ -403,6 +403,30 @@ describe('pie shape and presentation layout', () => {
       )
     }
   })
+  it('chooses the initial legend gap by row count while preserving scaling and overrides', () => {
+    for (const [count, width, baseGap] of [
+      [3, 480, 20],
+      [4, 480, 16],
+      [6, 720, 20],
+      [7, 720, 16],
+      [6, 280, 16],
+    ] as const) {
+      for (const height of [180, 240]) {
+        for (const itemGap of [undefined, 0, 8]) {
+          const option = createDefaultPieOption(
+            categories(count),
+            { width, height },
+            tokens,
+            '',
+            '',
+            'center',
+            { legend: { itemGap } },
+          ) as any
+          expect(option.legend[0].itemGap).toBeCloseTo(itemGap ?? (baseGap * height) / 180)
+        }
+      }
+    }
+  })
   it('measures native font size and item spacing and includes a subtitle in the block', () => {
     const option = createDefaultPieOption(categories(4), size, tokens, '', '', 'center', {
       title: { text: '554', subtext: 'Assets', textStyle: { fontSize: 28 }, itemGap: 8 },
