@@ -32,16 +32,18 @@ const option = {
 
 所有图表组件共用以下配置。ECharts 事件可通过 `@click`、`@legendselectchanged` 等监听，回调参数沿用 ECharts。
 
-| 属性                   | 类型                               | 默认值            | 行为                                                                                                                                                                                                                                                                                                      |
-| ---------------------- | ---------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `chartBackgroundColor` | `EChartsOption['backgroundColor']` | —                 | 设置整个 ECharts 绘图区的背景，优先于顶层原生 `backgroundColor`。                                                                                                                                                                                                                                         |
-| `autoResize`           | `boolean`                          | `true`            | 随容器尺寸变化调整图表。                                                                                                                                                                                                                                                                                  |
-| `group`                | `string`                           | —                 | 设置实例的分组 ID，调用 ECharts 的 `connect(group)` 后联动同组图表。                                                                                                                                                                                                                                      |
-| `initOption`           | `ChartInitOption`                  | —                 | ECharts `init` 的第三个参数。变化时重建实例。                                                                                                                                                                                                                                                             |
-| `loading`              | `boolean \| object`                | —                 | 显示内置图标和加载文案，保留图表实例及已有数据。各 Plot 自动选择对应图标；无类型时默认饼图，其他类型使用通用图标。传对象可配置 `text`、`textColor`、`maskColor`、`color`、`fontSize`、`fontFamily`、`icon`（图片 URL 或 SVG 源码）。默认文案为 `Loading...`，图标和遮罩随生效的 `darkMode` 适配深浅主题。 |
-| `setOptionOpts`        | `SetOptionOpts`                    | 由图表决定        | 传给 ECharts `setOption` 的第二个参数。单独修改此项也会应用到当前配置。                                                                                                                                                                                                                                   |
-| `theme`                | `ChartTheme`                       | 注入值或 `'seer'` | ECharts 主题名或主题对象。变化时重建实例。                                                                                                                                                                                                                                                                |
-| `onReady`              | `(chart: EChartsType) => void`     | —                 | 创建实例并提交初始 option 后调用。重建时再次调用。                                                                                                                                                                                                                                                        |
+| 属性                   | 类型                               | 默认值            | 行为                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------- | ---------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chartBackgroundColor` | `EChartsOption['backgroundColor']` | —                 | 设置整个 ECharts 绘图区的背景，优先于顶层原生 `backgroundColor`。                                                                                                                                                                                                                                                                                         |
+| `autoResize`           | `boolean`                          | `true`            | 随容器尺寸变化调整图表。                                                                                                                                                                                                                                                                                                                                  |
+| `group`                | `string`                           | —                 | 设置实例的分组 ID，调用 ECharts 的 `connect(group)` 后联动同组图表。                                                                                                                                                                                                                                                                                      |
+| `initOption`           | `ChartInitOption`                  | —                 | ECharts `init` 的第三个参数。变化时重建实例。                                                                                                                                                                                                                                                                                                             |
+| `loading`              | `boolean \| ChartLoadingOptions`   | —                 | 显示内置图标和加载文案，保留图表实例及已有数据。各 Plot 自动选择对应图标；`IxChart` 和 `useChart` 根据首个系列判断，饼图或无类型时默认饼图，其余类型使用通用图标。传对象可配置 `text`、`textColor`、`maskColor`、`color`、`fontSize`、`fontFamily`、`icon`（图片 URL 或 SVG 源码）。默认文案为 `Loading...`，图标和遮罩随生效的 `darkMode` 适配深浅主题。 |
+| `setOptionOpts`        | `SetOptionOpts`                    | 由图表决定        | 传给 ECharts `setOption` 的第二个参数。单独修改此项也会应用到当前配置。                                                                                                                                                                                                                                                                                   |
+| `theme`                | `ChartTheme`                       | 注入值或 `'seer'` | ECharts 主题名或主题对象。变化时重建实例。                                                                                                                                                                                                                                                                                                                |
+| `onReady`              | `(chart: EChartsType) => void`     | —                 | 创建实例并提交初始 option 后调用。重建时再次调用。                                                                                                                                                                                                                                                                                                        |
+
+加载内容由 DOM 绘制，不包含在 ECharts 导出的图片中。原生旋转动画选项（如 `showSpinner`、`spinnerRadius`）不再改变加载图标。`ChartLoadingOptions` 可从 `@idux/charts` 或 `@idux/charts-core` 导入。
 
 ### 实例访问
 
@@ -115,9 +117,12 @@ const option = {
 
 在 `setup` 中调用 `useChart(options)`，传入配置对象或 ref。将返回的 `containerRef` 绑定到有宽高的 `div`，通过 `chartRef` 访问实例。实例在挂载时创建，在卸载前销毁。ECharts 模块按所用配置注册；直接使用组合式 API 时也需确保渲染器、组件和主题已注册。
 
+将 `loading` 放在响应式配置中即可切换加载状态。「函数用法」示例提供了开关，可查看通用加载图标。
+
 ```vue
 <script setup lang="ts">
-import { seerTheme, useChart } from '@idux/charts'
+import { computed, ref } from 'vue'
+import { seerTheme, useChart, type ChartProps } from '@idux/charts'
 import { TitleComponent } from 'echarts/components'
 import { registerTheme, use } from 'echarts/core'
 import { SVGRenderer } from 'echarts/renderers'
@@ -125,13 +130,17 @@ import { SVGRenderer } from 'echarts/renderers'
 use([TitleComponent, SVGRenderer])
 registerTheme('seer', seerTheme)
 
-const { containerRef } = useChart({
+const loading = ref(false)
+const option = computed<ChartProps>(() => ({
+  loading: loading.value && { text: '图表正在加载中，请稍后...' },
   title: { text: '资产分布' },
   onReady: chart => chart.resize(),
-})
+}))
+const { containerRef } = useChart(option)
 </script>
 
 <template>
+  <button type="button" @click="loading = !loading">切换加载状态</button>
   <div ref="containerRef" style="height: 160px" />
 </template>
 ```
