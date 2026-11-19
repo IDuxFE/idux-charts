@@ -12,7 +12,7 @@ type: page
 npm install @idux/charts echarts lodash-es
 ```
 
-支持 Vue `^2.6.0 || ^3.2.5` 和 ECharts `^5.4.3 || ^6.0.0`。Vue 2.6 还需安装 `@vue/composition-api`（≥ 1.6.2），并在创建应用前注册。
+支持 Vue `^2.6.0 || ^3.2.5` 和 ECharts `^5.4.3 || ^6.1.0`。Vue 2.6 还需安装 `@vue/composition-api`（≥ 1.6.2），并在创建应用前注册。
 
 ```ts
 import Vue from 'vue'

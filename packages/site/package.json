@@ -33,7 +33,7 @@
     "@idux/components": "^2.11.0",
     "@idux/pro": "^2.11.0",
     "echarts": "^6.1.0",
-    "lodash-es": "^4.17.0",
+    "lodash-es": "^4.18.1",
     "vue": "^3.5.44",
     "vue-router": "^5.4.0"
   },
