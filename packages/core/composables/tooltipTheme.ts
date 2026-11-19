@@ -26,7 +26,7 @@ export function createTooltipTheme(getContainer: () => HTMLElement | undefined) 
       if (!options.tooltip) return options
       const prepareTooltip = (tooltip: TooltipComponentOption) => ({
         ...tooltip,
-        className: [tooltip.className, className].filter(Boolean).join(' '),
+        className: [tooltip.className, className, 'ix-chart-tooltip'].filter(Boolean).join(' '),
       })
       return {
         ...options,

@@ -11,11 +11,15 @@ import type { PieChartProps as LegacyPieProps } from './fixtures/usePieOption1_0
 
 // Functions have separate identities in the frozen implementation; compare their
 // output separately, while preserving every serializable option in the comparison.
-const serializable = (option: unknown) => {
+const serializable = (option: unknown, legacy = false) => {
   const result = JSON.parse(JSON.stringify(option))
   // The former tooltip surface now lives in the default theme so dark themes can override it.
   // Resolve theme defaults before comparing the remaining legacy options.
-  if (result.tooltip && result.tooltip.backgroundColor === undefined) {
+  if (
+    result.tooltip &&
+    (result.tooltip.backgroundColor === undefined ||
+      (legacy && result.tooltip.backgroundColor === 'rgba(251, 253, 255, 0.88)'))
+  ) {
     result.tooltip.backgroundColor = seerTheme.tooltip.backgroundColor
   }
   if (result.legend && !Array.isArray(result.legend) && result.legend.icon === undefined) {
@@ -28,6 +32,7 @@ for (const [name, presentation] of [
   ['data only', {}],
   ['title and legend styling', { title: { textStyle: { color: 'red' } }, legend: { show: false } }],
   ['hidden title', { title: null }],
+  ['custom tooltip surface', { tooltip: { backgroundColor: '#123456' } }],
   ['palette and theme', { color: ['red', 'blue'], theme: 'dark' }],
   ['explicit native series', { series: [{ type: 'pie', radius: ['40%', '70%'] }] }],
   [
@@ -64,7 +69,7 @@ for (const [name, presentation] of [
         props.data = [{ name: 'A', value }]
         await nextTick()
         expect(current.automatic.value).toBe(false)
-        const expected = serializable(baseline.value)
+        const expected = serializable(baseline.value, true)
         if (name === 'hidden title') expected.setOptionOpts = { replaceMerge: ['title'] }
         expect(serializable(current.option.value)).toEqual(expected)
         const params = { name: 'A', seriesName: 'Total', value, color: 'red' }
@@ -103,7 +108,7 @@ it('applies injected radius to the native series and still opts into automatic l
   )
   try {
     expect(current.automatic.value).toBe(false)
-    const { radius, ...expected } = serializable(baseline.value)
+    const { radius, ...expected } = serializable(baseline.value, true)
     expected.series[0].radius = radius
     expect(serializable(current.option.value)).toEqual(expected)
     props.align = 'center'
