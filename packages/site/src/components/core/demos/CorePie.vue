@@ -48,7 +48,7 @@ const option: ChartProps = {
 <archive-meta lang="json">
 {
   "title": "饼图",
-  "description": "饼图的配置与使用示例。",
+  "description": "通过 IxChart 配置原生饼图，业务按数值降序传入数据；显式配置中心合计、说明文字和右侧纵向图例。",
   "index": 2
 }
 </archive-meta>

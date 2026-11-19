@@ -22,7 +22,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -147,7 +147,7 @@ const options = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "基础柱状图-横向上方",
-  "description": "用于分类名称较长的场景。分类标签显示在柱条上方，具体数值显示在柱条右侧，无需借助坐标轴估算。",
+  "description": "用于分类名称较长的场景。分类标签显示在柱条上方，具体数值显示在柱条右侧，无需借助坐标轴估算。暗黑模式的数值使用柔和不透明灰色。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 2
 }
 </archive-meta>

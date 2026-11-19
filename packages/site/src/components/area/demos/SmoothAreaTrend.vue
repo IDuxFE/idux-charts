@@ -20,7 +20,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示面积图加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'point',
@@ -171,7 +171,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "平滑面积图",
-  "description": "用平滑连线和条纹填充展示变化趋势。",
+  "description": "单系列使用左侧数值轴、平滑连线和条纹填充展示趋势，支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 1
 }
 </archive-meta>

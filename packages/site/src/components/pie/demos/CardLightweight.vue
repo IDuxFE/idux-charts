@@ -40,7 +40,7 @@ const tooltip: PieChartProps['tooltip'] = {
 <archive-meta lang="json">
 {
   "title": "轻量卡片环形图",
-  "description": "紧凑容器中设置内外半径并声明 align，背景和圆心由组件计算。",
+  "description": "紧凑卡片中展示环形图，数据按数值降序传入；设置内外半径并声明 align，背景和圆心由组件计算。",
   "index": 6
 }
 </archive-meta>

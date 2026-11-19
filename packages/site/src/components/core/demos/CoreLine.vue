@@ -27,7 +27,7 @@ const option: ChartProps = {
 <archive-meta lang="json">
 {
   "title": "折线图",
-  "description": "折线图的配置与使用示例。",
+  "description": "通过 IxChart 配置原生折线图，显式设置绘图区边距，展示左对齐标题和坐标轴。",
   "index": 0
 }
 </archive-meta>

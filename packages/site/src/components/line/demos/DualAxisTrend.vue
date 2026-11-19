@@ -175,7 +175,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "流量对比折线图",
-  "description": "用于在同一个图表中以统一单位和刻度对比两个指标趋势，如对比同一时间段内的“上行流量”与“下行流量”。",
+  "description": "上行和下行流量共用左侧数值轴，以统一单位和刻度对比趋势；支持缩略轴、零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 1
 }
 </archive-meta>

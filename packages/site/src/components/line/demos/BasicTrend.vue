@@ -166,7 +166,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "基础折线图",
-  "description": "用于展示单一数据系列随时间或连续维度的变化趋势，如展示过去 7 天的告警发生趋势、系统 CPU 使用率波动等。底部可配合缩略图进行时间轴的缩放与刷选。",
+  "description": "单系列使用左侧数值轴展示时间趋势，底部缩略轴支持缩放与刷选；可切换零值、单点与区间缺报、参考线、空状态及组件内置加载插图。",
   "index": 0
 }
 </archive-meta>

@@ -195,7 +195,7 @@ const presentation = computed<PieChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "环形图",
-  "description": "业务声明数据和展示文案，组件内置图形装饰、自适应尺寸和图例布局。",
+  "description": "展示环形图、中心合计和自动图例。数据降序传入，缺失项保留原位置；支持零值、缺报、空状态、环形加载插图及重试。",
   "index": 1
 }
 </archive-meta>

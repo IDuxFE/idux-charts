@@ -64,7 +64,7 @@ const total = computed(() => data.value.reduce((sum, item) => sum + (item.value 
 const presentation = computed<PieChartProps>(() => ({
   name: '分类统计',
   legend: {
-    itemGap: 10,
+    itemGap: 32,
     formatter: name => {
       const item = data.value.find(item => item.name === name)
       if (item?.value == null) return `{label|${name}}{value|}{missing|数据缺失 ⓘ}`
@@ -168,7 +168,7 @@ const presentation = computed<PieChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "图例自定义 Formatter",
-  "description": "通过 legend.formatter 自定义图例内容，以数值和百分比展示为例。",
+  "description": "在 720 × 180 容器中通过 legend.formatter 展示数值和百分比，显式设置 32px 图例间距；缺失提示与百分比列右对齐，并支持零值、空状态、加载及重试。",
   "index": 4
 }
 </archive-meta>

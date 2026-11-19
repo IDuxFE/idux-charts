@@ -22,7 +22,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色柱状骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示柱状加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'missing',
@@ -148,7 +148,7 @@ const options = computed<BarChartProps>(() => {
 <archive-meta lang="json">
 {
   "title": "基础柱状图-横向",
-  "description": "用于分类名称较长（如完整的资产IP地址、长路径或长资产名）的场景。横向排布能提供充足的标签展示空间，避免文字被截断或折叠。",
+  "description": "用于分类名称较长（如完整的资产IP地址、长路径或长资产名）的场景。横向排布能提供充足的标签展示空间，避免文字被截断或折叠。默认在柱条右侧显示数值。支持零值、缺报、参考线、空状态及组件内置加载插图。",
   "index": 1
 }
 </archive-meta>

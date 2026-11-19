@@ -20,7 +20,7 @@ const scenarios = [
   {
     key: 'loading',
     label: '加载中',
-    description: '展示灰色骨架和加载文案，保持图表区域的高度。',
+    description: '由组件展示面积图加载插图和文案，保留图表实例与已有数据。',
   },
   {
     key: 'point',
@@ -169,7 +169,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "基础面积图（状态示例）",
-  "description": "用渐变条纹填充展示单系列随时间变化的趋势。",
+  "description": "单系列使用左侧数值轴和渐变条纹填充展示趋势，支持缩略轴、零值、单点与区间缺报、参考线及空状态；loading 使用组件内置面积图插图并保留实例。",
   "index": 0
 }
 </archive-meta>

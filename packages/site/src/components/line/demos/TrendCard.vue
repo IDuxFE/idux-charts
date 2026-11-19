@@ -56,7 +56,7 @@ const option: LineChartProps = {
 <archive-meta lang="json">
 {
   "title": "卡片化展示",
-  "description": "用于仪表盘的数据概览。将图表封装在卡片容器内（可含标题与操作区），图表与图例在卡片内自适应排布，适合大屏或工作台中并排展示多个核心指标趋势。",
+  "description": "在带标题的卡片中对比上行与下行流量，共用左侧数值轴及 Kbps 单位；缩略轴支持缩放与刷选，图表随卡片宽度调整。",
   "index": 7
 }
 </archive-meta>

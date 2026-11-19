@@ -80,7 +80,7 @@ const option = computed<LineChartProps>(() => ({
 <archive-meta lang="json">
 {
   "title": "图例多列排列（以堆叠面积图为例）",
-  "description": "图例优先使用单行，空间不足时排成两行，继续溢出时可滚轮或点击箭头翻页。",
+  "description": "展示堆叠面积图的图例布局：优先单行，空间不足时采用两行及 16px 行间距，列位置保持对齐；超过两行时可点击右侧箭头或滚轮翻页。",
   "index": 3
 }
 </archive-meta>
