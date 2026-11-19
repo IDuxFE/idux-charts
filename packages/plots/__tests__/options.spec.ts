@@ -121,6 +121,47 @@ for (const [name, useOption, token] of [
   })
 }
 
+describe('bar hover layers', () => {
+  it.each([undefined, 0, -5, 8])('keeps the default band below series with z %s', z => {
+    const attrs = {
+      series: [
+        { data: [12], ...(z === undefined ? {} : { z }) },
+        { data: [20], z: 3 },
+      ],
+    }
+    const original = structuredClone(attrs)
+    const { option, wrapper } = setup(useBarOption, {}, attrs)
+    try {
+      for (const series of option.value.series) {
+        expect(option.value.tooltip.axisPointer.z).toBeLessThan(series.z ?? 2)
+      }
+      expect(attrs).toEqual(original)
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
+  it('preserves explicit pointer layers, including array tooltip options', () => {
+    const { option, wrapper } = setup(
+      useBarOption,
+      {},
+      {
+        series: [{ data: [12], z: -3 }],
+        tooltip: [{ axisPointer: { z: 9 } }, { axisPointer: { lineStyle: { width: 24 } } }],
+      },
+    )
+    try {
+      expect(option.value.tooltip[0].axisPointer.z).toBe(9)
+      expect(option.value.tooltip[1].axisPointer).toMatchObject({
+        z: -4,
+        lineStyle: { width: 24 },
+      })
+    } finally {
+      wrapper.unmount()
+    }
+  })
+})
+
 describe('pie option', () => {
   it('does not leak the alignment control into ECharts options', () => {
     const { option, wrapper } = setup(

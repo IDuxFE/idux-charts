@@ -33,6 +33,16 @@ describe('tooltip output', () => {
     expect(html).not.toContain('99')
   })
 
+  it.each([undefined, 0, -5, 8])('keeps stripes above the bar with z %s', z => {
+    const [bar, stripe] = useStripeBarSeries({
+      series: { name: 'Visits', data: [12], ...(z === undefined ? {} : { z }), zlevel: 2 },
+      color: 'red',
+    })
+    expect(stripe!.z).toBeGreaterThan(bar!.z!)
+    expect(stripe!.zlevel).toBe(bar!.zlevel)
+    if (z !== undefined) expect(bar!.z).toBe(z)
+  })
+
   it('keeps stripe overlays silent and aligned with their data series', () => {
     const series = { name: 'Visits', data: [1, 2] }
     const result = useStripeBarSeries({
@@ -47,6 +57,7 @@ describe('tooltip output', () => {
       {
         type: 'pictorialBar',
         silent: true,
+        emphasis: { disabled: false, itemStyle: { opacity: 1 } },
         data: [1, 2],
         symbolOffset: [2, 3],
         symbolSize: [4, 5],
