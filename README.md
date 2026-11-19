@@ -102,6 +102,7 @@ Run `pnpm benchmark:charts` to measure initial rendering, refresh, and zoom in C
 ## 🤝 Contributing
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/IDuxFE/idux-charts/pulls)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
 
 We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.com/IDuxFE/idux/blob/main/packages/site/src/docs/Contributing.en.md) first. You can submit any ideas as [Pull Request](https://github.com/IDuxFE/idux-charts/pulls) or as [GitHub issues](https://github.com/IDuxFE/idux-charts/issues).
 
@@ -110,6 +111,9 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](https://github.c
 ## ☀️ License
 
 [MIT](https://github.com/IDuxFE/idux/blob/main/LICENSE) © 2023-present IDuxFE
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)
 
 ### Visual customization
 
