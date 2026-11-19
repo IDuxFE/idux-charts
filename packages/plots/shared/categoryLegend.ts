@@ -111,6 +111,9 @@ export function createCategoryLegend(
   if (naturalWidth <= width - 10) return { legend: { ...native, type: 'plain' }, height: 28 }
 
   const gap = 6
+  const rowGap = 16
+  // ECharts shares itemGap across axes; add vertical padding to keep columns unchanged.
+  const rowPadding = (rowGap - gap) / 2
   const bottom = 6
   const pagerSpace = 24
   const available = width - 12
@@ -159,7 +162,7 @@ export function createCategoryLegend(
         id: up ? `${idPrefix}-up` : `${idPrefix}-down`,
         type: 'group',
         left: left + legendWidth + 4,
-        bottom: bottom + (up ? rowHeight + gap : 0),
+        bottom: bottom + rowPadding + (up ? rowHeight + rowGap : 0),
         silent: !enabled,
         onclick: () => scrollBy(direction),
         children: [
@@ -212,14 +215,14 @@ export function createCategoryLegend(
         width: labelWidth,
         height: rowHeight,
         lineHeight: rowHeight,
-        padding: 0,
+        padding: [rowPadding, 0],
         overflow: 'truncate',
         lineOverflow: 'truncate',
         backgroundColor: style?.backgroundColor ?? 'transparent',
       },
       data: getData(),
     },
-    height: 2 * rowHeight + gap + bottom + 6,
+    height: 2 * rowHeight + rowGap + 2 * rowPadding + bottom + 6,
     ...(needsPager
       ? {
           pager: getPager(),
@@ -227,7 +230,7 @@ export function createCategoryLegend(
             left,
             bottom,
             width: legendWidth + pagerSpace,
-            height: 2 * rowHeight + gap,
+            height: 2 * rowHeight + rowGap + 2 * rowPadding,
             scrollBy,
           },
         }
