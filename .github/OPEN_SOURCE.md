@@ -79,12 +79,12 @@ broken integration.
 
 ## Dependency updates / 依赖更新
 
-`.github/dependabot.yml` checks npm manifests for the workspace and both
-independent playgrounds, plus GitHub Actions. Updates run weekly on Monday
+`.github/dependabot.yml` checks npm manifests for the workspace, plus GitHub
+Actions. Both independent playgrounds are excluded. Updates run weekly on Monday
 (Asia/Shanghai), with grouped minor/patch updates and a separate Vitest group.
 Actions and npm PR counts are limited to avoid flooding the review queue.
 
-Dependabot 每周一按上海时区检查工作区、两个独立 playground 和 GitHub Actions，
+Dependabot 每周一按上海时区检查工作区和 GitHub Actions，排除两个独立 playground，
 合并次版本、补丁版本更新，并将 Vitest 单独分组；限制并发 PR 数量。
 
 Playwright updates are deliberately excluded: upgrade the root, Vue 2, and Vue 3
@@ -93,6 +93,14 @@ copies together and review screenshot changes as described in
 because declaration tooling depends on the TypeScript 6 compiler API.
 
 Playwright 继续人工同步升级三个精确版本并评审截图基线；TypeScript 主版本升级也保留人工评审。
+
+The playground entry explicitly ignores all dependencies, including security
+update PRs; setting its version PR limit to zero alone would not disable security
+updates. Security alerts remain visible for manual evaluation. Dependabot branch
+pushes skip CI because its pull requests already run the complete CI matrix.
+
+playground 条目明确忽略所有依赖的自动升级 PR，包含安全升级；仅将版本 PR 数量设为零无法禁用安全升级。
+安全告警仍保留供人工评估。Dependabot 分支推送不重复触发 CI，其 PR 仍执行完整检查。
 
 Lockfiles remain untracked. Dependabot's manifest updates do not provide a
 complete, committed transitive dependency graph; inspect security alerts and
