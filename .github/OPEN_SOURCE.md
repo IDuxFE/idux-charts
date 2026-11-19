@@ -108,6 +108,18 @@ To activate Codecov:
 上游 PR 直接尝试上传，不依赖 fork PR 无法读取的上游配置变量；`CODECOV_ENABLED` 控制可信分支推送和 main 验证的上传。
 Fork 和 Dependabot PR 不获取上传令牌，使用公开仓库的无令牌分支上传，同时保留可下载报告。
 
+If Codecov reports a missing base commit, inspect the main validation's upload
+result URL. It must point to `IDuxFE/idux-charts`, not a contributor's fork. The
+upload step explicitly supplies the upstream repository slug, but `CODECOV_TOKEN`
+must still be the upstream repository token (or an authorized organization token).
+After correcting the secret, dispatch **CI** on `main` to upload the missing base
+report; a release workflow rerun is unnecessary.
+
+若提示缺少基线，检查 main 验证中上传日志的结果链接，必须属于 `IDuxFE/idux-charts`，
+不能是个人 fork。上传步骤显式指定仓库，但 `CODECOV_TOKEN` 仍须来自上游仓库
+（或具有对应权限的组织 token）。修正 Secret 后，在 `main` 手动运行 **CI** 补传基线，
+无需重跑 Release 工作流。
+
 `codecov.yml` reports project and changed-code coverage as informational results.
 There is no invented percentage gate or automatic merge policy. Once a stable
 baseline is established, maintainers can review a separate threshold change.
