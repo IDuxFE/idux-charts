@@ -1,5 +1,14 @@
 # @idux/charts
 
+## 1.5.1
+
+### Patch Changes
+
+- 3326895: Require lodash-es 4.18.1 or later and ECharts 6.1.0 or later on the ECharts 6 compatibility line. Update Vue 2/3 playgrounds and packed-consumer tests to the patched dependency versions while retaining Vue 2.6 and legacy ECharts 5 compatibility coverage.
+- Updated dependencies [3326895]
+  - @idux/charts-core@1.5.1
+  - @idux/charts-plots@1.5.1
+
 ## 1.5.0
 
 ### Minor Changes
