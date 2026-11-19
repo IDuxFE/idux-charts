@@ -43,7 +43,7 @@ jobs:
       - name: Upload coverage to Codecov
         if: >-
           github.repository == 'IDuxFE/idux-charts' &&
-          vars.CODECOV_ENABLED == 'true'
+          (github.event_name == 'pull_request' || vars.CODECOV_ENABLED == 'true')
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
         with:
           # Public fork PRs use the action's tokenless fork branch support.
