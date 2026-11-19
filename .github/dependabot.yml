@@ -2,10 +2,9 @@ version: 2
 
 updates:
   - package-ecosystem: npm
-    directories:
-      - /
-      - /playgrounds/vue2
-      - /playgrounds/vue3
+    directory: /
+    exclude-paths:
+      - playgrounds/**
     schedule:
       interval: weekly
       day: monday
@@ -33,6 +32,18 @@ updates:
           - version-update:semver-major
     commit-message:
       prefix: 'chore(deps)'
+
+  # These compatibility fixtures intentionally use older supported versions.
+  # Ignore both version and security-update PRs while retaining security alerts.
+  - package-ecosystem: npm
+    directories:
+      - /playgrounds/vue2
+      - /playgrounds/vue3
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: '*'
 
   - package-ecosystem: github-actions
     directory: /

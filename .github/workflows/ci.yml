@@ -6,7 +6,12 @@ on:
   push:
     # Changesets pushes a temporary branch and then the release PR branch.
     # The release PR gets its checks from pull_request instead.
-    branches-ignore: [main, 'changesets-ghcommit-temp/**', 'changeset-release/**']
+    branches-ignore:
+      - main
+      - 'changesets-ghcommit-temp/**'
+      - 'changeset-release/**'
+      # Dependabot PRs already receive upstream pull_request CI.
+      - 'dependabot/**'
   workflow_dispatch:
   workflow_call:
     secrets:
