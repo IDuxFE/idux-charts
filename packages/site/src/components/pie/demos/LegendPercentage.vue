@@ -67,12 +67,14 @@ const presentation = computed<PieChartProps>(() => ({
     itemGap: 10,
     formatter: name => {
       const item = data.value.find(item => item.name === name)
-      if (item?.value == null) return `{label|${name}}{missing|数据缺失 ⓘ}`
+      if (item?.value == null) return `{label|${name}}{value|}{missing|数据缺失 ⓘ}`
       const percent = total.value ? ((item.value / total.value) * 100).toFixed(1) : '0.0'
       return `{label|${name}}{value|${item.value}}{percent|${percent}%}`
     },
     textStyle: {
       rich: {
+        // 缺失提示沿用百分比列的宽度与右边界，数值列留空。
+        missing: { width: 60, align: 'right' },
         percent: {
           width: 60,
           align: 'right',
