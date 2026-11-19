@@ -31,7 +31,9 @@ to inspect the planned versions before merging a release-bearing PR. Do not use
 `linked` groups for this policy: they do not require every member to be published.
 
 The local pre-push hook runs repository-wide lint and forces a fresh TypeScript
-check. CI runs lint, formatting, types, and unit tests concurrently on Linux. Browser
+check. CI runs lint, formatting, types, and unit tests with coverage concurrently on Linux.
+Coverage reports are retained as artifacts; optional Codecov uploads and other
+community/security integrations are described in [Open source integrations](OPEN_SOURCE.md). Browser
 and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
 with two workers per shard and independent HTML reports. Both Vue playgrounds
 run in separate macOS jobs. The five Vue/ECharts compatibility combinations build
