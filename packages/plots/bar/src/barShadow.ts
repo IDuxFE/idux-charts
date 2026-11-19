@@ -4,11 +4,13 @@ import { color, PRIORITY, registerVisual } from 'echarts/core'
 import type { Color } from 'echarts/core'
 
 const autoShadow = 'auto'
+// Resolved from the final bar geometry in the visual stage, before painting.
+const autoBlur = -1
 const shadowStyle = {
   shadowColor: autoShadow,
-  shadowBlur: 10,
+  shadowBlur: autoBlur,
   shadowOffsetX: 0,
-  shadowOffsetY: -4,
+  shadowOffsetY: 0,
 }
 
 type Series = NonNullable<ChartProps['series']>
@@ -37,14 +39,22 @@ export function installBarShadow() {
     reset(series) {
       const data = series.getData()
       const style = data.getVisual('style')
-      if (style?.shadowColor !== autoShadow) return
-
-      if (data.hasItemVisual()) {
-        data.each(index => {
-          const itemStyle = data.getItemVisual(index, 'style')
-          if (itemStyle !== style) resolveShadow(itemStyle)
-        })
-      }
+      if (!style) return
+      data.each(index => {
+        const itemStyle = data.getItemVisual(index, 'style')
+        if (itemStyle?.shadowColor !== autoShadow && itemStyle?.shadowBlur !== autoBlur) return
+        const resolved = data.ensureUniqueItemVisual(index, 'style')
+        if (resolved.shadowBlur === autoBlur) {
+          const layout = data.getItemLayout(index) as { width: number; height: number } | undefined
+          const size = layout && Math.min(Math.abs(layout.width), Math.abs(layout.height))
+          // SVG shadow filters extend one bounding-box size beyond each edge.
+          // Keep that edge over three Gaussian standard deviations away, so
+          // thin/short bars fade to transparent before the filter clips them.
+          resolved.shadowBlur = size && Number.isFinite(size) ? Math.min(12, size * 0.6) : 0
+        }
+        resolveShadow(resolved)
+      })
+      if (style.shadowBlur === autoBlur) style.shadowBlur = 0
       resolveShadow(style)
     },
   })
