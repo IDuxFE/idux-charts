@@ -1,0 +1,32 @@
+name: FOSSA
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '43 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    if: >-
+      github.repository == 'IDuxFE/idux-charts' &&
+      github.ref == 'refs/heads/main' &&
+      vars.FOSSA_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      # Lockfiles are intentionally untracked. Generate a scan-only lockfile so
+      # FOSSA can resolve the actual workspace dependency graph.
+      - run: pnpm install --lockfile-only --ignore-scripts
+      - uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+          run-tests: true

@@ -1,0 +1,13 @@
+version: 3
+
+project:
+  name: iDux Charts
+  url: https://github.com/IDuxFE/idux-charts
+  link: https://charts.idux.site
+
+paths:
+  exclude:
+    - ./playgrounds
+
+telemetry:
+  scope: off
