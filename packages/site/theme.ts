@@ -65,6 +65,11 @@ export const plotTheme = computed(() => {
   if (!isDark.value) return {}
   const t = themeTokens.value
   return {
+    mapAreaColor: '#30445B',
+    mapBorderColor: '#53677E',
+    mapEmptyColor: '#1C2F44',
+    mapLabelBackgroundColor: t.colorContainerBg,
+    mapShadowColor: '#0B121D',
     textColor: t.colorText,
     secondaryTextColor: t.colorTextInfo,
     mutedColor: t.colorFillContainerBg,

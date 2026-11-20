@@ -96,7 +96,11 @@
     },
     "./types.d.ts": "./types.d.ts",
     "./dist/*": "./dist/*",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./map": {
+      "types": "./dist/map.d.ts",
+      "import": "./dist/map.js"
+    }
   },
   "typesVersions": {
     "*": {
@@ -120,6 +124,9 @@
       ],
       "liquid-fill": [
         "dist/liquid-fill.d.ts"
+      ],
+      "map": [
+        "dist/map.d.ts"
       ]
     }
   }

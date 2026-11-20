@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import type { LibraryOptions } from 'vite'
 
-const plots = ['bar', 'line', 'pie', 'radar', 'gauge', 'liquid-fill']
+const plots = ['bar', 'line', 'pie', 'radar', 'gauge', 'liquid-fill', 'map']
 
 export function chartEntries(
   directory: string,

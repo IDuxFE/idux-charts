@@ -33,10 +33,11 @@ describe('category line option', () => {
     )
     const series = Array.from({ length: palette.length + 2 }, () => ({ data: [1, 2, 3, 4, 5, 6] }))
     const option = build({}, { series })
-    expect(convertArray(option.series).map(line => line.itemStyle?.color)).toEqual([
-      ...palette,
-      ...palette.slice(0, 2),
-    ])
+    expect(
+      convertArray(option.series).map(line =>
+        line.type === 'line' ? line.itemStyle?.color : undefined,
+      ),
+    ).toEqual([...palette, ...palette.slice(0, 2)])
   })
 
   it('marks an isolated gap without reporting an interpolated value in the tooltip', () => {
