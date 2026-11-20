@@ -5,6 +5,11 @@ import type { ChartProps } from '@idux/charts-core'
 
 /** Visual defaults for built-in plot layouts. */
 export interface PlotTheme {
+  mapAreaColor?: string
+  mapBorderColor?: string
+  mapEmptyColor?: string
+  mapShadowColor?: string
+  mapLabelBackgroundColor?: string
   color?: string
   palette?: string[]
   textColor?: string

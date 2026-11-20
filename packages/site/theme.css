@@ -109,3 +109,7 @@
   color: var(--site-color-text);
   background-color: var(--site-color-container-bg);
 }
+
+html[data-theme='dark'] {
+  --map-demo-background: #141b27;
+}

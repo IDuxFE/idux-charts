@@ -21,6 +21,7 @@ import {
   IxRadarChart,
   IxLiquidFillChart,
   IxGaugeChart,
+  IxMapChart,
 } from '@idux/charts'
 
 const plugins = [
@@ -31,6 +32,7 @@ const plugins = [
   IxRadarChart,
   IxLiquidFillChart,
   IxGaugeChart,
+  IxMapChart,
 ] as unknown as Plugin[]
 
 loadDemoFont().catch(() => {})

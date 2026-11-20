@@ -1,4 +1,7 @@
 import type {
+  MapSeriesOption,
+  ScatterSeriesOption,
+  LinesSeriesOption,
   BarSeriesOption,
   LineSeriesOption,
   PieSeriesOption,
@@ -7,6 +10,8 @@ import type {
   CustomSeriesOption,
 } from 'echarts/charts'
 import type {
+  GeoComponentOption,
+  VisualMapComponentOption,
   RadarComponentOption,
   GraphicComponentOption,
   DatasetComponentOption,
@@ -112,6 +117,11 @@ type CommonComponentOption =
 export type BaseChartOption<T extends ComponentOption> = ComposeOption<CommonComponentOption | T>
 
 export type ChartOption = BaseChartOption<
+  | GeoComponentOption
+  | VisualMapComponentOption
+  | MapSeriesOption
+  | ScatterSeriesOption
+  | LinesSeriesOption
   | RadarComponentOption
   | RadarSeriesOption
   | GaugeSeriesOption

@@ -26,14 +26,15 @@ Vue.use(VueCompositionAPI)
 
 ## 图表组件
 
-| 组件                | 图表           |
-| ------------------- | -------------- |
-| `IxBarChart`        | 柱状图         |
-| `IxLineChart`       | 折线图、面积图 |
-| `IxPieChart`        | 饼图、环形图   |
-| `IxRadarChart`      | 雷达图         |
-| `IxGaugeChart`      | 仪表盘         |
-| `IxLiquidFillChart` | 水波图         |
+| 组件                | 图表                     |
+| ------------------- | ------------------------ |
+| `IxBarChart`        | 柱状图                   |
+| `IxLineChart`       | 折线图、面积图           |
+| `IxPieChart`        | 饼图、环形图             |
+| `IxRadarChart`      | 雷达图                   |
+| `IxGaugeChart`      | 仪表盘                   |
+| `IxMapChart`        | 地图（状态、密度、飞线） |
+| `IxLiquidFillChart` | 水波图                   |
 
 此外还导出基础组件 `IxChart`，可直接传入 ECharts 配置。
 
@@ -61,13 +62,13 @@ const option: LineChartProps = {
 
 图表组件会注册自身所需的 ECharts 模块。组件也支持全局注册：Vue 3 使用 `app.use(IxLineChart)`，Vue 2 使用 `Vue.use(IxLineChart)`。
 
-ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及类型。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge` 和 `liquid-fill`。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。总入口会注册全套图表模块。
+ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及类型。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge`、`liquid-fill` 和 `map`。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。总入口会注册全套图表模块。
 
 ## 配置与主题
 
-- `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption` 提供纯配置构建函数。
+- `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption`、`createMapOption` 提供纯配置构建函数。
 - `BAR_CHART_TOKEN`、`LINE_CHART_TOKEN`、`PIE_CHART_TOKEN` 通过 Vue `provide` 为对应图表的原生和内置布局提供默认配置。
-- 分类 Bar、Line / Area、自动 Pie、Radar、Gauge 和 LiquidFill 支持 `plotTheme`。用 `PLOT_THEME_TOKEN` 提供响应式默认值，直接调用纯配置构建函数时传入所需的 `plotTheme`。
+- 分类 Bar、Line / Area、自动 Pie、Radar、Gauge、LiquidFill 和 Map 支持 `plotTheme`。用 `PLOT_THEME_TOKEN` 提供响应式默认值，直接调用纯配置构建函数时传入所需的 `plotTheme`。
 - 配置对象按字段合并，数组整体替换。所有组件的模板 ref 均可调用 `getEChartsInstance()`。
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。
