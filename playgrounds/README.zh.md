@@ -82,3 +82,5 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 主题页还覆盖 `CHART_THEME_TOKEN`：修改注入的 ECharts 主题对象、验证实例重建、设置组件显式主题并恢复继承。Vue 2 和 Vue 3 均使用打包产物执行这些检查。
 
 根 E2E 本地使用 4 个 worker，CI 每个分片使用 2 个 worker，同一文件内的独立用例也并行运行。两个 playground 各使用 2 个 worker。`pnpm test:playgrounds` 只构建、打包一次库，并行安装两个应用，再使用独立端口并行执行测试。可通过 `pnpm playgrounds:prepare vue2` 或 `vue3` 只准备一个应用。资源较少时可用 `pnpm test:e2e --workers=2` 降低并发。不要在同一 checkout 同时启动多个根 E2E 命令，它们共享构建目录、预览端口和报告目录；CI 分片使用独立 runner。
+
+地图生命周期、geo 视角保留、总入口／子入口导出和生成函数类型由独立打包消费端矩阵覆盖：执行 `pnpm build:lib` 后运行 `pnpm test:declarations --runtime`。矩阵包含 Vue 2.6／2.7／3 及 ECharts 5／6；上述 playground 页面未包含地图示例。

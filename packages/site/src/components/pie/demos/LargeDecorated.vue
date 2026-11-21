@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useThemeToken } from '@idux/components/theme'
+import { seerColorsForRisk } from '@idux/charts'
 import type { PieChartProps } from '@idux/charts'
-import { graphic } from 'echarts/core'
+import { color, graphic } from 'echarts/core'
 import type { PieSeriesOption } from 'echarts/charts'
 
 type DataItem = PieSeriesOption['data']
@@ -56,21 +57,30 @@ const data = [
     value: 45,
     name: '高危',
     itemStyle: {
-      color: getLinearGradient('rgba(104, 159, 255, 1)', 'rgba(104, 159, 255, 0.2)'),
+      color: getLinearGradient(
+        seerColorsForRisk[1]!,
+        color.modifyAlpha(seerColorsForRisk[1]!, 0.2),
+      ),
     },
   },
   {
     value: 124,
     name: '中危',
     itemStyle: {
-      color: getLinearGradient('rgba(255, 146, 69, 1)', 'rgba(255, 146, 69, 0.2)'),
+      color: getLinearGradient(
+        seerColorsForRisk[2]!,
+        color.modifyAlpha(seerColorsForRisk[2]!, 0.2),
+      ),
     },
   },
   {
     value: 118,
     name: '低危',
     itemStyle: {
-      color: getLinearGradient('rgba(219, 76, 53, 1)', 'rgba(219, 76, 53, 0.2)'),
+      color: getLinearGradient(
+        seerColorsForRisk[3]!,
+        color.modifyAlpha(seerColorsForRisk[3]!, 0.2),
+      ),
     },
   },
 ]

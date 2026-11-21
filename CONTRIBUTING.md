@@ -30,9 +30,9 @@ pnpm check
 pnpm build:lib
 ```
 
-Add regression coverage for behavior changes. Run relevant Playwright tests for
+Add regression coverage for behavior changes, including failed initialization, control-only updates, interaction preservation, removed configuration, and disposal when relevant. Run relevant Playwright tests for
 browser or visual changes and review intentional screenshot changes. Close any
-browser sessions you start. For public API changes, verify the packed consumers
+browser sessions you start, then verify no owned Chrome/Chromium parent or child processes remain. Confirm ownership before cleaning up leftovers. For public API changes, verify the packed consumers
 with `pnpm test:declarations`; use `--runtime` for browser runtime validation.
 See [CI and releases](.github/RELEASING.md) for the complete compatibility matrix,
 visual baseline workflow, and browser test commands.

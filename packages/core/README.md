@@ -52,7 +52,7 @@ const option: ChartProps = {
 </template>
 ```
 
-`IxChart` takes ECharts options directly through `v-bind`, rather than a separate `option` prop. It registers the SVG renderer, Grid, Legend, Tooltip, Title, DataZoom, LabelLayout, and UniversalTransition. Register custom series or additional components with `use` from `echarts/core`. For Canvas, also register `CanvasRenderer` and pass `initOption: { renderer: 'canvas' }`.
+`IxChart` takes ECharts options directly through `v-bind`, rather than a separate `option` prop. It registers the SVG renderer, Grid, Legend, Tooltip, Title, DataZoom, MarkLine, MarkPoint, MarkArea, LabelLayout, and UniversalTransition. Register custom series or additional components with `use` from `echarts/core`. For Canvas, also register `CanvasRenderer` and pass `initOption: { renderer: 'canvas' }`.
 
 ## Core API
 
@@ -71,9 +71,11 @@ This package does not ship a separate CSS file. Shared HTML tooltip styles are p
 
 Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing `theme` or `initOption` recreates the instance and restores compatible zoom ranges and legend selections. Explicit changes to the range or selection take precedence. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).
 
+Compatible geo maps retain user zoom and center across full updates and theme rebuilds. Matching uses `geo.id`, or array position for anonymous maps; geometry, projection, bounds, or explicit viewport changes use the new configuration. If initial setup fails, the created instance is disposed and the original error reaches Vue error handling; `onReady` is not called. Remount after correcting the configuration.
+
 ## Loading
 
-Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge and LiquidFill select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
+Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge, LiquidFill, and Map select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
 
 Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.
 

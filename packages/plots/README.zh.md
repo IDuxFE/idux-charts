@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供六类图表组件及配置构建工具。
+iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供七类图表组件及配置构建工具。
 
 如需统一入口及共享提示框样式，可使用 [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.zh.md)。
 
@@ -35,8 +35,10 @@ Vue.use(VueCompositionAPI)
 | `IxPieChart`        | 饼图、环形图             |
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |
-| `IxMapChart`        | 地图（状态、密度、飞线） |
+| `IxMapChart`        | 地图（区域、节点、线路） |
 | `IxLiquidFillChart` | 水波图                   |
+
+渲染 `IxMapChart` 前通过 `registerMap(name, geoJSON)` 注册几何数据。地图由原生 `geo`、`series`、`visualMap` 组合，不使用 `mode` 属性。可选的 `createMapRegions`、`createMapNodes`、`createMapLines`、`createMapVisualMap` 返回普通 ECharts 配置。几何由应用管理，不打入组件包；`validateMapData({ nodes, routes, regions })` 可提前检查无效坐标、缺失端点和重复标识。
 
 ## 快速上手
 
@@ -76,11 +78,13 @@ ESM 项目可通过 [`@idux/charts` 的图表子入口](https://github.com/IDuxF
 
 在分类末尾追加数据且缩放配置未变时，柱状图、折线图和面积图会保留回看窗口。末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
 
+地图在数据刷新、清理系列及主题重建时保留兼容底图的缩放和中心位置。多底图建议提供稳定的 `geo.id`；修改底图、投影或显式视角时采用新配置。生成节点、线路和区域的函数不读取主题注入，需显式传入 `plotTheme`，并在数据或主题变化时重新调用。
+
 图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。
 
 ## 加载状态
 
-所有 Plot 组件均支持 `:loading="pending"`，自动选择横向/竖向柱图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘或水波图的加载图标，并适配深浅主题。加载期间保留实例及已有数据，无需自行绘制占位内容。
+所有 Plot 组件均支持 `:loading="pending"`，自动选择横向/竖向柱图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘、水波图或地图的加载图标，并适配深浅主题。加载期间保留实例及已有数据，无需自行绘制占位内容。
 
 可传入 `pending && { text: '正在加载...' }` 定制文案；完整配置和导出限制见 [Core 加载状态](https://github.com/IDuxFE/idux-charts/blob/main/packages/core/README.zh.md#加载状态)。
 

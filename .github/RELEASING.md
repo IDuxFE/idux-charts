@@ -67,7 +67,7 @@ Vue 2.7 and Vue 3 check declarations with
 bindings, data, computed values, and methods. Vue 2.6 checks the adapter prop
 aliases with its existing `skipLibCheck: true` boundary. Pass `--runtime` to also
 test the packed JS in Chromium: rendering, data updates, theme recreation and
-zoom preservation, chart container attributes, disposal, and remounting. It also
+zoom preservation (including geo center/zoom after map refreshes and theme rebuilds), chart container attributes, disposal, and remounting across all seven plot components plus the base chart and area layout. It also
 checks composable-only imports, shared instances across aggregate and modular
 imports, and that the line subpath excludes unrelated series and produces a
 smaller gzip-compressed JS bundle. Each compatibility CI job runs these checks.

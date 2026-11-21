@@ -52,10 +52,10 @@ const data = [123, 324, 156]
 
 ## 应用主题
 
-| 配置                             | 用途                                                                                                                                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `theme` / `CHART_THEME_TOKEN`    | ECharts 初始化主题。优先级为组件 `theme` → 注入主题 → 内置 `seer`。变更主题会重建实例并再次触发 `onReady`。缩放和图例配置兼容时沿用用户状态，新的显式配置优先。                      |
-| `plotTheme` / `PLOT_THEME_TOKEN` | 分类柱状图、分类折线图和面积图、饼图自动布局、雷达图、仪表盘及水波图的视觉默认值。各图表按需使用字段。局部字段覆盖注入值，`undefined` 继承，色板数组整体替换。更新该配置会保留实例。 |
+| 配置                             | 用途                                                                                                                                                                                       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `theme` / `CHART_THEME_TOKEN`    | ECharts 初始化主题。优先级为组件 `theme` → 注入主题 → 内置 `seer`。变更主题会重建实例并再次触发 `onReady`。缩放和图例配置兼容时沿用用户状态，新的显式配置优先。                            |
+| `plotTheme` / `PLOT_THEME_TOKEN` | 分类柱状图、分类折线图和面积图、饼图自动布局、雷达图、仪表盘、水波图及地图的视觉默认值。各图表按需使用字段。局部字段覆盖注入值，`undefined` 继承，色板数组整体替换。更新该配置会保留实例。 |
 
 在图表的父组件 `setup` 中提供响应式主题。Vue 2.6 从 `@vue/composition-api` 导入组合式 API。
 
@@ -84,7 +84,7 @@ provide(
 )
 ```
 
-组件可用 `:plot-theme="{ textColor: '#eeeeee' }"` 覆盖所用字段。独立调用 `createRadarOption`、`createGaugeOption` 或 `createLiquidFillOption` 时，请直接传入 `plotTheme`。
+组件可用 `:plot-theme="{ textColor: '#eeeeee' }"` 覆盖所用字段。独立调用 `createRadarOption`、`createGaugeOption` 、`createLiquidFillOption` 或 `createMapOption` 时，请直接传入 `plotTheme`。
 
 | `PlotTheme` 字段                       | 用途                                                 |
 | -------------------------------------- | ---------------------------------------------------- |
@@ -94,6 +94,12 @@ provide(
 | `mutedColor`、`borderColor`            | 中性色和边框色，用于占位、轨道或轴线等元素。         |
 | `splitLineColor`、`splitAreaColor`     | 分隔线和背景颜色。                                   |
 | `errorColor`、`missingBackgroundColor` | 异常色，以及分类柱状图、折线图和面积图的缺报底纹色。 |
+
+地图还使用 `mapAreaColor`、`mapBorderColor`、`mapEmptyColor`、`mapShadowColor`、`mapLabelBackgroundColor` 定义区域、边界、缺失值、阴影和标记文字的背景。地图的节点、线路和区域生成函数需显式传入同一份 `plotTheme`，在 `computed` 中随数据或主题重新生成。
+
+## 绘制地图
+
+先用 `registerMap(name, geoJSON)` 注册应用提供的几何，再通过 `geo: { map: name }` 指定底图。`series` 可组合 `createMapNodes`、`createMapLines` 的结果与手写的原生系列；`geo.regions` 可用 `createMapRegions` 生成。地图没有 `mode` 属性，也不内置几何或数据请求。完整示例和数据校验见<a href="../components/map">地图 API</a>。
 
 ## 自定义提示框
 
@@ -110,6 +116,7 @@ provide(
 - **数据和分类轴**。对象按字段合并，数组整体替换。传入 `series[].data` 时，每个系列应提供完整数据。分类 Bar 和 Line / Area 的分类标签由 `categories` 决定。原生 Pie 的默认合计按最终生效的系列数据计算，可用 `title: null` 清除标题。
 - **Tooltip**。调用 `useTooltipsFormatter` 时传原始文本，由工具统一转义。需要渲染自定义 HTML 时，可直接提供 `tooltip.formatter`。Bar 和 Line 原生布局的默认 Tooltip 向 `tooltip.valueFormatter` 传入数值轴上的测量值。时间轴数据如 `['2026-01-01', 10]` 会传入 `10`。
 - **默认配置和更新**。`BAR_CHART_TOKEN` 和 `LINE_CHART_TOKEN` 也会作用于分类布局。内置布局在删除配置时会应用完整配置清理旧图形。即使显式设置 `notMerge: false`，需要清理时仍会替换更新。单独修改 `setOptionOpts` 也会应用到当前配置。
+- **地图交互**。兼容底图在刷新数据、删除系列及主题重建后保留缩放和中心位置；多底图使用稳定的 `geo.id`。修改底图、投影或显式视角时采用新配置。
 - **背景色和实例**。Gauge 和 LiquidFill 兼容旧的 `backgroundColor`。新代码可分别使用 `trackColor` 和 `containerColor`，整张图的背景使用 `chartBackgroundColor`。组件挂载后可通过模板 ref 调用 `getEChartsInstance()`。切换主题或初始化配置后，使用 `onReady` 回调或模板 ref 获取新实例。
 
 - **加载状态**。`loading` 使用内置 DOM 图标及文案，不包含在 ECharts 导出的图片中。原生旋转动画选项（如 `showSpinner`、`spinnerRadius`）不再改变图标，可通过 `icon` 指定图片 URL 或 SVG 源码。

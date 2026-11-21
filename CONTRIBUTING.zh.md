@@ -29,8 +29,8 @@ pnpm check
 pnpm build:lib
 ```
 
-行为变更应补充回归测试。浏览器或视觉变更需运行相关 Playwright 测试，并检查有意修改的
-截图基线；关闭自己启动的浏览器。公共 API 变更通过 `pnpm test:declarations`
+行为变更应补充回归测试，按需覆盖初始化失败、控制属性独立更新、交互保留、配置删除及卸载清理。浏览器或视觉变更需运行相关 Playwright 测试，并检查有意修改的
+截图基线；关闭自己启动的浏览器，并复查 Chrome/Chromium 主进程和子进程；确认归属后再清理残留。公共 API 变更通过 `pnpm test:declarations`
 检查打包后的消费端，加入 `--runtime` 可进一步验证浏览器运行行为。
 完整兼容矩阵、视觉基线流程和浏览器测试命令见 [CI 与发布指南](.github/RELEASING.md)。
 

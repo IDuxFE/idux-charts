@@ -105,20 +105,19 @@ const options = computed<BarChartProps>(() => {
       </IxRadio>
     </IxRadioGroup>
     <p class="bar-demo-description">{{ description }}</p>
-    <IxEmpty
-      v-if="selected === 'empty'"
-      simple
-      class="bar-demo-empty"
-      description="未配置数据源，请先配置采集任务"
-    />
-    <IxBarChart
-      v-else
-      :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
-      :categories="labels"
-      :data="data"
-      v-bind="options"
-      style="width: 100%; height: 300px"
-    />
+    <div class="bar-demo-chart">
+      <div v-if="selected === 'empty'" class="bar-demo-placeholder">
+        <IxEmpty simple description="未配置数据源，请先配置采集任务" />
+      </div>
+      <IxBarChart
+        v-else
+        :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
+        :categories="labels"
+        :data="data"
+        v-bind="options"
+        style="width: 100%; height: 100%"
+      />
+    </div>
   </div>
 </template>
 
@@ -137,10 +136,16 @@ const options = computed<BarChartProps>(() => {
   color: var(--ix-color-text-info, #6a707d);
   line-height: 22px;
 }
-.bar-demo-empty {
+.bar-demo-chart {
   width: 100%;
   height: 300px;
-  margin: 0;
+}
+.bar-demo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 </style>
 
