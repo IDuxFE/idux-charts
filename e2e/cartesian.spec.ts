@@ -3,7 +3,7 @@ import { test, expect } from './helpers'
 import { fixtureBaseURL } from './environment'
 
 async function showTooltip(page: Page, index: number, dark: boolean) {
-  const chart = page.locator(`.chart-${index}`)
+  const chart = page.locator(`.chart-${index} [_echarts_instance_]`)
   // Theme changes recreate the instance; an SVG root alone is not evidence
   // that lazy setOption has rendered the new series.
   await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
