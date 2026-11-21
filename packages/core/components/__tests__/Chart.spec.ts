@@ -5,6 +5,7 @@ import {
   createTextVNode,
   defineComponent,
   Fragment,
+  Text,
   h,
   nextTick,
   ref,
@@ -123,3 +124,10 @@ it.each([
     if (visible) expect(wrapper.get('.ix-chart-content').text()).toBe(value)
   },
 )
+
+it('does not mask the chart for fragments or text nodes without children', () => {
+  const wrapper = mount(IxChart, { slots: { default: () => [h(Fragment), h(Text)] } })
+  wrappers.push(wrapper)
+  expect(wrapper.find('.ix-chart-overlay').exists()).toBe(false)
+  expect(wrapper.find('[data-chart]').exists()).toBe(true)
+})
