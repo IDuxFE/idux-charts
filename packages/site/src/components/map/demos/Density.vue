@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { IxMapChart, registerMap, type MapDataItem } from '@idux/charts'
+import { computed, inject, onBeforeUnmount, ref, unref, watch } from 'vue'
+import {
+  IxMapChart,
+  PLOT_THEME_TOKEN,
+  useTooltipsFormatter,
+  registerMap,
+  defaultMapPieces,
+  createMapRegions,
+  createMapVisualMap,
+  type MapRegionItem,
+} from '@idux/charts'
 import china from '../assets/china.json'
 // 世界地图来源：https://echarts.apache.org/examples/data/asset/geo/world.json
 import world from '../assets/world.json'
 
+// 注册 GeoJSON 地图边界；名称必须与模板中的 map 一致。通常在应用初始化时注册一次。
 registerMap('china', china as Parameters<typeof registerMap>[1])
-registerMap('world', world as unknown as Parameters<typeof registerMap>[1])
+registerMap('world', world as Parameters<typeof registerMap>[1])
 
 const worldNames = {
   'United States': '美国',
@@ -16,97 +26,119 @@ const worldNames = {
   China: '中国',
 }
 
-const chinaDensity: MapDataItem[] = Object.entries({
+// 仅为部分区域提供数据；未列出的区域显示缺失底色，value: 0 的区域仍使用零值色阶。
+const chinaDensity: MapRegionItem[] = Object.entries({
   北京: 920,
-  天津: 260,
   河北: 180,
   山西: 0,
   内蒙古: 240,
-  辽宁: 360,
-  吉林: 0,
   黑龙江: 300,
   上海: 860,
   江苏: 780,
   浙江: 650,
-  安徽: 420,
   福建: 580,
-  江西: 0,
   山东: 620,
-  河南: 390,
   湖北: 460,
-  湖南: 120,
   广东: 720,
-  广西: 520,
-  海南: 0,
-  重庆: 330,
   四川: 560,
-  贵州: 480,
   云南: 450,
-  西藏: 125,
-  陕西: 280,
   甘肃: 90,
   青海: 0,
-  宁夏: 0,
   新疆: 267,
-  台湾: 690,
-  香港: 210,
-  澳门: 45,
-}).map(([name, value]) => ({ name, value }))
+}).map(([name, value]) => ({ region: name, value }))
 
-const worldDensity: MapDataItem[] = Object.entries({
+const worldDensity: MapRegionItem[] = Object.entries({
   美国: 330,
   澳大利亚: 530,
   秘鲁: 720,
   哈萨克斯坦: 550,
   中国: 1670,
   Canada: 0,
-  Mexico: 440,
   Brazil: 610,
-  Argentina: 550,
-  Chile: 680,
   Colombia: 890,
   Bolivia: 120,
-  Ecuador: 260,
-  Venezuela: 0,
   'United Kingdom': 860,
   France: 580,
   Germany: 720,
-  Spain: 340,
-  Portugal: 0,
-  Italy: 460,
-  Netherlands: 640,
-  Belgium: 230,
-  Switzerland: 110,
   Norway: 0,
-  Sweden: 490,
-  Finland: 640,
-  Poland: 380,
-  Ukraine: 210,
   Russia: 0,
-  Turkey: 560,
   'Saudi Arabia': 420,
-  'United Arab Emirates': 780,
   Iran: 160,
   Egypt: 310,
   'South Africa': 690,
   Kenya: 180,
-  Nigeria: 470,
   Morocco: 0,
   India: 180,
   Japan: 760,
-  Korea: 820,
   Mongolia: 0,
   Indonesia: 320,
-  Malaysia: 440,
-  Thailand: 580,
-  Vietnam: 240,
-  Philippines: 90,
-  Pakistan: 0,
   'New Zealand': 630,
-}).map(([name, value]) => ({ name, value }))
+}).map(([name, value]) => ({ region: name, value }))
 
+// 内置蓝色色阶同样由 createMapPieces 根据阈值自动生成，无需手写区间和图例文案。
+// 区域填色和图例共用这份配置；0 与缺失数据使用不同颜色。
+const pieces = defaultMapPieces
+
+// 配置生成函数是纯函数：显式传入当前主题，并用 computed 在主题或数据变化时重新生成配置。
+const plotTheme = inject(PLOT_THEME_TOKEN, {})
 const scope = ref('china')
 const state = ref('normal')
+let reloadTimer: ReturnType<typeof setTimeout> | undefined
+const cancelReload = () => {
+  clearTimeout(reloadTimer)
+  reloadTimer = undefined
+}
+const reload = () => {
+  cancelReload()
+  state.value = 'loading'
+  reloadTimer = setTimeout(() => {
+    state.value = 'normal'
+    reloadTimer = undefined
+  }, 800)
+}
+watch(state, next => {
+  if (next !== 'loading') cancelReload()
+})
+onBeforeUnmount(cancelReload)
+// 仅零值状态改变业务数据；切换加载状态时保持配置稳定，避免重置用户缩放和拖动的位置。
+const isZero = computed(() => state.value === 'zero')
+// geo 管理地图底图；regions 为指定区域设置填色、名称和悬停提示，不需要额外的 map 系列。
+const geo = computed(() => ({
+  map: scope.value,
+  // 未提供数据的区域显示「-」，与真实数值 0 区分；已有数据使用 regions 自己的提示。
+  tooltip: {
+    formatter: (params: { name?: string }) =>
+      useTooltipsFormatter('资产总数', [
+        { name: params.name ?? '', value: '-', color: unref(plotTheme).color ?? '#4089FF' },
+      ]),
+  },
+  // 密度图使用平面底图：无数据区域为中性色，并关闭地图边缘阴影。
+  itemStyle: {
+    areaColor: unref(plotTheme).mapEmptyColor ?? '#F0F3F7',
+    shadowBlur: 0,
+    shadowOffsetY: 0,
+  },
+  // 底图也设置标签规则，保证未提供业务数据的区域与其他区域一致。
+  label: { show: scope.value === 'china' },
+  emphasis: {
+    label: { show: scope.value === 'china', color: unref(plotTheme).textColor ?? '#1C4EFF' },
+  },
+  ...(scope.value === 'world' ? { nameMap: worldNames } : {}),
+  regions: createMapRegions(
+    (scope.value === 'china' ? chinaDensity : worldDensity).map(item =>
+      isZero.value ? { ...item, value: 0 } : item,
+    ),
+    {
+      plotTheme: unref(plotTheme),
+      pieces, // 生成函数根据 value 匹配区间，写入各区域的原生 itemStyle。
+      label: { show: scope.value === 'china' }, // 世界地图区域密集，隐藏名称。
+      metricName: '资产总数',
+      unit: '台',
+    },
+  ),
+}))
+// 区域颜色已由 regions 设置；此原生 visualMap 仅展示色阶，默认不关联任何 series。
+const visualMap = computed(() => createMapVisualMap(pieces, { plotTheme: unref(plotTheme) }))
 </script>
 <template>
   <IxSpace vertical block :size="16">
@@ -119,31 +151,42 @@ const state = ref('normal')
         <IxRadio key="empty">空状态</IxRadio><IxRadio key="loading">加载中</IxRadio>
       </IxRadioGroup>
     </IxSpace>
-    <IxEmpty
-      simple
-      v-if="state === 'empty'"
-      description="暂无数据"
-      style="height: 560px; display: grid; place-content: center"
-    />
-    <IxMapChart
-      v-else
-      roam
-      :map="scope"
-      mode="density"
-      :data="
-        (scope === 'china' ? chinaDensity : worldDensity).map(item =>
-          state === 'zero' ? { ...item, value: 0 } : item,
-        )
-      "
-      :geo="scope === 'world' ? { nameMap: worldNames } : {}"
-      :showLabel="scope === 'china'"
-      :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-      metricName="资产总数"
-      unit="台"
-      style="height: 560px; width: 100%"
-    />
+    <div class="map-density-chart">
+      <div v-if="state === 'empty'" class="map-density-placeholder">
+        <IxEmpty simple>
+          <template #description>
+            <IxSpace align="center">
+              <span>暂无数据</span>
+              <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
+            </IxSpace>
+          </template>
+        </IxEmpty>
+      </div>
+      <!-- 密度通过 geo.regions 填色即可，无需提供 series；默认开启拖动和滚轮缩放。-->
+      <IxMapChart
+        v-else
+        :geo="geo"
+        :visualMap="visualMap"
+        :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
+        style="height: 100%; width: 100%"
+      />
+    </div>
   </IxSpace>
 </template>
+
+<style scoped>
+.map-density-chart {
+  width: 100%;
+  height: 560px;
+}
+.map-density-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+</style>
 
 <archive-meta lang="json">
 {

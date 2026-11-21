@@ -1,3 +1,4 @@
+import type { ChartOption } from '@idux/charts-core'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
 import { plotInstanceMethods, usePlotRender } from '../../shared/usePlotRender'
@@ -13,12 +14,7 @@ export default withChartProps<MapChartProps>()(
       return usePlotRender(
         context,
         () => props,
-        input =>
-          createMapOption({
-            ...input,
-            roam: input.roam === '' ? true : input.roam,
-            showLabel: input.showLabel === '' ? true : input.showLabel,
-          } as MapChartProps),
+        input => createMapOption(input as MapChartProps) as ChartOption,
         loadingIcon,
       )
     },
