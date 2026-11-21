@@ -13,7 +13,7 @@ const option: ChartProps = {
 
 <template>
   <IxSpace vertical block>
-    <IxRadioGroup v-model:value="state" buttoned>
+    <IxRadioGroup v-model:value="state" buttoned size="sm">
       <IxRadio key="chart">图表</IxRadio>
       <IxRadio key="empty">空状态</IxRadio>
       <IxRadio key="custom">自定义内容</IxRadio>
@@ -29,10 +29,17 @@ const option: ChartProps = {
           </IxSpace>
         </template>
       </IxEmpty>
-      <div v-else-if="state === 'custom'" class="core-slot-custom">
-        <p>自定义说明和操作，也可以直接放入默认插槽。</p>
-        <IxButton @click="state = 'chart'">查看图表</IxButton>
-      </div>
+      <IxSpace
+        v-else-if="state === 'custom'"
+        vertical
+        align="center"
+        justify="center"
+        :size="12"
+        class="core-slot-custom"
+      >
+        <span class="core-slot-description">自定义说明和操作，也可以直接放入默认插槽。</span>
+        <IxButton size="xs" @click="state = 'chart'">查看图表</IxButton>
+      </IxSpace>
     </IxChart>
   </IxSpace>
 </template>
@@ -48,11 +55,13 @@ const option: ChartProps = {
 }
 
 .core-slot-custom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  background: color-mix(in srgb, var(--ix-color-container-bg) 90%, transparent);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.core-slot-description {
+  font-size: 12px;
 }
 </style>
 
