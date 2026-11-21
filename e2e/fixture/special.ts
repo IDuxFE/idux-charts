@@ -91,7 +91,7 @@ createApp({
 Object.assign(window, {
   specialState: () =>
     ['radar', 'gauge', 'segmented', 'liquid'].map(name => {
-      const element = document.querySelector(`.${name}`) as HTMLElement
+      const element = document.querySelector(`.${name} [_echarts_instance_]`) as HTMLElement
       const chart = getInstanceByDom(element)
       return { width: chart?.getWidth(), option: chart?.getOption() }
     }),

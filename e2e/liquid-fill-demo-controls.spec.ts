@@ -54,10 +54,11 @@ for (const values of [
 }
 
 test('liquid fill handles empty, reload and loading states', async ({ page }, testInfo) => {
-  const { demo, chart, setValue } = await openLiquid(page)
+  const { demo, chart, chartId, setValue } = await openLiquid(page)
   await page.screenshot({ path: testInfo.outputPath('liquid-fill-examples.png'), fullPage: true })
   await demo.getByText('空状态', { exact: true }).click()
-  await expect(chart).toHaveCount(0)
+  await expect(chart).toHaveAttribute('_echarts_instance_', chartId!)
+  await expect(demo.locator('.ix-chart-overlay')).toContainText('暂无数据')
   await demo.getByRole('button', { name: '重新加载' }).click()
   await expect(demo.getByRole('status')).toHaveAttribute('aria-busy', 'true')
   await expect(chart.locator('svg')).toBeVisible()
