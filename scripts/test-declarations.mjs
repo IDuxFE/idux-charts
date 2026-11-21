@@ -515,6 +515,8 @@ instance.$emit('change', 1);
 instance.$emit('change', 'wrong');
 // @ts-expect-error undeclared events must be rejected
 instance.$emit('missing', 1);
+declare const coreInstance: InstanceType<typeof IxChart>;
+const coreSlotNodes: VNode[] | undefined = coreInstance.${scopedSlots}.default?.();
 const nodes: VNode[] = instance.${scopedSlots}.default({ value: 1 });
 // @ts-expect-error inferred scoped slot payload must remain numeric
 instance.${scopedSlots}.default({ value: 'wrong' });

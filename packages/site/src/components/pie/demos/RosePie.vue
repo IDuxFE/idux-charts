@@ -119,8 +119,8 @@ const presentation = computed<PieChartProps>(() => ({
       <div v-if="chartStatus === 'empty'" class="basic-pie-demo-placeholder">
         <IxEmpty simple>
           <template #description>
-            <IxSpace :size="0">
-              <span class="basic-pie-demo-empty-label">加载失败，</span>
+            <IxSpace align="center">
+              <span>暂无数据</span>
               <IxButton mode="link" size="sm" @click="reloadChart" style="display: flex"
                 >重新加载</IxButton
               >
@@ -149,19 +149,12 @@ const presentation = computed<PieChartProps>(() => ({
     gap: 12px 24px;
   }
 
-  &-empty-label {
-    font-size: 12px;
-  }
-
   &-placeholder {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
     width: 100%;
     height: 100%;
-    color: var(--ix-color-text-info);
   }
 
   &-text {

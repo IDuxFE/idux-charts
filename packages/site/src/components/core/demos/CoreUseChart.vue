@@ -32,21 +32,14 @@ const timer = setTimeout(() => {
 onUnmounted(() => clearTimeout(timer))
 </script>
 <template>
-  <label class="core-loading-switch">
-    加载中
-    <IxSwitch v-model:checked="loading" size="sm" aria-label="加载中" />
-  </label>
-  <div ref="containerRef" style="width: 100%; height: 300px" />
+  <IxSpace vertical block>
+    <IxSpace align="center">
+      <span>加载中</span>
+      <IxSwitch v-model:checked="loading" size="sm" aria-label="加载中" style="display: flex" />
+    </IxSpace>
+    <div ref="containerRef" style="width: 100%; height: 300px" />
+  </IxSpace>
 </template>
-
-<style scoped>
-.core-loading-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-</style>
 
 <archive-meta lang="json">
 {
