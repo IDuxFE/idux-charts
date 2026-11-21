@@ -4,7 +4,7 @@ import Basic from './basic.js'
 import Vue from 'vue'
 import CompositionAPI from '@vue/composition-api'
 Vue.use(CompositionAPI)
-import { IxBarChart, IxLineChart, IxPieChart, version } from '@idux/charts'
+import { IxBarChart, IxChart, IxLineChart, IxPieChart, version } from '@idux/charts'
 import { getInstanceByDom, use } from 'echarts/core'
 import { GraphicComponent } from 'echarts/components'
 use([GraphicComponent])
@@ -138,7 +138,11 @@ window.chartState = () =>
       background: option?.backgroundColor,
     }
   })
-const Slots = createSlotsFixture(undefined, IxBarChart, true)
+const coreSlots = location.search.includes('core-slots')
+const Slots = createSlotsFixture(undefined, coreSlots ? IxChart : IxBarChart, true, {
+  native: coreSlots,
+  initialMode: new URLSearchParams(location.search).has('initially-absent') ? 'absent' : 'element',
+})
 new Vue(
   location.search.includes('slots')
     ? Slots
