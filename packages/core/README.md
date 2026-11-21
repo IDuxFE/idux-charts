@@ -103,7 +103,7 @@ Built-in Plots use rectangular category swatches with 1px rounded corners; the `
 
 Call `useTooltipsFormatter(title, rows, rowsPerColumn?)` from `tooltip.formatter` to reuse the built-in HTML layout. `getTooltipsColor(color)` resolves a solid swatch, and `useStripeBarTooltip(unit)` returns tooltip options for native striped bars. Import these helpers from `@idux/charts` or `@idux/charts-core`.
 
-[See the signatures and complete formatter example](https://github.com/IDuxFE/idux-charts/blob/main/packages/site/src/components/core/API.tab.md#自定义-tooltip).
+[See the signatures and complete formatter example](https://github.com/IDuxFE/idux-charts/blob/main/packages/site/src/components/core/API.md#自定义-tooltip).
 
 ## TypeScript
 
