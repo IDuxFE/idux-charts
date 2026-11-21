@@ -40,25 +40,6 @@ jobs:
           path: coverage/
           retention-days: 7
           if-no-files-found: error
-      - name: Upload coverage to Codecov
-        if: >-
-          github.repository == 'IDuxFE/idux-charts' &&
-          (github.event_name == 'pull_request' || vars.CODECOV_ENABLED == 'true')
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
-        with:
-          # Keep uploads attached to upstream, including tokenless fork PRs.
-          slug: ${{ github.repository }}
-          # Public fork PRs use the action's tokenless fork branch support.
-          token: >-
-            ${{ github.actor != 'dependabot[bot]' &&
-                (github.event_name != 'pull_request' ||
-                 github.event.pull_request.head.repo.full_name == github.repository) &&
-                secrets.CODECOV_TOKEN || '' }}
-          # Dependabot also has no Actions secrets; use a tokenless branch prefix.
-          override_branch: ${{ github.actor == 'dependabot[bot]' && format('dependabot:{0}', github.head_ref || github.ref_name) || '' }}
-          files: ./coverage/lcov.info
-          disable_search: true
-          fail_ci_if_error: true
 
   browser-tests:
     name: Browser tests (${{ matrix.browser }}, ${{ matrix.shard }}/2)
@@ -151,6 +132,25 @@ jobs:
           path: coverage/combined/
           retention-days: 7
           if-no-files-found: error
+      - name: Upload coverage to Codecov
+        if: >-
+          github.repository == 'IDuxFE/idux-charts' &&
+          (github.event_name == 'pull_request' || vars.CODECOV_ENABLED == 'true')
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
+        with:
+          # Keep uploads attached to upstream, including tokenless fork PRs.
+          slug: ${{ github.repository }}
+          # Public fork PRs use the action's tokenless fork branch support.
+          token: >-
+            ${{ github.actor != 'dependabot[bot]' &&
+                (github.event_name != 'pull_request' ||
+                 github.event.pull_request.head.repo.full_name == github.repository) &&
+                secrets.CODECOV_TOKEN || '' }}
+          # Dependabot also has no Actions secrets; use a tokenless branch prefix.
+          override_branch: ${{ github.actor == 'dependabot[bot]' && format('dependabot:{0}', github.head_ref || github.ref_name) || '' }}
+          files: ./coverage/combined/lcov.info
+          disable_search: true
+          fail_ci_if_error: true
 
   compatibility:
     name: Compatibility (Vue ${{ matrix.vue }}, ECharts ${{ matrix.echarts }})
