@@ -26,7 +26,11 @@ export function useResizeObserver(
         if (frame !== undefined) return
         frame = requestAnimationFrame(() => {
           frame = undefined
-          if (chartRef.value === instance) instance.resize()
+          // A zero viewport makes map transforms singular; keep the previous size
+          // while hidden and measure again when the container becomes visible.
+          if (chartRef.value === instance && container.clientWidth && container.clientHeight) {
+            instance.resize()
+          }
         })
       }
       onResize(container, listener)

@@ -13,6 +13,8 @@ function createInstance() {
   const events = new Map<string, Set<(...args: unknown[]) => void>>()
   return {
     group: '',
+    getWidth: vi.fn(() => 640),
+    getHeight: vi.fn(() => 320),
     getOption: vi.fn(() => ({ darkMode: false })),
     setOption: vi.fn(),
     dispose: vi.fn(),
@@ -333,4 +335,18 @@ it('ignores option/theme updates when the component has no chart container', asy
   await nextTick()
   expect(init).not.toHaveBeenCalled()
   expect(wrapper.text()).toBe('After')
+})
+
+it('retains the viewport while rebuilding a hidden chart and honors explicit init sizes', async () => {
+  const options = reactive<any>({ theme: 'seer' })
+  const { chart } = setup(options)
+  options.theme = 'dark'
+  await nextTick()
+  expect(init).toHaveBeenLastCalledWith(chart.containerRef.value, 'dark', {
+    width: 640,
+    height: 320,
+  })
+  options.initOption = { width: 800, height: 400, renderer: 'canvas' }
+  await nextTick()
+  expect(init).toHaveBeenLastCalledWith(chart.containerRef.value, 'dark', options.initOption)
 })

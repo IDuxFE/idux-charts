@@ -89,7 +89,7 @@ export function useChart<U extends ChartProps>(
   const tooltipTheme = createTooltipTheme(() => containerRef.value)
   const loadingOverlay = createChartLoading()
 
-  const initChart = (initialOption?: ChartProps) => {
+  const initChart = (initialOption?: ChartProps, initOption = mergedInitOption.value) => {
     const container = containerRef.value
     if (!container) {
       return
@@ -97,7 +97,7 @@ export function useChart<U extends ChartProps>(
 
     const currOptions = unref(options)
     const { restOptions, events } = processOptions(currOptions, getListeners())
-    const instance = init(container, mergedTheme.value, mergedInitOption.value)
+    const instance = init(container, mergedTheme.value, initOption)
     // Own the instance only after setup succeeds. A failed first render must not
     // leave an unreachable instance registered on the container.
     try {
@@ -152,8 +152,13 @@ export function useChart<U extends ChartProps>(
       if (!instance) return
       const { restOptions } = processOptions(unref(options), getListeners())
       const initialOption = restoreChartInteraction(instance, prevRestOptions.value, restOptions)
+      // Hidden tabs have no measurable canvas. Keep the last valid viewport until
+      // ResizeObserver can measure it again, while honoring explicit init sizes.
+      const rebuildInitOption = containerRef.value?.getClientRects().length
+        ? mergedInitOption.value
+        : { width: instance.getWidth(), height: instance.getHeight(), ...mergedInitOption.value }
       destroyChart()
-      initChart(initialOption)
+      initChart(initialOption, rebuildInitOption)
     },
   )
 
