@@ -16,6 +16,8 @@ a security guarantee for those legacy dependencies.
 ECharts 5 的历史兼容范围仍保留，但低于 ECharts 6.1.0 的版本受 CVE-2026-45249 影响；
 历史版本的兼容性测试不代表其依赖漏洞已修复。
 
+References / 依据：[ECharts advisory](https://github.com/advisories/GHSA-fgmj-fm8m-jvvx), [lodash advisory](https://github.com/lodash/lodash/security/advisories/GHSA-f23m-r3pf-42rh).
+
 ## Reporting a vulnerability / 报告漏洞
 
 Use GitHub's [private vulnerability reporting](https://github.com/IDuxFE/idux-charts/security/advisories/new)

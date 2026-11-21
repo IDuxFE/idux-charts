@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh.md)
 
-The preset chart layer of iDux Charts, providing six chart components and option helpers built on `@idux/charts-core`.
+The preset chart layer of iDux Charts, providing seven chart components and option helpers built on `@idux/charts-core`.
 
 For the unified entry point and shared tooltip styles, use [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.md).
 
@@ -28,17 +28,17 @@ Vue.use(VueCompositionAPI)
 
 ## Chart components
 
-| Component           | Chart                         |
-| ------------------- | ----------------------------- |
-| `IxBarChart`        | Bar                           |
-| `IxLineChart`       | Line and area                 |
-| `IxPieChart`        | Pie and doughnut              |
-| `IxRadarChart`      | Radar                         |
-| `IxGaugeChart`      | Gauge                         |
-| `IxMapChart`        | Map (status, density, routes) |
-| `IxLiquidFillChart` | Liquid fill                   |
+| Component           | Chart                        |
+| ------------------- | ---------------------------- |
+| `IxBarChart`        | Bar                          |
+| `IxLineChart`       | Line and area                |
+| `IxPieChart`        | Pie and doughnut             |
+| `IxRadarChart`      | Radar                        |
+| `IxGaugeChart`      | Gauge                        |
+| `IxMapChart`        | Map (regions, nodes, routes) |
+| `IxLiquidFillChart` | Liquid fill                  |
 
-Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Its modes are `status`, `density`, and `lines`; geometry assets are managed by the application and excluded from the library bundle.
+Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Compose native `geo`, `series`, and `visualMap` options; optional `createMapRegions`, `createMapNodes`, `createMapLines`, and `createMapVisualMap` helpers return ordinary ECharts configuration. There is no `mode` prop. Geometry assets are managed by the application and excluded from the library bundle. Use `validateMapData({ nodes, routes, regions })` to inspect invalid coordinates, unresolved endpoints, and duplicate identities before generating options.
 
 ## Quick start
 
@@ -78,11 +78,13 @@ Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them on
 
 When data is appended and the zoom configuration is unchanged, category Bar, Line, and Area charts keep the historical window. A window at the end follows the newest data and keeps the same number of points. A full-range view continues to show all data.
 
+Maps preserve compatible geo zoom and center across data refreshes, series cleanup, and theme rebuilds. Use stable `geo.id` values for multiple maps; new geometry, projection, or explicit viewport settings take precedence. Map data helpers do not read injected themes: pass `plotTheme` explicitly and regenerate when data or themes change.
+
 Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
 
 ## Loading
 
-All Plot components support `:loading="pending"` and automatically select horizontal/vertical bar, line/area, pie/ring/rose, radar, gauge, or liquid fill illustrations with light and dark palettes. Loading retains the chart instance and data, so applications do not need custom placeholders.
+All Plot components support `:loading="pending"` and automatically select horizontal/vertical bar, line/area, pie/ring/rose, radar, gauge, liquid fill, or map illustrations with light and dark palettes. Loading retains the chart instance and data, so applications do not need custom placeholders.
 
 Pass `pending && { text: 'Updating...' }` to customize the message. See [Core loading](https://github.com/IDuxFE/idux-charts/blob/main/packages/core/README.md#loading) for all options and image export limitations.
 

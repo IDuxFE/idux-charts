@@ -15,6 +15,7 @@ type: page
 | 展示分类构成                 | `IxPieChart`（实心饼图、环形图、玫瑰图） |
 | 对比多个维度的表现           | `IxRadarChart`                           |
 | 展示单个指标在量程中的位置   | `IxGaugeChart`、`IxLiquidFillChart`      |
+| 展示区域统计、站点和连接     | `IxMapChart`                             |
 | 组合 ECharts 图形或坐标系    | `IxChart`                                |
 
 安装与主题接入见<a href="./GettingStarted.page.md">快速上手</a>。

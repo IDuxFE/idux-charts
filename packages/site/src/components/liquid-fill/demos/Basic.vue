@@ -64,8 +64,13 @@ onBeforeUnmount(cancel)
     }}</p>
     <div class="chart">
       <div v-if="state === 'empty'" class="placeholder">
-        <IxEmpty simple description="暂无数据">
-          <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
+        <IxEmpty simple>
+          <template #description>
+            <IxSpace align="center">
+              <span>暂无数据</span>
+              <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
+            </IxSpace>
+          </template>
         </IxEmpty>
       </div>
       <template v-else>
@@ -116,6 +121,7 @@ p {
   line-height: 24px;
 }
 .placeholder {
+  width: 100%;
   flex-direction: column;
   height: 100%;
   display: flex;

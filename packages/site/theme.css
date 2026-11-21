@@ -113,3 +113,6 @@
 html[data-theme='dark'] {
   --map-demo-background: #141b27;
 }
+.site-menu-component-name {
+  margin-right: 8px;
+}

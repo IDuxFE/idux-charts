@@ -33,10 +33,12 @@ Vue.use(VueCompositionAPI)
 | `IxPieChart`        | 饼图、环形图             |
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |
-| `IxMapChart`        | 地图（状态、密度、飞线） |
+| `IxMapChart`        | 地图（区域、节点、线路） |
 | `IxLiquidFillChart` | 水波图                   |
 
 此外还导出基础组件 `IxChart`，可直接传入 ECharts 配置。
+
+渲染 `IxMapChart` 前通过 `registerMap(name, geoJSON)` 注册几何数据。地图由原生 `geo`、`series`、`visualMap` 组合，不使用 `mode` 属性。可选的 `createMapRegions`、`createMapNodes`、`createMapLines`、`createMapVisualMap` 返回普通 ECharts 配置。几何由应用管理，不打入组件包；`validateMapData({ nodes, routes, regions })` 可提前检查无效坐标、缺失端点和重复标识。
 
 ## 快速上手
 
@@ -77,11 +79,13 @@ ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及�
 
 在分类末尾追加数据且缩放配置未变时，柱状图、折线图和面积图会保留回看窗口。末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
 
+地图在数据刷新、清理系列及主题重建时保留兼容底图的缩放和中心位置。多底图建议提供稳定的 `geo.id`；修改底图、投影或显式视角时采用新配置。生成节点、线路和区域的函数不读取主题注入，需显式传入 `plotTheme`，并在数据或主题变化时重新调用。
+
 图表组件将 `role`、`aria-*`、`tabindex` 和 `data-*` 转发到图表容器。
 
 ## 加载状态
 
-使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 使用首个系列判断：饼图或没有系列类型时使用饼图兜底，其余类型使用通用图标。图标和遮罩均适配深浅主题。
+使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘、水波图和地图自动选择对应图标。`IxChart` 和 `useChart` 使用首个系列判断：饼图或没有系列类型时使用饼图兜底，其余类型使用通用图标。图标和遮罩均适配深浅主题。
 
 传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。
 

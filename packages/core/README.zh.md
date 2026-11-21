@@ -52,7 +52,7 @@ const option: ChartProps = {
 </template>
 ```
 
-`IxChart` 的 ECharts 配置通过 `v-bind` 直接传入，不使用单独的 `option` 属性。默认注册 SVG 渲染器、Grid、Legend、Tooltip、Title、DataZoom，以及 LabelLayout、UniversalTransition。自定义系列或额外组件需要通过 `echarts/core` 的 `use` 注册；使用 Canvas 时也需注册 `CanvasRenderer`，并传入 `initOption: { renderer: 'canvas' }`。
+`IxChart` 的 ECharts 配置通过 `v-bind` 直接传入，不使用单独的 `option` 属性。默认注册 SVG 渲染器、Grid、Legend、Tooltip、Title、DataZoom、MarkLine、MarkPoint、MarkArea，以及 LabelLayout、UniversalTransition。自定义系列或额外组件需要通过 `echarts/core` 的 `use` 注册；使用 Canvas 时也需注册 `CanvasRenderer`，并传入 `initOption: { renderer: 'canvas' }`。
 
 ## 核心 API
 
@@ -71,9 +71,11 @@ const option: ChartProps = {
 
 可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。修改 `theme` 或 `initOption` 会重建实例，并恢复兼容的缩放范围和图例选择。显式变更范围或选择时采用新配置。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。
 
+兼容的 geo 底图在完整更新或主题重建后保留用户缩放和中心位置。匹配时优先使用 `geo.id`，未设置 ID 时按位置匹配；底图、投影、坐标边界或显式视角配置变化时采用新配置。初始化提交失败会销毁已创建的实例，并把原始异常交给 Vue 错误处理；不会触发 `onReady`。纠正配置后重新挂载组件。
+
 ## 加载状态
 
-使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘和水波图自动选择对应图标。`IxChart` 和 `useChart` 使用首个系列判断：饼图或没有系列类型时使用饼图兜底，其余类型使用通用图标。图标和遮罩均适配深浅主题。
+使用 `:loading="pending"` 即可展示内置图标和 `Loading...` 文案，保留图表实例及已有数据。柱状图、折线/面积图、饼图/环形图/玫瑰图、雷达图、仪表盘、水波图和地图自动选择对应图标。`IxChart` 和 `useChart` 使用首个系列判断：饼图或没有系列类型时使用饼图兜底，其余类型使用通用图标。图标和遮罩均适配深浅主题。
 
 传对象可定制文案和外观，如 `:loading="pending && { text: '正在加载...', maskColor: 'transparent' }"`。还支持 `textColor`、`color`（图标着色）、`fontSize`、`fontFamily` 和 `icon`（图片 URL 或 SVG 源码）。加载层为 DOM 内容，不包含在 ECharts 导出的图片中；原生旋转动画的 `showSpinner`、`spinnerRadius` 等选项不再改变图标。
 

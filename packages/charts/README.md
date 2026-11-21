@@ -26,19 +26,19 @@ Vue.use(VueCompositionAPI)
 
 ## Chart components
 
-| Component           | Chart                         |
-| ------------------- | ----------------------------- |
-| `IxBarChart`        | Bar                           |
-| `IxLineChart`       | Line and area                 |
-| `IxPieChart`        | Pie and doughnut              |
-| `IxRadarChart`      | Radar                         |
-| `IxGaugeChart`      | Gauge                         |
-| `IxMapChart`        | Map (status, density, routes) |
-| `IxLiquidFillChart` | Liquid fill                   |
+| Component           | Chart                        |
+| ------------------- | ---------------------------- |
+| `IxBarChart`        | Bar                          |
+| `IxLineChart`       | Line and area                |
+| `IxPieChart`        | Pie and doughnut             |
+| `IxRadarChart`      | Radar                        |
+| `IxGaugeChart`      | Gauge                        |
+| `IxMapChart`        | Map (regions, nodes, routes) |
+| `IxLiquidFillChart` | Liquid fill                  |
 
 Also exports the generic `IxChart` component for direct ECharts options.
 
-Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Its modes are `status`, `density`, and `lines`; geometry assets are managed by the application and excluded from the library bundle.
+Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Compose native `geo`, `series`, and `visualMap` options; optional `createMapRegions`, `createMapNodes`, `createMapLines`, and `createMapVisualMap` helpers return ordinary ECharts configuration. There is no `mode` prop. Geometry assets are managed by the application and excluded from the library bundle. Use `validateMapData({ nodes, routes, regions })` to inspect invalid coordinates, unresolved endpoints, and duplicate identities before generating options.
 
 ## Quick start
 
@@ -79,11 +79,13 @@ Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them on
 
 When data is appended and the zoom configuration is unchanged, category Bar, Line, and Area charts keep the historical window. A window at the end follows the newest data and keeps the same number of points. A full-range view continues to show all data.
 
+Maps preserve compatible geo zoom and center across data refreshes, series cleanup, and theme rebuilds. Use stable `geo.id` values for multiple maps; new geometry, projection, or explicit viewport settings take precedence. Map data helpers do not read injected themes: pass `plotTheme` explicitly and regenerate when data or themes change.
+
 Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart container.
 
 ## Loading
 
-Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge and LiquidFill select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
+Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge, LiquidFill, and Map select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
 
 Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.
 

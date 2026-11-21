@@ -16,7 +16,7 @@ none of these integrations enable automatic merging.
 | CodeQL                                 | Runs on PRs to upstream main / 上游 PR 执行                                | Runs on main pushes and weekly / main 推送和每周执行                   |
 | Issue and PR templates / 模板          | YAML and Markdown can be checked locally / 可检查本地文件                  | GitHub uses templates from the default branch / 默认分支合并后正式使用 |
 | Dependabot                             | Review configuration / 检查配置                                            | Weekly dependency update PRs / 每周提交依赖升级 PR                     |
-| Codecov                                | Requires app authorization and credentials / 需 App 授权和凭证             | Uploads when explicitly enabled / 显式启用后上传                       |
+| Codecov                                | Upstream PR uploads; forks need no token / 上游 PR 上传，fork 无需令牌     | Trusted pushes upload when explicitly enabled / 可信推送显式启用后上传 |
 | FOSSA                                  | Review configuration; no PR execution / 检查配置，不在 PR 执行             | Main-only scans when explicitly enabled / 显式启用后扫描 main          |
 
 GitHub settings such as private vulnerability reporting and Dependabot security

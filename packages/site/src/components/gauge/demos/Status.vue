@@ -49,17 +49,23 @@ onBeforeUnmount(cancel)
       </IxRadioGroup>
     </IxSpace>
     <div class="stage">
-      <IxEmpty v-if="state === 'empty'" simple description="暂无数据">
-        <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
-      </IxEmpty>
-      <template v-else>
+      <div v-if="state === 'empty'" class="placeholder">
+        <IxEmpty simple>
+          <template #description>
+            <IxSpace align="center">
+              <span>暂无数据</span>
+              <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
+            </IxSpace>
+          </template>
+        </IxEmpty>
+      </div>
+      <div v-for="(item, index) in data" :key="index" :style="chartStyle">
         <IxGaugeChart
+          v-if="state !== 'empty'"
           :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          v-for="(item, index) in data"
-          :key="index"
           :value="valueOf(item.value)"
           :size="size"
-          :style="chartStyle"
+          style="width: 100%; height: 100%"
           :color="state === 'zero' ? '#FF6B57' : item.color"
           :valueFormatter="() => (state === 'zero' ? '高危' : item.status)"
           :valueFontSize="16"
@@ -67,7 +73,7 @@ onBeforeUnmount(cancel)
           :labelColor="themeTokens.colorTextInfo"
           :backgroundColor="themeTokens.colorInfoContainerBgDisabled"
         />
-      </template>
+      </div>
     </div>
   </IxSpace>
 </template>
@@ -76,6 +82,7 @@ onBeforeUnmount(cancel)
   width: 100%;
 }
 .stage {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -83,6 +90,15 @@ onBeforeUnmount(cancel)
   gap: 24px;
   min-height: 110px;
   padding: 24px 0;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 </style>
 <archive-meta lang="json">
