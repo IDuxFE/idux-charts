@@ -11,3 +11,6 @@ packageExtensions:
   '@idux/archive-types@0.5.0':
     dependencies:
       type-fest: ^3.2.0
+overrides:
+  # Patch Archive's URL parser without changing its Markdown 13 integration.
+  'linkify-it@<5.0.2': 5.0.2
