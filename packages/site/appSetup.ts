@@ -32,15 +32,15 @@ type SiteMenuItem = MenuData & {
 }
 
 const componentNames: Record<string, string> = {
-  core: 'IxChart',
-  bar: 'IxBarChart',
-  line: 'IxLineChart',
-  area: 'IxLineChart',
-  pie: 'IxPieChart',
-  radar: 'IxRadarChart',
-  gauge: 'IxGaugeChart',
-  'liquid-fill': 'IxLiquidFillChart',
-  map: 'IxMapChart',
+  core: 'Chart',
+  bar: 'BarChart',
+  line: 'LineChart',
+  area: 'AreaChart',
+  pie: 'PieChart',
+  radar: 'RadarChart',
+  gauge: 'GaugeChart',
+  'liquid-fill': 'LiquidFillChart',
+  map: 'MapChart',
 }
 
 function renderSiderMenu(menuProps: MenuProps) {
