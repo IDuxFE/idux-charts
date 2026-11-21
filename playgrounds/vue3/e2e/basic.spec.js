@@ -56,11 +56,12 @@ test('packaged ring owns its graphics and preserves interaction on presentation 
   await page.getByRole('button', { name: 'Ring', exact: true }).click()
   await expect(page.locator('.basic-chart')).toContainText('Assets')
   expect((await state()).id).toBe(id)
-  expect((await state()).option.series[2].radius).toEqual([52.8, 60])
+  await expect.poll(async () => (await state()).option.series[2].radius).toEqual([52.8, 60])
   await page
     .locator('.basic-chart svg text')
     .filter({ hasText: /^图例1$/ })
     .click()
+  await expect.poll(async () => (await state()).option.legend[0].selected['图例1']).toBe(false)
   await page.getByRole('button', { name: 'Presentation', exact: true }).click()
   await expect(page.locator('.basic-chart svg text').filter({ hasText: /^图例2$/ })).toHaveCSS(
     'font-size',
@@ -69,6 +70,9 @@ test('packaged ring owns its graphics and preserves interaction on presentation 
   expect((await state()).id).toBe(id)
   expect((await state()).option.legend[0].selected['图例1']).toBe(false)
   await page.getByRole('button', { name: 'Zero', exact: true }).click()
+  await expect
+    .poll(async () => (await state()).option.series[2].data.map(item => item.value))
+    .toEqual([0, 0, 0])
   await expect(page.locator('.basic-chart')).toContainText('Assets')
   expect(errors).toEqual([])
 })

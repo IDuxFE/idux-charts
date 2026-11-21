@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { test, expect } from './helpers'
+import { test, expect, reloadDemo } from './helpers'
 
 async function openLiquid(page: Page) {
   await page.goto('components/liquid-fill')
@@ -11,6 +11,7 @@ async function openLiquid(page: Page) {
   await expect(demo.locator('.chart-demo-slider')).toHaveCSS('width', '200px')
   const chartId = await chart.getAttribute('_echarts_instance_')
   const setValue = async (value: number) => {
+    await demo.locator('.chart-demo-slider').scrollIntoViewIfNeeded()
     const rail = await demo.locator('.ix-slider-rail').boundingBox()
     await page.mouse.click(
       rail!.x + Math.min(rail!.width - 0.5, Math.max(0.5, (rail!.width * value) / 100)),
@@ -53,14 +54,13 @@ for (const values of [
   })
 }
 
-test('liquid fill handles empty, reload and loading states', async ({ page }, testInfo) => {
+test('liquid fill handles empty, reload and loading states', async ({ page }) => {
   const { demo, chart, chartId, setValue } = await openLiquid(page)
-  await page.screenshot({ path: testInfo.outputPath('liquid-fill-examples.png'), fullPage: true })
   await demo.getByText('空状态', { exact: true }).click()
   await expect(chart).toHaveAttribute('_echarts_instance_', chartId!)
   await expect(demo.locator('.ix-chart-overlay')).toContainText('暂无数据')
-  await demo.getByRole('button', { name: '重新加载' }).click()
-  await expect(demo.getByRole('status')).toHaveAttribute('aria-busy', 'true')
+  const loading = await reloadDemo(demo)
+  expect(loading.busy).toBe('true')
   await expect(chart.locator('svg')).toBeVisible()
   await demo.getByText('加载中', { exact: true }).click()
   await setValue(0)
@@ -70,9 +70,7 @@ test('liquid fill handles empty, reload and loading states', async ({ page }, te
   await expect(chart.locator('svg')).toBeVisible()
 })
 
-test('additional liquid fill examples render and animated waves change shape', async ({
-  page,
-}, testInfo) => {
+test('additional liquid fill examples render and animated waves change shape', async ({ page }) => {
   await page.goto('components/liquid-fill')
   await page.getByRole('radio', { name: '示例', exact: true }).click()
   const paths = page.locator('.liquid-basic svg path')
@@ -90,6 +88,5 @@ test('additional liquid fill examples render and animated waves change shape', a
   ]) {
     await page.getByText(title!, { exact: true }).first().scrollIntoViewIfNeeded()
     await expect(page.getByText(label!, { exact: true })).toBeVisible()
-    await page.screenshot({ path: testInfo.outputPath(`${title}.png`) })
   }
 })

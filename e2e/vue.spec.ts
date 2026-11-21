@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs'
-import { test, expect } from './helpers'
+import { test, expect, hoverCategory, reloadDemo } from './helpers'
 
 const multiChartDemos: Record<string, number> = {
   'gauge/Basic.vue': 4,
@@ -27,30 +27,35 @@ for (const chart of ['core', 'bar', 'line', 'area', 'pie', 'radar', 'gauge', 'li
     })
 
   test(`${chart} demos render charts`, async ({ page }) => {
-    // A showcase can mount a dozen charts on slower browser runners.
-    test.setTimeout(60_000)
     const response = await page.goto(`components/${chart}`, { waitUntil: 'domcontentloaded' })
     expect(response?.ok()).toBe(true)
     await expect(page.locator('[_echarts_instance_]')).toHaveCount(
       demos.reduce((count, demo) => count + demo.count, 0),
-      { timeout: 30_000 },
     )
-    for (const demo of demos) {
-      await test.step(demo.file, async () => {
-        const block = page.locator('.archive-app-demo').filter({
-          has: page.getByRole('heading', {
-            name: new RegExp(`^${demo.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*#?\\s*$`),
+    // Read the showcase in one browser round trip instead of checking every
+    // chart with separate protocol calls. Poll the complete rendering contract.
+    await expect(async () => {
+      const rendered = await page.locator('.archive-app-demo').evaluateAll(blocks =>
+        blocks.map(block => ({
+          title: block.querySelector('h3')?.textContent?.replace(/#\s*$/, '').trim(),
+          charts: [...block.querySelectorAll('[_echarts_instance_]')].map(element => {
+            const box = element.getBoundingClientRect()
+            const style = getComputedStyle(element)
+            return {
+              visible: box.width > 0 && box.height > 0 && style.visibility !== 'hidden',
+              drawing: !!element.querySelector('svg path, canvas'),
+            }
           }),
-        })
-        await expect(block).toHaveCount(1)
-        const charts = block.locator('[_echarts_instance_]')
-        await expect(charts).toHaveCount(demo.count)
-        for (const chartElement of await charts.all()) {
-          await expect(chartElement).toBeVisible()
-          await expect(chartElement.locator('svg path, canvas').first()).toBeAttached()
-        }
-      })
-    }
+        })),
+      )
+      for (const demo of demos) {
+        const blocks = rendered.filter(block => block.title === demo.title)
+        expect(blocks, demo.file).toHaveLength(1)
+        expect(blocks[0]!.charts, demo.file).toEqual(
+          Array.from({ length: demo.count }, () => ({ visible: true, drawing: true })),
+        )
+      }
+    }).toPass({ timeout: 5000 })
     if (chart === 'core') {
       const block = page
         .locator('.archive-app-demo')
@@ -92,12 +97,7 @@ test('stacked area tooltip shows missing ranges and recovers when data returns',
   const rows = tooltip.locator('.charts-tooltips-item')
   const hoverSample = async (day: string) => {
     const label = chart.locator('svg text').filter({ hasText: new RegExp(`^${day}$`) })
-    await label.scrollIntoViewIfNeeded()
-    const labelBox = await label.boundingBox()
-    const chartBox = await chart.boundingBox()
-    expect(labelBox).not.toBeNull()
-    expect(chartBox).not.toBeNull()
-    await page.mouse.move(labelBox!.x + labelBox!.width / 2, chartBox!.y + 150)
+    await hoverCategory(chart.locator('svg'), label, 150)
     await expect(tooltip).toBeVisible()
   }
 
@@ -146,8 +146,8 @@ test('built-in Basic demo switches states and reloads', async ({ page }) => {
   await demo.getByText('空状态', { exact: true }).click()
   await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
   await expect(demo.locator('.ix-chart-overlay')).toContainText('暂无数据')
-  await demo.getByRole('button', { name: '重新加载' }).click()
-  await expect(demo.getByRole('status')).toContainText('图表正在加载中')
-  await expect(demo.getByRole('status').locator('img')).toBeVisible()
+  const loading = await reloadDemo(demo)
+  expect(loading.text).toContain('图表正在加载中')
+  expect(loading.image).toBe(true)
   await expect(demo.locator('[_echarts_instance_]')).toContainText('554')
 })

@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, clickSvg, hoverPieSector } from './helpers'
 import { comparePixels } from './comparePixels'
 import { fixtureBaseURL } from './environment'
 
@@ -23,6 +23,15 @@ test('automatic pie preserves the original Basic presentation with explicit lega
       await page.getByRole('button', { name: state, exact: true }).click()
       await page.mouse.move(0, 0)
       await expect(actual).toContainText(state === 'Missing' ? '数据缺失' : '统计总数')
+      const values =
+        state === 'Zero'
+          ? [0, 0, 0, 0, 0, 0]
+          : [145, 124, 118, state === 'Missing' ? 0 : 92, 54, 21]
+      await expect
+        .poll(() => page.evaluate(() => (window as any).pieComparisonState()))
+        .toEqual(
+          Array.from({ length: 2 }, () => ({ values, width: 480, height: 180, finished: true })),
+        )
       // Wait for the ResizeObserver and Vue update, then compare independently
       // rendered charts in the same browser, fonts and device scale.
       await expect
@@ -66,15 +75,18 @@ test('built-in pie retains interaction and cleanly switches to an explicit layou
   await page.goto('?basic')
   const actual = page.getByTestId('actual')
   await expect(page.getByTestId('ready-count')).toHaveText('1')
-  const box = await actual.locator('svg').boundingBox()
-  await page.mouse.move(box!.x + 100, box!.y + 60)
+  const point = await hoverPieSector(actual)
   await expect(actual.locator('.charts-tooltips')).toContainText('图例1')
-  await page.mouse.click(box!.x + 100, box!.y + 60)
+  await page.mouse.click(point.x, point.y)
   await expect(page.getByTestId('click-count')).toHaveText('1')
   await page.mouse.move(0, 0)
   const legend = actual.locator('svg text').filter({ hasText: /^图例2$/ })
-  const label = await legend.boundingBox()
-  await page.mouse.click(label!.x + label!.width / 2, label!.y + label!.height / 2)
+  await clickSvg(actual.locator('svg'), legend)
+  await expect
+    .poll(() =>
+      page.evaluate(() => (window as any).pieAlignmentState().option.legend[0].selected['图例2']),
+    )
+    .toBe(false)
   await expect(actual).toContainText('554')
   await page.getByRole('button', { name: 'Toggle layout', exact: true }).click()
   await expect(page.getByTestId('ready-count')).toHaveText('2')
@@ -100,10 +112,17 @@ test('all nine alignment positions update reactively without recreating the char
     for (const column of ['start', 'center', 'end']) {
       const align = row === 'center' && column === 'center' ? 'center' : `${row}-${column}`
       await page.getByRole('combobox', { name: 'Alignment' }).selectOption(align)
-      await expect
-        .poll(async () => (await state()).option.series[0].center[1])
-        .toBe({ top: r, center: 90, bottom: 180 - r }[row]!)
-      centers[`${row}-${column}`] = (await state()).option.series[0].center
+      await expect(async () => {
+        const current = (await state()).option.series[0].center
+        expect(current[1]).toBe({ top: r, center: 90, bottom: 180 - r }[row]!)
+        if (column === 'start') expect(current[0]).toBe(r)
+        else if (column === 'end') expect(current[0]).toBe(480 - r)
+        else {
+          expect(current[0]).toBeGreaterThan(r)
+          expect(current[0]).toBeLessThan(480 - r)
+        }
+        centers[`${row}-${column}`] = current
+      }).toPass({ timeout: 5000 })
       expect((await state()).id).toBe(original.id)
       expect((await state()).option).not.toHaveProperty('align')
     }
@@ -132,9 +151,7 @@ test('all nine alignment positions update reactively without recreating the char
   await expect(page.getByTestId('ready-count')).toHaveText('1')
 })
 
-test('hidden content, ring/rose shapes and crowded layouts remain responsive', async ({
-  page,
-}, testInfo) => {
+test('hidden content, ring/rose shapes and crowded layouts remain responsive', async ({ page }) => {
   await page.goto('?basic')
   const state = () => page.evaluate(() => (window as any).pieAlignmentState())
   await expect(page.getByTestId('ready-count')).toHaveText('1')
@@ -155,10 +172,6 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
       await expect.poll(async () => (await state()).option.series[2].roseType).toBeNull()
     if (shape === 'rose')
       await expect.poll(async () => (await state()).option.series[2].roseType).toBe('area')
-    await testInfo.attach(`center-no-legend-${shape}`, {
-      body: await page.getByTestId('actual').screenshot(),
-      contentType: 'image/png',
-    })
   }
   await page.getByRole('button', { name: 'Toggle legend', exact: true }).click()
   await page.getByRole('button', { name: 'Crowded', exact: true }).click()
@@ -167,12 +180,9 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
   expect((await state()).option.legend[1].show).toBe(false)
   const actual = page.getByTestId('actual')
   await expect(actual.locator('svg')).toHaveAttribute('width', '280')
-  await testInfo.attach('narrow-scroll-legend', {
-    body: await actual.screenshot(),
-    contentType: 'image/png',
-  })
+
   // The built-in pager uses graphic images and intentionally hides native page text.
-  await actual.locator('svg image').last().click()
+  await clickSvg(actual.locator('svg'), actual.locator('svg image').last())
   await expect.poll(async () => (await state()).option.legend[0].scrollDataIndex).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Restore', exact: true }).click()
   // Data updates can reach ECharts before the animation-frame resize restores
@@ -193,7 +203,7 @@ test('hidden content, ring/rose shapes and crowded layouts remain responsive', a
 
 test('automatic pie expands into freed space and shrinks when the legend returns', async ({
   page,
-}, testInfo) => {
+}) => {
   await page.goto('?basic')
   const state = () => page.evaluate(() => (window as any).pieAlignmentState())
   await page.getByRole('combobox', { name: 'Alignment' }).selectOption('center')
@@ -206,10 +216,7 @@ test('automatic pie expands into freed space and shrinks when the legend returns
   expect((await state()).option.series[2].radius).toBeGreaterThan(before.option.series[2].radius)
   expect((await state()).option.series[2].center).toEqual([240, 150])
   expect((await state()).id).toBe(before.id)
-  await testInfo.attach('expanded-without-legend', {
-    body: await page.getByTestId('actual').screenshot(),
-    contentType: 'image/png',
-  })
+
   await page.getByRole('button', { name: 'Toggle legend', exact: true }).click()
   await expect
     .poll(async () => (await state()).option.series[2].radius)
@@ -223,18 +230,8 @@ test('native presentation updates retain the instance and legend selection', asy
   await expect(page.getByTestId('ready-count')).toHaveText('1')
   const state = () => page.evaluate(() => (window as any).pieAlignmentState())
   const original = await state()
-  // WebKit hit-tests ECharts' transparent legend hit area instead of the SVG
-  // text node. Click the visible label coordinates and assert the real selection.
   const label = actual.locator('svg text').filter({ hasText: /^图例1$/ })
-  // Scroll the stable wrapper: ECharts may replace SVG labels while laying out.
-  await actual.scrollIntoViewIfNeeded()
-  let point = { x: 0, y: 0 }
-  await expect(async () => {
-    const box = await label.boundingBox()
-    expect(box).not.toBeNull()
-    point = { x: box!.x + box!.width / 2, y: box!.y + box!.height / 2 }
-  }).toPass({ timeout: 10_000 })
-  await page.mouse.click(point.x, point.y)
+  await clickSvg(actual.locator('svg'), label)
   await expect.poll(async () => (await state()).option.legend[0].selected['图例1']).toBe(false)
   await page.getByRole('button', { name: 'Presentation', exact: true }).click()
   await expect(actual).toContainText('Assets')

@@ -9,8 +9,12 @@ export default defineConfig({
   testDir: './e2e',
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   fullyParallel: true,
-  workers: 2,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  workers: process.env.CI ? 2 : 4,
+  reporter: [
+    ['list'],
+    ['html', { open: 'never' }],
+    ['json', { outputFile: 'test-results/results.json' }],
+  ],
   retries: process.env.CI ? 1 : 0,
   failOnFlakyTests: false,
   use: {

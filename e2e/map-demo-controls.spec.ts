@@ -1,5 +1,5 @@
 import type { Locator } from '@playwright/test'
-import { test, expect } from './helpers'
+import { test, expect, reloadDemo } from './helpers'
 
 async function select(demo: Locator, group: string, name: string) {
   const label = demo
@@ -42,7 +42,7 @@ for (const title of ['状态型', '密度型', '飞线型']) {
       await expect(placeholder).toBeVisible()
       const stage = demo.locator('.ix-chart-overlay')
       expect((await stage.boundingBox())!.height).toBeCloseTo(height, 0)
-      await demo.getByRole('button', { name: '重新加载', exact: true }).click()
+      await reloadDemo(demo)
       await expect(svg).toBeVisible()
       await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
       await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
@@ -57,7 +57,6 @@ test('core map example renders and component menu labels preserve navigation', a
     has: page.getByRole('heading', { name: /^地图\s*#?\s*$/, level: 3 }),
   })
   await expect(demo.locator('svg path').first()).toBeVisible()
-  await page.waitForLoadState('networkidle')
   await expect(page.getByRole('menuitem', { name: '基础组件', exact: true })).toHaveText(
     'Chart基础组件',
   )

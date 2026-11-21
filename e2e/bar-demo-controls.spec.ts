@@ -1,8 +1,6 @@
 import type { Locator, Page } from '@playwright/test'
 
-import { test, expect } from './helpers'
-
-test.describe.configure({ timeout: 60_000 })
+import { test, expect, clickSvg, hoverSvg, hoverCategory as hoverCategoryLabel } from './helpers'
 
 const barPaths = 'path[fill^="url("]:not([transform])'
 const referencePath = 'path[stroke="#F5654F"][stroke-dasharray]'
@@ -61,18 +59,8 @@ async function aboveLabelGap(label: Locator, bar: Locator) {
   return (await aboveLabelGaps(label, bar))[0] ?? NaN
 }
 
-async function hoverCategory(page: Page, svg: Locator, name: string) {
-  // Scrolling can redraw the axes. Keep the scroll target on the persistent
-  // SVG surface and resolve the current label only after scrolling completes.
-  await svg.scrollIntoViewIfNeeded()
-  const label = svg.getByText(name, { exact: true })
-  await expect(label).toBeVisible()
-  const point = await label.evaluate(el => {
-    const labelBox = el.getBoundingClientRect()
-    const chartBox = (el as SVGElement).ownerSVGElement!.getBoundingClientRect()
-    return { x: labelBox.x + labelBox.width / 2, y: chartBox.y + chartBox.height / 3 }
-  })
-  await page.mouse.move(point.x, point.y)
+async function hoverCategory(svg: Locator, name: string) {
+  await hoverCategoryLabel(svg, svg.getByText(name, { exact: true }))
 }
 
 for (const [title, seriesCount] of [
@@ -211,7 +199,7 @@ test('missing data shows a persistent red band and a reason on hover', async ({ 
   await selectState(demo, missingState)
   await expect(band).toBeVisible()
   await expect(tooltip).toBeHidden()
-  await hoverCategory(page, svg, '微信网页')
+  await hoverCategory(svg, '微信网页')
   await expect(band).toBeVisible()
   await expect(tooltip).toContainText('微信网页')
   await expect(tooltip).toContainText('数据缺失，采集任务未返回结果，请检查采集配置')
@@ -220,12 +208,12 @@ test('missing data shows a persistent red band and a reason on hover', async ({ 
   expect(shade.width).toBeCloseTo(20, 1)
   expect(shade.height).toBeGreaterThan(150)
 
-  await hoverCategory(page, svg, '百度网盘')
+  await hoverCategory(svg, '百度网盘')
   await expect(band).toBeVisible()
   await expect(tooltip.locator('.charts-tooltips-item')).toContainText('200')
   await expect(tooltip).not.toContainText('数据缺失')
 
-  await hoverCategory(page, svg, '微信网页')
+  await hoverCategory(svg, '微信网页')
   await expect(tooltip).toContainText('数据缺失')
   await demo.getByRole('radiogroup', { name: '图表状态' }).hover()
   await expect(tooltip).toBeHidden()
@@ -240,7 +228,7 @@ test('grouped hover keeps valid values and shows reasons for only the missing se
   const chart = demo.locator('[_echarts_instance_]')
   const svg = chart.locator('svg')
   await selectState(demo, missingState)
-  await hoverCategory(page, svg, '2024')
+  await hoverCategory(svg, '2024')
   await expect(svg.locator(missingPath)).toHaveCount(2)
   await expect(chart.locator('.charts-tooltips-item')).toHaveCount(2)
   await expect(
@@ -282,7 +270,7 @@ test('category bars follow the site theme for the slider, tooltip and data state
   const svg = chart.locator('svg')
   await expect(chart).toHaveAttribute('data-ix-chart-theme', 'dark')
   await expect(svg.locator('path[fill="rgb(104,159,255)"][fill-opacity="0.24"]')).toBeAttached()
-  await hoverCategory(page, svg, '微信网页')
+  await hoverCategory(svg, '微信网页')
   await expect(svg.locator('path[stroke="rgb(128,137,153)"][stroke-opacity="0.25"]')).toBeAttached()
   const tooltip = chart.locator('.charts-tooltips')
   await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
@@ -290,7 +278,7 @@ test('category bars follow the site theme for the slider, tooltip and data state
 
   await selectState(demo, missingState)
   await expect(svg.locator('path[fill="rgb(54, 26, 27)"]')).toBeVisible()
-  await hoverCategory(page, svg, '微信网页')
+  await hoverCategory(svg, '微信网页')
   await expect(tooltip).toContainText('数据缺失，采集任务未返回结果，请检查采集配置')
   await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
   await selectState(demo, '带参考线')
@@ -327,7 +315,7 @@ test('the dashed reference draws beneath the bars and can be toggled by its lege
       return Boolean(el.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING)
     }, barPaths),
   ).toBe(true)
-  const toggle = () => svg.getByText('异常', { exact: true }).click({ force: true })
+  const toggle = () => clickSvg(svg, svg.getByText('异常', { exact: true }))
   await toggle()
   await expect(line).toHaveCount(0)
   await toggle()
@@ -444,7 +432,7 @@ for (const [title, horizontal, first, last, seriesCount, grouped] of [
   })
 }
 
-test('legends wrap, paginate, and display totals in independent examples', async ({ page }) => {
+test('bar example catalogue and legend totals remain complete', async ({ page }) => {
   await page.setViewportSize({ width: 1500, height: 900 })
   await page.goto('components/bar')
   const titles = page.locator('.archive-app-demo h3')
@@ -465,6 +453,15 @@ test('legends wrap, paginate, and display totals in independent examples', async
       '卡片化展示（以分组柱状图为例）',
       '外部配置覆盖默认值',
     ])
+  const stats = page.locator('.category-bar-legend-percentage svg')
+  await expect(stats.getByText(/^服务器\s+1028 次（29.8%）$/)).toBeVisible()
+  await expect(stats.getByText(/^终端\s+1400 次（40.5%）$/)).toBeVisible()
+  await expect(stats.getByText(/^分支\s+1025 次（29.7%）$/)).toBeVisible()
+})
+
+test('bar legends wrap and enable pagination as the series count grows', async ({ page }) => {
+  await page.setViewportSize({ width: 1500, height: 900 })
+  await page.goto('components/bar')
   const demo = page.locator('.category-bar-legend')
   const svg = demo.locator('svg')
   const count = demo.getByRole('radiogroup', { name: '系列数量' })
@@ -488,7 +485,7 @@ test('legends wrap, paginate, and display totals in independent examples', async
   await expect(svg).toContainText('2023')
   await expect.poll(() => rowOffset('设备类别 15')).toBeGreaterThan(0)
   await expect(arrows).toHaveCount(0)
-  await labels.first().hover({ force: true })
+  await hoverSvg(svg, labels.first())
   const unpagedY = (await svg.boundingBox())!.y
   await page.mouse.wheel(0, 120)
   await expect.poll(async () => (await svg.boundingBox())!.y).toBeLessThan(unpagedY)
@@ -498,9 +495,24 @@ test('legends wrap, paginate, and display totals in independent examples', async
     await expect(svg.getByText(/^1\/\d+$/)).toHaveCount(0)
     await expect(years).toHaveText(['2019', '2020', '2021'])
   }
+})
 
+test('bar legend paging preserves zoom, selection, wheel behavior and resize anchors', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1500, height: 900 })
+  await page.goto('components/bar')
+  const demo = page.locator('.category-bar-legend')
+  const svg = demo.locator('svg')
+  const count = demo.getByRole('radiogroup', { name: '系列数量' })
+  const years = svg.getByText(/^20(?:19|2[0-3])$/)
+  const labels = svg.getByText(/^(服务器|终端|分支|设备类别 \d+)$/)
+  const arrows = svg.locator('path[stroke-linecap="round"][stroke-linejoin="round"]')
+  await count.getByText('50 个系列', { exact: true }).click()
+  await expect(arrows).toHaveCount(2)
+  await expect(years).toHaveText(['2019', '2020', '2021'])
   const selection = svg.locator('path[fill="rgb(135,175,255)"][fill-opacity="0.2"]')
-  await selection.scrollIntoViewIfNeeded()
+  await svg.scrollIntoViewIfNeeded()
   const box = (await selection.boundingBox())!
   const x = box.x + box.width / 2
   const y = box.y + box.height / 2
@@ -535,17 +547,17 @@ test('legends wrap, paginate, and display totals in independent examples', async
 
   const first = svg.getByText('服务器', { exact: true })
   const activeFill = await first.getAttribute('fill')
-  await first.click({ force: true })
+  await clickSvg(svg, first)
   await expect(first).not.toHaveAttribute('fill', activeFill!)
   const inactiveFill = await first.getAttribute('fill')
-  await arrows.last().click({ force: true })
+  await clickSvg(svg, arrows.last())
   await expect(labels.first()).toHaveText(secondRow![0]!.text)
   await expect(first).toHaveCount(0)
   await expect(years).toHaveText(['2021', '2022', '2023'])
-  await arrows.first().click({ force: true })
+  await clickSvg(svg, arrows.first())
   await expect(first).toHaveAttribute('fill', inactiveFill!)
 
-  await first.hover({ force: true })
+  await hoverSvg(svg, first)
   const legendScrollY = (await svg.boundingBox())!.y
   await page.mouse.wheel(0, 120)
   await expect(labels.first()).toHaveText(secondRow![0]!.text)
@@ -560,7 +572,7 @@ test('legends wrap, paginate, and display totals in independent examples', async
   await expect.poll(async () => (await svg.boundingBox())!.y).toBeLessThan(legendScrollY)
   await expect(labels.first()).toHaveText('服务器')
 
-  await hoverCategory(page, svg, '2022')
+  await hoverCategory(svg, '2022')
   const columns = demo.locator('.charts-tooltips-column')
   await expect(columns).toHaveCount(5)
   await expect
@@ -573,11 +585,19 @@ test('legends wrap, paginate, and display totals in independent examples', async
   expect((await columns.nth(1).boundingBox())!.x).toBeGreaterThan(
     (await columns.first().boundingBox())!.x,
   )
-  const tooltipBox = (await demo.locator('.charts-tooltips').boundingBox())!
-  expect(tooltipBox.y + tooltipBox.height).toBeLessThan((await first.boundingBox())!.y)
+  await expect(async () => {
+    const positions = await demo.evaluate(element => {
+      const tooltip = element.querySelector('.charts-tooltips')!.getBoundingClientRect()
+      const legend = [...element.querySelectorAll('svg text')]
+        .find(label => label.textContent === '服务器')!
+        .getBoundingClientRect()
+      return { bottom: tooltip.bottom, legendTop: legend.top }
+    })
+    expect(positions.bottom).toBeLessThan(positions.legendTop)
+  }).toPass({ timeout: 5000 })
 
   await count.hover()
-  await arrows.last().click({ force: true })
+  await clickSvg(svg, arrows.last())
   const anchor = (await labels.first().textContent())!
   expect(anchor).toBe(secondRow![0]!.text)
   const resizedWidth = await demo.evaluate(el => {
@@ -590,13 +610,8 @@ test('legends wrap, paginate, and display totals in independent examples', async
   await expect(svg.getByText(anchor, { exact: true })).toBeVisible()
   await expect(first).toHaveCount(0)
   await expect(years).toHaveText(['2021', '2022', '2023'])
-  await arrows.first().click({ force: true })
+  await clickSvg(svg, arrows.first())
   await expect(first).toHaveAttribute('fill', inactiveFill!)
-
-  const stats = page.locator('.category-bar-legend-percentage svg')
-  await expect(stats.getByText(/^服务器\s+1028 次（29.8%）$/)).toBeVisible()
-  await expect(stats.getByText(/^终端\s+1400 次（40.5%）$/)).toBeVisible()
-  await expect(stats.getByText(/^分支\s+1025 次（29.7%）$/)).toBeVisible()
 })
 
 test('external options override the category defaults and can be removed', async ({ page }) => {
@@ -614,7 +629,7 @@ test('external options override the category defaults and can be removed', async
   await expect(customBars).toHaveCount(5)
   await expect.poll(() => thickness(customBars)).toBeCloseTo(14)
   await expect(svg.getByText('500', { exact: true })).toBeVisible()
-  await hoverCategory(page, svg, '周一')
+  await hoverCategory(svg, '周一')
   await expect(chart.locator('.charts-tooltips-item-value')).toHaveText('120 次')
 
   await toggle.click()
@@ -652,7 +667,7 @@ for (const [title, legend, total, selectedTotal, missingTotal] of [
     const instance = await chart.getAttribute('_echarts_instance_')
     await expect(svg.getByText(total, { exact: true })).toHaveCount(1)
     const toggle = svg.getByText(legend, { exact: true })
-    await toggle.click({ force: true })
+    await clickSvg(svg, toggle)
     await expect(svg.getByText(total, { exact: true })).toHaveCount(0)
     await expect(svg.getByText(selectedTotal, { exact: true })).toHaveCount(1)
     await selectState(demo, '加载中')
@@ -661,7 +676,7 @@ for (const [title, legend, total, selectedTotal, missingTotal] of [
     await selectState(demo, '正常')
     await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
     await expect(svg.getByText(selectedTotal, { exact: true })).toHaveCount(1)
-    await toggle.click({ force: true })
+    await clickSvg(svg, toggle)
     await expect(svg.getByText(total, { exact: true })).toHaveCount(1)
     await selectState(demo, missingState)
     await expect(svg.getByText(missingTotal, { exact: true })).toHaveCount(1)

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { defineComponent, h, ref } from 'vue'
 import {
   IxChart,
+  useChart,
+  useReactiveAttrs,
   IxBarChart,
   IxLineChart,
   IxPieChart,
@@ -25,6 +27,15 @@ const pieData = [
   { name: 'A', value: 20 },
   { name: 'B', value: 30 },
 ]
+// Exercise loading's positioning ownership on a composable host whose position
+// is controlled by the application, rather than the component's absolute canvas.
+const ComposableHost = defineComponent({
+  inheritAttrs: false,
+  setup(_, context) {
+    const { containerRef } = useChart(useReactiveAttrs(context.attrs))
+    return () => h('div', { ref: containerRef, style: context.attrs.style })
+  },
+})
 const cases = [
   { name: 'pie', component: IxPieChart, props: { data: pieData, align: 'center' } },
   {
@@ -67,7 +78,7 @@ const cases = [
     },
   },
   { name: 'gauge', component: IxGaugeChart, props: { value: 40 } },
-  { name: 'fallback', component: IxChart, props: {} },
+  { name: 'fallback', component: ComposableHost, props: {} },
   {
     name: 'other',
     component: IxChart,
@@ -86,7 +97,15 @@ const renderChart = (item: (typeof cases)[number]) =>
           legend: { type: 'scroll' },
         }
       : {}),
-    ...(empty.value ? { data: [], categories: 'categories' in item.props ? [] : undefined } : {}),
+    ...(empty.value
+      ? {
+          data: [],
+          categories: 'categories' in item.props ? [] : undefined,
+          ...('series' in item.props && item.props.series
+            ? { series: item.props.series.map(series => ({ ...series, data: [] })) }
+            : {}),
+        }
+      : {}),
     loading: loading.value && (objectLoading.value ? { icon: loadingIcon.value } : true),
     darkMode: dark.value,
     animation: false,

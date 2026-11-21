@@ -20,9 +20,30 @@ const positions: PieChartAlign[] = [
 ]
 Object.assign(window, {
   pieAlignmentState: () => {
-    const el = document.querySelector('[data-testid=actual] [_echarts_instance_]') as HTMLElement
-    const chart = getInstanceByDom(el)!
-    return { id: chart.id, option: chart.getOption() }
+    const el = document.querySelector<HTMLElement>('[data-testid=actual] [_echarts_instance_]')
+    const chart = el && getInstanceByDom(el)
+    const option = chart?.getOption()
+    return chart && option ? { id: chart.id, option } : null
+  },
+  pieComparisonState: async () => {
+    // Both fixtures disable animation. Flush Vue/lazy setOption painting before
+    // reporting readiness; updated model values alone do not prove SVG paint.
+    await new Promise<void>(resolve => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+    })
+    return ['reference', 'actual'].map(name => {
+      const dom = document.querySelector<HTMLElement>(`[data-testid=${name}] [_echarts_instance_]`)
+      const chart = dom && getInstanceByDom(dom)
+      if (!chart) return null
+      const series = (chart.getOption()?.series as any[] | undefined)?.at(-1)
+      if (!series?.data) return null
+      return {
+        values: series.data.map((item: any) => item.value),
+        width: chart.getWidth(),
+        height: chart.getHeight(),
+        finished: chart.getZr().animation.isFinished(),
+      }
+    })
   },
 })
 const referenceSize = new URLSearchParams(location.search).has('reference')

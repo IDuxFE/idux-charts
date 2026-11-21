@@ -17,7 +17,10 @@ test('rose defaults render a transparent 32px hole and a bordered 28px gradient 
       await expect
         .poll(async () => {
           const option = await inspect()
+          if (!option) return null
           return {
+            roseType: option.roseType,
+            data: option.data,
             radius: option.radius,
             background: option.background,
             width: option.center?.bounds.width,
@@ -25,10 +28,24 @@ test('rose defaults render a transparent 32px hole and a bordered 28px gradient 
             border: option.center?.lineWidth,
           }
         })
-        .toEqual({ radius: [16, 82], background: 'transparent', width: 28, height: 28, border: 1 })
+        .toEqual({
+          roseType: shape,
+          data: [10, 20, 30, 40].map(value => ({
+            value: state === 'normal' ? value : 0,
+            missing: state === 'missing',
+          })),
+          radius: [16, 82],
+          background: 'transparent',
+          width: 28,
+          height: 28,
+          border: 1,
+        })
     }
   }
   await page.getByRole('combobox', { name: 'State' }).selectOption('normal')
+  await expect
+    .poll(async () => (await inspect())?.data)
+    .toEqual([10, 20, 30, 40].map(value => ({ value, missing: false })))
   const option = await inspect()
   expect(option.center.fill.colorStops.map((stop: any) => stop.color)).toEqual([
     'rgba(69, 143, 255, 0.1)',
@@ -79,19 +96,29 @@ test('rose defaults render a transparent 32px hole and a bordered 28px gradient 
     ['default', [16, 82]],
   ] as const) {
     await page.getByRole('combobox', { name: 'Radius' }).selectOption(mode)
-    await expect.poll(async () => (await inspect()).radius).toEqual(expected)
+    await expect.poll(async () => (await inspect())?.radius).toEqual(expected)
     await expect
-      .poll(async () => (await inspect()).center?.bounds.width ?? 0)
+      .poll(async () => (await inspect())?.center?.bounds.width ?? 0)
       .toBe(mode === 'custom' ? 12 : mode === 'solid' ? 0 : 28)
   }
   await page.getByRole('combobox', { name: 'Shape' }).selectOption('pie')
-  await expect.poll(async () => (await inspect()).center).toBeNull()
+  await expect.poll(async () => (await inspect())?.center).toBeNull()
   await page.getByRole('combobox', { name: 'Shape' }).selectOption('radius')
   await page.getByRole('spinbutton', { name: 'Width' }).fill('600')
   await page.getByRole('spinbutton', { name: 'Height' }).fill('300')
-  await expect.poll(async () => (await inspect()).width).toBe(600)
-  expect((await inspect()).radius[0]).toBe(16)
-  expect((await inspect()).center.bounds.width).toBe(28)
+  await expect
+    .poll(async () => {
+      const option = await inspect()
+      if (!option) return null
+      return {
+        width: option.width,
+        height: option.height,
+        roseType: option.roseType,
+        innerRadius: option.radius[0],
+        circleWidth: option.center?.bounds.width,
+      }
+    })
+    .toEqual({ width: 600, height: 300, roseType: 'radius', innerRadius: 16, circleWidth: 28 })
 })
 
 test('legend reduces columns without losing names or clipping at 450px, and restores them on resize', async ({
@@ -109,22 +136,19 @@ test('legend reduces columns without losing names or clipping at 450px, and rest
     [720, 3],
   ]) {
     await page.getByRole('spinbutton', { name: 'Width' }).fill(String(width))
-    await expect
-      .poll(async () => {
-        const state = await inspect()
-        return [state?.width, state?.legends.length]
-      })
-      .toEqual([width, columns])
-    const state = await inspect()
-    for (const legend of state.legends) {
-      expect(legend.bounds.x).toBeGreaterThanOrEqual(-1)
-      expect(legend.bounds.x + legend.bounds.width).toBeLessThanOrEqual(width! + 1)
-      expect(legend.labelWidth).toBeGreaterThan(12)
-    }
-    expect(state.legends.flatMap((legend: any) => legend.names)).toEqual(
-      Array.from({ length: 30 }, (_, i) => `分类 ${i + 1}`),
-    )
-    expect(state.legends.at(-1).type).toBe('scroll')
+    await expect(async () => {
+      const state = await inspect()
+      expect([state?.width, state?.legends.length]).toEqual([width, columns])
+      for (const legend of state.legends) {
+        expect(legend.bounds.x).toBeGreaterThanOrEqual(-1)
+        expect(legend.bounds.x + legend.bounds.width).toBeLessThanOrEqual(width! + 1)
+        expect(legend.labelWidth).toBeGreaterThan(12)
+      }
+      expect(state.legends.flatMap((legend: any) => legend.names)).toEqual(
+        Array.from({ length: 30 }, (_, i) => `分类 ${i + 1}`),
+      )
+      expect(state.legends.at(-1).type).toBe('scroll')
+    }).toPass({ timeout: 5000 })
     await expect(
       page
         .getByTestId('layout-chart')
@@ -134,7 +158,7 @@ test('legend reduces columns without losing names or clipping at 450px, and rest
   }
   await page.getByRole('spinbutton', { name: 'Count' }).fill('12')
   await page.getByRole('combobox', { name: 'Name mode' }).selectOption('long')
-  await expect.poll(async () => (await inspect()).legends.length).toBe(2)
+  await expect.poll(async () => (await inspect())?.legends.length).toBe(2)
   await expect(
     page
       .getByTestId('layout-chart')
@@ -142,5 +166,5 @@ test('legend reduces columns without losing names or clipping at 450px, and rest
       .filter({ hasText: /^Long category name 1$/ }),
   ).toBeVisible()
   await page.getByRole('combobox', { name: 'Name mode' }).selectOption('short')
-  await expect.poll(async () => (await inspect()).legends.length).toBe(3)
+  await expect.poll(async () => (await inspect())?.legends.length).toBe(3)
 })

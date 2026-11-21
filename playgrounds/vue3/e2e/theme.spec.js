@@ -7,6 +7,12 @@ test('reactive global theme, local styles and explicit Pie modes work in the pac
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/?theme')
   const state = () => page.evaluate(() => window.themePlotState())
+  await expect
+    .poll(async () => {
+      const charts = await state()
+      return ['pie', 'gauge', 'liquid', 'radar'].map(name => !!charts[name]?.option?.series?.length)
+    })
+    .toEqual([true, true, true, true])
   await expect.poll(async () => (await state()).pie?.option.series.length).toBe(3)
   const id = (await state()).pie.id
   await page.getByRole('button', { name: 'Theme', exact: true }).click()
@@ -65,19 +71,36 @@ test('packaged charts inherit a reactive ECharts theme and honor local overrides
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/?theme')
   const state = () => page.evaluate(() => window.themePlotState())
+  await expect
+    .poll(async () => {
+      const charts = await state()
+      return ['pie', 'gauge', 'liquid', 'radar'].map(name => !!charts[name]?.option?.series?.length)
+    })
+    .toEqual([true, true, true, true])
   await expect.poll(async () => (await state()).pie?.option.textStyle.color).toBe('#123456')
   const before = (await state()).pie.id
   await page.getByRole('button', { name: 'Dark charts', exact: true }).click()
   await expect.poll(async () => (await state()).pie.option.darkMode).toBe(true)
+  await expect
+    .poll(async () => {
+      const charts = await state()
+      return ['pie', 'gauge', 'liquid', 'radar'].map(name => ({
+        dark: charts[name]?.option?.darkMode,
+        color: charts[name]?.option?.textStyle?.color,
+      }))
+    })
+    .toEqual(Array.from({ length: 4 }, () => ({ dark: true, color: '#f4f8ff' })))
   expect((await state()).pie.id).not.toBe(before)
-  for (const chart of Object.values(await state())) {
-    expect(chart.option.darkMode).toBe(true)
-    expect(chart.option.textStyle.color).toBe('#f4f8ff')
-  }
   await page.getByRole('button', { name: 'Local chart theme', exact: true }).click()
   await expect.poll(async () => (await state()).pie.option.textStyle.color).toBe('#345678')
   const localId = (await state()).pie.id
   await page.getByRole('button', { name: 'Light charts', exact: true }).click()
+  await expect
+    .poll(async () => {
+      const charts = await state()
+      return ['gauge', 'liquid', 'radar'].map(name => charts[name]?.option?.darkMode)
+    })
+    .toEqual([false, false, false])
   expect((await state()).pie.id).toBe(localId)
   expect((await state()).pie.option.textStyle.color).toBe('#345678')
   await page.getByRole('button', { name: 'Clear chart override', exact: true }).click()

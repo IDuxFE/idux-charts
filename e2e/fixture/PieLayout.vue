@@ -71,7 +71,9 @@ const inspect = () => {
   const chart = dom && (getInstanceByDom(dom) as any)
   if (!chart) return null
   const model = chart.getModel()
-  const main = model.getSeriesByIndex(2)
+  const main = model?.getSeriesByIndex(2)
+  const background = model?.getSeriesByIndex(0)?.getData().getItemGraphicEl(0)
+  if (!main || !background) return null
   const center = chart
     .getZr()
     .storage.getDisplayList()
@@ -86,6 +88,11 @@ const inspect = () => {
   return {
     width: chart.getWidth(),
     height: chart.getHeight(),
+    roseType: main.option.roseType,
+    data: main.option.data.map((item: any) => ({
+      value: item.value,
+      missing: item.tooltip?.show === false,
+    })),
     center: center
       ? {
           bounds: bounds(center),
@@ -94,7 +101,7 @@ const inspect = () => {
           lineWidth: center.style.lineWidth,
         }
       : null,
-    background: model.getSeriesByIndex(0).getData().getItemGraphicEl(0).style.fill,
+    background: background.style.fill,
     radius: main.option.radius,
     centerPosition: { x: rect.x + main.option.center[0], y: rect.y + main.option.center[1] },
     legends: model

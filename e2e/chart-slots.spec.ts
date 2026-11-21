@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, expectFillsContainer } from './helpers'
 import { fixtureBaseURL } from './environment'
 
 test('default slot fills min-height charts, receives clicks and survives theme recreation', async ({
@@ -12,9 +12,8 @@ test('default slot fills min-height charts, receives clicks and survives theme r
   await expect(host).toHaveCSS('height', '300px')
   const before = await page.evaluate(() => (window as any).slotState())
   expect(before).toMatchObject({ count: 1, width: 400, height: 300 })
-  const box = await content.boundingBox()
-  const chartBox = await host.boundingBox()
-  expect(box).toEqual(chartBox)
+  // The Vue overlay and the ECharts canvas are siblings inside Chart's root.
+  await expectFillsContainer(host.locator('..'), '[data-testid=slot-content]')
   await content.click()
   await expect(page.locator('.ix-chart-overlay')).toHaveCount(0)
   expect(await page.evaluate(() => (window as any).slotState())).toMatchObject({

@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, reloadDemo } from './helpers'
 
 for (const name of ['basic', 'status', 'segmented']) {
   test(`gauge ${name} demo supports sizes, zero and request states`, async ({ page }) => {
@@ -23,8 +23,8 @@ for (const name of ['basic', 'status', 'segmented']) {
     await demo.getByText('空状态', { exact: true }).click()
     await expect(charts.first()).toHaveAttribute('_echarts_instance_', instance!)
     await expect(demo.locator('.ix-chart-overlay')).toContainText('暂无数据')
-    await demo.getByRole('button', { name: '重新加载' }).click()
-    await expect(demo.getByRole('status').first()).toHaveAttribute('aria-busy', 'true')
+    const loading = await reloadDemo(demo)
+    expect(loading.busy).toBe('true')
     await expect(demo.getByRole('status')).toHaveCount(0)
     await expect(charts.first().locator('svg')).toBeVisible()
     await demo.getByText('加载中', { exact: true }).click()
@@ -34,7 +34,7 @@ for (const name of ['basic', 'status', 'segmented']) {
   })
 }
 
-test('gauge business scenarios and responsive layout', async ({ page }, testInfo) => {
+test('gauge business scenarios and responsive layout', async ({ page }) => {
   await page.goto('components/gauge', { waitUntil: 'domcontentloaded' })
   const segmented = page.locator('.gauge-segmented')
   await segmented.getByText('评分等级', { exact: true }).click()
@@ -43,7 +43,6 @@ test('gauge business scenarios and responsive layout', async ({ page }, testInfo
   const range = page.locator('.gauge-range')
   await range.getByText('80 GB（超量程）', { exact: true }).click()
   await expect(range.locator('svg')).toContainText('80')
-  await page.screenshot({ path: testInfo.outputPath('gauge-examples.png'), fullPage: true })
   await page.setViewportSize({ width: 480, height: 800 })
   await expect(page.locator('.gauge-basic svg').first()).toBeVisible()
 })
