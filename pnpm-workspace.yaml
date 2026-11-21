@@ -12,5 +12,16 @@ packageExtensions:
     dependencies:
       type-fest: ^3.2.0
 overrides:
-  # Patch Archive's URL parser without changing its Markdown 13 integration.
+  # Use the patched URL parser in documentation builds.
   'linkify-it@<5.0.2': 5.0.2
+  # Keep Archive's Markdown plugins on the matching Markdown 14 API.
+  'markdown-it@<14.3.3': 14.3.3
+  '@mdit-vue/plugin-component@<2.1.4': 2.1.4
+  '@mdit-vue/plugin-frontmatter@<2.1.4': 2.1.4
+  '@mdit-vue/plugin-headers@<2.1.4': 2.1.4
+  '@mdit-vue/plugin-sfc@<2.1.4': 2.1.4
+  '@mdit-vue/plugin-title@<2.1.4': 2.1.4
+  '@mdit-vue/plugin-toc@<2.1.4': 2.1.4
+  '@mdit-vue/shared@<2.1.4': 2.1.4
+  '@mdit-vue/types@<2.1.4': 2.1.4
+  '@types/markdown-it@<14.2.0': 14.2.0

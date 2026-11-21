@@ -244,6 +244,26 @@ to the validated test environment and Node.js 22 tooling baseline. Keep security
 issue scanning enabled. If the package version changes, review the new warning
 rather than hiding all future issues for the package.
 
+The following documentation/build dependencies also have approved current-version
+quality exceptions while their upstream integrations require these API versions.
+Apply the same project-and-selected-version scope, record the integration reason,
+and review the exception when that integration is upgraded. Security and license
+findings remain enabled independently.
+
+| Dependency                          | Version  | Integration baseline                                            |
+| ----------------------------------- | -------- | --------------------------------------------------------------- |
+| `@atlaskit/pragmatic-drag-and-drop` | `1.8.1`  | iDux CDK 2.11 uses the 1.x API.                                 |
+| `entities`                          | `4.5.0`  | Markdown 14's declared dependency range.                        |
+| `lru-cache`                         | `7.18.3` | Archive 0.5 uses the default-export constructor.                |
+| `mime`                              | `1.6.0`  | Less uses the legacy `lookup` and `charsets` APIs.              |
+| `nanoid`                            | `3.3.20` | PostCSS 8 declares the 3.x dependency range.                    |
+| `shiki`                             | `0.11.1` | Archive 0.5 and shiki-processor use the legacy highlighter API. |
+| `vscode-textmate`                   | `6.0.0`  | Required by the retained Shiki integration.                     |
+
+上表依赖保留现有上游集成要求的 API 版本，过期质量提醒仅在当前项目、当前版本中设置例外。
+每条例外记录集成原因，并在上游集成升级时复核；漏洞和许可证检查继续独立启用。
+`@types/node@22.20.5` 的 Node 22 基线例外沿用前述规则。
+
 FOSSA quality issues do not support all-version auto-ignore rules. To change
 project-wide outdated-version enforcement, adjust the project's quality policy
 and its Stale Package Prevention rule where the account plan permits it. That
