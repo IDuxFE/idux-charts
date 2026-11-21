@@ -1,3 +1,4 @@
+import type { SlotsType, VNode } from 'vue-demi'
 import loadingIcon from '../assets/loading.svg?raw'
 import ringLoadingIcon from '../assets/loading-ring.svg?raw'
 import roseLoadingIcon from '../assets/loading-rose.svg?raw'
@@ -17,6 +18,7 @@ export default withChartProps<PieChartProps>()(
   defineComponent({
     name: 'IxPieChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: pieChartProps as any,
     methods: plotInstanceMethods,
     // @ts-ignore

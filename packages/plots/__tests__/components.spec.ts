@@ -1,7 +1,7 @@
 import { PLOT_THEME_TOKEN } from '../shared/plotTheme'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick, reactive } from 'vue'
+import { defineComponent, h, nextTick, reactive, ref } from 'vue'
 
 vi.mock('echarts/core', async () => ({
   ...(await vi.importActual<typeof import('echarts/core')>('echarts/core')),
@@ -16,6 +16,7 @@ import Pie from '../pie/src/Pie'
 import Radar from '../radar/src/Radar'
 import Gauge from '../gauge/src/Gauge'
 import LiquidFill from '../liquid-fill/src/LiquidFill'
+import MapChart from '../map/src/Map'
 
 const instances: {
   getOption: ReturnType<typeof vi.fn>
@@ -374,3 +375,69 @@ it('leaves wheel events available to the page when a category bar needs no legen
   wrapper.element.dispatchEvent(event)
   expect(event.defaultPrevented).toBe(false)
 })
+
+it.each([
+  ['core', IxChart],
+  ['bar', Bar],
+  ['line', Line],
+  ['pie', Pie],
+  ['radar', Radar],
+  ['gauge', Gauge],
+  ['liquid-fill', LiquidFill],
+  ['map', MapChart],
+] as const)(
+  '%s forwards reactive overlay slots while retaining its chart instance',
+  async (name, component) => {
+    const visible = ref(true)
+    const theme = ref('seer')
+    const wrapper = mount(
+      defineComponent({
+        setup: () => () =>
+          h(
+            component,
+            {
+              theme: theme.value,
+              style: { height: '300px' },
+              ...(name === 'core'
+                ? { series: [{ type: 'bar', data: [1] }] }
+                : name === 'map'
+                  ? { geo: { map: 'slot-map' } }
+                  : name === 'radar'
+                    ? { indicator: [{ name: 'A', max: 100 }], data: [{ name: 'One', value: [20] }] }
+                    : name === 'gauge' || name === 'liquid-fill'
+                      ? { value: 50 }
+                      : { data: name === 'pie' ? [{ name: 'A', value: 1 }] : [1] }),
+            },
+            {
+              default: () =>
+                visible.value
+                  ? [
+                      h(
+                        'button',
+                        {
+                          onClick: () => {
+                            visible.value = false
+                          },
+                        },
+                        'Reload',
+                      ),
+                    ]
+                  : [],
+            },
+          ),
+      }),
+    )
+    wrappers.push(wrapper)
+    const button = wrapper.get('button').element
+    expect(wrapper.get('.ix-chart-overlay').text()).toBe('Reload')
+    theme.value = 'dark'
+    await nextTick()
+    expect(wrapper.get('button').element).toBe(button)
+    expect(instances).toHaveLength(2)
+    expect(instances[0].dispose).toHaveBeenCalledTimes(1)
+    await wrapper.get('button').trigger('click')
+    expect(wrapper.find('.ix-chart-overlay').exists()).toBe(false)
+    expect(instances).toHaveLength(2)
+    expect(instances[1].dispose).not.toHaveBeenCalled()
+  },
+)

@@ -29,6 +29,8 @@ const option: RadarChartProps = {
 </template>
 ```
 
+支持默认插槽，公共配置和用法见<a href="./core">IxChart API</a>。
+
 ### RadarChartProps
 
 | 属性          | 类型                                | 默认值           | 行为                                                          |
@@ -41,14 +43,12 @@ const option: RadarChartProps = {
 | `clockwise`   | `boolean`                           | `false`          | 开启后从首轴按顺时针排列其余维度，并同步调整数值顺序。        |
 | `center`      | `RadarComponentOption['center']`    | `['50%', '50%']` | 圆心坐标。                                                    |
 | `radius`      | `RadarComponentOption['radius']`    | `'65%'`          | 支持像素或百分比。                                            |
-| `plotTheme`   | `PlotTheme`                         | 注入值           | 色板、轴文字和网格样式，继承 `PLOT_THEME_TOKEN`。             |
+| `plotTheme`   | `PlotTheme`                         | 注入值           | 色板、轴文字和网格样式。                                      |
 
 数值数组的顺序须与 `indicator` 一致。维度尚未就绪时渲染空态。开启 `clockwise` 后，ECharts 回调中的 `value` 使用绘制顺序。要读取业务原始数据，可按 `dataIndex` 索引传入的 `data`。
 
 ### createRadarOption
 
-`createRadarOption(props)` 与组件使用同样的配置合并规则。例如传入 `radar: { splitNumber: 3 }` 可修改网格分段数并保留 `indicator` 和其他默认值。直接调用函数时可显式传入 `plotTheme`。
+`createRadarOption(props)` 返回雷达图的 ECharts option。例如传入 `radar: { splitNumber: 3 }` 可修改网格分段数并保留 `indicator` 和其他默认值。
 
-`radar` 和 `tooltip` 等原生对象按字段合并。显式传入 `series` 会使用指定的系列及其原始数据顺序。组件支持<a href="./core">基础组件</a> API 中的公共图表选项。
-
-自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。
+显式传入 `series` 时使用指定系列的原始数据顺序，不执行顶层 `clockwise` 的数值重排。

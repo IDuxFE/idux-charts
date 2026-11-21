@@ -185,7 +185,7 @@ for (const [title, seriesCount] of [
     await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
     await selectState(demo, '空状态')
     await expect(body.locator('.ix-empty')).toContainText('未配置数据源，请先配置采集任务')
-    await expect(chart).toHaveCount(0)
+    await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
     await selectState(demo, '正常')
     await expect(bars).toHaveCount(5 * seriesCount)
     await page.setViewportSize({ width: 480, height: 800 })

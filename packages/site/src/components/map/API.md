@@ -61,9 +61,15 @@ const series = [
 
 底图通过 `geo.map` 指定已注册的地图名称；`geo.roam` 默认 `true`，可设为 `false`、`'scale'` 或 `'move'` 控制缩放和拖动。
 
-`MapChartProps` 接受完整 ECharts 选项及公共图表属性。支持 `loading`、`onReady`、`getEChartsInstance()`、图表事件及自动 resize。对象按字段合并，数组整体替换，series 不按下标合并；组件不转换或重新生成传入的系列数据。
+`MapChartProps` 接受原生 ECharts 选项，组件不转换或重新生成传入的系列数据。
 
 组件自动注册 map、scatter、lines、geo 和 visualMap；使用 effectScatter、heatmap、custom 等其他原生系列时，由应用通过 ECharts `use()` 注册相应能力。生成函数不依赖组件，可以配合 `IxChart` 或 ECharts 实例使用，调用方需注册对应系列及组件。
+
+支持默认插槽，公共配置和用法见<a href="./core">IxChart API</a>。
+
+### createMapOption
+
+`createMapOption(props)` 返回地图的 ECharts option。
 
 ### createMapPieces(thresholds, options?)
 
@@ -165,7 +171,7 @@ const visualMap = createMapVisualMap(defaultMapPieces)
 
 `MapMetric`：`{ name: string; value: number | string | null; unit?: string }`。生成函数默认 Tooltip 展示单个 value；提供非空 metrics 时按指标逐行展示。0 保留，null 和非有限数值显示 `-`，缺失值不附单位，文本转义 HTML。使用生成函数 options.tooltip.formatter 可替换默认格式；手写系列遵循原生 Tooltip 规则。
 
-生成函数是纯函数，调用时生成配置，不读取 Vue 注入、不维护隐式节点关联。组件的 plotTheme 作用于底图及公共默认值；希望生成的节点、线路、区域同步使用自定义主题时，将同一份 plotTheme 显式传给对应生成函数。
+组件的 `plotTheme` 作用于底图及公共默认值；节点、线路和区域的主题由对应生成函数的 `options.plotTheme` 设置。生成函数不维护隐式节点关联。
 
 数据、节点坐标或主题会变化时，在 computed 中重新调用生成函数，并传入最新 nodes。生成结果的字段合并优先级为：内部默认值 → options 原生配置 → 单条数据的 color/symbol 或区域分段颜色。需要完全接管某个字段，也可在生成后按原生配置修改。
 

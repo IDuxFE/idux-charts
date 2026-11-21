@@ -65,6 +65,26 @@ Chart components register their required ECharts modules. Global registration is
 
 To import individual chart families in an ESM build, use the [`@idux/charts` subpaths](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.md#quick-start), such as `@idux/charts/line`.
 
+## Default slot
+
+All Plot components accept a default overlay slot that fills the chart. Control empty-state visibility with `v-if`; the chart instance stays mounted. An `IxEmpty` description is sufficient when no retry action is needed. Add a background and remove margins to cover the underlying chart.
+
+```vue
+<IxBarChart :categories="categories" :data="data" style="height: 300px">
+  <IxEmpty v-if="isEmpty" simple description="No data" class="chart-empty" />
+</IxBarChart>
+```
+
+```css
+.chart-empty {
+  /* Remove the Empty component margins so the background covers the whole chart. */
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+```
+
+The slot does not hide or clear the underlying chart. Transparent content remains visible alongside the chart, but the overlay receives pointer events by default. For annotations, set `.ix-chart-overlay { pointer-events: none; }` and restore `pointer-events: auto` on interactive elements. In scoped styles, target the overlay with `:deep(.ix-chart-overlay)`. Slot content is excluded from ECharts image exports. The background variable above comes from the iDux component theme; an application background color also works.
+
 ## Configuration and themes
 
 - `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, `createLiquidFillOption`, and `createMapOption` are pure option builders.

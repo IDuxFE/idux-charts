@@ -16,7 +16,7 @@ it('forwards category-line readiness and falls back when no ready listener is in
       setup() {
         option = useCategoryLineOption(
           () => ({ props: { categories: ['A'], data: [1] }, attrs: attrs.value }),
-          { attrs: {} },
+          { attrs: {}, slots: {} },
         )
         const Child = defineComponent({ render: () => h('div') })
         return () => h(Child, { ref: 'chart' })

@@ -1,3 +1,4 @@
+import type { SlotsType, VNode } from 'vue-demi'
 import loadingIcon from '../assets/loading.svg?raw'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
@@ -9,6 +10,7 @@ export default withChartProps<RadarChartProps>()(
   defineComponent({
     name: 'IxRadarChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: [...radarProps],
     methods: plotInstanceMethods,
     setup(props, context) {

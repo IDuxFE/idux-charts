@@ -25,6 +25,8 @@ const option: BarChartProps = {
 </template>
 ```
 
+支持默认插槽，公共配置和用法见<a href="./core">IxChart API</a>。
+
 ### BarChartProps
 
 | 属性                 | 类型                                               | 分类布局行为                                                                                               |
@@ -36,9 +38,7 @@ const option: BarChartProps = {
 | `barWidth`、`barGap` | `number \| string`                                 | 可覆盖柱宽和组内间距。系列值优先于顶层值。分类布局的 `barGap` 默认为 `30%`。                               |
 | `referenceLine`      | `BarReferenceLine`                                 | `{ value: number, name?: string, color?: string }`。沿数值轴的指定值绘制虚线，提供独立名称后可用图例切换。 |
 | `zeroText`           | `string`                                           | 全部数值为 0 时的可选提示。上方标签布局使用轨道表达零值。                                                  |
-| `plotTheme`          | `PlotTheme`                                        | 分类布局的色板和辅助元素颜色，继承 `PLOT_THEME_TOKEN`。                                                    |
-
-未显式指定图例类型或位置时，分类布局的多行图例采用 16px 行间距。
+| `plotTheme`          | `PlotTheme`                                        | 分类布局的色板和辅助元素颜色。                                                                             |
 
 默认数值标签：基础竖向柱状图显示在 `top`，基础横向（含上方分类标签布局）显示在 `right`；分组柱状图不显示；竖向堆叠柱状图在 `top` 显示当前可见系列的堆叠总数，横向堆叠柱状图在整条柱子的 `right` 显示当前可见系列的堆叠总数。可用顶层 `label` 或 `series[].label` 覆盖默认值，系列配置优先。
 
@@ -48,19 +48,17 @@ const option: BarChartProps = {
 
 并排柱默认宽 6px。单列柱按可见分类数取宽度，1–3 项为 20px，4–5 项为 10px，6 项以上为 6px。
 
-`zeroText` 默认使用浅色 `#A1A7B3`、深色 `#808999`，`plotTheme.secondaryTextColor` 可覆盖。柱体默认阴影随实际柱宽和长度调整，显式 `itemStyle.shadow*` 配置优先。
+柱体默认阴影随实际柱宽和长度调整，显式 `itemStyle.shadow*` 配置优先。
 
 `0` 为有效值。缺少对应数据项、空值或非有限数值时保留分类并显示缺报底条，可用 `missingReason` 补充提示。缺少分类或全部系列的数据数组为空时，清除生成的图形。
 
-`grid`、`xAxis`、`yAxis` 与默认值合并。分类布局使用每个轴的第一项配置，分类轴类型和标签由 `categories` 决定。`dataZoom` 默认绑定分类轴，显式指定目标轴时沿用该绑定。用 `tooltip.valueFormatter` 改写数值，用 `tooltip.formatter` 改写整个提示框。显式指定图例类型或位置时使用 ECharts 图例布局。
-
-支持<a href="./core">基础组件</a> API 中的公共图表选项。分类布局在数据清空时移除旧系列及辅助图形。仅刷新数值时保留缩放范围和图例选择。若缩放配置未变，在分类末尾追加数据时保留回看窗口，末端窗口以相同的点数跟随新数据，全范围视图继续显示全部数据。
+`grid`、`xAxis`、`yAxis` 与默认值合并。分类布局使用每个轴的第一项配置，分类轴类型和标签由 `categories` 决定。`dataZoom` 默认绑定分类轴，显式指定目标轴时沿用该绑定。
 
 ### 原生配置与 useBarOption
 
-省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。额外 ECharts 模块按需注册。
+省略 `categories` 即可使用原生配置，适合多坐标系、`dataset` 和混合图。将 `data`、`name`、`barWidth`、`barGap`、`label`、`markArea`、`stack` 作为顶层系列简写，或传入 ECharts `series`。
 
-在 `setup` 中调用 `useBarOption(seriesProps, attrs)` 可得到 `ComputedRef<BarChartProps>`。`BAR_CHART_TOKEN` 为分类布局、原生布局和该组合式函数提供默认配置。系列的 `data` 整体覆盖顶层简写。原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
+原生布局的悬浮条纹可用 `useStripeBarSeries` 与 `useStripeBarTooltip` 组合。
 
 原生配置沿用基础图、分组图和堆叠图的标签默认规则；条纹等非 bar 辅助系列不参与柱组数量及总数计算，也不应用柱图的默认标签。自动堆叠总数根据 `series[].data`（含顶层 `data` 简写）计算；使用 `dataset` 时通过 `label.formatter` 自行提供总数。直接调用 `useBarOption` 时，可传入第三个参数 `getChart: () => EChartsType | undefined`，以便总数读取实例当前的图例选择。组件会自动提供该回调。
 
@@ -82,5 +80,3 @@ const option = {
   tooltip: { trigger: 'axis', ...useStripeBarTooltip('次') },
 } satisfies BarChartProps
 ```
-
-自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。

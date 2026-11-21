@@ -152,8 +152,14 @@ const visualMap = computed(() => createMapVisualMap(pieces, { plotTheme: unref(p
       </IxRadioGroup>
     </IxSpace>
     <div class="map-density-chart">
-      <div v-if="state === 'empty'" class="map-density-placeholder">
-        <IxEmpty simple>
+      <!-- 密度通过 geo.regions 填色即可，无需提供 series；默认开启拖动和滚轮缩放。-->
+      <IxMapChart
+        :geo="geo"
+        :visualMap="visualMap"
+        :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
+        style="height: 100%; width: 100%"
+      >
+        <IxEmpty v-if="state === 'empty'" class="chart-empty" simple>
           <template #description>
             <IxSpace align="center">
               <span>暂无数据</span>
@@ -163,30 +169,20 @@ const visualMap = computed(() => createMapVisualMap(pieces, { plotTheme: unref(p
             </IxSpace>
           </template>
         </IxEmpty>
-      </div>
-      <!-- 密度通过 geo.regions 填色即可，无需提供 series；默认开启拖动和滚轮缩放。-->
-      <IxMapChart
-        v-else
-        :geo="geo"
-        :visualMap="visualMap"
-        :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-        style="height: 100%; width: 100%"
-      />
+      </IxMapChart>
     </div>
   </IxSpace>
 </template>
 
 <style scoped>
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .map-density-chart {
   width: 100%;
   height: 560px;
-}
-.map-density-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 </style>
 

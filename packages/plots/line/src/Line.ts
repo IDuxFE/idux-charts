@@ -1,3 +1,4 @@
+import type { SlotsType, VNode } from 'vue-demi'
 import lineLoadingIcon from '../assets/loading-line.svg?raw'
 import areaLoadingIcon from '../assets/loading-area.svg?raw'
 import { computed, defineComponent, inject } from 'vue-demi'
@@ -17,6 +18,7 @@ export default withChartProps<LineChartProps>()(
   defineComponent({
     name: 'IxLineChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: {
       ...Object.fromEntries(lineChartProps.map(key => [key, null])),
       categories: Array,

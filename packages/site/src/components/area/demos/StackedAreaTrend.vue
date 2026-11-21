@@ -156,20 +156,28 @@ const option = computed<LineChartProps>(() => ({
     </IxRadioGroup>
     <p class="trend-description">{{ description }}</p>
     <div class="trend-chart">
-      <div v-if="selected === 'empty'" class="trend-placeholder">
-        <IxEmpty simple description="未配置数据源，请先配置采集任务" />
-      </div>
       <IxLineChart
-        v-else
         :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
         v-bind="option"
         style="width: 100%; height: 100%"
-      />
+      >
+        <IxEmpty
+          v-if="selected === 'empty'"
+          class="chart-empty"
+          simple
+          description="未配置数据源，请先配置采集任务"
+        />
+      </IxLineChart>
     </div>
   </div>
 </template>
 
 <style scoped>
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .trend-demo {
   width: 100%;
   min-width: 0;
@@ -187,13 +195,6 @@ const option = computed<LineChartProps>(() => ({
 .trend-chart {
   width: 100%;
   height: 320px;
-}
-.trend-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 </style>
 

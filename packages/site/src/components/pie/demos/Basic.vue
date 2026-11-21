@@ -118,8 +118,16 @@ const legend = computed<PieChartProps['legend']>(() => ({
     </div>
     <span class="basic-pie-demo-text">{{ statusDescriptions[chartStatus] }}</span>
     <div class="basic-pie-demo-chart" :style="chartStyle">
-      <div v-if="chartStatus === 'empty'" class="basic-pie-demo-placeholder">
-        <IxEmpty simple>
+      <IxPieChart
+        :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
+        style="width: 100%; height: 100%"
+        :data="data"
+        align="center-start"
+        name="基础饼图"
+        :title="title"
+        :legend="legend"
+      >
+        <IxEmpty v-if="chartStatus === 'empty'" class="chart-empty" simple>
           <template #description>
             <IxSpace align="center">
               <span>暂无数据</span>
@@ -129,36 +137,23 @@ const legend = computed<PieChartProps['legend']>(() => ({
             </IxSpace>
           </template>
         </IxEmpty>
-      </div>
-      <IxPieChart
-        v-else
-        :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
-        style="width: 100%; height: 100%"
-        :data="data"
-        align="center-start"
-        name="基础饼图"
-        :title="title"
-        :legend="legend"
-      />
+      </IxPieChart>
     </div>
   </IxSpace>
 </template>
 
 <style scoped lang="less">
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .basic-pie-demo {
   &-controls {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px 24px;
-  }
-
-  &-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 
   &-text {

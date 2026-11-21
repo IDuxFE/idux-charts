@@ -1,3 +1,4 @@
+import type { SlotsType, VNode } from 'vue-demi'
 import type { ChartOption } from '@idux/charts-core'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
@@ -8,6 +9,7 @@ export default withChartProps<MapChartProps>()(
   defineComponent({
     name: 'IxMapChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: [...mapProps],
     methods: plotInstanceMethods,
     setup(props, context) {

@@ -127,7 +127,9 @@ export default {
 window.themePlotState = () =>
   Object.fromEntries(
     ['pie', 'gauge', 'liquid', 'radar'].map(name => {
-      const chart = getInstanceByDom(document.querySelector(`.theme-${name}`))
+      const element = document.querySelector(`.theme-${name}`)
+      const chart =
+        element && getInstanceByDom(element.querySelector('[_echarts_instance_]') ?? element)
       return [name, chart ? { id: chart.id, option: chart.getOption() } : null]
     }),
   )

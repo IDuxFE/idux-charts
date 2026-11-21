@@ -37,15 +37,15 @@ for (const title of ['状态型', '密度型', '飞线型']) {
       await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
       const height = (await chart.boundingBox())!.height
       await select(demo, '数据状态', '空状态')
-      await expect(chart).toHaveCount(0)
+      await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
       const placeholder = demo.getByText('暂无数据', { exact: true })
       await expect(placeholder).toBeVisible()
-      const stage = placeholder.locator('xpath=ancestor::div[contains(@class,"placeholder")]')
+      const stage = demo.locator('.ix-chart-overlay')
       expect((await stage.boundingBox())!.height).toBeCloseTo(height, 0)
       await demo.getByRole('button', { name: '重新加载', exact: true }).click()
       await expect(svg).toBeVisible()
       await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
-      await expect(chart).not.toHaveAttribute('_echarts_instance_', instance!)
+      await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
     }
   })
 }

@@ -65,6 +65,26 @@ const option: LineChartProps = {
 
 ESM 项目可通过 [`@idux/charts` 的图表子入口](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.zh.md#快速上手)按需导入，例如 `@idux/charts/line`。
 
+## 默认插槽
+
+所有 Plot 组件均支持默认覆盖插槽，内容自动铺满图表。业务通过 `v-if` 控制空状态，切换时保留图表实例；无重试功能时可仅传入 `IxEmpty` 的描述文案。需要遮住底层图形时，为内容设置背景并清除外边距。
+
+```vue
+<IxBarChart :categories="categories" :data="data" style="height: 300px">
+  <IxEmpty v-if="isEmpty" simple description="暂无数据" class="chart-empty" />
+</IxBarChart>
+```
+
+```css
+.chart-empty {
+  /* 清除 IxEmpty 的默认外边距，让背景覆盖整个图表。 */
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+```
+
+插槽不会隐藏或清空底层图表。透明内容可与图表同时展示，但覆盖层默认接收鼠标事件。纯说明场景可设置 `.ix-chart-overlay { pointer-events: none; }`，局部交互节点设置 `pointer-events: auto`；在 scoped 样式中使用 `:deep(.ix-chart-overlay)`。插槽内容不包含在 ECharts 导出的图片中。上例背景变量由 iDux 组件主题提供，也可替换为应用自己的背景色。
+
 ## 配置与主题
 
 - `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption`、`createMapOption` 提供纯配置构建函数。

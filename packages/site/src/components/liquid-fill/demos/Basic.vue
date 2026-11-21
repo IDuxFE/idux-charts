@@ -63,8 +63,24 @@ onBeforeUnmount(cancel)
         : '拖动滑块调整水位，颜色随使用率切换。'
     }}</p>
     <div class="chart">
-      <div v-if="state === 'empty'" class="placeholder">
-        <IxEmpty simple>
+      <span
+        v-if="state !== 'loading' && state !== 'empty'"
+        class="status"
+        :style="{ color: themeTokens.colorPrimaryText }"
+        >{{ status }}</span
+      >
+      <IxLiquidFillChart
+        :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
+        :value="value"
+        label="CPU"
+        :color="color"
+        :zeroColor="themeTokens.colorInfoContainerBgDisabled"
+        :textColor="themeTokens.colorText"
+        :backgroundColor="themeTokens.colorContainerBg"
+        :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
+        style="width: 100%; height: 100%"
+      >
+        <IxEmpty v-if="state === 'empty'" class="chart-empty" simple>
           <template #description>
             <IxSpace align="center">
               <span>暂无数据</span>
@@ -74,30 +90,16 @@ onBeforeUnmount(cancel)
             </IxSpace>
           </template>
         </IxEmpty>
-      </div>
-      <template v-else>
-        <span
-          v-if="state !== 'loading'"
-          class="status"
-          :style="{ color: themeTokens.colorPrimaryText }"
-          >{{ status }}</span
-        >
-        <IxLiquidFillChart
-          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          :value="value"
-          label="CPU"
-          :color="color"
-          :zeroColor="themeTokens.colorInfoContainerBgDisabled"
-          :textColor="themeTokens.colorText"
-          :backgroundColor="themeTokens.colorContainerBg"
-          :textStyle="{ fontFamily: 'D-DIN-PRO, sans-serif' }"
-          style="width: 100%; height: 100%"
-        />
-      </template>
+      </IxLiquidFillChart>
     </div>
   </IxSpace>
 </template>
 <style scoped>
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .liquid-basic {
   width: 100%;
 }
@@ -121,13 +123,6 @@ p {
   width: 100%;
   text-align: center;
   line-height: 24px;
-}
-.placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 </style>
 <archive-meta lang="json">

@@ -69,7 +69,7 @@ This package does not ship a separate CSS file. Shared HTML tooltip styles are p
 
 ## Default slot
 
-`IxChart` accepts a default slot for `IxEmpty`, error messages, or other custom content. An absolutely positioned overlay fills the chart; its inner container uses `flex: 1` and Grid to stretch direct children without extra width or height styles. Multiple root nodes share the height in separate rows. Explicit sizes and margins still apply.
+`IxChart` accepts a default slot for `IxEmpty`, error messages, or other custom content. The overlay fills the chart's content box and stretches direct children without extra width or height styles. Multiple root nodes share the height in separate rows. Explicit sizes and margins still apply.
 
 ```vue
 <IxChart v-bind="option" style="height: 320px">
@@ -78,6 +78,8 @@ This package does not ship a separate CSS file. Shared HTML tooltip styles are p
 ```
 
 Control visibility in your application; the chart instance stays mounted. The overlay receives pointer events by default. For annotations, set `.ix-chart-overlay { pointer-events: none; }` and restore `pointer-events: auto` on interactive elements. The slot does not hide the chart or supply a background; add a background and remove margins for full coverage. Slot content is excluded from ECharts image exports.
+
+The outer container controls dimensions, `min-height`, padding, and positioning; the canvas and slot fill its content box. With `autoResize` enabled by default, changes to the parent size or component dimensions resize the existing instance. Percentage heights require a resolvable parent height.
 
 ## Application themes
 

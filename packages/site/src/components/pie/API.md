@@ -25,6 +25,8 @@ const option: PieChartProps = {
 </template>
 ```
 
+支持默认插槽，公共配置和用法见<a href="./core">IxChart API</a>。
+
 ### 布局模式
 
 - `layoutMode="auto"` 按容器尺寸计算饼图、标题和图例的位置。只传 `align` 也可启用自动布局。
@@ -45,7 +47,7 @@ const option: PieChartProps = {
 | `title`、`legend`、`tooltip` | 对应的 ECharts 选项       | 自动布局由业务传入标题。默认图例显示分类名称和数值，空间不足时分列或分页。用 `legend.formatter` 自定义内容。                                                                                        |
 | `label`、`markArea`          | 对应的 ECharts 系列选项   | 扇区标签和标域。自动布局中可用 `label: { position: 'center', formatter }` 显示一段中心摘要。                                                                                                        |
 | `seriesStyle`                | `PieSeriesStyle`          | 主系列的 `itemStyle`、`labelLine`、`emphasis`、`blur`、`select`、`selectedMode`。                                                                                                                   |
-| `plotTheme`                  | `PlotTheme`               | 自动布局的色板与辅助样式，继承 `PLOT_THEME_TOKEN`。                                                                                                                                                 |
+| `plotTheme`                  | `PlotTheme`               | 自动布局的色板与辅助样式。                                                                                                                                                                          |
 
 自动布局接受有限非负数，`0` 是有效值。所有分类均为零时显示中性占位环。缺失、负数和非有限值按缺报处理，默认图例显示 `–`，可用 `{ name, value: null, missingReason }` 补充原因。空数据的提示文案由业务页面提供。
 
@@ -53,12 +55,10 @@ const option: PieChartProps = {
 
 自动布局的标题和中心摘要由业务计算。用 `title.text`、`title.subtext` 显示总数及说明。点击图例筛选后，业务文案保持原值。
 
-支持<a href="./core">基础组件</a> API 中的公共图表选项。自动布局清理已移除的样式，图例配置和数据名称相同时保留图例选择。原生布局的默认合计取最终生效的系列数据，可用 `title: null` 移除标题。
+原生布局的默认合计取最终生效的系列数据，可用 `title: null` 移除标题。
 
 ### usePieOption
 
-在 `setup` 中调用 `usePieOption(seriesProps, attrs)` 可得到 `ComputedRef<PieChartProps>`。该函数读取 `PIE_CHART_TOKEN`，生成原生饼图配置。组件的自适应布局通过 `layoutMode` 或 `align` 启用。
+`usePieOption` 生成原生饼图配置。组件的自适应布局通过 `layoutMode` 或 `align` 启用。
 
 风险分布示例用同一个函数组装风险数量、占比和统计口径，再分别交给扇区与图例的 formatter。
-
-自定义内容和复用内置 HTML 排版的用法见<a href="./core">基础组件 API 的「自定义 Tooltip」</a>。

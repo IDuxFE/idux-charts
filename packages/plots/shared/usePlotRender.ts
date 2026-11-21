@@ -1,6 +1,6 @@
 import { usePlotTheme } from './plotTheme'
 import type { PlotTheme } from './plotTheme'
-import { computed, h } from 'vue-demi'
+import { computed, h, isVue2 } from 'vue-demi'
 import type { SetupContext } from 'vue-demi'
 import {
   filterEmptyProps,
@@ -20,7 +20,9 @@ import {
   restoreLegendSelection,
 } from './usePlotLayout'
 
-export type PlotContext = Pick<SetupContext, 'attrs'> & { listeners?: Record<string, Function> }
+export type PlotContext = Pick<SetupContext, 'attrs' | 'slots'> & {
+  listeners?: Record<string, Function>
+}
 
 export function renderPlot(
   option: ChartProps,
@@ -30,7 +32,19 @@ export function renderPlot(
 ) {
   const settings = typeof option.loading === 'object' ? option.loading : undefined
   const loading = option.loading && { ...settings, icon: settings?.icon ?? loadingIcon }
-  return h(IxChart, { ...mergeAttrs({ ...option, loading }, context.listeners), ref: 'chart', key })
+  // Evaluate in IxChart's render so reactive slot content is independent of option generation.
+  const slots = { default: () => context.slots.default?.() }
+  return h(
+    IxChart,
+    {
+      ...mergeAttrs({ ...option, loading }, context.listeners),
+      ref: 'chart',
+      key,
+      // Vue 2 stores slot functions in VNode data; Vue 3 receives them as children.
+      ...(isVue2 ? { scopedSlots: slots } : {}),
+    },
+    isVue2 ? undefined : slots,
+  )
 }
 
 export const plotInstanceMethods: ChartInstanceMethods = {

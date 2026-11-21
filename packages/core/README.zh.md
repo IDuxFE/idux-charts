@@ -69,7 +69,7 @@ const option: ChartProps = {
 
 ## 默认插槽
 
-`IxChart` 支持默认插槽，可放置 `IxEmpty`、错误提示或其他自定义内容。覆盖层绝对定位铺满图表，内部使用 `flex: 1` 和 Grid 拉伸直接子节点，无需额外设置宽高；多个根节点按行平分高度。显式尺寸和外边距仍然生效。
+`IxChart` 支持默认插槽，可放置 `IxEmpty`、错误提示或其他自定义内容。覆盖层填满图表的内容区域，直接子节点默认拉伸，无需额外设置宽高；多个根节点按行平分高度。显式尺寸和外边距仍然生效。
 
 ```vue
 <IxChart v-bind="option" style="height: 320px">
@@ -78,6 +78,8 @@ const option: ChartProps = {
 ```
 
 显隐由业务控制，图表实例保持挂载。覆盖层默认接收鼠标事件；纯说明场景可设置 `.ix-chart-overlay { pointer-events: none; }`，局部交互节点可设置 `pointer-events: auto`。插槽不自动隐藏图表或设置背景；需要完整遮盖时为内容设置背景并清除外边距。插槽内容不包含在 ECharts 导出的图片中。
+
+图表外层负责宽高、`min-height`、padding 和定位，画布与插槽填满内容区域。默认开启的 `autoResize` 会跟随父容器尺寸或组件宽高变化，保留现有实例。百分比高度需要父容器提供可解析的高度。
 
 ## 应用级主题
 

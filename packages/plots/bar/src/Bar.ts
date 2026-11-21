@@ -1,3 +1,4 @@
+import type { SlotsType, VNode } from 'vue-demi'
 import horizontalLoadingIcon from '../assets/loading-horizontal.svg?raw'
 import verticalLoadingIcon from '../assets/loading-vertical.svg?raw'
 import { computed, defineComponent, inject, watch } from 'vue-demi'
@@ -22,6 +23,7 @@ export default withChartProps<BarChartProps>()(
   defineComponent({
     name: 'IxBarChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: [...barPlotProps] as any,
     methods: plotInstanceMethods,
     // @ts-ignore

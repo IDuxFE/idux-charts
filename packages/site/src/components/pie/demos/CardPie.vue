@@ -111,8 +111,14 @@ const presentation = computed<PieChartProps>(() => ({
         </IxHeader>
       </template>
       <div class="basic-pie-demo-chart" :style="chartStyle">
-        <div v-if="chartStatus === 'empty'" class="basic-pie-demo-placeholder">
-          <IxEmpty simple>
+        <IxPieChart
+          :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
+          style="width: 100%; height: 100%"
+          :data="data"
+          align="center"
+          v-bind="presentation"
+        >
+          <IxEmpty v-if="chartStatus === 'empty'" class="chart-empty" simple>
             <template #description>
               <IxSpace align="center">
                 <span>暂无数据</span>
@@ -122,21 +128,18 @@ const presentation = computed<PieChartProps>(() => ({
               </IxSpace>
             </template>
           </IxEmpty>
-        </div>
-        <IxPieChart
-          v-else
-          :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          style="width: 100%; height: 100%"
-          :data="data"
-          align="center"
-          v-bind="presentation"
-        />
+        </IxPieChart>
       </div>
     </IxCard>
   </IxSpace>
 </template>
 
 <style scoped lang="less">
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .basic-pie-demo {
   overflow-x: auto;
 
@@ -147,14 +150,6 @@ const presentation = computed<PieChartProps>(() => ({
 
   &-chart {
     margin: 0 auto;
-  }
-
-  &-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 
   &-text {

@@ -25,6 +25,7 @@ export default defineConfig(({ command, mode }) => ({
           : {
               main: fromRoot('e2e/fixture/index.html'),
               slots: fromRoot('e2e/fixture/slots.html'),
+              layout: fromRoot('e2e/fixture/layout.html'),
               special: fromRoot('e2e/fixture/special.html'),
               cartesian: fromRoot('e2e/fixture/cartesian.html'),
             },
