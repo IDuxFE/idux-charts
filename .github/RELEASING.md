@@ -162,7 +162,9 @@ settings shown at setup time if the policy changes.
 
 1. Merge feature PRs containing changesets into `main`.
 2. After validation passes, Changesets creates or updates the release PR with
-   package versions, changelogs, and internal dependency updates.
+   package versions, changelogs, and internal dependency updates. The PR title and
+   release commit message include the planned version, for example
+   `chore(release): v1.6.1`, and update when the release plan changes.
 3. Review the generated release PR and wait for CI, then merge it.
 4. The main workflow validates the merged commit, rebuilds the library, and
    publishes unpublished versions to npm. It also pushes package tags and creates
