@@ -52,6 +52,6 @@ onUnmounted(() => clearTimeout(timer))
 {
   "title": "函数用法",
   "description": "通过 useChart 配置图表，并切换 loading 查看通用加载状态。",
-  "index": 3
+  "index": 4
 }
 </archive-meta>

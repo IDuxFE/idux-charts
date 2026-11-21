@@ -16,13 +16,33 @@ export function registerMap(...args: Parameters<typeof registerEChartsMap>) {
   use([GeoComponent])
   return registerEChartsMap(...args)
 }
-export { createMapOption, defaultMapPieces } from './src/createMapOption'
+export {
+  createMapOption,
+  defaultMapPieces,
+  createMapPieces,
+  getMapPieceColor,
+  createMapNodes,
+  createMapLines,
+  createMapRegions,
+  createMapVisualMap,
+} from './src/createMapOption'
+export { validateMapData } from './src/mapValidation'
 export type {
   MapChartProps,
   MapChartPublicProps,
-  MapDataItem,
-  MapLineItem,
   MapCoordinate,
   MapPiece,
+  MapThreshold,
+  MapMetric,
+  MapRegionItem,
+  MapNodeItem,
+  MapRouteItem,
+  MapNodeOptions,
+  MapLineOptions,
+  MapRegionOptions,
+  MapVisualMapOptions,
+  MapTooltipOptions,
+  MapDataInput,
+  MapDataIssue,
 } from './src/createMapOption'
 export { PLOT_THEME_TOKEN, type PlotTheme, type PlotTextStyle } from '../shared/plotTheme'

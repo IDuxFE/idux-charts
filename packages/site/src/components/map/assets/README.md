@@ -6,7 +6,7 @@ These GeoJSON files are local demo assets, excluded from the published chart lib
 
 - File: [world.json](./world.json).
 - Source: [Apache ECharts example data](https://echarts.apache.org/examples/data/asset/geo/world.json).
-- The local JSON matches this source and contains 217 regions. It uses uncompressed longitude/latitude coordinates with CRS84 metadata.
+- The local JSON preserves the source geometry and properties for 217 regions, adding the GeoJSON `type: "Feature"` discriminator to each feature. It uses uncompressed longitude/latitude coordinates with CRS84 metadata.
 - Region names come from `properties.name`. The status and density demos use `geo.nameMap` to translate the names needed by their sample data; the source geometry and names are preserved.
 
 ## China map
