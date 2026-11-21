@@ -1,0 +1,49 @@
+name: Run browser partition
+description: Run a reproducible random third of the main E2E suite
+inputs:
+  browser:
+    description: Playwright browser project
+    required: true
+  prebuilt:
+    description: Download shared assets instead of building in the test job
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup
+      with:
+        install-scripts: ${{ inputs.prebuilt == 'true' && 'false' || 'true' }}
+    - uses: actions/download-artifact@v8
+      if: inputs.prebuilt == 'true'
+      with:
+        name: browser-build
+        path: .
+    - shell: bash
+      run: pnpm exec playwright install --with-deps ${{ inputs.browser }}
+    - shell: bash
+      env:
+        IDUX_E2E_PREBUILT: ${{ inputs.prebuilt == 'true' && '1' || '0' }}
+      run: pnpm test:e2e:ci ${{ inputs.browser }}
+    - name: Summarize browser tests
+      if: ${{ !cancelled() }}
+      shell: bash
+      run: node scripts/e2e-summary.mjs test-results/results.json
+    - name: Upload browser reports and assignment
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: browser-reports-${{ inputs.browser }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: |
+          playwright-report/
+          test-results/
+        retention-days: 7
+        if-no-files-found: ignore
+    - name: Upload partition receipt
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: browser-plans-${{ inputs.browser }}
+        path: test-results/ci-plan/
+        overwrite: true
+        retention-days: 7
+        if-no-files-found: error

@@ -48,46 +48,37 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  browser-tests:
-    name: Browser tests (${{ matrix.browser }}, ${{ matrix.shard }}/2)
-    # Preserve the OS used by the reviewed screenshot baselines.
+  # Queue WebKit immediately; it must not wait for the shared asset producer.
+  # The other browsers are created only after browser-build completes.
+  webkit-tests:
+    name: Browser tests (webkit, random third)
     runs-on: macos-15-intel
-    needs: browser-build
-    env:
-      IDUX_E2E_PREBUILT: '1'
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-        shard: [1, 2]
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup
+      - uses: ./.github/actions/browser-tests
         with:
-          # Preview prebuilt assets only; no Node canvas or package builds run here.
-          install-scripts: 'false'
-      - uses: actions/download-artifact@v8
+          browser: webkit
+          prebuilt: 'false'
+
+  browser-tests:
+    name: Browser tests (${{ matrix.browser }}, random third)
+    runs-on: macos-15-intel
+    needs: browser-build
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, chromium]
+    steps:
+      - uses: actions/checkout@v7
         with:
-          name: browser-build
-          path: .
-      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
-      - run: pnpm test:e2e --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
-      - name: Summarize browser tests
-        if: ${{ !cancelled() }}
-        run: node scripts/e2e-summary.mjs test-results/results.json
-      - name: Upload browser reports
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
+          persist-credentials: false
+      - uses: ./.github/actions/browser-tests
         with:
-          name: browser-reports-${{ matrix.browser }}-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-          if-no-files-found: ignore
+          browser: ${{ matrix.browser }}
 
   browser-build:
     name: Build browser fixtures
@@ -273,6 +264,7 @@ jobs:
         checks,
         browser-build,
         browser-tests,
+        webkit-tests,
         playground-tests,
         combined-coverage,
         compatibility,
@@ -285,3 +277,15 @@ jobs:
         env:
           RESULTS: ${{ toJSON(needs) }}
         run: echo "$RESULTS" | jq -e 'all(.[]; .result == "success")'
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.14.0'
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: browser-plans-*
+          path: e2e-plans/
+      - name: Verify complete, non-overlapping browser coverage
+        run: node scripts/e2e-verify-plans.mjs e2e-plans
