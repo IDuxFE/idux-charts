@@ -186,7 +186,9 @@ onBeforeUnmount(cancelReload)
             ><template #description>
               <IxSpace align="center"
                 ><span>暂无数据</span>
-                <IxButton mode="link" size="sm" @click="reloadChart">重新加载</IxButton>
+                <IxButton mode="link" size="sm" @click="reloadChart" style="display: flex"
+                  >重新加载</IxButton
+                >
               </IxSpace>
             </template></IxEmpty
           >
@@ -211,13 +213,10 @@ onBeforeUnmount(cancelReload)
 
   &-placeholder {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
     width: 100%;
     height: 100%;
-    color: var(--ix-color-text-info);
   }
 }
 </style>

@@ -67,6 +67,18 @@ Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart
 
 This package does not ship a separate CSS file. Shared HTML tooltip styles are provided by `@idux/charts/dist/style.css`.
 
+## Default slot
+
+`IxChart` accepts a default slot for `IxEmpty`, error messages, or other custom content. An absolutely positioned overlay fills the chart; its inner container uses `flex: 1` and Grid to stretch direct children without extra width or height styles. Multiple root nodes share the height in separate rows. Explicit sizes and margins still apply.
+
+```vue
+<IxChart v-bind="option" style="height: 320px">
+  <IxEmpty v-if="isEmpty" simple description="No data" />
+</IxChart>
+```
+
+Control visibility in your application; the chart instance stays mounted. The overlay receives pointer events by default. For annotations, set `.ix-chart-overlay { pointer-events: none; }` and restore `pointer-events: auto` on interactive elements. The slot does not hide the chart or supply a background; add a background and remove margins for full coverage. Slot content is excluded from ECharts image exports.
+
 ## Application themes
 
 Use `CHART_THEME_TOKEN` to provide an application-wide theme name/object or a reactive ref. Explicit `theme` props override it; otherwise charts fall back to `seer`. Changing `theme` or `initOption` recreates the instance and restores compatible zoom ranges and legend selections. Explicit changes to the range or selection take precedence. For generated plot labels and graphics, also configure `PLOT_THEME_TOKEN` from `@idux/charts-plots` (or `@idux/charts`).

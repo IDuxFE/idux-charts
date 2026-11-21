@@ -67,6 +67,18 @@ const option: ChartProps = {
 
 此包不提供独立 CSS 文件；共享 HTML 提示框样式由 `@idux/charts/dist/style.css` 提供。
 
+## 默认插槽
+
+`IxChart` 支持默认插槽，可放置 `IxEmpty`、错误提示或其他自定义内容。覆盖层绝对定位铺满图表，内部使用 `flex: 1` 和 Grid 拉伸直接子节点，无需额外设置宽高；多个根节点按行平分高度。显式尺寸和外边距仍然生效。
+
+```vue
+<IxChart v-bind="option" style="height: 320px">
+  <IxEmpty v-if="isEmpty" simple description="暂无数据" />
+</IxChart>
+```
+
+显隐由业务控制，图表实例保持挂载。覆盖层默认接收鼠标事件；纯说明场景可设置 `.ix-chart-overlay { pointer-events: none; }`，局部交互节点可设置 `pointer-events: auto`。插槽不自动隐藏图表或设置背景；需要完整遮盖时为内容设置背景并清除外边距。插槽内容不包含在 ECharts 导出的图片中。
+
 ## 应用级主题
 
 可用 `CHART_THEME_TOKEN` 提供应用级主题名称、对象或响应式 ref。显式 `theme` 属性优先，未配置时回退到 `seer`。修改 `theme` 或 `initOption` 会重建实例，并恢复兼容的缩放范围和图例选择。显式变更范围或选择时采用新配置。对于配置生成器绘制的文字和辅助图形，还需配置 `@idux/charts-plots`（或 `@idux/charts`）导出的 `PLOT_THEME_TOKEN`。

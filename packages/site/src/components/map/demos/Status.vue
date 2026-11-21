@@ -190,7 +190,9 @@ const visualMap = computed(() =>
             <template #description>
               <IxSpace align="center">
                 <span>暂无数据</span>
-                <IxButton mode="link" size="sm" @click="reload">重新加载</IxButton>
+                <IxButton mode="link" size="sm" @click="reload" style="display: flex"
+                  >重新加载</IxButton
+                >
               </IxSpace>
             </template>
           </IxEmpty>

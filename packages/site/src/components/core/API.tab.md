@@ -28,6 +28,20 @@ const option = {
 
 `ChartProps` 组合 `ChartOption` 和 `AdditionalChartOption`。`ChartOption` 声明库内置系列的类型。使用额外系列时，可用 ECharts 的 `ComposeOption` 描述对应配置。
 
+### 默认插槽
+
+`IxChart` 的默认插槽用于覆盖在图表上方的空状态、错误提示或其他自定义内容。覆盖层通过绝对定位铺满图表，内部内容容器使用 `flex: 1`，直接子节点默认通过 Grid 拉伸填满可用空间，无需为 `IxEmpty` 额外设置宽高。多个根节点按行平分高度；需要其他排版时传入一个包装节点自行布局。子节点显式设置的尺寸、外边距和对齐仍然生效。
+
+```vue
+<IxChart v-bind="option" style="height: 300px">
+  <IxEmpty v-if="isEmpty" simple description="暂无数据" />
+</IxChart>
+```
+
+插槽由业务控制显隐，不自动判断数据是否为空，也不隐藏底层图表。需要遮住图表时，为插槽内容设置背景；`IxEmpty` 自带外边距，完整遮盖时可设置 `margin: 0`。切换插槽内容保留图表实例，主题重建也不会移除插槽内容。
+
+覆盖层默认接收鼠标事件，适合空状态和重试操作；仅展示说明并需要操作底层图表时，可通过应用样式设置 `.ix-chart-overlay { pointer-events: none; }`，再对需要交互的局部节点设置 `pointer-events: auto`。无有效插槽内容时不渲染覆盖层。插槽内容不包含在 ECharts 导出的图片中。此插槽目前仅由 `IxChart` 提供。
+
 ### AdditionalChartOption
 
 所有图表组件共用以下配置。ECharts 事件可通过 `@click`、`@legendselectchanged` 等监听，回调参数沿用 ECharts。
