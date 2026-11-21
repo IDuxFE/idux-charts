@@ -62,7 +62,7 @@ createApp({
 Object.assign(window, {
   cartesianPointerColor: (index: number) => {
     const option = getInstanceByDom(
-      document.querySelector(`.chart-${index}`) as HTMLElement,
+      document.querySelector(`.chart-${index} [_echarts_instance_]`) as HTMLElement,
     )?.getOption()
     return (
       (option?.tooltip as any)?.[0]?.axisPointer?.lineStyle?.color ??
@@ -70,7 +70,9 @@ Object.assign(window, {
     )
   },
   showCartesianTooltip: (index: number) =>
-    getInstanceByDom(document.querySelector(`.chart-${index}`) as HTMLElement)?.dispatchAction({
+    getInstanceByDom(
+      document.querySelector(`.chart-${index} [_echarts_instance_]`) as HTMLElement,
+    )?.dispatchAction({
       type: 'showTip',
       seriesIndex: 0,
       dataIndex: 0,
