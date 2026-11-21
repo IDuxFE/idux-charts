@@ -358,6 +358,148 @@ describe('native map configuration generators', () => {
     expect(host.textContent).toContain('0 台')
   })
 
+  it('formats metric strings and zero while suppressing units for missing or nonfinite values', () => {
+    const series = createMapNodes([
+      {
+        ...nodes[0]!,
+        metrics: [
+          { name: 'State', value: '<Ready>' },
+          { name: 'Count', value: 0, unit: 'devices' },
+          { name: 'Rate', value: 1.5, unit: 'Mbps' },
+          { name: 'Missing', value: null, unit: 'ms' },
+          { name: 'Invalid', value: NaN, unit: 'ms' },
+          { name: 'Infinite', value: Infinity, unit: 'ms' },
+        ],
+      },
+    ])
+    const host = tooltipText(series, series.data![0])
+    expect(host.textContent).toContain('<Ready>')
+    expect(host.querySelector('ready')).toBeNull()
+    expect(host.textContent).toContain('0 devices')
+    expect(host.textContent).toContain('1.5 Mbps')
+    expect(host.textContent).not.toMatch(/NaN|Infinity|ms/)
+    expect(host.textContent!.match(/-/g)).toHaveLength(3)
+  })
+
+  it('accepts array tooltip params and safely handles absent data and empty metrics', () => {
+    const series = createMapNodes([{ ...nodes[0]!, value: 7, metrics: [] }])
+    const formatter = (series.tooltip as { formatter: (params: unknown) => string }).formatter
+    const host = document.createElement('div')
+    host.innerHTML = formatter([{ data: series.data![0] }])
+    expect(host.textContent).toContain('Same name')
+    expect(host.textContent).toContain('7')
+    for (const params of [undefined, {}, [], [{}]]) expect(formatter(params)).toBe('')
+
+    const missing = createMapNodes([{ ...nodes[0]!, value: null }], { unit: 'devices' })
+    expect(tooltipText(missing, missing.data![0]).textContent).toContain('-')
+    expect(tooltipText(missing, missing.data![0]).textContent).not.toContain('devices')
+
+    const route = createMapLines([{ source: 'a', target: 'b', value: 0 }], {
+      nodes,
+      metricName: 'Requests',
+      unit: 'req/s',
+      plotTheme: { color: '#123456' },
+    })
+    expect(route.data).toMatchObject([{ value: 0, mapValue: 0 }])
+    const routeHost = tooltipText(route, route.data![0])
+    expect(routeHost.querySelector('.charts-tooltips-title')?.textContent).toBe('Requests')
+    expect(routeHost.textContent).toContain('0 req/s')
+    expect(routeHost.innerHTML).toContain('#123456')
+  })
+
+  it('keeps callback-colored pins native and preserves explicit symbol sizes and borders', () => {
+    const color = () => '#123456'
+    const native = createMapNodes([{ ...nodes[0]!, symbol: 'pin' }], {
+      itemStyle: { color },
+      symbolSize: 40,
+    })
+    expect(native.itemStyle?.color).toBe(color)
+    expect(native).toMatchObject({ symbolSize: 40, data: [{ symbol: 'pin' }] })
+    expect(native.data![0]).not.toHaveProperty('symbolSize')
+    const fixed = createMapNodes([{ ...nodes[0]!, symbol: 'pin', color: '#abcdef' }], {
+      itemStyle: { color, borderWidth: 0 },
+      symbolSize: 40,
+    })
+    const symbol = (fixed.data![0] as { symbol: string }).symbol
+    const svg = new DOMParser().parseFromString(
+      decodeURIComponent(symbol.split(',')[1]!),
+      'image/svg+xml',
+    )
+    expect(svg.querySelector('path')?.getAttribute('fill')).toBe('#abcdef')
+    expect(svg.querySelector('path')?.hasAttribute('stroke')).toBe(false)
+    expect(fixed.data![0]).not.toHaveProperty('symbolSize')
+    const circle = createMapNodes([{ ...nodes[0]!, symbol: 'circle' }], { symbolSize: 30 })
+    expect(circle.symbolSize).toBe(30)
+    expect(circle.data![0]).not.toHaveProperty('symbolSize')
+  })
+
+  it('preserves vertical gradient direction and caller-supplied gradient objects', () => {
+    const upward: MapRouteItem = {
+      from: 'A',
+      to: 'B',
+      coords: [
+        [0, 0],
+        [1, 10],
+      ],
+    }
+    const downward: MapRouteItem = {
+      from: 'B',
+      to: 'A',
+      coords: [
+        [1, 10],
+        [0, 0],
+      ],
+    }
+    const series = createMapLines([upward, downward])
+    expect(series.data).toMatchObject([
+      { lineStyle: { color: { x: 0, x2: 0, y: 1, y2: 0 } } },
+      { lineStyle: { color: { x: 0, x2: 0, y: 0, y2: 1 } } },
+    ])
+    const color = {
+      type: 'linear' as const,
+      x: 0,
+      y: 0,
+      x2: 1,
+      y2: 0,
+      colorStops: [
+        { offset: 0, color: 'red' },
+        { offset: 1, color: 'blue' },
+      ],
+    }
+    expect(createMapLines([upward], { lineStyle: { color } }).data).toMatchObject([
+      { lineStyle: { color } },
+    ])
+  })
+
+  it('honors native region colors and retains readable labels for dark and CSS fills', () => {
+    expect(
+      createMapRegions([{ region: 'A' }], { itemStyle: { areaColor: '#123456' } }),
+    ).toMatchObject([{ itemStyle: { areaColor: '#123456' }, label: { color: '#FFFFFF' } }])
+    expect(
+      createMapRegions([{ region: 'A' }], {
+        itemStyle: { areaColor: 'var(--region-fill)' },
+        plotTheme: { color: '#abcdef' },
+        label: { show: false },
+      }),
+    ).toMatchObject([
+      {
+        itemStyle: { areaColor: 'var(--region-fill)' },
+        label: { color: '#abcdef', show: false },
+        emphasis: { label: { show: false }, itemStyle: { areaColor: 'var(--region-fill)' } },
+      },
+    ])
+  })
+
+  it.each([
+    [{ min: 1, max: 3 }, [1, 2, 3], [0, 4]],
+    [{ gt: 1, lt: 3 }, [2], [1, 3]],
+    [{ gte: 1, lte: 3 }, [1, 2, 3], [0, 4]],
+  ])('respects inclusive and exclusive native piece bounds %j', (bounds, inside, outside) => {
+    const pieces = [{ ...bounds, label: 'Range', color: '#123456' }]
+    for (const value of inside) expect(getMapPieceColor(value, pieces)).toBe('#123456')
+    for (const value of outside) expect(getMapPieceColor(value, pieces)).toBe('#F0F3F7')
+  })
+
   it('renders generated regions, nodes and routes alongside a handwritten native series', () => {
     use([MapChart, ScatterChart, LinesChart, GeoComponent, VisualMapComponent, SVGRenderer])
     registerMap('native-test', {
