@@ -31,7 +31,12 @@ jobs:
         uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
-      - name: Check license and security policies
+      # Analyze sets the title only at creation; edit also renames an existing project.
+      - name: Align CLI project display name
+        env:
+          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
+        run: fossa project edit
+      - name: Check dependency policies
         uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
