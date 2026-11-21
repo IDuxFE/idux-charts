@@ -62,11 +62,17 @@ async function aboveLabelGap(label: Locator, bar: Locator) {
 }
 
 async function hoverCategory(page: Page, svg: Locator, name: string) {
+  // Scrolling can redraw the axes. Keep the scroll target on the persistent
+  // SVG surface and resolve the current label only after scrolling completes.
+  await svg.scrollIntoViewIfNeeded()
   const label = svg.getByText(name, { exact: true })
-  await label.scrollIntoViewIfNeeded()
-  const labelBox = (await label.boundingBox())!
-  const chartBox = (await svg.boundingBox())!
-  await page.mouse.move(labelBox.x + labelBox.width / 2, chartBox.y + chartBox.height / 3)
+  await expect(label).toBeVisible()
+  const point = await label.evaluate(el => {
+    const labelBox = el.getBoundingClientRect()
+    const chartBox = (el as SVGElement).ownerSVGElement!.getBoundingClientRect()
+    return { x: labelBox.x + labelBox.width / 2, y: chartBox.y + chartBox.height / 3 }
+  })
+  await page.mouse.move(point.x, point.y)
 }
 
 for (const [title, seriesCount] of [
