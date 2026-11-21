@@ -26,7 +26,13 @@ jobs:
       # Lockfiles are intentionally untracked. Generate a scan-only lockfile so
       # FOSSA can resolve the actual workspace dependency graph.
       - run: pnpm install --lockfile-only --ignore-scripts
-      - uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
+      # The action selects either analyze or test; test does not upload a revision.
+      - name: Upload dependency analysis
+        uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+      - name: Check license and security policies
+        uses: fossas/fossa-action@29693cc50323968e039056be419b32989fc5880c # v2.0.0
         with:
           api-key: ${{ secrets.FOSSA_API_KEY }}
           run-tests: true

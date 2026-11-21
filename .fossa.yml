@@ -1,6 +1,7 @@
 version: 3
 
 project:
+  locator: git+github.com/IDuxFE/idux-charts
   name: iDux Charts
   url: https://github.com/IDuxFE/idux-charts
   link: https://charts.idux.site
