@@ -1,3 +1,4 @@
+import { createSlotsFixture } from '../../testing/slots.js'
 import Theme from './theme.js'
 import Basic from './basic.js'
 import { createApp, h } from 'vue'
@@ -102,7 +103,7 @@ const App = {
 window.chartPackageVersion = version
 window.chartState = () =>
   Array.from(document.querySelectorAll('.chart')).map(el => {
-    const chart = getInstanceByDom(el)
+    const chart = getInstanceByDom(el.querySelector('[_echarts_instance_]') ?? el)
     const option = chart?.getOption()
     return {
       id: chart?.id,
@@ -122,6 +123,13 @@ window.chartState = () =>
       background: option?.backgroundColor,
     }
   })
+const Slots = createSlotsFixture(h, IxBarChart, false)
 createApp(
-  location.search.includes('theme') ? Theme : location.search.includes('basic') ? Basic : App,
+  location.search.includes('slots')
+    ? Slots
+    : location.search.includes('theme')
+      ? Theme
+      : location.search.includes('basic')
+        ? Basic
+        : App,
 ).mount('#app')

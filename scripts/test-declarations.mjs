@@ -103,7 +103,7 @@ if ([Bar, Line, Pie, Radar, Gauge, LiquidFill, MapChart].some((component, index)
     Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN) {
   throw new Error('Modular and aggregate imports must share the same component instances');
 }
-const revision = ref(0), dark = ref(false), mounted = ref(true);
+const revision = ref(0), dark = ref(false), mounted = ref(true), slotVisible = ref(false);
 const instances = [];
 const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
@@ -111,6 +111,7 @@ const root = createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
   button('theme', () => { dark.value = !dark.value }),
   button('mount', () => { mounted.value = !mounted.value }),
+  button('slot', () => { slotVisible.value = !slotVisible.value }),
   ...(mounted.value ? kinds.map(([kind, component]) => {
     const data = [10 + revision.value, 20, 30];
     const props = {
@@ -133,8 +134,9 @@ const root = createApp({setup() { return () => h('main', {}, [
           return sample ? JSON.stringify({data: sample.data, value: sample.value}) : '';
         }}} : {data, xAxis: {data: ['A', 'B', 'C']}}),
     };
+    const slots = {default: () => slotVisible.value ? [h('button', {}, 'Slot action')] : []};
     return h('section', isVue2 ? {attrs: {'data-kind': kind}, style: {width: '400px', height: '240px'}} : {'data-kind': kind, style: {width: '400px', height: '240px'}},
-      [h(component, isVue2 ? {attrs: props, ref: kind} : {...props, ref: kind})]);
+      [h(component, isVue2 ? {attrs: props, ref: kind, scopedSlots: slots} : {...props, ref: kind}, isVue2 ? undefined : slots)]);
   }) : []),
 ]) }}).mount('#app');
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
@@ -179,6 +181,25 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
       .toEqual(Array(9).fill(true))
     expect((await state()).map(chart => chart.exposed)).toEqual(Array(9).fill(true))
     expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(9).fill(true))
+    const beforeSlots = await state()
+    await page.getByTestId('slot').click()
+    await expect(page.locator('.ix-chart-overlay')).toHaveCount(9)
+    const firstSlot = await page.locator('.ix-chart-overlay button').first().elementHandle()
+    expect((await state()).map(chart => chart.id)).toEqual(beforeSlots.map(chart => chart.id))
+    await page.getByTestId('theme').click()
+    await expect
+      .poll(async () => (await state()).every((chart, index) => chart.id !== beforeSlots[index].id))
+      .toBe(true)
+    expect(
+      await page
+        .locator('.ix-chart-overlay button')
+        .first()
+        .evaluate((element, old) => element === old, firstSlot),
+    ).toBe(true)
+    await page.getByTestId('theme').click()
+    await page.getByTestId('slot').click()
+    await expect(page.locator('.ix-chart-overlay')).toHaveCount(0)
+
     const area = page.locator('[data-kind="area"]')
     await expect(area.locator('svg pattern[width="4"][height="240"]').first()).toBeAttached()
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(3)
@@ -222,8 +243,8 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
-      .poll(async () => (await state()).every((chart, i) => chart.id && chart.id !== before[i].id))
-      .toBe(true)
+      .poll(async () => (await state()).map((chart, i) => !!chart.id && chart.id !== before[i].id))
+      .toEqual(Array(9).fill(true))
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await expectMapViewport()
     await page.getByTestId('mount').click()
@@ -517,6 +538,13 @@ instance.$emit('change', 'wrong');
 instance.$emit('missing', 1);
 declare const coreInstance: InstanceType<typeof IxChart>;
 const coreSlotNodes: VNode[] | undefined = coreInstance.${scopedSlots}.default?.();
+for (const component of chartComponents) {
+  declareSlot(component);
+}
+function declareSlot(component: (typeof chartComponents)[number]) {
+  const slots = (null! as InstanceType<typeof component>).${scopedSlots};
+  const nodes: VNode[] | undefined = slots.default?.();
+}
 const nodes: VNode[] = instance.${scopedSlots}.default({ value: 1 });
 // @ts-expect-error inferred scoped slot payload must remain numeric
 instance.${scopedSlots}.default({ value: 'wrong' });

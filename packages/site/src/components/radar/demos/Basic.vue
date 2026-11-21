@@ -181,8 +181,12 @@ onBeforeUnmount(cancelReload)
     </IxRadioGroup>
     <div class="radar-demo-scroll">
       <div :style="chartStyle">
-        <div v-if="chartStatus === 'empty'" class="radar-demo-placeholder">
-          <IxEmpty simple
+        <IxRadarChart
+          :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
+          style="width: 100%; height: 100%"
+          v-bind="chartBindings"
+        >
+          <IxEmpty v-if="chartStatus === 'empty'" class="chart-empty" simple
             ><template #description>
               <IxSpace align="center"
                 ><span>暂无数据</span>
@@ -192,31 +196,22 @@ onBeforeUnmount(cancelReload)
               </IxSpace>
             </template></IxEmpty
           >
-        </div>
-        <IxRadarChart
-          v-else
-          :loading="chartStatus === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          style="width: 100%; height: 100%"
-          v-bind="chartBindings"
-        />
+        </IxRadarChart>
       </div>
     </div>
   </IxSpace>
 </template>
 
 <style scoped lang="less">
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .radar-demo {
   &-scroll {
     width: 100%;
     overflow-x: auto;
-  }
-
-  &-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 }
 </style>

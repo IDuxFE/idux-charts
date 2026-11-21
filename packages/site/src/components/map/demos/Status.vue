@@ -185,8 +185,15 @@ const visualMap = computed(() =>
     </IxSpace>
     <div class="map-status-demo">
       <div class="map-status-chart">
-        <div v-if="state === 'empty'" class="map-status-placeholder">
-          <IxEmpty simple>
+        <!-- geo.map 选择已注册的边界，默认开启拖动和滚轮缩放；loading 只控制加载遮罩。-->
+        <IxMapChart
+          :geo="geo"
+          :series="series"
+          :visualMap="visualMap"
+          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
+          style="height: 100%; width: 100%"
+        >
+          <IxEmpty v-if="state === 'empty'" class="chart-empty" simple>
             <template #description>
               <IxSpace align="center">
                 <span>暂无数据</span>
@@ -196,21 +203,17 @@ const visualMap = computed(() =>
               </IxSpace>
             </template>
           </IxEmpty>
-        </div>
-        <!-- geo.map 选择已注册的边界，默认开启拖动和滚轮缩放；loading 只控制加载遮罩。-->
-        <IxMapChart
-          v-else
-          :geo="geo"
-          :series="series"
-          :visualMap="visualMap"
-          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          style="height: 100%; width: 100%"
-        />
+        </IxMapChart>
       </div>
     </div>
   </IxSpace>
 </template>
 <style scoped>
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .map-status-demo {
   background: var(--map-demo-background, #f6f8fa);
   padding: 20px;
@@ -218,13 +221,6 @@ const visualMap = computed(() =>
 .map-status-chart {
   width: 100%;
   height: 520px;
-}
-.map-status-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 </style>
 

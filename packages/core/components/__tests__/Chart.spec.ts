@@ -1,6 +1,14 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { createCommentVNode, defineComponent, Fragment, h, nextTick, ref } from 'vue'
+import {
+  createCommentVNode,
+  createTextVNode,
+  defineComponent,
+  Fragment,
+  h,
+  nextTick,
+  ref,
+} from 'vue'
 
 vi.mock('echarts/core', async () => ({
   ...(await vi.importActual<typeof import('echarts/core')>('echarts/core')),
@@ -99,3 +107,17 @@ it('renders ordinary empty elements and multiple roots while omitting an unused 
   expect(withContent.get('.ix-chart-content').element.children).toHaveLength(2)
   expect(withContent.find('.custom').exists()).toBe(true)
 })
+
+it.each([
+  ['Slot notice', true],
+  ['   ', false],
+  ['', false],
+] as const)(
+  'handles plain text slot content %j without leaving an empty overlay',
+  (value, visible) => {
+    const wrapper = mount(IxChart, { slots: { default: () => [createTextVNode(value)] } })
+    wrappers.push(wrapper)
+    expect(wrapper.find('.ix-chart-overlay').exists()).toBe(visible)
+    if (visible) expect(wrapper.get('.ix-chart-content').text()).toBe(value)
+  },
+)

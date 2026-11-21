@@ -169,8 +169,14 @@ const series = computed(() => [
     </IxSpace>
     <div class="map-lines-demo">
       <div class="map-lines-chart">
-        <div v-if="state === 'empty'" class="map-lines-placeholder">
-          <IxEmpty simple>
+        <!-- geo.map 选择已注册的边界，默认开启拖动和滚轮缩放；loading 只控制加载遮罩。-->
+        <IxMapChart
+          :series="series"
+          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
+          :geo="geo"
+          style="height: 100%; width: 100%"
+        >
+          <IxEmpty v-if="state === 'empty'" class="chart-empty" simple>
             <template #description>
               <IxSpace align="center">
                 <span>暂无数据</span>
@@ -180,33 +186,23 @@ const series = computed(() => [
               </IxSpace>
             </template>
           </IxEmpty>
-        </div>
-        <!-- geo.map 选择已注册的边界，默认开启拖动和滚轮缩放；loading 只控制加载遮罩。-->
-        <IxMapChart
-          v-else
-          :series="series"
-          :loading="state === 'loading' && { text: '图表正在加载中，请稍后...' }"
-          :geo="geo"
-          style="height: 100%; width: 100%"
-        />
+        </IxMapChart>
       </div>
     </div>
   </IxSpace>
 </template>
 <style scoped>
+.chart-empty {
+  margin: 0;
+  background: var(--ix-color-container-bg);
+}
+
 .map-lines-demo {
   background: var(--map-demo-background, #f6f8fa);
 }
 .map-lines-chart {
   width: 100%;
   height: 500px;
-}
-.map-lines-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 </style>
 

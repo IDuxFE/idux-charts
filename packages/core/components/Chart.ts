@@ -60,50 +60,72 @@ export default withChartProps<ChartProps>()(
           class: className,
           style: {
             position: 'relative',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr)',
+            gridTemplateRows: 'minmax(0, 1fr)',
             width: '100%',
             height: '100%',
             ...(style as any),
           },
         },
         [
-          // ECharts owns this container; Vue owns the sibling overlay.
-          h('div', {
-            ...(isVue2 ? { attrs } : attrs),
-            ref: 'containerRef',
-            class: 'ix-chart-canvas',
-            style: { position: 'absolute', inset: 0 },
-          }),
-          content &&
-            hasContent(content) &&
-            h(
-              'div',
-              {
-                class: 'ix-chart-overlay',
-                style: {
-                  position: 'absolute',
-                  inset: 0,
-                  display: 'flex',
-                  flexDirection: 'column',
-                },
+          // The surface follows the wrapper's content box, including min-height sizing.
+          // Its own positioning keeps overlays local even when the wrapper is static.
+          h(
+            'div',
+            {
+              class: 'ix-chart-surface',
+              style: {
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                minWidth: 0,
+                minHeight: 0,
+                flex: '1 1 0%',
+                alignSelf: 'stretch',
               },
-              [
+            },
+            [
+              // ECharts owns this container; Vue owns the sibling overlay.
+              h('div', {
+                ...(isVue2 ? { attrs } : attrs),
+                ref: 'containerRef',
+                class: 'ix-chart-canvas',
+                style: { position: 'absolute', inset: 0 },
+              }),
+              content &&
+                hasContent(content) &&
                 h(
                   'div',
                   {
-                    class: 'ix-chart-content',
+                    class: 'ix-chart-overlay',
                     style: {
-                      flex: '1 1 0%',
-                      minWidth: 0,
-                      minHeight: 0,
-                      display: 'grid',
-                      gridTemplateColumns: 'minmax(0, 1fr)',
-                      gridAutoRows: 'minmax(0, 1fr)',
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
                     },
                   },
-                  content,
+                  [
+                    h(
+                      'div',
+                      {
+                        class: 'ix-chart-content',
+                        style: {
+                          flex: '1 1 0%',
+                          minWidth: 0,
+                          minHeight: 0,
+                          display: 'grid',
+                          gridTemplateColumns: 'minmax(0, 1fr)',
+                          gridAutoRows: 'minmax(0, 1fr)',
+                        },
+                      },
+                      content,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+            ],
+          ),
         ],
       )
     },

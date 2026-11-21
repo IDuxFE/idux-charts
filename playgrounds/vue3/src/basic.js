@@ -53,6 +53,6 @@ export default {
 }
 window.basicPieState = () => {
   const el = document.querySelector('.basic-chart')
-  const chart = el && getInstanceByDom(el)
+  const chart = el && getInstanceByDom(el.querySelector('[_echarts_instance_]') ?? el)
   return chart ? { id: chart.id, width: chart.getWidth(), option: chart.getOption() } : null
 }

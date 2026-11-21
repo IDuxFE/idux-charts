@@ -1,5 +1,5 @@
 import loadingIcon from '../assets/loading.svg?raw'
-import type { PropType } from 'vue-demi'
+import type { PropType, SlotsType, VNode } from 'vue-demi'
 import type { PlotTextStyle } from '../../shared/plotTheme'
 import { defineComponent } from 'vue-demi'
 import { withChartProps } from '@idux/charts-core'
@@ -11,6 +11,7 @@ export default withChartProps<LiquidFillChartProps>()(
   defineComponent({
     name: 'IxLiquidFillChart',
     inheritAttrs: false,
+    slots: Object as SlotsType<{ default?: () => VNode[] }>,
     props: {
       ...Object.fromEntries(liquidFillProps.map(key => [key, null])),
       valueTextStyle: Object as PropType<PlotTextStyle>,
