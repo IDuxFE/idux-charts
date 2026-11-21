@@ -35,18 +35,34 @@ check. CI runs lint, formatting, types, and unit tests with coverage concurrentl
 Coverage reports are retained as artifacts; optional Codecov uploads and other
 community/security integrations are described in [Open source integrations](OPEN_SOURCE.md). Browser
 and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
-with two workers per shard and independent HTML reports. Both Vue playgrounds
-run in separate macOS jobs. The five Vue/ECharts compatibility combinations build
-and test packed declarations and runtime behavior in separate Linux jobs. Domain
-and subpath deployment checks also run independently. Matrix jobs use
-`fail-fast: false` to retain evidence from every combination; `CI result` requires
-all jobs to succeed. Browser tests that pass on retry are accepted by CI and
-remain marked as flaky in the report. Tests that exhaust their retries still
-fail CI. CI records traces on the first retry and captures screenshots on failure,
-avoiding trace overhead on successful first attempts. Local runs retain traces
-on failure. Playground lockfiles and local tarballs remain untracked. Browser reports are retained for seven days. Review
-screenshot differences if runner image or browser rendering changes; CI never
-automatically accepts new baselines.
+with two workers per shard. A Linux job builds the production site and browser
+fixtures once; all six browser shards download the same static assets and start
+isolated preview servers. Preview-only jobs skip package install scripts and
+native canvas build dependencies. Both Vue playgrounds retain separate macOS
+jobs and their existing screenshot baselines. The five Vue/ECharts compatibility
+combinations build and test packed declarations and runtime behavior in separate
+Linux jobs. Domain and subpath deployment checks also run independently and
+start only the site server, without building unused fixtures.
+
+Matrix jobs use `fail-fast: false` to retain evidence from every combination;
+`CI result` requires all jobs, including the shared browser build, to succeed.
+Superseded PR and feature-branch runs are cancelled, while main/release validation
+remains non-cancelling. Reports include HTML, JSON and a job summary listing
+first-attempt failures, successful retries and the ten slowest tests. CI retains
+the existing fallback retries: two for the main browser suite and one for each
+playground. Tests that pass on retry are accepted and marked as flaky; an Actions
+warning and the summary make these visible even on a green run. Tests that
+exhaust their retries still fail CI. Traces are recorded on the first retry and
+screenshots on failure. Local runs retain failure traces and default to four
+workers; the aggregate local test command runs suites and playgrounds sequentially.
+
+Playground lockfiles and local tarballs remain untracked. Browser reports and
+the shared build are retained for seven days. Shared build/coverage artifacts
+use stable names within a workflow run and overwrite on producer reruns, so a
+failed downstream job can be rerun without rebuilding its successful producers.
+Review screenshot differences if runner image or browser rendering changes; CI
+never automatically accepts new baselines. See [E2E maintenance](../e2e/README.md)
+for coverage boundaries and focused validation commands.
 
 Documentation layout changes also affect chart screenshot dimensions. Before
 opening a PR that changes shared site styles, run
@@ -79,8 +95,10 @@ Use `pnpm benchmark:charts` for a local Chromium performance run. See the
 
 Root dependency lockfiles also remain untracked. CI and release jobs install with
 `pnpm install --no-lockfile --no-frozen-lockfile`, resolving dependencies within their declared
-version ranges on every run. Lockfile-based caching is disabled. Exact dependency
-versions and the explicitly pinned Node.js and pnpm versions remain fixed.
+version ranges on every run. The pnpm content-addressable store is cached by OS,
+architecture and dependency manifests; cache reuse does not freeze dependency
+resolution. Exact dependency versions and the explicitly pinned Node.js and pnpm
+versions remain fixed. This policy does not provide lockfile-level reproducibility.
 
 ## One-time upstream GitHub setup
 

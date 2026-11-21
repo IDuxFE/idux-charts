@@ -23,6 +23,7 @@ jobs:
     env:
       SITE_BASE: /
       SITE_DOMAIN: charts.idux.site
+      IDUX_E2E_TARGET: site
     steps:
       - uses: actions/checkout@v7
         with:
@@ -40,11 +41,15 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       # Playwright builds the site and tests a fresh production preview.
       - run: pnpm exec playwright test e2e/pages.spec.ts --project=chromium
+      - name: Summarize documentation tests
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e-summary.mjs test-results/results.json
       - name: Upload browser reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: documentation-browser-reports
+          overwrite: true
           path: |
             playwright-report/
             test-results/
@@ -53,6 +58,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: documentation
+          overwrite: true
           path: packages/site/dist/
           include-hidden-files: true
           if-no-files-found: error
