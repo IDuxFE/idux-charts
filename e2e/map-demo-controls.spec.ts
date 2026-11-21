@@ -58,11 +58,11 @@ test('core map example renders and component menu labels preserve navigation', a
   })
   await expect(demo.locator('svg path').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
-  await expect(page.getByRole('menuitem', { name: '基础组件', exact: true })).toContainText(
-    'IxChart',
+  await expect(page.getByRole('menuitem', { name: '基础组件', exact: true })).toHaveText(
+    'Chart基础组件',
   )
   const map = page.getByRole('menuitem', { name: '地图', exact: true })
-  await expect(map).toContainText('IxMapChart')
+  await expect(map).toHaveText('MapChart地图')
   await map.click()
   await expect(page).toHaveURL(/components\/map$/)
   await expect(page.locator('.map-density-chart svg')).toBeVisible()
