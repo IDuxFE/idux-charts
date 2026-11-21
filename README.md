@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
 [![Unit test coverage](https://codecov.io/gh/IDuxFE/idux-charts/branch/main/graph/badge.svg)](https://app.codecov.io/gh/IDuxFE/idux-charts/tree/main)
 [![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
+[![FOSSA GitHub App Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
 [![CodeQL](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml)
 
 [![Vue compatibility](https://img.shields.io/badge/Vue-2.6%20%7C%202.7%20%7C%203-4FC08D?logo=vuedotjs&logoColor=white)](#-installation)
@@ -146,6 +146,6 @@ Made with [contributors-img](https://contrib.rocks).
 
 ## Dependency scanning
 
-See FOSSA for dependency license, security, and quality findings.
+The badges below report the GitHub App project. The separate [FOSSA CLI workflow](https://github.com/IDuxFE/idux-charts/actions/workflows/fossa.yml) scans the resolved pnpm workspace; its project settings and issue exceptions are independent. See [scan configuration](.github/OPEN_SOURCE.md).
 
-[![FOSSA report](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)
+[![FOSSA GitHub App report](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)

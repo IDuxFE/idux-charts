@@ -5,7 +5,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
 [![Unit test coverage](https://codecov.io/gh/IDuxFE/idux-charts/branch/main/graph/badge.svg)](https://app.codecov.io/gh/IDuxFE/idux-charts/tree/main)
 [![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
+[![FOSSA GitHub App Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
 [![CodeQL](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml)
 
 [![Vue compatibility](https://img.shields.io/badge/Vue-2.6%20%7C%202.7%20%7C%203-4FC08D?logo=vuedotjs&logoColor=white)](#-安装)
@@ -146,6 +146,6 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 
 ## 依赖扫描
 
-依赖许可证、安全和质量检查结果见 FOSSA。
+以下徽章展示 GitHub App 项目的结果；独立的 [FOSSA CLI 流水线](https://github.com/IDuxFE/idux-charts/actions/workflows/fossa.yml) 扫描 pnpm 实际解析的工作区依赖，两者的项目设置与问题例外分别管理。详见[扫描配置](.github/OPEN_SOURCE.md)。
 
-[![FOSSA 扫描报告](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)
+[![FOSSA GitHub App 扫描报告](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_large)

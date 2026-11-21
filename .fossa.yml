@@ -1,8 +1,9 @@
 version: 3
 
 project:
-  locator: git+github.com/IDuxFE/idux-charts
-  name: iDux Charts
+  # CLI uploads use a separate custom project, not the GitHub App project.
+  id: github.com/IDuxFE/idux-charts
+  name: idux-charts-cli
   url: https://github.com/IDuxFE/idux-charts
   link: https://charts.idux.site
 

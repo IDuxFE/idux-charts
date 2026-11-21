@@ -192,6 +192,38 @@ has been invented.
 
 ## FOSSA / 依赖许可证扫描
 
+### Scan sources / 扫描来源
+
+The GitHub App import (`idux-charts`, a `git+github.com/...` locator) and CLI
+uploads (`idux-charts-cli`, a `custom+<organization>/...` locator) are separate
+FOSSA projects. README badges and GitHub App status checks refer to the former;
+the main-only FOSSA workflow reports the latter. Project-specific exclusions and
+ignored issues do not automatically transfer between them. Compare dependency
+coverage and policy settings before interpreting different results.
+
+`.fossa.yml` fixes the CLI project ID so different checkout remotes cannot create
+additional projects. Changing `project.name` alone does not rename an existing
+project; the workflow uses `fossa project edit` after analysis to apply the title
+without changing its identity or history. `project.locator` is not an override
+for the CLI's `analyze` and `test` project inference.
+
+GitHub App 导入的 `idux-charts` 与 CLI 上传的 `idux-charts-cli` 是两个独立项目。
+README 徽章和 GitHub App 检查对应前者，main 上的 FOSSA 流水线对应后者。
+项目级排除项和已忽略问题不会自动迁移，结果不同时需先核对依赖覆盖和策略配置。
+CLI 固定项目 ID，并通过 `fossa project edit` 更新现有项目标题，保留项目身份和历史记录。
+
+### Vulnerability remediation / 漏洞处理
+
+Check for a compatible patched version before accepting a vulnerability exception.
+Dependency upgrades require maintainer approval. If no compatible remediation is
+available, ignore only the specific vulnerability in the current project and
+selected version, record the reason, and review it when a fix becomes available.
+An outdated-version quality warning is not a vulnerability exception.
+
+先检查是否有兼容的修复版本，依赖升级须经维护者确认。确实无法兼容修复时，
+仅忽略当前项目、当前版本的具体漏洞，记录原因，并在修复方案可用后复核。
+版本过期质量提醒不属于漏洞例外。
+
 ### Compatibility and test-only exceptions / 兼容性与测试依赖例外
 
 Keep Vue 2.6.14 in the private Vue 2 playground and packed-consumer fixtures.
@@ -234,7 +266,8 @@ FOSSA is opt-in because it needs an organization account and API key:
    Import the upstream repository or let its first authenticated CLI scan create
    the project. Confirm that it identifies the upstream Git URL.
 2. Set the upstream Actions secret `FOSSA_API_KEY` to an API key permitted to
-   analyze the project and read scan results (`fossa test` needs read access).
+   analyze the project, read scan results (`fossa test` needs read access), and
+   edit its metadata (`fossa project edit` maintains the display name).
 3. Configure the intended license policy in FOSSA, then set the upstream Actions
    variable `FOSSA_ENABLED=true`.
 4. After merging, manually run **FOSSA** on main and inspect discovered packages
@@ -243,7 +276,7 @@ FOSSA is opt-in because it needs an organization account and API key:
    into both READMEs after a valid scan. Its URL depends on the registered project;
    do not fabricate a success badge before onboarding is complete.
 
-FOSSA 需先登录组织账号，导入上游仓库并配置许可证策略；将有分析和读取权限的 API Key
+FOSSA 需先登录组织账号，导入上游仓库并配置许可证策略；将有分析、读取及项目元数据编辑权限的 API Key
 存为 `FOSSA_API_KEY`，再设置 `FOSSA_ENABLED=true`。合并后在 main 手动执行并检查依赖图，
 确认不是空扫描后，复制实际项目卡片到两份 README。
 
