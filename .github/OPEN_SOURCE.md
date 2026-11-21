@@ -120,14 +120,20 @@ report; a release workflow rerun is unnecessary.
 （或具有对应权限的组织 token）。修正 Secret 后，在 `main` 手动运行 **CI** 补传基线，
 无需重跑 Release 工作流。
 
-`codecov.yml` reports project and changed-code coverage as informational results.
-There is no invented percentage gate or automatic merge policy. Once a stable
-baseline is established, maintainers can review a separate threshold change.
-With uploads enabled, upload errors fail the check rather than silently hiding
-broken integration.
+`codecov.yml` requires at least 95% coverage of changed code, with no threshold
+allowance. `codecov/patch` fails below this fixed target; it does not inherit the
+overall coverage of unrelated code. Project coverage remains informational so
+historical gaps and changes in the coverage denominator do not block a feature.
+To make a failing patch check prevent merging, require `codecov/patch` in the
+upstream branch protection or an active ruleset. The YAML alone does not enforce
+merge restrictions or merge PRs automatically. With uploads enabled, upload
+errors also fail the check rather than silently hiding broken integration.
 
-当前覆盖率仅提供信息，不设置未经验证的百分比门槛。基线稳定后可单独评审门槛。
-启用后的上传失败会使检查失败，不会隐藏接入故障。
+变更代码覆盖率要求至少 95%，不设额外容差；低于门槛时 `codecov/patch` 检查失败。
+采用固定目标，不随无关代码的整体覆盖率变化。整体覆盖率仍仅提供信息，避免历史缺口或
+统计分母变化阻塞功能迭代。要阻止未达标的 PR 合并，需在上游分支保护或已启用的规则集中
+将 `codecov/patch` 设为必需检查；仅修改 YAML 不会强制限制合并或自动合并 PR。
+启用后的上传失败同样会使检查失败，不会隐藏接入故障。
 
 ## Dependency updates / 依赖更新
 

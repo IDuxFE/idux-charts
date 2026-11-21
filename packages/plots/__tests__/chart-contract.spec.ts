@@ -1,5 +1,7 @@
 import { mount } from '@vue/test-utils'
 import type { EChartsType } from 'echarts/core'
+import { use } from 'echarts/core'
+import { DatasetComponent } from 'echarts/components'
 import { afterEach, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, reactive } from 'vue'
 import type { Component } from 'vue'
@@ -236,6 +238,35 @@ it('clears removed automatic Pie styles and retains legend selections when value
   await nextTick()
   expect(series().emphasis.focus).toBeUndefined()
   expect(item.option.legend[0].selected.B).toBe(false)
+})
+
+it('preserves legend selections when a native map series reads its data from a dataset', async () => {
+  use([DatasetComponent])
+  const source = [
+    [10, 10, 'A'],
+    [20, 20, 'B'],
+  ]
+  const item = mountChart(IxMapChart, {
+    legend: {},
+    dataset: { dimensions: ['lng', 'lat', 'name'], source },
+    series: [
+      {
+        name: 'Sites',
+        type: 'scatter',
+        coordinateSystem: 'geo',
+        encode: { lng: 'lng', lat: 'lat', itemName: 'name' },
+        itemStyle: { color: '#123abc' },
+      },
+    ],
+  })
+  expect(item.option.series[0].data).toBeUndefined()
+  expect(item.chart.getVisual({ seriesIndex: 0, dataIndex: 1 }, 'color')).toBe('#123abc')
+  item.chart.dispatchAction({ type: 'legendUnSelect', name: 'Sites' })
+  item.props.title = { text: 'Updated sites' }
+  await nextTick()
+  expect(item.option.legend[0].selected.Sites).toBe(false)
+  expect(item.option.dataset[0].source).toEqual(source)
+  expect(item.option.title[0].text).toBe('Updated sites')
 })
 
 it('feeds the measured dimension to native tooltip formatters and escapes their results', () => {

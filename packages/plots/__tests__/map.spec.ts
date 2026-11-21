@@ -39,6 +39,24 @@ describe('map options', () => {
     expect(defaultMapPieces.some(piece => matchesMapPiece(-1, piece))).toBe(false)
   })
 
+  it('applies theme typography and native ECharts 6 map bounds', () => {
+    const option = createMapOption({
+      geo: { map: 'test' },
+      plotTheme: { fontFamily: 'Test Sans', palette: ['#123456', '#abcdef'] },
+    })
+    expect(option.textStyle).toMatchObject({ fontFamily: 'Test Sans' })
+    expect(option.color).toEqual(['#123456', '#abcdef'])
+    expect(option.geo).toMatchObject({
+      left: '12%',
+      right: '6%',
+      top: 24,
+      bottom: 24,
+      preserveAspect: 'contain',
+    })
+    expect(option.geo).not.toHaveProperty('layoutCenter')
+    expect(option.geo).not.toHaveProperty('layoutSize')
+  })
+
   it('merges native geo and tooltip fields while replacing series without mutating inputs', () => {
     const series = [{ type: 'scatter' as const, data: [] }]
     const option = createMapOption({

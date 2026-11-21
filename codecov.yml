@@ -7,8 +7,9 @@ coverage:
         informational: true
     patch:
       default:
-        target: auto
-        informational: true
+        target: 95%
+        threshold: 0%
+        informational: false
 
 comment:
   layout: 'diff, files'

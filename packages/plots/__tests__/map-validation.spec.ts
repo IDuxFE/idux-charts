@@ -72,3 +72,22 @@ it('rejects sparse coordinate pairs instead of passing holes to ECharts', () => 
   ])
   expect(createMapLines(routes).data).toEqual([])
 })
+
+it('reports malformed routes from external data without throwing or rendering them', () => {
+  const routes = [
+    { from: 'A', to: 'B' },
+    { source: 'a' },
+    { target: 'a' },
+    { from: 'A', to: 'B', coords: [[1, 2]] },
+  ] as unknown as NonNullable<MapDataInput['routes']>
+  const nodes = [{ id: 'a', name: 'A', coordinate: [0, 0] as MapCoordinate }]
+  expect(validateMapData({ nodes, routes })).toEqual(
+    routes.map((_, index) => ({
+      kind: 'route',
+      index,
+      id: undefined,
+      code: 'invalid-coordinate',
+    })),
+  )
+  expect(createMapLines(routes, { nodes }).data).toEqual([])
+})
