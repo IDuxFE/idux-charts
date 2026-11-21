@@ -1,5 +1,13 @@
 # @idux/charts
 
+## 1.6.1
+
+### Patch Changes
+
+- Updated dependencies [cc8b790]
+  - @idux/charts-core@1.6.1
+  - @idux/charts-plots@1.6.1
+
 ## 1.6.0
 
 ### Patch Changes
