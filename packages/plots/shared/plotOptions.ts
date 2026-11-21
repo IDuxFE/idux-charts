@@ -62,6 +62,7 @@ function removesOption(previous: unknown, next: unknown): boolean {
     const after = next as Record<string, unknown>
     return (
       before.id !== after.id ||
+      before.map !== after.map ||
       Object.keys(before).some(key => removesOption(before[key], after[key]))
     )
   }

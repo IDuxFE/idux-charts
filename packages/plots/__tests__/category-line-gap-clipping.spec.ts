@@ -13,8 +13,10 @@ function fixture() {
   installCategoryLineGapClipping()
   const update = vi.mocked(registerPostUpdate).mock.lastCall![0]
   const line = new graphic.Polyline()
+  line.shape.points = []
   line.type = 'ec-polyline'
   const polygon = new graphic.Polygon()
+  polygon.shape.points = []
   polygon.type = 'ec-polygon'
   const unrelated = new graphic.Rect()
   const series = { option: { data: [1, null, null, 4], stack: 'total' } }
@@ -139,6 +141,9 @@ describe('category line gap clipping', () => {
       f.polygon.buildPath({} as never, unchanged as never)
       expect(draw.mock.lastCall![1]).toBe(unchanged)
     }
+    f.clearBands()
+    f.update()
+    expect(f.polygon.buildPath).toBe(draw)
   })
 })
 

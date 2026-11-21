@@ -14,8 +14,12 @@ import {
   IxLiquidFillChart,
   IxPieChart,
   IxRadarChart,
+  IxMapChart,
   createRadarOption,
 } from '../index'
+import { registerTestMaps, testMapName } from './fixtures/map'
+
+registerTestMaps()
 
 const wrappers: ReturnType<typeof mount>[] = []
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()))
@@ -36,6 +40,7 @@ function mountChart(
           autoResize: false,
           animation: false,
           onReady: ready,
+          ...(component === IxMapChart && { geo: { map: testMapName } }),
           ...props,
         }),
     }),
@@ -275,6 +280,7 @@ it('exposes the same instance as onReady for every chart, including after reinit
     IxRadarChart,
     IxGaugeChart,
     IxLiquidFillChart,
+    IxMapChart,
   ]
   for (const component of components) {
     const item = mountChart(component, {})
@@ -373,6 +379,7 @@ it.each([
   IxRadarChart,
   IxGaugeChart,
   IxLiquidFillChart,
+  IxMapChart,
 ])(
   'forwards HTML attributes to the chart container without sending them to ECharts',
   async component => {
@@ -398,5 +405,39 @@ it.each([
     await nextTick()
     expect(element.hasAttribute('aria-label')).toBe(false)
     expect(element.getAttribute('tabindex')).toBe('-1')
+  },
+)
+
+it.each([
+  ['radar', IxRadarChart, { indicator: [{ name: 'A', max: 100 }], data: [{ value: [20] }] }],
+  ['gauge', IxGaugeChart, { value: 20 }],
+  ['liquid', IxLiquidFillChart, { value: 20 }],
+  ['map', IxMapChart, {}],
+] as const)(
+  '%s keeps generated callbacks stable on control-only changes but updates real options',
+  async (_, component, input) => {
+    const item = mountChart(component, { ...input, loading: false })
+    const chart = item.chart
+    const setOption = vi.spyOn(chart, 'setOption')
+    const click = vi.fn()
+    item.props.loading = { text: 'Working' }
+    item.props.onClick = click
+    item.props.group = 'group'
+    item.props['aria-label'] = 'Updated chart'
+    await nextTick()
+    expect(setOption).not.toHaveBeenCalled()
+    expect(chart.group).toBe('group')
+    expect(chart.getDom().getAttribute('aria-label')).toBe('Updated chart')
+    expect(chart.getDom().textContent).toContain('Working')
+    chart.trigger('click', { name: 'A' } as never)
+    expect(click).toHaveBeenCalledOnce()
+    item.props.title = { text: 'New title' }
+    await nextTick()
+    expect(setOption).toHaveBeenCalledOnce()
+    expect(item.option.title[0].text).toBe('New title')
+    item.props.loading = false
+    await nextTick()
+    expect(setOption).toHaveBeenCalledOnce()
+    expect(item.chart).toBe(chart)
   },
 )

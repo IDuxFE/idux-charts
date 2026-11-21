@@ -87,7 +87,7 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, PLOT_THEME_TOKEN } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN } from '@idux/charts';
 import { IxChart as Core } from '@idux/charts/core';
 import { IxBarChart as Bar } from '@idux/charts/bar';
 import { IxLineChart as Line, PLOT_THEME_TOKEN as LineTheme } from '@idux/charts/line';
@@ -95,15 +95,17 @@ import { IxPieChart as Pie } from '@idux/charts/pie';
 import { IxRadarChart as Radar } from '@idux/charts/radar';
 import { IxGaugeChart as Gauge } from '@idux/charts/gauge';
 import { IxLiquidFillChart as LiquidFill } from '@idux/charts/liquid-fill';
+import { IxMapChart as MapChart, registerMap, createMapNodes } from '@idux/charts/map';
 import { getInstanceByDom } from 'echarts/core';
-if ([Bar, Line, Pie, Radar, Gauge, LiquidFill].some((component, index) => component !==
-    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart][index]) ||
+registerMap('consumer-map', {type: 'FeatureCollection', features: [{type: 'Feature', properties: {name: 'A'}, geometry: {type: 'Polygon', coordinates: [[[0,0], [30,0], [30,30], [0,30], [0,0]]]}}]});
+if ([Bar, Line, Pie, Radar, Gauge, LiquidFill, MapChart].some((component, index) => component !==
+    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart][index]) ||
     Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN) {
   throw new Error('Modular and aggregate imports must share the same component instances');
 }
 const revision = ref(0), dark = ref(false), mounted = ref(true);
 const instances = [];
-const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart]];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
 const root = createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
@@ -118,6 +120,7 @@ const root = createApp({setup() { return () => h('main', {}, [
       setOptionOpts: {notMerge: kind !== 'area'},
       theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
       ...(kind === 'core' ? {xAxis: {type: 'category', data: ['A', 'B', 'C']}, yAxis: {type: 'value'}, series: [{type: 'bar', data}]} :
+        kind === 'map' ? {geo: {id: 'base', map: 'consumer-map'}, series: [createMapNodes([{id: 'a', name: 'A', coordinate: [10, 10], value: data[0]}])]} :
         kind === 'radar' ? { indicator: ['A', 'B', 'C'].map(name => ({name, max: 100})), data: [{name: 'One', value: data}] } :
         kind === 'gauge' || kind === 'liquid-fill' ? {value: data[0]} :
         kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} :
@@ -137,7 +140,7 @@ const root = createApp({setup() { return () => h('main', {}, [
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
   const el = section.querySelector('[_echarts_instance_]');
   const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
-  return {id: chart?.id, title: option?.title?.[0]?.text, value: Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart, domAttrs: el?.getAttribute('role') === 'img' && el?.getAttribute('aria-label') === section.dataset.kind + ' chart' && el?.getAttribute('tabindex') === '0' && option?.role === undefined};
+  return {id: chart?.id, title: option?.title?.[0]?.text, value: section.dataset.kind === 'map' ? data?.value?.[2] : Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart, domAttrs: el?.getAttribute('role') === 'img' && el?.getAttribute('aria-label') === section.dataset.kind + ' chart' && el?.getAttribute('tabindex') === '0' && option?.role === undefined};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
 const areaChart = () => {
@@ -148,6 +151,9 @@ window.areaSeriesCount = () => areaChart()?.getOption().series?.length;
 window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIndex: 0, dataIndex: 4});
 window.zoomArea = () => areaChart().dispatchAction({type: 'dataZoom', dataZoomId: 'area-zoom', start: 0, end: 80});
 window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
+const mapChart = () => getInstanceByDom(document.querySelector('[data-kind="map"] [_echarts_instance_]'));
+window.roamMap = () => mapChart().dispatchAction({type: 'geoRoam', componentType: 'geo', geoId: 'base', zoom: 2, dx: 10, dy: 10, originX: 200, originY: 120});
+window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {zoom: geo.zoom, center: geo.center};};
 `,
   )
   await build({ root: app, configFile: false, logLevel: 'error' })
@@ -170,9 +176,9 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
     const state = () => page.evaluate(() => window.readCharts())
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
-      .toEqual([true, true, true, true, true, true, true, true])
-    expect((await state()).map(chart => chart.exposed)).toEqual(Array(8).fill(true))
-    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(8).fill(true))
+      .toEqual(Array(9).fill(true))
+    expect((await state()).map(chart => chart.exposed)).toEqual(Array(9).fill(true))
+    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(9).fill(true))
     const area = page.locator('[data-kind="area"]')
     await expect(area.locator('svg pattern[width="4"][height="240"]').first()).toBeAttached()
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(3)
@@ -183,6 +189,16 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
     await page.evaluate(() => window.zoomArea())
     const areaZoom = await page.evaluate(() => window.areaZoom())
     expect(areaZoom).toBeLessThan(100)
+    await page.evaluate(() => window.roamMap())
+    const mapViewport = await page.evaluate(() => window.mapViewport())
+    expect(mapViewport.zoom).toBeCloseTo(2, 10)
+    const expectMapViewport = async () => {
+      const current = await page.evaluate(() => window.mapViewport())
+      expect(current.zoom).toBeCloseTo(mapViewport.zoom, 10)
+      current.center.forEach((value, index) =>
+        expect(value).toBeCloseTo(mapViewport.center[index], 10),
+      )
+    }
     await page.getByTestId('update').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
@@ -195,18 +211,21 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
         'radar 1',
         'gauge 1',
         'liquid-fill 1',
+        'map 1',
       ])
     await expect
       .poll(async () => (await state()).map(chart => chart.value))
-      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 0.11])
+      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 0.11, 11])
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(1)
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
+    await expectMapViewport()
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
       .poll(async () => (await state()).every((chart, i) => chart.id && chart.id !== before[i].id))
       .toBe(true)
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
+    await expectMapViewport()
     await page.getByTestId('mount').click()
     await expect.poll(state).toEqual([])
     await expect.poll(() => page.evaluate(() => window.allDisposed())).toBe(true)
@@ -222,6 +241,7 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
         'radar 1',
         'gauge 1',
         'liquid-fill 1',
+        'map 1',
       ])
     expect(errors).toEqual([])
   } finally {
@@ -240,7 +260,7 @@ async function checkLineBundle(app) {
     [
       'all',
       '@idux/charts',
-      'IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart',
+      'IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart',
     ],
   ]) {
     writeFileSync(
@@ -338,7 +358,7 @@ provide(CHART_THEME_TOKEN, ref<ChartTheme>('dark'));
 provide(CHART_THEME_TOKEN, { darkMode: true, textStyle: { color: '#fff' } });
 // @ts-expect-error themes must be names or objects, not numbers
 provide(CHART_THEME_TOKEN, 42);
-import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps } from '@idux/charts';
+import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps, MapChartPublicProps } from '@idux/charts';
 import type { LineChartPublicProps as ModularLineProps } from '@idux/charts/line';
 const modularLine: ModularLineProps = { categories: ['A', 'B'], data: [1, 2] };
 const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
@@ -351,6 +371,15 @@ const badMode: PieChartPublicProps = { layoutMode: 'custom' };
 const badSeriesStyle: PieChartPublicProps = { seriesStyle: { radius: 100 } };
 // @ts-expect-error text sizing uses numeric pixels
 const badTextStyle: GaugeChartPublicProps = { valueTextStyle: { fontSize: 'big' } };
+import { createMapLines, validateMapData, type MapNodeItem } from '@idux/charts/map';
+const map: MapChartPublicProps = {geo: {map: 'consumer-map'}, series: []};
+const mapNodes: MapNodeItem[] = [{id: 'a', name: 'A', coordinate: [0, 0]}];
+createMapLines([{source: 'a', target: 'a'}], {nodes: mapNodes});
+validateMapData({nodes: mapNodes});
+// @ts-expect-error map nodes must have a pair of numeric coordinates
+const invalidMapNode: MapNodeItem = {id: 'a', name: 'A', coordinate: ['0', 0]};
+// @ts-expect-error route references and standalone coordinates cannot be mixed
+createMapLines([{source: 'a', target: 'a', coords: [[0, 0], [1, 1]]}]);
 const liquid: LiquidFillChartPublicProps = { value: 20, waveAnimation: false };
 // @ts-expect-error value must be numeric
 const invalidGauge: GaugeChartPublicProps = { value: '20' };
@@ -433,7 +462,7 @@ for (const [version, echartsVersion, adapter] of selectedTargets) {
   const consumer = adapter
     ? adapterConsumer
     : `${adapterConsumer}
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart } from '@idux/charts';
 import '@idux/charts/types';
 import type { GlobalComponents } from 'vue';
 import Fixture from './inferred-fixture';
@@ -441,7 +470,7 @@ import { defineComponent } from 'vue';
 import type { VNode } from 'vue';
 import type { EChartsType } from 'echarts/core';
 ${version.startsWith('2.') ? "import Vue from 'vue'; const app = Vue;" : "import { createApp } from 'vue'; const app = createApp({});"}
-const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart] as const;
+const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart] as const;
 for (const component of chartComponents) app.use(component);
 declare const chartInstance: InstanceType<(typeof chartComponents)[number]>;
 const echartsInstance: EChartsType | undefined = chartInstance.getEChartsInstance();
