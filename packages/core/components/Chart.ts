@@ -52,7 +52,13 @@ export default withChartProps<ChartProps>()(
         ),
       )
 
-      const content = this.renderContent()
+      // Vue 2's setup slot proxy can outlive a conditional slot when setup
+      // returns bindings rather than a render function. Read the current slots.
+      const content = isVue2
+        ? (
+            this as unknown as { $scopedSlots: { default?: () => VNode[] } }
+          ).$scopedSlots.default?.()
+        : this.renderContent()
 
       return h(
         'div',
