@@ -53,12 +53,25 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
+      - name: Read planned release version
+        id: release-title
+        run: |
+          pnpm exec changeset status --output "$RUNNER_TEMP/release-plan.json"
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs'
+          import { join } from 'node:path'
+
+          const plan = JSON.parse(readFileSync(join(process.env.RUNNER_TEMP, 'release-plan.json'), 'utf8'))
+          const release = plan.releases.find(({ name }) => name === '@idux/charts')
+          if (!release) throw new Error('No planned release found for @idux/charts')
+          appendFileSync(process.env.GITHUB_OUTPUT, `title=chore(release): v${release.newVersion}\n`)
+          NODE
       - uses: changesets/action/version@v2.1.2
         with:
           github-token: ${{ secrets.RELEASE_GITHUB_TOKEN || github.token }}
           script: pnpm run version:release
-          commit-message: 'chore(release): version packages'
-          pr-title: 'chore(release): version packages'
+          commit-message: ${{ steps.release-title.outputs.title }}
+          pr-title: ${{ steps.release-title.outputs.title }}
 
   publish:
     name: Publish to npm
