@@ -21,6 +21,12 @@ on:
 permissions:
   contents: read
 
+# Superseded PR/feature pushes need not consume the scarce macOS runners.
+# Reusable validation on main remains part of the non-cancelling release flow.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main') }}
+
 jobs:
   checks:
     name: Checks
@@ -36,7 +42,8 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: unit-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          name: unit-coverage-${{ github.run_id }}
+          overwrite: true
           path: coverage/
           retention-days: 7
           if-no-files-found: error
@@ -45,6 +52,9 @@ jobs:
     name: Browser tests (${{ matrix.browser }}, ${{ matrix.shard }}/2)
     # Preserve the OS used by the reviewed screenshot baselines.
     runs-on: macos-15-intel
+    needs: browser-build
+    env:
+      IDUX_E2E_PREBUILT: '1'
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -56,8 +66,18 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          # Preview prebuilt assets only; no Node canvas or package builds run here.
+          install-scripts: 'false'
+      - uses: actions/download-artifact@v8
+        with:
+          name: browser-build
+          path: .
       - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
       - run: pnpm test:e2e --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/2
+      - name: Summarize browser tests
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e-summary.mjs test-results/results.json
       - name: Upload browser reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -68,6 +88,28 @@ jobs:
             test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+  browser-build:
+    name: Build browser fixtures
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm build:site
+      - run: pnpm exec vite build --config e2e/fixture/vite.config.ts
+      - uses: actions/upload-artifact@v7
+        with:
+          name: browser-build
+          path: |
+            packages/site/dist/
+            e2e/fixture/dist/
+          include-hidden-files: true
+          overwrite: true
+          retention-days: 7
+          if-no-files-found: error
 
   playground-tests:
     name: Playground (${{ matrix.vue }})
@@ -88,11 +130,15 @@ jobs:
       - run: pnpm playgrounds:prepare ${{ matrix.vue }}
       - run: pnpm --dir playgrounds/${{ matrix.vue }} exec playwright install --with-deps chromium
       - run: pnpm --dir playgrounds/${{ matrix.vue }} test:e2e
+      - name: Summarize playground tests
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e-summary.mjs playgrounds/${{ matrix.vue }}/test-results/results.json
       - name: Upload playground coverage
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
-          name: playground-coverage-${{ matrix.vue }}
+          name: playground-coverage-${{ matrix.vue }}-${{ github.run_id }}
+          overwrite: true
           path: coverage/playgrounds/${{ matrix.vue }}/
           retention-days: 7
           if-no-files-found: error
@@ -117,13 +163,15 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - uses: actions/download-artifact@v6
         with:
-          name: unit-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          name: unit-coverage-${{ github.run_id }}
           path: coverage/
       - uses: actions/download-artifact@v6
         with:
-          pattern: playground-coverage-*
+          pattern: playground-coverage-*-${{ github.run_id }}
           path: coverage/playgrounds/
       - run: pnpm coverage:merge
       - uses: actions/upload-artifact@v7
@@ -195,6 +243,7 @@ jobs:
     env:
       SITE_BASE: ${{ matrix.base }}
       SITE_DOMAIN: ${{ matrix.domain }}
+      IDUX_E2E_TARGET: site
     steps:
       - uses: actions/checkout@v7
         with:
@@ -202,6 +251,9 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec playwright test ${{ matrix.tests }} --project=chromium
+      - name: Summarize documentation tests
+        if: ${{ !cancelled() }}
+        run: node scripts/e2e-summary.mjs test-results/results.json
       - name: Upload documentation browser reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7
@@ -216,7 +268,16 @@ jobs:
   ci:
     name: CI result
     if: ${{ always() }}
-    needs: [checks, browser-tests, playground-tests, combined-coverage, compatibility, pages-smoke]
+    needs:
+      [
+        checks,
+        browser-build,
+        browser-tests,
+        playground-tests,
+        combined-coverage,
+        compatibility,
+        pages-smoke,
+      ]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
