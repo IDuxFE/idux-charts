@@ -29,6 +29,8 @@ beforeEach(() => {
       container!.innerHTML = '<svg data-chart="true"></svg>'
       return {
         getOption: () => ({}),
+        getWidth: () => 640,
+        getHeight: () => 320,
         setOption: vi.fn(),
         on: vi.fn(),
         off: vi.fn(),

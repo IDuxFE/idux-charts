@@ -93,6 +93,17 @@ for (const route of [
       'rgb(255, 255, 255)',
     )
     await expect(page.locator('.archive-md').first()).not.toHaveCSS('color', 'rgb(244, 248, 255)')
+    if (route === 'components/core') {
+      await page.getByRole('radio', { name: '示例', exact: true }).click()
+      const map = page
+        .locator('.archive-app-demo')
+        .filter({ has: page.getByRole('heading', { name: /^地图/ }) })
+      await expect(map.locator('svg path').first()).toBeVisible()
+      await expect(map.locator('[_echarts_instance_]')).toHaveAttribute(
+        'data-ix-chart-theme',
+        'light',
+      )
+    }
   })
 }
 

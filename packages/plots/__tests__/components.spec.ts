@@ -30,6 +30,9 @@ const instances: {
 }[] = []
 const wrappers: ReturnType<typeof mount>[] = []
 beforeEach(() => {
+  vi.spyOn(HTMLElement.prototype, 'getClientRects').mockReturnValue([
+    new DOMRect(0, 0, 640, 320),
+  ] as unknown as DOMRectList)
   instances.length = 0
   vi.mocked(init)
     .mockReset()
@@ -48,7 +51,10 @@ beforeEach(() => {
       return instance as unknown as ReturnType<typeof init>
     })
 })
-afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()))
+afterEach(() => {
+  wrappers.splice(0).forEach(wrapper => wrapper.unmount())
+  vi.restoreAllMocks()
+})
 
 for (const [name, component] of [
   ['core', IxChart],

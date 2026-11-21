@@ -4,6 +4,8 @@ import { effectScope, computed, shallowRef, nextTick } from 'vue'
 import { useResizeObserver } from '../useResizeObserver'
 
 beforeEach(() => {
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(640)
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(320)
   vi.useFakeTimers()
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
     setTimeout(() => callback(0), 16),
@@ -11,6 +13,7 @@ beforeEach(() => {
   vi.stubGlobal('cancelAnimationFrame', (handle: number) => clearTimeout(handle))
 })
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.useRealTimers()
   vi.unstubAllGlobals()
 })
@@ -47,6 +50,19 @@ it('resizes the current instance after replacement and disconnects on cleanup', 
   vi.advanceTimersByTime(16)
   expect(first.resize).not.toHaveBeenCalled()
   expect(second.resize).toHaveBeenCalledTimes(1)
+  vi.spyOn(container, 'clientWidth', 'get').mockReturnValue(0)
+  callbacks[0]([{ target: container }])
+  vi.advanceTimersByTime(16)
+  expect(second.resize).toHaveBeenCalledTimes(1)
+  vi.spyOn(container, 'clientWidth', 'get').mockReturnValue(640)
+  vi.spyOn(container, 'clientHeight', 'get').mockReturnValue(0)
+  callbacks[0]([{ target: container }])
+  vi.advanceTimersByTime(16)
+  expect(second.resize).toHaveBeenCalledTimes(1)
+  vi.spyOn(container, 'clientHeight', 'get').mockReturnValue(320)
+  callbacks[0]([{ target: container }])
+  vi.advanceTimersByTime(16)
+  expect(second.resize).toHaveBeenCalledTimes(2)
   scope.stop()
   expect(disconnect).toHaveBeenCalled()
   vi.unstubAllGlobals()
