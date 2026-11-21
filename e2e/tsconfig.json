@@ -4,6 +4,7 @@
   "compilerOptions": {
     "types": ["node"],
     "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
     "paths": {
       "@idux/charts": ["../packages/charts/index.ts"],
       "@idux/charts-core": ["../packages/core/index.ts"],

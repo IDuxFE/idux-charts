@@ -1,16 +1,13 @@
 import type { Page } from '@playwright/test'
-import { expect, test } from './helpers'
+import { expect, test, hoverCategory } from './helpers'
 
 for (const width of [1440, 768, 390]) {
   test(`theme control follows system and persists manual choice at ${width}px`, async ({
     page,
   }) => {
-    // This persistence scenario loads three documents, including the full pie
-    // showcase twice. Give it its own budget on slower Firefox CI runners.
-    test.setTimeout(60_000)
     await page.setViewportSize({ width, height: 900 })
     await page.emulateMedia({ colorScheme: 'dark' })
-    await page.goto('components/pie')
+    await page.goto('components/radar')
     const root = page.locator('html')
     await expect(root).toHaveAttribute('data-theme', 'dark')
     const lightButton = page.getByRole('button', { name: '切换到亮色模式' })
@@ -49,7 +46,7 @@ test('system theme changes apply until a manual choice is made', async ({ page }
 for (const route of [
   '0-guide/Introdoction.page.md',
   '0-guide/GettingStarted.page.md',
-  ...['core', 'pie', 'bar', 'line', 'area', 'radar', 'gauge', 'liquid-fill'].map(
+  ...['core', 'pie', 'bar', 'line', 'area', 'radar', 'gauge', 'liquid-fill', 'map'].map(
     name => `components/${name}`,
   ),
 ]) {
@@ -236,8 +233,10 @@ for (const [kind, title] of [
     await chart.scrollIntoViewIfNeeded()
     await expect(chart).toHaveAttribute('data-ix-chart-theme', 'dark')
     await expect(chart.locator('svg text').first()).toBeAttached()
-    const box = await chart.boundingBox()
-    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+    await hoverCategory(
+      chart.locator('svg'),
+      chart.locator('svg text').filter({ hasText: kind === 'bar' ? /^微信网页$/ : /^07-03$/ }),
+    )
     const tooltip = chart.locator('.charts-tooltips')
     await expect(tooltip).toBeVisible()
     await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgb(10, 12, 15)')
@@ -246,9 +245,10 @@ for (const [kind, title] of [
     await chart.scrollIntoViewIfNeeded()
     await expect(chart).toHaveAttribute('data-ix-chart-theme', 'light')
     await expect(chart.locator('svg text').first()).toBeAttached()
-    await page.mouse.move(0, 0)
-    const lightBox = await chart.boundingBox()
-    await page.mouse.move(lightBox!.x + lightBox!.width / 2, lightBox!.y + lightBox!.height / 2)
+    await hoverCategory(
+      chart.locator('svg'),
+      chart.locator('svg text').filter({ hasText: kind === 'bar' ? /^微信网页$/ : /^07-03$/ }),
+    )
     await expect(tooltip).toBeVisible()
     await expect(tooltip.locator('..')).toHaveCSS('background-color', 'rgba(251, 253, 255, 0.72)')
     await expect(tooltip.locator('..')).toHaveCSS('backdrop-filter', 'blur(4px)')

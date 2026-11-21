@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, hoverCategory } from './helpers'
 
 test('external overrides keep the hover band behind the bar and stripes above it', async ({
   page,
@@ -11,13 +11,8 @@ test('external overrides keep the hover band behind the bar and stripes above it
   await expect(chart).toHaveCount(1)
   await demo.getByRole('button', { name: '应用外部配置', exact: true }).click()
   await expect(chart.locator('svg path[fill="#8352cc" i]:not([transform])')).toHaveCount(5)
-  await chart.scrollIntoViewIfNeeded()
   const label = chart.locator('svg text').filter({ hasText: /^周一$/ })
-  const labelBox = await label.boundingBox()
-  const chartBox = await chart.boundingBox()
-  expect(labelBox).not.toBeNull()
-  expect(chartBox).not.toBeNull()
-  await page.mouse.move(labelBox!.x + labelBox!.width / 2, chartBox!.y + 140)
+  await hoverCategory(chart.locator('svg'), label, 140)
   await expect(chart.locator('.charts-tooltips')).toBeVisible()
   await expect(chart.locator('.charts-tooltips-item')).toHaveCount(1)
   await expect(chart.locator('.charts-tooltips')).toContainText('120 次')
@@ -49,11 +44,6 @@ test('external overrides keep the hover band behind the bar and stripes above it
       }),
     )
     .toEqual({ bandFound: true, barAfterBand: true, stripeAfterBar: true })
-  await chart.screenshot({ path: test.info().outputPath('stripe-hover.png') })
-  await test.info().attach('stripe-hover', {
-    path: test.info().outputPath('stripe-hover.png'),
-    contentType: 'image/png',
-  })
   await page.mouse.move(0, 0)
   await expect(chart.locator('.charts-tooltips')).not.toBeVisible()
   await expect

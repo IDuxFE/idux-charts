@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, hoverPieSector, hoverSvg } from './helpers'
 
 for (const title of [
   '实心饼图',
@@ -21,30 +21,21 @@ for (const title of [
       has: page.getByRole('heading', { name: new RegExp(`^${title}\\s*#?\\s*$`) }),
     })
     const chart = demo.locator('[_echarts_instance_]')
-    const tooltip = chart.locator('div[style*="z-index: 9999999"]')
+    const tooltip = chart.locator('.ix-chart-tooltip')
     const decorated = title === '大尺寸：多层装饰环图'
     for (const dark of [true, false]) {
       await chart.scrollIntoViewIfNeeded()
-      if (decorated)
-        await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
+      await expect(chart).toHaveAttribute('data-ix-chart-theme', dark ? 'dark' : 'light')
       await expect(chart.locator('svg')).toBeVisible()
-      // Move across the plot at mid-height to trigger real sector emphasis.
-      await expect(async () => {
-        await page.mouse.move(0, 0)
+      if (decorated) {
         const box = (await chart.boundingBox())!
-        const centerY = box.y + box.height / 2
-        if (decorated) {
-          // The interactive ring spans 70% to 80% of the radius between silent layers.
-          const radius = Math.min(box.width, box.height) / 2
-          await page.mouse.move(box.x + box.width / 2 - radius * 0.75, centerY)
-        } else {
-          for (let x = 8; x < Math.min(300, box.width / 2); x += 8) {
-            await page.mouse.move(box.x + x, centerY)
-            if (await tooltip.isVisible()) break
-          }
-        }
-        await expect(tooltip).toBeVisible({ timeout: 500 })
-      }).toPass({ timeout: 5000 })
+        const radius = Math.min(box.width, box.height) / 2
+        await page.mouse.move(0, 0)
+        await page.mouse.move(box.x + box.width / 2 - radius * 0.75, box.y + box.height / 2)
+      } else {
+        await hoverPieSector(chart)
+      }
+      await expect(tooltip).toBeVisible()
       await expect(tooltip).toHaveCSS(
         'background-color',
         dark ? 'rgb(10, 12, 15)' : 'rgba(251, 253, 255, 0.72)',
@@ -77,15 +68,7 @@ for (const missing of [false, true]) {
     const chart = demo.locator('[_echarts_instance_]')
     await chart.scrollIntoViewIfNeeded()
     const label = chart.locator('svg text').filter({ hasText: missing ? /^图例4$/ : /^严重$/ })
-    const point = await label.evaluate(element => {
-      const text = element as SVGTextElement
-      const p = new DOMPoint(
-        text.x.baseVal.getItem(0).value + text.getComputedTextLength() / 2,
-        text.y.baseVal.getItem(0).value,
-      ).matrixTransform(text.getScreenCTM()!)
-      return { x: p.x, y: p.y }
-    })
-    await page.mouse.move(point.x, point.y)
+    await hoverSvg(chart.locator('svg'), label)
     const tooltip = chart.locator('.charts-tooltips')
     await expect(tooltip).toBeVisible()
     await expect(tooltip.locator('..')).toContainText(missing ? '缺失原因' : '当前筛选范围')

@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { test, expect } from './helpers'
+import { test, expect, hoverSvg, reloadDemo } from './helpers'
 
 async function openRadar(page: Page) {
   await page.goto('components/radar')
@@ -93,17 +93,21 @@ test('radar demo handles zero, empty and reload', async ({ page }) => {
   await block.getByText('空状态', { exact: true }).click()
   await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
   await expect(block.locator('.ix-chart-overlay .ix-empty')).toBeVisible()
-  await block.getByRole('button', { name: '重新加载' }).click()
-  await expect(block.getByRole('status')).toContainText('正在加载')
+  const loading = await reloadDemo(block)
+  expect(loading.text).toContain('正在加载')
   await expect(chart.locator('svg')).toBeVisible()
 })
 
 test('radar demo cancels pending reload and toggles loading', async ({ page }) => {
+  await page.clock.install({ time: new Date('2026-01-01T00:00:00Z') })
   const { block, chart } = await openRadar(page)
+  await page.clock.pauseAt(new Date('2026-01-01T01:00:00Z'))
   await block.getByText('空状态', { exact: true }).click()
   await block.getByRole('button', { name: '重新加载' }).click()
   await block.getByText('全部数值为 0', { exact: true }).click()
-  await page.waitForTimeout(900)
+  // Advance beyond the cancelled 800ms request without a wall-clock sleep.
+  await page.clock.fastForward(1000)
+  await page.clock.resume()
   await expect(block.getByLabel('图表状态').getByRole('radio').nth(1)).toBeChecked()
   await expect(chart.locator('svg')).toBeVisible()
   await block.getByText('加载中', { exact: true }).click()
@@ -152,7 +156,10 @@ test('radar default tooltip uses the shared chart title and value rows', async (
   const { chart } = await openRadar(page)
   // Hover the first object's actual marker after its animation settles. A fixed
   // coordinate can hit the second object while the radar is still expanding.
-  await chart.locator('svg path[fill="#458fff" i][transform^="matrix"]').first().hover()
+  await hoverSvg(
+    chart.locator('svg'),
+    chart.locator('svg path[fill="#458fff" i][transform^="matrix"]').first(),
+  )
   const tooltip = page.locator('.charts-tooltips:visible')
   await expect(tooltip.locator('.charts-tooltips-title')).toHaveText('攻击A')
   await expect(tooltip.locator('.charts-tooltips-item-name')).toHaveText([

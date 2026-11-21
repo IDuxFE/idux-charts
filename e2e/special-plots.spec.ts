@@ -1,14 +1,13 @@
 import { expect, test } from '@playwright/test'
 import { fixtureBaseURL } from './environment'
 
-test('special plots render, resize and clear stale data', async ({ page }, testInfo) => {
+test('special plots render, resize and clear stale data', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
   await page.goto(`${fixtureBaseURL}/special.html`)
   for (const name of ['radar', 'gauge', 'segmented', 'liquid']) {
     await expect(page.locator(`.${name} svg path`).first()).toBeVisible()
   }
-  await page.screenshot({ path: testInfo.outputPath('special-plots.png') })
   const state = () =>
     page.evaluate(() => (window as unknown as { specialState: () => any[] }).specialState())
   await page.locator('#shrink').click()

@@ -1,4 +1,4 @@
-import { siteDeploymentBase } from '../packages/site/deployment'
+import { siteDeploymentBase } from '../packages/site/deployment.ts'
 
 export const isCI = !!process.env.CI
 export const sitePreviewPort = Number(process.env.IDUX_E2E_SITE_PORT ?? 4173)

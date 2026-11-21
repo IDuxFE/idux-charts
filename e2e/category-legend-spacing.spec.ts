@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, clickSvg } from './helpers'
 
 for (const [chart, title, labels] of [
   ['bar', '图例多列排列（以分组柱状图为例）', /^(服务器|终端|分支|设备类别 \d+)$/],
@@ -17,7 +17,7 @@ for (const [chart, title, labels] of [
       has: page.getByRole('heading', { name: new RegExp(`^${title}\\s*#?\\s*$`) }),
     })
     await block.getByRole('radiogroup', { name: '系列数量' }).getByText('50 个系列').click()
-    const svg = block.locator('svg')
+    const svg = block.locator('[_echarts_instance_] svg')
     const legendLabels = svg.locator('text').filter({ hasText: labels })
     await expect(async () => {
       const rows = await legendLabels.evaluateAll(nodes => {
@@ -38,13 +38,13 @@ for (const [chart, title, labels] of [
       expect(rows).toHaveLength(2)
       expect(rows[1]![0] - rows[0]![0]).toBe(30)
       expect(rows[1]![1]).toEqual(rows[0]![1])
-    }).toPass()
+    }).toPass({ timeout: 5000 })
     const arrows = svg.locator('path[stroke-linecap="round"][stroke-linejoin="round"]')
     await expect(arrows).toHaveCount(2)
     const first = await legendLabels.first().textContent()
-    await arrows.last().click({ force: true })
+    await clickSvg(svg, arrows.last())
     await expect(legendLabels.first()).not.toHaveText(first!)
-    await arrows.first().click({ force: true })
+    await clickSvg(svg, arrows.first())
     await expect(legendLabels.first()).toHaveText(first!)
     await block.getByRole('radiogroup', { name: '系列数量' }).getByText('3 个系列').click()
     await expect(legendLabels).toHaveCount(3)

@@ -70,10 +70,27 @@ const inspect = () => {
   const dom = host.value?.querySelector<HTMLElement>('[_echarts_instance_]')
   const chart = dom && getInstanceByDom(dom)
   if (!chart) return null
-  const model = (chart as any).getModel().getSeriesByIndex(2)
+  const model = (chart as any).getModel()?.getSeriesByIndex(2)
+  const seriesData = model?.getData()
+  if (
+    !seriesData ||
+    data.value.some(
+      (_, index) => !seriesData.getItemGraphicEl(index) || !seriesData.getItemLayout(index),
+    )
+  )
+    return null
   const series = model.option
   const rect = dom.getBoundingClientRect()
   return {
+    id: chart.id,
+    mode:
+      series.emphasis?.scale === false
+        ? 'disabled'
+        : series.emphasis?.scaleSize === 24
+          ? 'custom'
+          : model.getData().getItemModel(0).get('emphasis.scaleSize') === 32
+            ? 'item'
+            : 'default',
     roseType: series.roseType,
     width: chart.getWidth(),
     height: chart.getHeight(),

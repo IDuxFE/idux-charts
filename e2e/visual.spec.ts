@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, hoverCategory } from './helpers'
 import { fixtureBaseURL } from './environment'
 
 for (const [chart, title, snapshot, fixture] of [
@@ -45,13 +45,8 @@ test('single-series area keeps its fitted stripe during hover', async ({ page })
 test('bar hover tooltip excludes the helper series and preserves appearance', async ({ page }) => {
   await page.goto(`${fixtureBaseURL}?legacy-bar-stripe`)
   const chart = page.locator('#app [_echarts_instance_]')
-  await chart.scrollIntoViewIfNeeded()
   const label = chart.locator('svg text').filter({ hasText: /^星期二$/ })
-  const labelBox = await label.boundingBox()
-  const chartBox = await chart.boundingBox()
-  expect(labelBox).not.toBeNull()
-  expect(chartBox).not.toBeNull()
-  await page.mouse.move(labelBox!.x + labelBox!.width / 2, chartBox!.y + 140)
+  await hoverCategory(chart.locator('svg'), label, 140)
   const tooltip = chart.locator('.charts-tooltips')
   const row = tooltip.locator('.charts-tooltips-item')
   await expect(tooltip).toBeVisible()

@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, hoverPieSector, hoverSvg, clickSvg } from './helpers'
 
 const heading = (title: string) => new RegExp(`^${title}\\s*#?\\s*$`)
 
@@ -74,13 +74,8 @@ test('iDux responsive controls change both dimensions and keep large examples at
   await block.getByRole('button', { name: '业务标题', exact: true }).click()
   await expect(chart).not.toContainText('统计总数')
   await block.getByText('实心', { exact: true }).click()
-  await chart.scrollIntoViewIfNeeded()
-  const box = await chart.boundingBox()
-  await expect(async () => {
-    await page.mouse.move(0, 0)
-    await page.mouse.move(box!.x + box!.width / 2 + 30, box!.y + box!.height / 2 + 10)
-    await expect(chart.locator('.charts-tooltips')).toContainText('资产分布', { timeout: 500 })
-  }).toPass({ timeout: 5000 })
+  await hoverPieSector(chart)
+  await expect(chart.locator('.charts-tooltips')).toContainText('资产分布')
   await expect(chart.locator('.charts-tooltips')).toContainText('分类')
   await page.mouse.move(0, 0)
   const titles = await page
@@ -105,10 +100,7 @@ test('lightweight card tooltip uses 12px text', async ({ page }) => {
     has: page.getByRole('heading', { name: heading('轻量卡片环形图') }),
   })
   const chart = block.locator('[_echarts_instance_]')
-  await chart.scrollIntoViewIfNeeded()
-  const box = await chart.boundingBox()
-  // Hover the ring itself; the center is intentionally empty.
-  await page.mouse.move(box!.x + box!.width / 2 + 34, box!.y + box!.height / 2 + 1)
+  await hoverPieSector(chart)
   const tooltip = chart
     .locator('div')
     .filter({ hasText: /^图例\d: \d+$/ })
@@ -152,7 +144,7 @@ test('multi-column legend updates default row spacing when category count change
         .filter({ hasText: /^图例2$/ })
         .boundingBox()
       expect(second!.y - first!.y).toBeCloseTo(12 + gap, 0)
-    }).toPass()
+    }).toPass({ timeout: 5000 })
     await expect(chart).toHaveAttribute('_echarts_instance_', id!)
   }
 })
@@ -189,10 +181,10 @@ test('multi-column legend paging icons align with the values', async ({ page }) 
       ).matrixTransform(text.getCTM()!).x
     })
     expect(iconRight).toBeCloseTo(valueRight, 0)
-  }).toPass()
-  await arrows.last().click()
+  }).toPass({ timeout: 5000 })
+  await clickSvg(chart.locator('svg'), arrows.last())
   await expect(chart.locator('svg text').filter({ hasText: /^图例17$/ })).toBeVisible()
-  await arrows.first().click()
+  await clickSvg(chart.locator('svg'), arrows.first())
   await expect(value).toBeVisible()
 })
 
@@ -219,14 +211,14 @@ test('single-column legend shares compact paging controls and pages both ways', 
   await chart.scrollIntoViewIfNeeded()
   const firstLabel = chart.locator('svg text').filter({ hasText: /^分类 1$/ })
   const before = await firstLabel.boundingBox()
-  await arrows.last().click()
+  await clickSvg(chart.locator('svg'), arrows.last())
   await expect(async () => {
     expect((await firstLabel.boundingBox())!.y).toBeLessThan(before!.y)
-  }).toPass()
-  await arrows.first().click()
+  }).toPass({ timeout: 5000 })
+  await clickSvg(chart.locator('svg'), arrows.first())
   await expect(async () => {
     expect((await firstLabel.boundingBox())!.y).toBeCloseTo(before!.y)
-  }).toPass()
+  }).toPass({ timeout: 5000 })
 
   const secondLabel = chart.locator('svg text').filter({ hasText: /^分类 2$/ })
   const rowHeight = (await secondLabel.boundingBox())!.y - before!.y
@@ -266,32 +258,13 @@ test('large pie demos switch shapes and loading and show business tooltips', asy
     has: page.getByRole('heading', { name: heading('大尺寸：风险分布') }),
   })
   const riskChart = risk.locator('[_echarts_instance_]')
-  await riskChart.scrollIntoViewIfNeeded()
-  await expect(async () => {
-    const box = await riskChart.boundingBox()
-    await page.mouse.move(0, 0)
-    // Sweep the plot area to hit a ring sector regardless of legend width.
-    for (let x = 30; x < 300; x += 15) {
-      await page.mouse.move(box!.x + x, box!.y + 150)
-      if (await riskChart.locator('.charts-tooltips').isVisible()) break
-    }
-    await expect(riskChart.locator('.charts-tooltips')).toBeVisible({ timeout: 500 })
-    await expect(riskChart.locator('.charts-tooltips')).toContainText('占全部风险')
-    await expect(riskChart.locator('.charts-tooltips')).toContainText('当前筛选范围')
-  }).toPass({ timeout: 5000 })
+  await hoverPieSector(riskChart)
+  await expect(riskChart.locator('.charts-tooltips')).toBeVisible()
+  await expect(riskChart.locator('.charts-tooltips')).toContainText('占全部风险')
+  await expect(riskChart.locator('.charts-tooltips')).toContainText('当前筛选范围')
   await page.mouse.move(0, 0)
   const legendLabel = riskChart.locator('svg text').filter({ hasText: /^严重$/ })
-  // Resolve the glyph position from SVG coordinates: WebKit's text bounding box
-  // can include the icon origin, which makes locator.hover() hit the icon.
-  const legendPoint = await legendLabel.evaluate(element => {
-    const text = element as SVGTextElement
-    const point = new DOMPoint(
-      text.x.baseVal.getItem(0).value + text.getComputedTextLength() / 2,
-      text.y.baseVal.getItem(0).value,
-    ).matrixTransform(text.getScreenCTM()!)
-    return { x: point.x, y: point.y }
-  })
-  await page.mouse.move(legendPoint.x, legendPoint.y)
+  await hoverSvg(riskChart.locator('svg'), legendLabel)
   const legendTooltip = riskChart.locator('.charts-tooltips')
   await expect(legendTooltip).toBeVisible()
   await expect(legendTooltip).toContainText('严重')

@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
-import { fixturePort, serverHost } from '../environment'
+import { fixturePort, serverHost } from '../environment.ts'
 
 const fromRoot = (path: string) => fileURLToPath(new URL(`../../${path}`, import.meta.url))
 

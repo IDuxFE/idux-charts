@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { test, expect } from './helpers'
+import { test, expect, clickSvg } from './helpers'
 import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
@@ -17,7 +17,7 @@ for (const variant of [
 ]) {
   test(`${variant} renders the revised layout and retains category positions across states`, async ({
     page,
-  }, testInfo) => {
+  }) => {
     await page.goto('?variants')
     await page.getByRole('combobox', { name: 'Variant', exact: true }).selectOption(variant)
     const actual = page.getByTestId('actual')
@@ -84,10 +84,6 @@ for (const variant of [
             .radius,
       )
       expect(Array.isArray(radius) ? radius[0] > 0 : false).toBe(variant !== 'BasicTotal')
-      await testInfo.attach(`${variant}-${state}`, {
-        body: await chart.screenshot({ animations: 'disabled' }),
-        contentType: 'image/png',
-      })
     }
   })
 }
@@ -134,7 +130,7 @@ test('multi-column paging leaves the first eight categories fixed and recovers a
   const legends = () => page.evaluate(() => (window as any).variantState()[1].legend)
   await expect.poll(async () => (await legends()).map((l: any) => l.data.length)).toEqual([4, 4, 7])
   await expect(actual.locator('svg text').filter({ hasText: /xx|\d+\/\d+/ })).toHaveCount(0)
-  await actual.locator('svg image').last().click()
+  await clickSvg(actual.locator('svg'), actual.locator('svg image').last())
   await expect.poll(async () => (await legends())[2].scrollDataIndex).toBeGreaterThan(0)
   expect((await legends()).slice(0, 2).flatMap((l: any) => l.data.map((d: any) => d.name))).toEqual(
     Array.from({ length: 8 }, (_, i) => `图例${i + 1}`),

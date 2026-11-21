@@ -8,7 +8,7 @@ test('exports the version declared by the installed package', async ({ page }) =
   expect(await page.evaluate(() => window.chartPackageVersion)).toBe(packageVersion)
 })
 
-test('renders charts and preserves dynamic behavior', async ({ page }, testInfo) => {
+test('renders charts and preserves dynamic behavior', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   page.on('console', message => {
@@ -23,9 +23,9 @@ test('renders charts and preserves dynamic behavior', async ({ page }, testInfo)
   await expect(page.locator('.chart svg')).toHaveCount(3)
   await expect
     .poll(async () =>
-      (await state()).every(chart => chart.width > 0 && chart.height === 280 && chart.svg),
+      (await state()).map(chart => chart.width > 0 && chart.height === 280 && chart.svg),
     )
-    .toBe(true)
+    .toEqual([true, true, true])
   await page.getByTestId('data').click()
   await expect
     .poll(async () => (await state()).map(chart => chart.title))
@@ -37,36 +37,42 @@ test('renders charts and preserves dynamic behavior', async ({ page }, testInfo)
   await page.getByTestId('attrs').click()
   await expect
     .poll(async () =>
-      (await state()).every(chart =>
+      (await state()).map(chart =>
         chart.graphic?.[0]?.elements?.some(el => el.style?.text === 'Extra marker'),
       ),
     )
-    .toBe(true)
+    .toEqual([true, true, true])
   await page.getByTestId('attrs').click()
-  await expect.poll(async () => (await state()).every(chart => !chart.graphic?.length)).toBe(true)
+  await expect
+    .poll(async () => (await state()).map(chart => !chart.graphic?.length))
+    .toEqual([true, true, true])
   await page.getByTestId('loading').click()
-  await expect.poll(async () => (await state()).every(chart => chart.loading)).toBe(true)
+  await expect
+    .poll(async () => (await state()).map(chart => chart.loading))
+    .toEqual([true, true, true])
   await page.getByTestId('loading').click()
-  await expect.poll(async () => (await state()).every(chart => !chart.loading)).toBe(true)
+  await expect
+    .poll(async () => (await state()).map(chart => !chart.loading))
+    .toEqual([true, true, true])
   const beforeTheme = await state()
   await page.getByTestId('theme').click()
   await expect
     .poll(async () =>
-      (await state()).every(
+      (await state()).map(
         (chart, i) =>
-          chart.id !== beforeTheme[i].id && chart.background !== beforeTheme[i].background,
+          typeof chart.id === 'string' &&
+          chart.type === beforeTheme[i].type &&
+          chart.id !== beforeTheme[i].id &&
+          chart.background !== beforeTheme[i].background,
       ),
     )
-    .toBe(true)
+    .toEqual([true, true, true])
   await expect
     .poll(async () =>
-      (await state()).every(chart => !chart.graphic?.length && chart.title.endsWith('1')),
+      (await state()).map(chart => !chart.graphic?.length && chart.title?.endsWith('1')),
     )
-    .toBe(true)
-  await testInfo.attach('charts-dark', {
-    body: await page.screenshot({ fullPage: true }),
-    contentType: 'image/png',
-  })
+    .toEqual([true, true, true])
+
   const initialWidth = (await state())[0].width
   await page.getByTestId('size').click()
   await expect.poll(async () => (await state())[0].width).toBeLessThan(initialWidth)
@@ -82,7 +88,11 @@ test('renders charts and preserves dynamic behavior', async ({ page }, testInfo)
     .poll(async () => (await state()).map(chart => chart.type))
     .toEqual(['bar', 'line', 'pie'])
   await expect
-    .poll(async () => (await state()).every((chart, i) => chart.id !== beforeUnmount[i]))
-    .toBe(true)
+    .poll(async () =>
+      (await state()).map(
+        (chart, i) => typeof chart.id === 'string' && chart.id !== beforeUnmount[i],
+      ),
+    )
+    .toEqual([true, true, true])
   expect(errors).toEqual([])
 })

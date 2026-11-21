@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { test, expect } from './helpers'
+import { test, expect, clickSvg } from './helpers'
 import { fixtureBaseURL } from './environment'
 
 test.use({ baseURL: fixtureBaseURL })
@@ -74,7 +74,8 @@ async function clickData(page: Page) {
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
       }),
   )
-  await page.mouse.click(point.x, point.y)
+  const currentPoint = await page.evaluate(() => window.chartTest.point())
+  await page.mouse.click(currentPoint.x, currentPoint.y)
 }
 
 for (const kind of ['bar', 'line', 'pie']) {
@@ -196,13 +197,7 @@ for (const kind of ['bar', 'line', 'pie']) {
         .locator('svg text')
         .filter({ hasText: new RegExp(`^${label}$`) })
         .last()
-      const legendBox = await legendLabel.boundingBox()
-      expect(legendBox).not.toBeNull()
-      // ECharts adds a transparent hit area over SVG legend text in WebKit.
-      await page.mouse.click(
-        legendBox!.x + legendBox!.width / 2,
-        legendBox!.y + legendBox!.height / 2,
-      )
+      await clickSvg(page.getByTestId('container').locator('svg'), legendLabel)
       await expect
         .poll(async () => (await state(page)).option.legend[0]!.selected[label])
         .toBe(false)
