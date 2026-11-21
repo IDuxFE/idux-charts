@@ -1,5 +1,11 @@
 # @idux/charts-core
 
+## 1.6.1
+
+### Patch Changes
+
+- cc8b790: Fix Vue 2 conditional default slots so they can be added after mounting, removed, and restored without stale-slot warnings or recreating the chart instance. Empty slots continue to leave the chart unobstructed.
+
 ## 1.6.0
 
 ### Minor Changes
