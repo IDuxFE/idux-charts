@@ -1,6 +1,10 @@
 # End-to-end tests
 
-The main suite runs the same coverage in Chromium, Firefox and WebKit. Keep the
+The full local suite runs every case in Chromium, Firefox and WebKit. CI randomly
+partitions the complete catalogue into three balanced sets and assigns one set
+to each browser, so each case runs once per CI run. A new workflow run changes
+the assignment; rerunning the same workflow keeps its seed for reproduction.
+A single CI run therefore does not check every case in every browser. Keep the
 reviewed macOS screenshot baselines and their existing pixel tolerances. Vue 2
 and Vue 3 playgrounds test packed packages separately; the compatibility jobs
 also retain all five Vue/ECharts combinations.
@@ -58,12 +62,28 @@ or cancellation checks with fresh-page assertions.
 
 ## CI and reports
 
-The shared browser-build job builds the root-path site and fixture assets once.
-Six macOS shards reuse those assets with `IDUX_E2E_PREBUILT=1`, while retaining
-fresh preview processes and independent ports. `IDUX_E2E_TARGET=site` skips the
-unused fixture server for deployment smoke jobs; `fixture` skips the site server
-when explicitly running fixture-only tests. The target selects servers, not tests.
-Without these variables, local commands build both assets as before.
+WebKit is queued immediately and builds its own production assets. Chromium and
+Firefox are queued after the Linux browser-build job produces their shared
+assets. This gives WebKit a head start without waiting for it to finish before
+the other browsers can run. The three browser jobs and two playground jobs can
+fit into five macOS runner slots.
+
+`scripts/e2e-ci.mjs` collects the real Playwright catalogue, hashes each complete
+case identity with the workflow run ID, and deals the shuffled cases across the
+three browsers. Counts differ by at most one. It checks Playwright's actual
+`--test-list` selection against the plan before running, preventing ambiguous
+titles from dropping or duplicating cases. Seed, complete assignments and each
+browser's selected list are retained under `test-results/ci-plan/` in the report
+artifacts. The final CI gate compares all three receipts and verifies complete,
+non-overlapping coverage and balanced counts. `IDUX_E2E_SEED` reproduces a particular assignment. This random strategy
+provides cross-browser coverage over multiple runs; use the full command for a
+complete three-browser regression in one run.
+
+`IDUX_E2E_PREBUILT=1` reuses explicitly built assets for local repeated checks.
+`IDUX_E2E_TARGET=site` skips the unused fixture server for deployment smoke jobs;
+`fixture` skips the site server when running fixture-only tests. The target
+selects servers, not tests. Without these variables, local commands build both
+assets as before.
 
 Existing retry budgets remain unchanged: two in CI for the main suite and one
 for playgrounds, with no local retries by default. Do not increase retries,
@@ -73,7 +93,7 @@ job summary; a retry success also emits a warning. HTML, JSON, traces and failur
 screenshots remain downloadable artifacts.
 
 The pnpm store cache avoids downloading unchanged packages, but the repository's
-untracked-lockfile policy still resolves version ranges on every run. Preview
+untracked-lockfile policy still resolves version ranges on every run. Chromium and Firefox
 workers install dependencies without scripts because they only serve prebuilt
 assets; builds, unit tests and package-consumer jobs retain normal install scripts
 and native dependencies.
@@ -98,7 +118,7 @@ IDUX_E2E_TARGET=fixture pnpm exec playwright test e2e/chart-layout.spec.ts e2e/p
 Full three-browser coverage and package consumers:
 
 ```sh
-pnpm test:e2e
+pnpm test:e2e:full
 pnpm test:playgrounds
 ```
 
@@ -114,3 +134,13 @@ Use the matching `SITE_BASE` and `SITE_DOMAIN` for deployment builds and preview
 do not reuse root-path build artifacts for a subpath smoke test. After any run,
 including failures or interruptions, close only the browsers and preview servers
 started by that run and verify that their child processes have exited.
+
+Reproduce one CI browser assignment (use the same seed for all three browsers):
+
+```sh
+IDUX_E2E_SEED=12345 pnpm test:e2e:ci webkit
+IDUX_E2E_SEED=12345 pnpm test:e2e:ci firefox
+IDUX_E2E_SEED=12345 pnpm test:e2e:ci chromium
+```
+
+Add `--plan-only` to inspect and verify the selection without starting browsers.

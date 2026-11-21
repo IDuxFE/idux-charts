@@ -34,18 +34,24 @@ The local pre-push hook runs repository-wide lint and forces a fresh TypeScript
 check. CI runs lint, formatting, types, and unit tests with coverage concurrently on Linux.
 Coverage reports are retained as artifacts; optional Codecov uploads and other
 community/security integrations are described in [Open source integrations](OPEN_SOURCE.md). Browser
-and screenshot tests run on Intel macOS 15 in a three-browser, two-shard matrix,
-with two workers per shard. A Linux job builds the production site and browser
-fixtures once; all six browser shards download the same static assets and start
-isolated preview servers. Preview-only jobs skip package install scripts and
-native canvas build dependencies. Both Vue playgrounds retain separate macOS
-jobs and their existing screenshot baselines. The five Vue/ECharts compatibility
-combinations build and test packed declarations and runtime behavior in separate
-Linux jobs. Domain and subpath deployment checks also run independently and
-start only the site server, without building unused fixtures.
+and screenshot tests run on Intel macOS 15. Each CI run randomly divides the
+complete case catalogue into three balanced sets and assigns one to each browser;
+every case runs once, while browser assignment changes between workflow runs.
+The workflow run ID is the reproducible seed, and the reports retain the complete
+assignment. A single CI run does not verify every case in all three browsers;
+`pnpm test:e2e:full` performs that full regression locally.
+
+WebKit is queued immediately and builds its assets independently. Chromium and
+Firefox are queued after a Linux job produces their shared production assets,
+giving WebKit a head start while preserving parallel execution. Preview-only
+jobs skip package install scripts and native canvas build dependencies. Both Vue
+playgrounds retain separate macOS jobs and their existing screenshot baselines.
+The five Vue/ECharts compatibility combinations run independently on Linux.
+Domain and subpath deployment checks start only the site server, without building
+unused fixtures.
 
 Matrix jobs use `fail-fast: false` to retain evidence from every combination;
-`CI result` requires all jobs, including the shared browser build, to succeed.
+`CI result` requires all jobs, including WebKit and the shared browser build, to succeed.
 Superseded PR and feature-branch runs are cancelled, while main/release validation
 remains non-cancelling. Reports include HTML, JSON and a job summary listing
 first-attempt failures, successful retries and the ten slowest tests. CI retains
