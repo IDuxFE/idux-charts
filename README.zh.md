@@ -3,9 +3,13 @@
 [![Release](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/release.yml)
 [![npm version](https://img.shields.io/npm/v/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
 [![npm downloads](https://img.shields.io/npm/dm/@idux/charts)](https://www.npmjs.com/package/@idux/charts)
+[![Unit test coverage](https://codecov.io/gh/IDuxFE/idux-charts/branch/main/graph/badge.svg)](https://app.codecov.io/gh/IDuxFE/idux-charts/tree/main)
 [![License](https://img.shields.io/npm/l/@idux/charts)](LICENSE)
-[![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FIDuxFE%2Fidux-charts?ref=badge_shield)
+[![CodeQL](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/IDuxFE/idux-charts/actions/workflows/codeql.yml)
+
+[![Vue compatibility](https://img.shields.io/badge/Vue-2.6%20%7C%202.7%20%7C%203-4FC08D?logo=vuedotjs&logoColor=white)](#-安装)
+[![ECharts compatibility](https://img.shields.io/badge/ECharts-5%20%7C%206-AA344D?logo=apacheecharts&logoColor=white)](#-安装)
 
 > [ECharts](https://echarts.apache.org/) 的 `Vue` 组件, 支持 `v2.x` 和 `v3.x`, 查看 [文档](https://charts.idux.site) 了解更多.
 
@@ -133,6 +137,8 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 ## 贡献者
 
 感谢所有为 iDux Charts 作出贡献的开发者！
+
+[![Contributors](https://img.shields.io/github/contributors/IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
 
 [![贡献者头像](https://contrib.rocks/image?repo=IDuxFE/idux-charts)](https://github.com/IDuxFE/idux-charts/graphs/contributors)
 
