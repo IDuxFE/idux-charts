@@ -10,4 +10,4 @@ paths:
     - ./playgrounds
 
 telemetry:
-  scope: off
+  scope: 'off'
