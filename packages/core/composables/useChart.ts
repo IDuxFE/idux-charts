@@ -26,7 +26,7 @@ import { useResizeObserver } from './useResizeObserver'
 import type { ChartProps } from '../types'
 import { CHART_THEME_TOKEN } from '../themes/token'
 import { isChartEvent, replaceChartComponent, splitChartOptions } from '../utils/chartOptions'
-import { restoreChartInteraction } from '../utils/chartInteraction'
+import { restoreChartInteraction, restoreGeoInteraction } from '../utils/chartInteraction'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -95,22 +95,27 @@ export function useChart<U extends ChartProps>(
       return
     }
 
-    const instance = init(container, mergedTheme.value, mergedInitOption.value)
-
-    instance.on('rendered', tooltipTheme.rendered)
-
     const currOptions = unref(options)
     const { restOptions, events } = processOptions(currOptions, getListeners())
-
-    instance.setOption(
-      tooltipTheme.prepare(initialOption ?? restOptions),
-      mergedSetOptionOpts.value,
-    )
-    tooltipTheme.sync(instance)
-    prevRestOptions.value = cloneDeep(restOptions) as U
-    prevSetOptionOpts = cloneDeep(mergedSetOptionOpts.value)
-
-    syncEvents(instance, events)
+    const instance = init(container, mergedTheme.value, mergedInitOption.value)
+    // Own the instance only after setup succeeds. A failed first render must not
+    // leave an unreachable instance registered on the container.
+    try {
+      instance.on('rendered', tooltipTheme.rendered)
+      instance.setOption(
+        tooltipTheme.prepare(initialOption ?? restOptions),
+        mergedSetOptionOpts.value,
+      )
+      tooltipTheme.sync(instance)
+      syncEvents(instance, events)
+      prevRestOptions.value = cloneDeep(restOptions) as U
+      prevSetOptionOpts = cloneDeep(mergedSetOptionOpts.value)
+    } catch (error) {
+      instance.dispose()
+      boundEvents = []
+      loadingOverlay.remove()
+      throw error
+    }
     chartRef.value = instance
 
     const onReady = currOptions.onReady || getListeners()?.ready
@@ -166,7 +171,10 @@ export function useChart<U extends ChartProps>(
       const setOptionOpts = mergedSetOptionOpts.value
       const updateChanged = !isEqual(setOptionOpts, prevSetOptionOpts)
       if (updateChanged || !isEqual(restOptions, prevRestOptions.value)) {
-        instance.setOption(tooltipTheme.prepare(restOptions), setOptionOpts)
+        const next = setOptionOpts?.notMerge
+          ? restoreGeoInteraction(instance, prevRestOptions.value, restOptions)
+          : restOptions
+        instance.setOption(tooltipTheme.prepare(next), setOptionOpts)
         if (updateChanged || restOptions.darkMode !== prevRestOptions.value?.darkMode) {
           tooltipTheme.sync(instance)
         } else {

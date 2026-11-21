@@ -39,12 +39,53 @@ const axes = ['xAxis', 'yAxis', 'radiusAxis', 'angleAxis', 'singleAxis'] as cons
 const axisIdentity = (option: ChartProps) =>
   axes.map(key => convertArray(option[key]).map(axis => pick(axis, ['id', 'type', 'data'])))
 
+// A viewport is reusable only while its geometry and caller-owned viewport agree.
+// Layout/style changes may resize a map without changing the user's area of interest.
+const geoViewportConfig = [
+  'map',
+  'projection',
+  'nameMap',
+  'nameProperty',
+  'boundingCoords',
+  'aspectScale',
+  'center',
+  'zoom',
+  'scaleLimit',
+] as const
+
+export function restoreGeoInteraction(
+  instance: EChartsType,
+  previous: ChartProps | undefined,
+  next: ChartProps,
+): ChartProps {
+  if (!previous?.geo || !next.geo) return next
+  const before = convertArray(previous.geo)
+  const live = convertArray((instance.getOption() as ChartProps).geo)
+  const geo = convertArray(next.geo).map((item, index) => {
+    const previousItem = findComponent(before, item, index)
+    const liveItem = findComponent(live, item, index)
+    if (
+      !previousItem ||
+      !liveItem ||
+      !isEqual(pick(item, geoViewportConfig), pick(previousItem, geoViewportConfig))
+    )
+      return item
+    return {
+      ...item,
+      ...(liveItem.center != null && { center: [...liveItem.center] }),
+      ...(liveItem.zoom != null && { zoom: liveItem.zoom }),
+    }
+  })
+  return { ...next, geo: Array.isArray(next.geo) ? geo : geo[0] }
+}
+
 /** Carry user interaction across a theme rebuild while honoring new caller settings. */
 export function restoreChartInteraction(
   instance: EChartsType,
   previous: ChartProps | undefined,
   next: ChartProps,
 ): ChartProps {
+  next = restoreGeoInteraction(instance, previous, next)
   if (!previous || (!next.dataZoom && !next.legend)) return next
   const current = instance.getOption() as ChartProps
   const zoomAxesMatch = next.dataZoom && isEqual(axisIdentity(previous), axisIdentity(next))

@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick, reactive, shallowRef } from 'vue'
+import { createApp, defineComponent, h, nextTick, reactive, shallowRef } from 'vue'
 import type { EChartsType } from 'echarts/core'
 
 vi.mock('echarts/core', () => ({ init: vi.fn(), use: vi.fn() }))
@@ -60,6 +60,70 @@ beforeEach(() => {
     })
 })
 afterEach(() => wrappers.splice(0).forEach(wrapper => wrapper.unmount()))
+
+it.each(['setOption', 'getOption', 'on'] as const)(
+  'disposes a partially initialized instance when %s fails and reports the original error',
+  operation => {
+    const failed = createInstance()
+    const error = new Error(`Failed ${operation}`)
+    failed[operation].mockImplementationOnce(() => {
+      throw error
+    })
+    vi.mocked(init).mockReturnValueOnce(failed as unknown as EChartsType)
+    const onError = vi.fn()
+    const ready = vi.fn()
+    let chart!: ReturnType<typeof useChart>
+    const app = createApp({
+      setup() {
+        chart = useChart({ loading: true, onReady: ready })
+        return () => h('div', { ref: chart.containerRef })
+      },
+    })
+    app.config.errorHandler = onError
+    try {
+      app.mount(document.createElement('div'))
+      expect(onError.mock.calls[0][0]).toBe(error)
+      expect(chart.chartRef.value).toBeUndefined()
+      expect(failed.dispose).toHaveBeenCalledOnce()
+      expect(ready).not.toHaveBeenCalled()
+    } finally {
+      app.unmount()
+    }
+    expect(failed.dispose).toHaveBeenCalledOnce()
+  },
+)
+
+it('cleans up a failed theme rebuild and can be mounted again without stale event handlers', async () => {
+  const error = new Error('Invalid rebuilt option')
+  const options = reactive({ theme: 'seer', onClick: vi.fn() })
+  const onError = vi.fn()
+  const app = createApp({
+    setup() {
+      const chart = useChart(options)
+      return () => h('div', { ref: chart.containerRef })
+    },
+  })
+  app.config.errorHandler = onError
+  try {
+    app.mount(document.createElement('div'))
+    const failed = createInstance()
+    failed.setOption.mockImplementationOnce(() => {
+      throw error
+    })
+    vi.mocked(init).mockReturnValueOnce(failed as unknown as EChartsType)
+    options.theme = 'dark'
+    await nextTick()
+    expect(onError.mock.calls[0][0]).toBe(error)
+    expect(instances[0].dispose).toHaveBeenCalledOnce()
+    expect(failed.dispose).toHaveBeenCalledOnce()
+  } finally {
+    app.unmount()
+  }
+  const { wrapper } = setup(options)
+  instances.at(-1)!.emit('click')
+  expect(options.onClick).toHaveBeenCalledOnce()
+  wrapper.unmount()
+})
 
 describe('useChart lifecycle', () => {
   it('inherits reactive application themes while preserving explicit overrides', async () => {

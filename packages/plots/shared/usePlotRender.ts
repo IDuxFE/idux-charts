@@ -12,6 +12,7 @@ import {
 } from '@idux/charts-core'
 import type { ChartInstanceMethods, ChartOption, ChartProps } from '@idux/charts-core'
 import type { EChartsType } from 'echarts/core'
+import { cloneDeep, isEqual } from 'lodash-es'
 import { createPlotUpdater } from './plotOptions'
 import {
   createPlotInteraction,
@@ -50,6 +51,8 @@ export function usePlotRender(
   )
   const update = createPlotUpdater()
   const interaction = createPlotInteraction()
+  let previousInput: ChartProps | undefined
+  let generatedOption: ChartOption
   const onReady = (chart: EChartsType) => {
     interaction.setChart(chart)
     const ready = attrs.value.onReady ?? context.listeners?.ready
@@ -57,23 +60,28 @@ export function usePlotRender(
   }
   const option = computed(() => {
     const input = { ...attrs.value, ...filterEmptyProps(props()), plotTheme: theme.value }
-    const generated = createOption(input)
-    const { legend } = interaction.read({
-      legend: generated.legend && {
-        option: legendSelectionConfig(input.legend),
-        names: convertArray(generated.series).map(series => ({
-          name: series.name,
-          items: Array.isArray(series.data)
-            ? series.data.map(item =>
-                item && typeof item === 'object' && 'name' in item ? item.name : undefined,
-              )
-            : undefined,
-        })),
-      },
-    })
-    restoreLegendSelection(generated, legend)
-    const { controls } = splitChartOptions(input)
-    return { ...update({ ...generated, ...controls })!, onReady }
+    const { option: plotInput, controls } = splitChartOptions(input)
+    // Controls must not recreate formatter/renderItem closures or restart a plot.
+    // Keep a snapshot to detect nested mutations, including Vue 2 attrs updates.
+    if (!previousInput || !isEqual(plotInput, previousInput)) {
+      generatedOption = createOption(plotInput)
+      previousInput = cloneDeep(plotInput)
+      const { legend } = interaction.read({
+        legend: generatedOption.legend && {
+          option: legendSelectionConfig(input.legend),
+          names: convertArray(generatedOption.series).map(series => ({
+            name: series.name,
+            items: Array.isArray(series.data)
+              ? series.data.map(item =>
+                  item && typeof item === 'object' && 'name' in item ? item.name : undefined,
+                )
+              : undefined,
+          })),
+        },
+      })
+      restoreLegendSelection(generatedOption, legend)
+    }
+    return { ...update({ ...cloneDeep(generatedOption), ...controls })!, onReady }
   })
   return () => renderPlot(option.value, context, undefined, loadingIcon)
 }

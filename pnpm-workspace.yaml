@@ -6,3 +6,8 @@ allowBuilds:
   esbuild: true
   vue-demi: true
 strictPeerDependencies: false
+packageExtensions:
+  # Published declarations import type-fest, but 0.5.0 lists it only as a dev dependency.
+  '@idux/archive-types@0.5.0':
+    dependencies:
+      type-fest: ^3.2.0
