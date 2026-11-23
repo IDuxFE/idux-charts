@@ -1,3 +1,9 @@
+/**
+ * Pure catalogue/assignment helpers shared by the CI runner and receipt verifier.
+ * Identify cases by file + full title path, excluding browser-specific project names.
+ * Seeded SHA-256 ranking rotates browser assignments without non-reproducible randomness.
+ * Round-robin gives counts differing by at most one; it does not balance execution time.
+ */
 import { createHash } from 'node:crypto'
 
 export const browsers = ['webkit', 'firefox', 'chromium']
@@ -26,6 +32,7 @@ export function caseId(test) {
 
 export function partitionCases(cases, seed) {
   if (!seed) throw new Error('Expected a nonempty partition seed')
+  // Hash each identity independently so collection order cannot change a run's plan.
   const ranked = cases.map(test => ({
     test,
     rank: createHash('sha256')
@@ -49,6 +56,7 @@ export function testList(cases, browser) {
 }
 
 export function verifyPlans(plans) {
+  // Every runner collected independently; reject drift before counting assignments.
   const reference = plans.webkit
   if (
     !reference ||

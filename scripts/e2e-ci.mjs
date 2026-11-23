@@ -1,3 +1,10 @@
+/**
+ * Run one reproducible browser partition of the main E2E catalogue.
+ * Entry: pnpm test:e2e:ci <webkit|firefox|chromium> [--plan-only].
+ * IDUX_E2E_SEED overrides GITHUB_RUN_ID; all browser jobs must use the same seed.
+ * Retains assignment receipts under test-results/ci-plan, including on test failure.
+ * Filters are forbidden because final CI requires full, non-overlapping coverage.
+ */
 import { execFileSync, spawnSync } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import {
@@ -20,6 +27,7 @@ const [browser, ...args] = process.argv.slice(2)
 if (!browsers.includes(browser)) throw new Error('Expected a browser: webkit, firefox or chromium')
 const root = fileURLToPath(new URL('..', import.meta.url))
 const cli = createRequire(import.meta.url).resolve('@playwright/test/cli')
+// Run attempts retain GITHUB_RUN_ID, reproducing the assignment during a rerun.
 const seed =
   process.env.IDUX_E2E_SEED || process.env.GITHUB_RUN_ID || randomBytes(8).toString('hex')
 const planOnly = args.includes('--plan-only')
@@ -97,6 +105,7 @@ try {
     process.exitCode = result.status ?? 1
   }
 } finally {
+  // Playwright clears its results directory; restore receipts after execution ends.
   try {
     mkdirSync(output, { recursive: true })
     for (const [source, name] of [

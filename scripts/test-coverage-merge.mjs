@@ -1,3 +1,9 @@
+/**
+ * Regression checks for cross-platform, source-mapped coverage aggregation.
+ * Entry: pnpm test:coverage:merge (Node test runner; also part of check:ci).
+ * Synthetic Istanbul counters exercise denominator preservation, both-Vue requirements,
+ * foreign-source rejection and JSON/source-map location alignment without a browser.
+ */
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { mergeCoverage, normalizeCoverage } from './merge-coverage.mjs'

@@ -1,4 +1,9 @@
 // @vitest-environment node
+/**
+ * Exercise server ownership cleanup with real subprocesses and listening sockets.
+ * Entry: Vitest / check:ci; POSIX-only group assertions are skipped on Windows.
+ * Every spawned group is tracked for cleanup; an unrelated listener must survive owner loss.
+ */
 import { spawn, type ChildProcess } from 'node:child_process'
 import { once } from 'node:events'
 import { createServer } from 'node:net'

@@ -1,5 +1,7 @@
 # CI and releases
 
+English | [简体中文](RELEASING.zh.md)
+
 Contributors push feature branches to their forks, then open pull requests against
 `IDuxFE/idux-charts:main`. CI runs on feature-branch pushes and pull requests. Main
 branch pushes run the same checks through the Release workflow. Forks never run
@@ -41,14 +43,22 @@ The workflow run ID is the reproducible seed, and the reports retain the complet
 assignment. A single CI run does not verify every case in all three browsers;
 `pnpm test:e2e:full` performs that full regression locally.
 
-WebKit is queued immediately and builds its assets independently. Chromium and
-Firefox are queued after a Linux job produces their shared production assets,
-giving WebKit a head start while preserving parallel execution. Preview-only
-jobs skip package install scripts and native canvas build dependencies. Both Vue
-playgrounds retain separate macOS jobs and their existing screenshot baselines.
-The five Vue/ECharts compatibility combinations run independently on Linux.
-Domain and subpath deployment checks start only the site server, without building
-unused fixtures.
+A Linux job builds the shared site and fixture assets once. WebKit, Firefox and
+Chromium consume those artifacts through the same macOS matrix, with preparation,
+artifact download, browser installation and test execution shown separately.
+Matrices have no explicit parallelism cap; actual concurrency depends on available
+GitHub runner capacity. Both Vue playgrounds retain separate macOS jobs and their
+existing screenshot baselines. The five Vue/ECharts compatibility combinations
+run independently on Linux. Domain and subpath deployment checks start only the
+site server, without building unused fixtures.
+
+Root installs skip scripts/native canvas preparation for build, browser,
+consumer, planning, coverage-merge and analysis-only tasks. Unit validation keeps
+canvas support; consumer installations run their own scripts to initialize
+vue-demi correctly. Release-PR versioning keeps normal scripts because its version
+command reinstalls the workspace. `scripts/ci-timing.mjs` reports preparation
+phases in logs and job summaries; Playground builds, packing and consumer installs
+are measured separately from Chromium installation and tests.
 
 Matrix jobs use `fail-fast: false` to retain evidence from every combination;
 `CI result` requires all jobs, including WebKit and the shared browser build, to succeed.
@@ -131,7 +141,7 @@ These settings belong to **IDuxFE/idux-charts**, not the contributor's fork.
    **RELEASE_ENABLED** to **true**. Leave it unset until publishing is ready.
 
 No `NPM_TOKEN` or `NODE_AUTH_TOKEN` secret is needed. Only the publish job receives
-`id-token: write`. All jobs install pnpm 11.8.0 and Node.js 22.14.0 explicitly.
+`id-token: write`. All jobs using the shared setup install pnpm 11.8.0 and Node.js 22.14.0 explicitly.
 
 ## One-time npm setup
 
@@ -305,7 +315,13 @@ does not govern this documentation workflow. To roll back, restore the static
 files from a known-good `gh-pages` commit in a new commit and push it; do not
 force-push away the deployment history.
 
-Release planning runs alongside validation. Updating the release PR and publishing
-still require both planning and the complete CI validation to succeed. Library
-builds remain ordered by package dependency, and packaging/installing consumers
-always precedes their tests.
+Release planning runs alongside validation. Each main run validates its own SHA
+independently, so a slow earlier run does not serialize later validation. Only
+release-PR updates and npm publication share the release write lock, with no
+cancellation of the active write job. `queue: max` retains waiting writers so an
+older validation finishing late cannot replace a newer pending release. Both
+require planning and full validation to
+succeed. Checkouts stay pinned to the validated SHA; immediately before writing,
+each job checks main and skips a superseded SHA. A newer main run owns the newer
+release work. Library builds remain ordered by package dependency, and packaging
+and installing consumers always precede their tests.

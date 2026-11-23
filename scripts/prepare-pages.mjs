@@ -1,3 +1,9 @@
+/**
+ * Add GitHub Pages metadata to a freshly built documentation site.
+ * Entry: the site build runs this after Archive writes packages/site/dist/index.html.
+ * SITE_DOMAIN optionally writes CNAME; an empty value removes stale custom-domain state.
+ * 404.html must match index.html for SPA routes; .nojekyll preserves static assets.
+ */
 import { copyFileSync, rmSync, writeFileSync } from 'node:fs'
 
 const output = new URL('../packages/site/dist/', import.meta.url)

@@ -1,3 +1,8 @@
+/**
+ * Guard deployment-base normalization and reject external or ambiguous site paths.
+ * Entry: Vitest / check:ci; env/module state resets between domain/subpath cases.
+ * These inputs are consumed by Vite previews, CI smoke tests and Pages deployment.
+ */
 import { afterEach, expect, test, vi } from 'vitest'
 
 afterEach(() => {

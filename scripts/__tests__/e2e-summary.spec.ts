@@ -1,4 +1,9 @@
 // @vitest-environment node
+/**
+ * Exercise the report CLI against temporary JSON files and CI summary destinations.
+ * Entry: Vitest / check:ci; no browser needed. Cover missing reports and successful retries
+ * so reporting remains diagnostic and cannot silently conceal flaky execution.
+ */
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'

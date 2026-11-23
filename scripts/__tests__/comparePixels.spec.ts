@@ -1,3 +1,8 @@
+/**
+ * Guard visual comparison sensitivity using generated PNGs, without browser startup.
+ * Entry: Vitest / check:ci. Equal images must pass; displaced drawings must be detected.
+ * Keep fixtures synthetic so changing site screenshot baselines cannot weaken this check.
+ */
 import { expect, it } from 'vitest'
 import { PNG } from 'pngjs'
 import { comparePixels } from '../../e2e/comparePixels'

@@ -1,3 +1,11 @@
+/**
+ * Validate published tarballs as real, isolated Vue/ECharts consumer applications.
+ * Entry: pnpm test:declarations [--runtime], after pnpm build:lib.
+ * IDUX_DECLARATION_TARGET selects one supported Vue/ECharts pair; unset checks all.
+ * Checks public declarations and inferred APIs; --runtime adds Chromium lifecycle,
+ * composable-only registration and bundle/tree-shaking checks. Fixture paths are logged
+ * and retained in the OS temp directory for diagnosis; runtime browsers close in finally.
+ */
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -78,6 +86,8 @@ for (const name of ['core', 'plots', 'charts']) {
   run(['pack', '--out', tarball], join(root, 'packages', name))
   tarballs[name] = `file:${tarball}`
 }
+// Exercise packed components through render, reactive updates, theme and remount.
+// The generated app deliberately imports public entries rather than workspace aliases.
 async function smokeRuntime(app) {
   writeFileSync(
     join(app, 'index.html'),
@@ -273,6 +283,8 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
   }
 }
 
+// Compare production bundles and inspect module identities, not a brittle byte budget.
+// A smaller line entry alone would not prove unrelated series were excluded.
 async function checkLineBundle(app) {
   const entry = join(app, 'line-entry.js')
   const sizes = {}
@@ -316,6 +328,7 @@ createApp({render: () => h('div', [${imports}].map(component => h(component)))})
   assert.ok(sizes.line < sizes.all, 'The line subpath must produce a smaller JS bundle')
 }
 
+// A composable-only consumer catches registration accidentally retained by components.
 async function smokeHooks(app) {
   writeFileSync(
     join(app, 'hook-only.html'),
@@ -422,6 +435,8 @@ const invalidLine: LineChartPublicProps = { smooth: 'yes' };
 // @ts-expect-error named public types must reject unknown fields
 const unknownField: BarChartPublicProps = { unknownOption: true };
 `
+// Supported consumers are pinned independently of the workspace development Vue.
+// Keep this list synchronized with the compatibility matrix in ci.yml.
 const targets = [
   ...['5.4.3', '6.1.0'].flatMap(echarts => [
     ['2.7.16', echarts, false],

@@ -1,9 +1,16 @@
+/**
+ * Fail the final CI gate if downloaded browser receipts disagree or lose coverage.
+ * Entry: node scripts/e2e-verify-plans.mjs <downloaded-artifact-directory>.
+ * Requires exactly one receipt per browser, one shared seed/catalogue and no duplicates.
+ * Keep browser-plans artifact names aligned with .github/actions/browser-reports.
+ */
 import { readFileSync, readdirSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { browsers, verifyPlans } from './e2e-partition.mjs'
 
 const directory = process.argv[2]
 if (!directory) throw new Error('Expected the downloaded browser plan directory')
+// download-artifact extracts each matching artifact into its own subdirectory.
 const files = readdirSync(directory, { recursive: true })
 const plans = Object.fromEntries(
   browsers.map(browser => {
