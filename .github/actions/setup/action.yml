@@ -1,3 +1,9 @@
+# Common Node/pnpm bootstrap with a cached package store and explicit script policy.
+# install-scripts=true provisions canvas build tools for jsdom-based unit validation.
+# Browser/build/analysis-only callers opt out; Vue consumer installs still run their
+# own scripts to select vue-demi correctly. Do not globally disable consumer scripts.
+# ci-timing logs native preparation and pnpm installation separately in job summaries.
+
 name: Setup workspace
 description: Install the pinned pnpm version and workspace dependencies
 inputs:
@@ -17,6 +23,8 @@ runs:
       id: pnpm-store
       shell: bash
       run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+    # Cache downloaded packages, not node_modules or installed OS/Homebrew libraries.
+    # This deliberately keeps the repository's no-lockfile policy; resolution still runs.
     - uses: actions/cache@v5
       with:
         path: ${{ steps.pnpm-store.outputs.path }}
@@ -28,22 +36,24 @@ runs:
       if: runner.os == 'Linux' && inputs.install-scripts == 'true'
       shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+        node scripts/ci-timing.mjs "Refresh Linux package index" sudo apt-get update
+        node scripts/ci-timing.mjs "Install Linux canvas build dependencies" sudo apt-get install -y build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
     - name: Install canvas build dependencies (macOS)
       if: runner.os == 'macOS' && inputs.install-scripts == 'true'
       shell: bash
       env:
         HOMEBREW_NO_AUTO_UPDATE: '1'
         HOMEBREW_NO_INSTALL_CLEANUP: '1'
-      run: brew install pkg-config cairo pango libpng jpeg giflib librsvg pixman python-setuptools
+      run: node scripts/ci-timing.mjs "Install macOS canvas build dependencies" brew install pkg-config cairo pango libpng jpeg giflib librsvg pixman python-setuptools
+    # --ignore-scripts also disables the root Husky hook, unnecessary in read-only CI.
+    # Build/browser tasks rely on platform packages; validate them after changing this policy.
     - name: Install workspace dependencies
       shell: bash
       env:
         INSTALL_SCRIPTS: ${{ inputs.install-scripts }}
       run: |
         if [ "$INSTALL_SCRIPTS" = 'true' ]; then
-          pnpm install --no-lockfile --no-frozen-lockfile
+          node scripts/ci-timing.mjs "Install workspace dependencies (scripts enabled)" pnpm install --no-lockfile --no-frozen-lockfile
         else
-          pnpm install --no-lockfile --no-frozen-lockfile --ignore-scripts
+          node scripts/ci-timing.mjs "Install workspace dependencies (scripts disabled)" pnpm install --no-lockfile --no-frozen-lockfile --ignore-scripts
         fi

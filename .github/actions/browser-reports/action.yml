@@ -1,29 +1,17 @@
-name: Run browser partition
-description: Run a reproducible random third of the main E2E suite
+# Shared diagnostics for each browser partition, called even after test failure.
+# Keep report artifacts distinct from small partition receipts used by final CI result.
+# Report names include attempt IDs; receipts overwrite within a run for rerun consistency.
+# A receipt is mandatory: missing assignments must fail the final coverage verification.
+
+name: Report browser partition
+description: Summarize tests and retain reports and complete partition receipts
 inputs:
   browser:
     description: Playwright browser project
     required: true
-  prebuilt:
-    description: Download shared assets instead of building in the test job
-    default: 'true'
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/setup
-      with:
-        install-scripts: ${{ inputs.prebuilt == 'true' && 'false' || 'true' }}
-    - uses: actions/download-artifact@v8
-      if: inputs.prebuilt == 'true'
-      with:
-        name: browser-build
-        path: .
-    - shell: bash
-      run: pnpm exec playwright install --with-deps ${{ inputs.browser }}
-    - shell: bash
-      env:
-        IDUX_E2E_PREBUILT: ${{ inputs.prebuilt == 'true' && '1' || '0' }}
-      run: pnpm test:e2e:ci ${{ inputs.browser }}
     - name: Summarize browser tests
       if: ${{ !cancelled() }}
       shell: bash
