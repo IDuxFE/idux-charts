@@ -75,8 +75,8 @@ build fails the test instead of emitting an empty report.
 
 CI keeps unit and combined reports as separate artifacts. A merge job downloads
 the unit and both playground results, normalizes source paths across runners,
-and rejects missing Vue versions or a changed coverage denominator. The existing
-Codecov upload continues to use the unit report. A failed test run does not
+and rejects missing Vue versions or a changed coverage denominator. The
+Codecov upload uses the combined LCOV report. A failed test run does not
 produce a successful combined-coverage check.
 
 完整命令保留 `coverage/index.html` 单测报告，并生成
@@ -84,7 +84,7 @@ produce a successful combined-coverage check.
 覆盖率构建使用 `CHARTS_COVERAGE=1`，正常构建不插入计数器。浏览器采集统计打包后
 实际执行的库源码，经 source map 回溯后合并，不将示例和第三方依赖加入分母。
 CI 分别保留两份报告；缺少任一 Vue 版本数据或合并后分母变化都会报错。
-现有 Codecov 上传继续采用单测报告。
+Codecov 上传使用综合覆盖率的 LCOV 报告。
 
 To activate Codecov:
 

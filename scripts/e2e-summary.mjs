@@ -1,3 +1,9 @@
+/**
+ * Summarize a Playwright JSON report without hiding the original test outcome.
+ * Entry: node scripts/e2e-summary.mjs <results.json>, after a browser test step.
+ * Prints counts, first-attempt failures, retries and slowest cases; appends a CI summary.
+ * A missing report is diagnostic, not proof of success; the test step owns exit status.
+ */
 import { appendFileSync, existsSync, readFileSync } from 'node:fs'
 
 const reportPath = process.argv[2]
@@ -30,6 +36,7 @@ if (!existsSync(reportPath)) {
       `::warning title=Flaky browser tests::${stats.flaky} tests passed only after retry. See the job summary and HTML report.`,
     )
   }
+  // Final status can be passed after a failed attempt; show both views for diagnosis.
   const retried = tests.filter(test => test.attempts.length > 1)
   const firstFailures = tests.filter(test =>
     ['failed', 'timedOut', 'interrupted'].includes(test.attempts[0]?.status),
@@ -70,6 +77,7 @@ if (!existsSync(reportPath)) {
     '| Project | Test | Duration |',
     '| --- | --- | ---: |',
   )
+  // Sum attempts so retry-heavy cases cannot disappear behind a fast final pass.
   for (const test of tests
     .map(test => ({
       ...test,

@@ -1,3 +1,8 @@
+# Scan JavaScript/TypeScript on main pushes, PRs, weekly and on manual request.
+# Source analysis uses build-mode none: no workspace install or library build is required.
+# Run only upstream and scope security-events write permission to the analysis job.
+# Retain main + scheduled scans so security findings refresh beyond PR validation.
+
 name: CodeQL
 
 on:

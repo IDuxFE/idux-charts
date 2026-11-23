@@ -1,3 +1,9 @@
+/**
+ * Collect local unit + Vue 2/3 consumer coverage from one clean generation.
+ * Entry: pnpm test:coverage:all; requires Chromium and installs fresh consumer tarballs.
+ * Order matters: Vitest clears coverage/, then both instrumented Playgrounds run.
+ * Only merge after both consumers pass; output is coverage/combined/.
+ */
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
@@ -20,6 +26,7 @@ function run(args, coverage = false) {
 await run(['test:coverage:merge'])
 await run(['test:coverage'])
 await run(['playgrounds:prepare'], true)
+// Await both consumers even after one fails; do not merge half-finished snapshots.
 const results = await Promise.allSettled(
   ['vue2', 'vue3'].map(version => run(['--dir', `playgrounds/${version}`, 'test:e2e'], true)),
 )

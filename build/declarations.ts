@@ -1,3 +1,10 @@
+/**
+ * Normalize Vite-generated Vue 3 declarations into the shared Vue 2.7/3 surface.
+ * chartDeclarations hooks into vite-plugin-dts before each declaration is written;
+ * test-declarations.mjs imports the same normalizer for inferred-component fixtures.
+ * This depends on the TypeScript 6 AST API and Vue generic parameter positions.
+ * Unsupported slot shapes fail the build rather than silently losing public types.
+ */
 import ts from 'typescript'
 import type { PluginOptions } from 'vite-plugin-dts'
 
@@ -12,6 +19,8 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
     true,
     ts.ScriptKind.TS,
   )
+  // Resolve local aliases before matching Vue types, e.g. DefineComponent as Component.
+  // Matching bare names alone could rewrite unrelated user-defined types.
   const vueNames = new Map<string, string>()
   for (const statement of source.statements) {
     if (
@@ -27,6 +36,7 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
       }
     }
   }
+  // Declarations may use named imports or inline import('vue').SomeType references.
   const nameOf = (node: ts.Node): string | undefined => {
     if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName)) {
       return vueNames.get(node.typeName.text)
@@ -42,6 +52,8 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
       return node.qualifier.text
     return undefined
   }
+  // Track the original inner node: its slots are preserved on ChartComponent first,
+  // before the visitor trims the Vue-version-specific DefineComponent parameters.
   const handledSlots = new Set<ts.Node>()
   const transformed = ts.transform(source, [
     context => {
@@ -76,6 +88,8 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
               (ts.isImportTypeNode(component) || ts.isTypeReferenceNode(component)) &&
               nameOf(component) === 'DefineComponent'
             ) {
+              // Vue 3's slot generic is parameter 13. Preserve its payload in our
+              // wrapper's third argument, unless the wrapper already provides one.
               const slots = component.typeArguments?.[12]
               if (slots && !(ts.isTypeLiteralNode(slots) && slots.members.length === 0)) {
                 if (
@@ -115,12 +129,14 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
               args[1] = factory.createTypeLiteralNode([])
             }
           } else if (vueName === 'VNode' && args.length) {
+            // These extra generics are Vue 3 details, absent from Vue 2 declarations.
             args = []
           } else if ((vueName === 'Ref' || vueName === 'ShallowRef') && args.length > 1) {
             args = args.slice(0, 1)
           }
           node = updateArgs(node, args)
         }
+        // Consumers must resolve Vue types through their own vue-demi installation.
         if (
           ts.isImportTypeNode(node) &&
           ts.isLiteralTypeNode(node.argument) &&
@@ -198,6 +214,7 @@ export function normalizeChartDeclarations(content: string, filePath: string): s
   }
 }
 
+/** Apply identical normalization to all files emitted by each library's dts plugin. */
 export function chartDeclarations(tsconfigPath: string): PluginOptions {
   return {
     tsconfigPath,

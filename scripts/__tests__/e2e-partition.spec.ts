@@ -1,4 +1,9 @@
 // @vitest-environment node
+/**
+ * Guard seeded browser distribution and complete, non-overlapping receipt verification.
+ * Entry: Vitest / check:ci; uses synthetic cases, not the changing live E2E catalogue.
+ * Protect reproducibility, browser-independent case identities and bounded count skew.
+ */
 import { expect, test } from 'vitest'
 import {
   browsers,

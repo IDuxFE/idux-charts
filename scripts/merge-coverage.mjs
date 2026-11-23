@@ -1,3 +1,10 @@
+/**
+ * Merge unit and instrumented Vue 2/3 consumer coverage onto original source files.
+ * Entry: pnpm coverage:merge; also exports helpers for test-coverage-merge.mjs.
+ * Reads coverage-final.json and JSON files under coverage/playgrounds; writes coverage/combined/.
+ * Normalize cross-runner paths and source maps without increasing the unit denominator.
+ * Both Vue consumer results are mandatory; missing/foreign sources are errors.
+ */
 import { readFileSync, readdirSync, rmSync } from 'node:fs'
 import { resolve, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'

@@ -1,5 +1,7 @@
 # End-to-end tests
 
+English | [简体中文](README.zh.md)
+
 The full local suite runs every case in Chromium, Firefox and WebKit. CI randomly
 partitions the complete catalogue into three balanced sets and assigns one set
 to each browser, so each case runs once per CI run. A new workflow run changes
@@ -62,11 +64,13 @@ or cancellation checks with fresh-page assertions.
 
 ## CI and reports
 
-WebKit is queued immediately and builds its own production assets. Chromium and
-Firefox are queued after the Linux browser-build job produces their shared
-assets. This gives WebKit a head start without waiting for it to finish before
-the other browsers can run. The three browser jobs and two playground jobs can
-fit into five macOS runner slots.
+A Linux browser-build job builds the site and fixture once. WebKit, Firefox and
+Chromium then consume those shared production assets through the same macOS
+matrix. Preparation, artifact download, browser installation and test execution
+are separate steps so their durations can be compared. No `max-parallel` limit
+is set; GitHub runner capacity determines when jobs actually start. The three
+browser jobs and two playground jobs need five macOS slots to run concurrently.
+Other workflow runs can compete for that capacity.
 
 `scripts/e2e-ci.mjs` collects the real Playwright catalogue, hashes each complete
 case identity with the workflow run ID, and deals the shuffled cases across the
@@ -93,10 +97,18 @@ job summary; a retry success also emits a warning. HTML, JSON, traces and failur
 screenshots remain downloadable artifacts.
 
 The pnpm store cache avoids downloading unchanged packages, but the repository's
-untracked-lockfile policy still resolves version ranges on every run. Chromium and Firefox
-workers install dependencies without scripts because they only serve prebuilt
-assets; builds, unit tests and package-consumer jobs retain normal install scripts
-and native dependencies.
+untracked-lockfile policy still resolves version ranges on every run. Root
+workspace installs skip scripts for browser, build, consumer, release-planning,
+coverage-merge and analysis-only tasks. Unit validation retains canvas build
+dependencies. Consumer installs still run their own scripts so vue-demi selects
+the correct Vue environment. Release-PR versioning also retains normal scripts
+because its version command reinstalls workspace dependencies.
+
+`scripts/ci-timing.mjs` records native preparation and workspace installation in
+logs and the Actions job summary, including failed commands. Playground
+preparation separately times library builds, packing and each consumer install;
+the Playground Chromium installation is timed as well. These measurements help
+distinguish environment costs from actual tests without changing retry budgets.
 
 ## Validation commands
 

@@ -1,3 +1,9 @@
+/**
+ * Keep a Playwright web-server process group tied to the owning Playwright PID.
+ * Entry: spawned via guardedServer in playwright.config.ts: <owner-pid> <command>.
+ * POSIX requires exec + a dedicated group; owner loss terminates only that group.
+ * Never replace ownership tracking with killing by port/name: unrelated servers may exist.
+ */
 import { spawn } from 'node:child_process'
 
 const [ownerArgument, command] = process.argv.slice(2)

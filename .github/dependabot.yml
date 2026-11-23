@@ -1,3 +1,8 @@
+# Group routine dependency updates to reduce PR/CI churn while keeping alerts enabled.
+# Root npm dependencies and Actions update weekly; consumer fixtures stay deliberately pinned.
+# Playwright copies and visual baselines must be upgraded together under manual validation.
+# Dependabot branch pushes are excluded by ci.yml because their PRs already run validation.
+
 version: 2
 
 updates:

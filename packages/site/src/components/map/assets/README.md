@@ -1,5 +1,7 @@
 # Demo map data
 
+English | [简体中文](README.zh.md)
+
 These GeoJSON files are local demo assets, excluded from the published chart library. Each Vue demo imports and registers its maps; no runtime download is required.
 
 ## World map

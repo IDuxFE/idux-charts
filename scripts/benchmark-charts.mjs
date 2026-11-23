@@ -1,3 +1,9 @@
+/**
+ * Measure SVG chart create/update workloads against a fresh production fixture.
+ * Entry: pnpm benchmark:charts; requires the Playwright Chromium binary.
+ * Prints p50/p95 timings for 1k/10k points; these are diagnostics, not CI thresholds.
+ * Always closes the owned browser/server and deletes its temporary build.
+ */
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -26,6 +32,7 @@ try {
   await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/benchmark.html`)
   await page.waitForFunction(() => typeof window.runChartBenchmark === 'function')
 
+  // Keep workloads/viewport fixed when comparing revisions; hardware still affects timings.
   const results = []
   for (const points of [1_000, 10_000]) {
     for (const workload of ['line', 'stacked-area-with-gaps']) {

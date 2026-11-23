@@ -1,5 +1,7 @@
 # Chart performance baseline
 
+English | [简体中文](PERFORMANCE.zh.md)
+
 Run `pnpm benchmark:charts` after installing the Chromium browser with `pnpm exec playwright install chromium`.
 
 The benchmark builds a production fixture and renders a 960 × 480 px chart in headless Chromium with the SVG renderer and animation disabled. Both workloads use three series and initially show the last 25% of the category axis. The striped stacked area includes a series with isolated and consecutive gaps. Each run mounts the chart, replaces the series values, and dispatches a zoom action. Input generation is outside the timed section. Measurements include the Vue update and two animation frames, so an update completed within the frame budget typically measures around 33 ms at 60 Hz. The script discards one warm-up and reports p50 and p95 for 24 measurements per workload.
