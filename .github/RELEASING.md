@@ -1,327 +1,77 @@
 # CI and releases
 
-English | [简体中文](RELEASING.zh.md)
+English | [简体中文](RELEASING.zh.md) | [Pipeline map](PIPELINES.md)
 
-Contributors push feature branches to their forks, then open pull requests against
-`IDuxFE/idux-charts:main`. CI runs on feature-branch pushes and pull requests. Main
-branch pushes run the same checks through the Release workflow. Forks never run
-the versioning or publishing jobs.
+## Contribution and validation
 
-## Contributor workflow
+Push feature branches to a fork and open PRs against `IDuxFE/idux-charts:main`. Main pushes run full CI through Release. Forks do not perform release writes.
 
-For changes that affect published packages, run `pnpm changelog`, select the
-affected packages and version impact, and write a concise English summary. Commit
-the generated `.changeset/*.md` alongside the code. Documentation, tests, and
-development tooling changes alone do not normally need a changeset.
+For published-package behavior changes, run `pnpm changelog`, select affected packages and version impact, and commit a concise English changeset. Documentation, tests and tooling alone normally need none. Changesets manages versions, changelogs and internal dependencies; do not edit them manually. The three public packages (`@idux/charts-core`, `@idux/charts-plots`, `@idux/charts`) use one fixed version group; the highest requested bump applies to all three. Add new public library packages to this group.
 
-Creating a Git commit does not generate a changeset automatically. Contributors
-control when to add one and which packages and version increments it requests.
-Before it is consumed by a release PR, its summary and version impact can be
-edited through a normal code review.
+| Validation      | Scope                                                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `pnpm check:ci` | Lint, format, types, unit coverage and coverage-merge tests                                                            |
+| Browser CI      | Shared site / fixture build; random disjoint thirds on WebKit, Firefox, Chromium; Intel macOS 15                       |
+| Playgrounds     | Vue 2.6 / Vue 3 packed consumers on macOS Chromium                                                                     |
+| Compatibility   | Vue 2.7.16 / 3.5.44 × ECharts 5.4.3 / 6.1.0, plus Vue 2.6.14 + ECharts 6.1.0; packed declarations and Chromium runtime |
+| Documentation   | Domain `/` and project subpath `/idux-charts/` production-site smoke tests                                             |
 
-Do not manually bump package versions or edit generated changelogs. Changesets
-updates versions and internal dependencies together. The three public packages
-(`@idux/charts-core`, `@idux/charts-plots`, and `@idux/charts`) form one fixed
-version group in `.changeset/config.json`. Any release of a member bumps and
-publishes all three at the same version, including packages with no code changes.
-Contributors still select the affected packages and their actual version impact;
-Changesets applies the highest requested bump to the entire group. The private
-documentation site is excluded. Keep new public library packages in this group.
+`pnpm test:declarations --runtime` runs the compatibility checks after `pnpm build:lib`; `IDUX_DECLARATION_TARGET=2.7.16/5.4.3` selects one pair. Vue 2.7 / 3 use `skipLibCheck: false`; Vue 2.6 retains the adapter's `skipLibCheck: true` boundary.
 
-Use `pnpm exec changeset status --output /tmp/idux-charts-release-plan.json`
-to inspect the planned versions before merging a release-bearing PR. Do not use
-`linked` groups for this policy: they do not require every member to be published.
+Keep Playwright pinned to the same exact version in the root and both Playgrounds. For shared site-style changes, run `pnpm exec playwright test e2e/site-layout.spec.ts e2e/visual.spec.ts` in all three browsers. Review changed dimensions and images before updating affected baselines, then rerun without `--update-snapshots`; retain existing tolerances. See [E2E maintenance](../e2e/README.md) for retries, reports and focused commands, and [performance baseline](../e2e/PERFORMANCE.md) for benchmarks.
 
-The local pre-push hook runs repository-wide lint and forces a fresh TypeScript
-check. CI runs lint, formatting, types, and unit tests with coverage concurrently on Linux.
-Coverage reports are retained as artifacts; optional Codecov uploads and other
-community/security integrations are described in [Open source integrations](OPEN_SOURCE.md). Browser
-and screenshot tests run on Intel macOS 15. Each CI run randomly divides the
-complete case catalogue into three balanced sets and assigns one to each browser;
-every case runs once, while browser assignment changes between workflow runs.
-The workflow run ID is the reproducible seed, and the reports retain the complete
-assignment. A single CI run does not verify every case in all three browsers;
-`pnpm test:e2e:full` performs that full regression locally.
+CI uses Node.js 22.14.0 and pnpm 11.8.0. Lockfiles are untracked; installs resolve declared ranges on every run. The pnpm store cache does not freeze resolution. Shared setup retains installation scripts / canvas for checks and versioning, while lightweight root installs skip them; consumer installs run their own scripts for vue-demi.
 
-A Linux job builds the shared site and fixture assets once. WebKit, Firefox and
-Chromium consume those artifacts through the same macOS matrix, with preparation,
-artifact download, browser installation and test execution shown separately.
-Matrices have no explicit parallelism cap; actual concurrency depends on available
-GitHub runner capacity. Both Vue playgrounds retain separate macOS jobs and their
-existing screenshot baselines. The five Vue/ECharts compatibility combinations
-run independently on Linux. Domain and subpath deployment checks start only the
-site server, without building unused fixtures.
+## Upstream setup
 
-Root installs skip scripts/native canvas preparation for build, browser,
-consumer, planning, coverage-merge and analysis-only tasks. Unit validation keeps
-canvas support; consumer installations run their own scripts to initialize
-vue-demi correctly. Release-PR versioning keeps normal scripts because its version
-command reinstalls the workspace. `scripts/ci-timing.mjs` reports preparation
-phases in logs and job summaries; Playground builds, packing and consumer installs
-are measured separately from Chromium installation and tests.
+Configure `IDuxFE/idux-charts`:
 
-Matrix jobs use `fail-fast: false` to retain evidence from every combination;
-`CI result` requires all jobs, including WebKit and the shared browser build, to succeed.
-Superseded PR and feature-branch runs are cancelled, while main/release validation
-remains non-cancelling. Reports include HTML, JSON and a job summary listing
-first-attempt failures, successful retries and the ten slowest tests. CI retains
-the existing fallback retries: two for the main browser suite and one for each
-playground. Tests that pass on retry are accepted and marked as flaky; an Actions
-warning and the summary make these visible even on a green run. Tests that
-exhaust their retries still fail CI. Traces are recorded on the first retry and
-screenshots on failure. Local runs retain failure traces and default to four
-workers; the aggregate local test command runs suites and playgrounds sequentially.
+1. Enable Actions and **Allow GitHub Actions to create and approve pull requests**. Repository permissions may remain read-only; jobs request writes explicitly.
+2. Protect main with PR review and **CI result**. Maintainers merge PRs using rebase; do not require publish jobs for PR merging.
+3. Create the **npm** environment, restrict it to main, and optionally require approval.
+4. Set **RELEASE_GITHUB_TOKEN** to a repository-scoped PAT with Contents and Pull requests read/write so release PRs trigger CI. Without it, `GITHUB_TOKEN` creates the PR but a maintainer must close and reopen it to trigger checks.
+5. Configure npm trusted publishing below, then set **RELEASE_ENABLED=true**. Until then, main validation still runs but planning and release writes are disabled.
 
-Playground lockfiles and local tarballs remain untracked. Browser reports and
-the shared build are retained for seven days. Shared build/coverage artifacts
-use stable names within a workflow run and overwrite on producer reruns, so a
-failed downstream job can be rerun without rebuilding its successful producers.
-Review screenshot differences if runner image or browser rendering changes; CI
-never automatically accepts new baselines. See [E2E maintenance](../e2e/README.md)
-for coverage boundaries and focused validation commands.
+For **each** public package, configure npm **Settings → Trusted publishing**:
 
-Documentation layout changes also affect chart screenshot dimensions. Before
-opening a PR that changes shared site styles, run
-`pnpm exec playwright test e2e/site-layout.spec.ts e2e/visual.spec.ts` across all
-three browsers. If the layout change intentionally changes a baseline, review
-the rendered chart and its dimensions before updating only the affected images,
-then rerun without `--update-snapshots`. Do not increase screenshot tolerances to
-make a layout change pass.
+| Field                     | Value                    |
+| ------------------------- | ------------------------ |
+| Provider                  | GitHub Actions           |
+| Organization / repository | `IDuxFE` / `idux-charts` |
+| Workflow / environment    | `release.yml` / `npm`    |
+| Allowed action            | npm publish              |
 
-Keep Playwright pinned to the same exact version in the root and both playgrounds
-so browser upgrades and screenshot changes are reviewed together. CI also installs
-Chromium through each playground's own Playwright CLI before testing it.
+Publishing uses OIDC (`id-token: write`), without `NPM_TOKEN` or `NODE_AUTH_TOKEN`. Follow npm's setup page for trust activation requirements.
 
-After building, `pnpm test:declarations` packs the actual library and installs it
-in independent Vue 2.6, Vue 2.7, and Vue 3 projects against ECharts 5.4.3 and 6.1.0.
-Vue 2.7 and Vue 3 check declarations with
-`skipLibCheck: false`, including inferred props, events, scoped slots, setup
-bindings, data, computed values, and methods. Vue 2.6 checks the adapter prop
-aliases with its existing `skipLibCheck: true` boundary. Pass `--runtime` to also
-test the packed JS in Chromium: rendering, data updates, theme recreation and
-zoom preservation (including geo center/zoom after map refreshes and theme rebuilds), chart container attributes, disposal, and remounting across all seven plot components plus the base chart and area layout. It also
-checks composable-only imports, shared instances across aggregate and modular
-imports, and that the line subpath excludes unrelated series and produces a
-smaller gzip-compressed JS bundle. Each compatibility CI job runs these checks.
-`IDUX_DECLARATION_TARGET=2.7.16/5.4.3` selects one combination; without it, local
-runs retain the complete compatibility matrix.
+## Release operation
 
-Use `pnpm benchmark:charts` for a local Chromium performance run. See the
-[performance baseline](../e2e/PERFORMANCE.md) for the workload and reference results.
+1. Merge feature PRs with changesets. Inspect the plan with `pnpm exec changeset status --output /tmp/idux-charts-release-plan.json`.
+2. Full CI and planning run in parallel. `version` mode creates / updates a release PR with package versions and changelogs; several feature PRs can accumulate before release.
+3. Review the release PR, wait for CI, then rebase-merge it.
+4. The new main run validates the commit and, in `publish` mode, rebuilds and publishes unpublished packages, pushes tags and creates GitHub Releases. Approve the npm environment if configured.
 
-Root dependency lockfiles also remain untracked. CI and release jobs install with
-`pnpm install --no-lockfile --no-frozen-lockfile`, resolving dependencies within their declared
-version ranges on every run. The pnpm content-addressable store is cached by OS,
-architecture and dependency manifests; cache reuse does not freeze dependency
-resolution. Exact dependency versions and the explicitly pinned Node.js and pnpm
-versions remain fixed. This policy does not provide lockfile-level reproducibility.
+Versioning and publication share a non-cancelling write lock with `queue: max`. Both use the validated SHA and skip writes when main has moved. Only the write jobs serialize; validation remains independent per SHA.
 
-## One-time upstream GitHub setup
+To retry, manually run **Release** on main. Changesets can publish an unpublished version already on main even without pending changesets; check versions before enabling or retrying publication. After partial failure, inspect npm and logs before rerunning; do not bump already published packages again or delete pending changesets to postpone release.
 
-These settings belong to **IDuxFE/idux-charts**, not the contributor's fork.
+## Documentation deployment
 
-1. Enable GitHub Actions and allow the actions referenced in the workflows.
-2. Under **Settings → Actions → General → Workflow permissions**, enable
-   **Allow GitHub Actions to create and approve pull requests**. Jobs request their
-   own permissions; read-only can remain the repository default.
-3. Create an environment named **npm**. Limit deployment branches to **main**.
-   Optionally require maintainer approval before publishing.
-4. Protect `main`: require pull requests, reviews, and the **CI result** check from
-   the CI workflow. Select the actual check after its first PR run. Do not require
-   the publishing job for merging a PR.
-5. To automatically run CI for bot-created release PRs, add a repository secret
-   **RELEASE_GITHUB_TOKEN** containing a fine-grained PAT with access only to this
-   repository and **Contents: read/write**, **Pull requests: read/write**. The token
-   owner must have repository access. A renewable GitHub App installation token
-   can replace the PAT if the workflow is extended to generate it.
-   Without this secret, the workflow uses `GITHUB_TOKEN`, which can create the PR
-   but does not trigger its CI. A maintainer must close and reopen that release PR
-   to trigger `pull_request` checks. Never bypass the required checks.
-6. After configuring npm below, set the repository Actions variable
-   **RELEASE_ENABLED** to **true**. Leave it unset until publishing is ready.
+New npm publication dispatches **Deploy documentation** with the published SHA. Documentation-only changes and retries use **Actions → Deploy documentation → Run workflow → main**: leave `source_sha` blank for the dispatch SHA, or supply a full SHA already in main history. This workflow is independent of npm approval and publication retries.
 
-No `NPM_TOKEN` or `NODE_AUTH_TOKEN` secret is needed. Only the publish job receives
-`id-token: write`. All jobs using the shared setup install pnpm 11.8.0 and Node.js 22.14.0 explicitly.
+- Pages settings: **Deploy from a branch → gh-pages → /(root)**; domain `charts.idux.site`, DNS target `iduxfe.github.io`.
+- Secret: **PAGES_DEPLOY_TOKEN**, a repository-scoped PAT with Contents read/write; fallback **RELEASE_GITHUB_TOKEN**. `GITHUB_TOKEN` pushes cannot trigger branch-based Pages builds.
+- Build verifies source ancestry and runs Chromium smoke tests. Deploy copies only the tested `documentation` artifact into `gh-pages`, removes stale assets and preserves history. Identical output creates no commit.
+- Check both **Deploy documentation** and the platform **pages build and deployment**, then refresh a chart route on the site. Roll back by restoring known-good static files in a new `gh-pages` commit.
 
-## One-time npm setup
+| Build variable | Default | Purpose                                                                |
+| -------------- | ------- | ---------------------------------------------------------------------- |
+| `SITE_BASE`    | `/`     | Absolute asset / router base; use the same value for build and preview |
+| `SITE_DOMAIN`  | unset   | Optional CNAME; leave empty for a project subpath                      |
 
-An npm owner/maintainer with permission to manage the existing `@idux/*` packages
-must configure a GitHub Actions **Trusted Publisher** on **each** package:
-
-- `@idux/charts`
-- `@idux/charts-core`
-- `@idux/charts-plots`
-
-In each package's **Settings → Trusted publishing**, use:
-
-| Field                | Value          |
-| -------------------- | -------------- |
-| Provider             | GitHub Actions |
-| Organization or user | `IDuxFE`       |
-| Repository           | `idux-charts`  |
-| Workflow filename    | `release.yml`  |
-| Environment          | `npm`          |
-| Allowed action       | npm publish    |
-
-The repository, workflow filename, and environment must match exactly. These are
-existing packages: a fork does not grant permission to publish their names.
-Trusted publishing uses short-lived OIDC credentials on GitHub-hosted runners.
-pnpm 11 supports this authentication and automatically attaches provenance for
-public packages published from public repositories. Package repository metadata
-continues to point to the upstream repository.
-
-Configure trust near the first planned release: npm currently requires a new
-trusted publisher to complete its first publish within two days. Follow the npm
-settings shown at setup time if the policy changes.
-
-## Release workflow
-
-1. Merge feature PRs containing changesets into `main`.
-2. After validation passes, Changesets creates or updates the release PR with
-   package versions, changelogs, and internal dependency updates. The PR title and
-   release commit message include the planned version, for example
-   `chore(release): v1.6.1`, and update when the release plan changes.
-3. Review the generated release PR and wait for CI, then merge it.
-4. The main workflow validates the merged commit, rebuilds the library, and
-   publishes unpublished versions to npm. It also pushes package tags and creates
-   GitHub Releases. Approve the `npm` environment deployment if required.
-
-Multiple feature PRs can accumulate in the same open release PR. Keep that PR
-open until the batch is ready to release; merging each feature PR does not itself
-create a new npm version. The release PR consumes the pending changeset files
-and preserves their entries in each package's changelog. Do not manually delete
-pending changesets to postpone a release.
-
-Release PR CI runs on the pull request event. Pushes to Changesets temporary
-branches and release branches are excluded from push CI to avoid duplicate runs.
-
-Both Release PR generation and publishing remain disabled until
-`RELEASE_ENABLED=true`. Once enabled, a manual **Release → Run workflow** on
-**main** can start or retry the process. Main pushes also trigger it. Changesets
-checks npm for unpublished versions, so running it without pending changesets can
-publish any unpublished version already present on main. Review the current
-versions before enabling releases. Re-running after a partial failure does not
-require another version bump for packages already published; inspect npm and the
-workflow logs first. Never attempt to overwrite an existing npm version.
-
-## References
-
-- [Changesets automation](https://changesets.dev/guide/automating)
-- [Changesets Action](https://github.com/changesets/action)
-- [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
-- [pnpm publishing](https://pnpm.io/cli/publish)
-
-## Toolchain and dependency boundaries
-
-- Development uses Node.js 22.14+ (22.x), 24.x or 26+, with pnpm 10+.
-  `.nvmrc`, CI, engine declarations and Node typings use the Node 22 baseline.
-  Changesets 3 requires pnpm 10+; the independent playgrounds retain their pnpm 9
-  compatibility because they do not run the release toolchain.
-- TypeScript stays on the 6.x compiler API for declaration generation, Vue tooling
-  and the AST normalizer. The unused native TypeScript 7 compiler dependency is
-  removed; a future compiler API migration must pass the packed-consumer matrix.
-- Published ECharts peers explicitly support 5.x and 6.x. The documentation app
-  uses the same 6.x baseline as development. `vue-demi` 0.14.10 and the optional
-  Composition API peer remain necessary for the Vue 2 compatibility boundary.
-- Core and plots entry points perform ECharts registration and are marked as
-  side-effectful. Published CSS is also marked as side-effectful. Both component
-  imports and a separately bundled `useChart`-only import are exercised in browsers.
-- The latest archive documentation tooling still declares Vite 4 and archive-app
-  0.2 peers, while this workspace uses Vite 8 and archive-app 0.5. Its current
-  combination is covered by the site build and browser suite. The optional Vue 2.6
-  Composition API peer can also warn in the Vue 3 development workspace. Do not
-  broaden those upstream peer declarations to hide warnings: packed-consumer
-  projects instead use strict peer validation for each supported Vue version.
-
-## Deploying the documentation site
-
-Documentation runs in a separate **Deploy documentation** workflow. After
-Changesets successfully publishes new npm packages (`published == 'true'`),
-Release dispatches that workflow with the exact published commit SHA. Creating
-a release PR, a normal merge, or a publish run with nothing new does not deploy.
-Dispatch uses `GITHUB_TOKEN` with `actions: write`; `workflow_dispatch` is an
-exception to GitHub's token-trigger restriction. A dispatch failure is reported
-as a warning and does not change the successful npm publish result.
-
-For documentation-only updates or deployment retries, select
-**Actions → Deploy documentation → Run workflow → main** in `IDuxFE/idux-charts`.
-Leave `source_sha` blank to deploy the selected main commit, or enter the full
-release commit SHA to retry that exact version. The source must be a commit
-already on main and must contain the documentation build/test tooling. Forks
-and other branches cannot deploy. A failed documentation run can be retried
-without publishing npm packages again.
-
-Keep **Settings → Pages → Source** set to **Deploy from a branch**, with branch
-**gh-pages** and folder **/(root)**. Keep the custom domain **charts.idux.site**
-and its DNS record pointing at **iduxfe.github.io**.
-
-Configure the repository secret **PAGES_DEPLOY_TOKEN** with a fine-grained PAT
-that has **Contents: read/write** access to this upstream repository. The token
-owner must have permission to push to `gh-pages`. If this secret is absent, the
-workflow reuses **RELEASE_GITHUB_TOKEN**. There is deliberately no fallback to
-`GITHUB_TOKEN`: pushes made with that token do not trigger branch-based Pages
-builds. Keep credentials in Actions secrets, never in source or static artifacts.
-
-The build job builds the production site and runs a Chromium smoke test covering
-Pages-style 404 fallback, deep-link refresh, query/hash preservation, navigation,
-and chart rendering. Browser reports and failure traces are retained for seven
-days. The deployment artifact contains only `packages/site/dist/`. A separate deploy job
-copies that artifact into `gh-pages`, removes obsolete assets, and pushes a normal
-commit recording the source SHA. Existing branch history is retained; identical
-output produces no commit. No source code or dependencies are published.
-
-Build-time configuration is available through shell environment variables:
-
-| Variable      | Default | Purpose                                                                       |
-| ------------- | ------- | ----------------------------------------------------------------------------- |
-| `SITE_BASE`   | `/`     | Absolute asset/router path; a trailing slash is added if omitted.             |
-| `SITE_DOMAIN` | unset   | Optional custom hostname for `CNAME`; omit it for a `github.io` project site. |
-
-For example, to build and preview a project site without a custom domain:
+Production uses `/` and `charts.idux.site`. Variables are supplied through the shell at build time. The build includes `.nojekyll` and an `index.html` copy as `404.html`; deep links preserve parameters but still return GitHub Pages' HTTP 404 status.
 
 ```sh
 SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm build:site
 SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm preview
-```
-
-Use the same `SITE_BASE` for build and preview. These are build-tool environment
-variables, not runtime settings or automatic `.env` file loading. Development
-still runs at `/`. The production deployment workflow explicitly sets
-`SITE_BASE=/` and `SITE_DOMAIN=charts.idux.site`, preserving the official site.
-Other builds do not inherit that domain. An unset or empty `SITE_DOMAIN` removes
-any stale generated `CNAME`; setting a custom hostname also requires matching
-GitHub Pages settings and DNS. The upstream push workflow remains restricted to
-the official domain; building for another destination does not change that target.
-
-To run the subpath smoke test locally:
-
-```sh
 SITE_BASE=/idux-charts/ SITE_DOMAIN= pnpm exec playwright test e2e/pages.spec.ts
 ```
-
-CI tests the default root path and also runs a Chromium subpath regression.
-A required Ubuntu smoke job exercises the same configuration as deployment;
-the broader browser/screenshot suite continues to run on macOS.
-The build generates
-`404.html` from the same application entry as `index.html`, so history routes
-load without redirecting or losing URL parameters. GitHub Pages still returns
-HTTP 404 for these deep links; this is its static hosting behavior. `.nojekyll`
-is always included; `CNAME` is included only when `SITE_DOMAIN` is configured.
-
-After the workflow pushes, GitHub runs the separate **pages build and deployment**
-process. Check that deployment as well as the push workflow, then open
-<https://charts.idux.site/> and refresh a chart route. The npm environment approval
-does not govern this documentation workflow. To roll back, restore the static
-files from a known-good `gh-pages` commit in a new commit and push it; do not
-force-push away the deployment history.
-
-Release planning runs alongside validation. Each main run validates its own SHA
-independently, so a slow earlier run does not serialize later validation. Only
-release-PR updates and npm publication share the release write lock, with no
-cancellation of the active write job. `queue: max` retains waiting writers so an
-older validation finishing late cannot replace a newer pending release. Both
-require planning and full validation to
-succeed. Checkouts stay pinned to the validated SHA; immediately before writing,
-each job checks main and skips a superseded SHA. A newer main run owns the newer
-release work. Library builds remain ordered by package dependency, and packaging
-and installing consumers always precede their tests.
