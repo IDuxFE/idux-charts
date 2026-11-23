@@ -1,3 +1,9 @@
+# Analyze workspace dependencies and enforce FOSSA license/security policies.
+# Runs on main pushes, weekly and manually; FOSSA_ENABLED and FOSSA_API_KEY are required.
+# Generate a scan-only lockfile because repository lockfiles are intentionally untracked.
+# Analysis uploads this revision before the policy test; keep both steps in this order.
+# No library execution is needed, so setup disables native package installation scripts.
+
 name: FOSSA
 
 on:
@@ -23,6 +29,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       # Lockfiles are intentionally untracked. Generate a scan-only lockfile so
       # FOSSA can resolve the actual workspace dependency graph.
       - run: pnpm install --lockfile-only --ignore-scripts

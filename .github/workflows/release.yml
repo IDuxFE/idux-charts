@@ -1,3 +1,9 @@
+# Validate each main SHA independently, then plan and perform release maintenance.
+# Only release-PR updates and npm publishing share a non-cancelling write lock.
+# Write jobs require successful validation of the same pinned SHA and skip stale main.
+# RELEASE_ENABLED gates release work; publishing uses the npm environment/OIDC.
+# Changesets creates the release PR; maintainers review and merge it themselves.
+
 name: Release
 
 on:
@@ -8,17 +14,15 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  # Reuse the full CI contract instead of maintaining a smaller release-only suite.
   validate:
     name: Validate
     uses: ./.github/workflows/ci.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  # Planning reads package/change metadata; it needs neither canvas nor built artifacts.
   plan:
     name: Plan release
     if: >-
@@ -35,13 +39,23 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - uses: changesets/action/select-mode@v2.1.2
         id: mode
 
+  # version:release reinstalls workspace dependencies; retain normal scripts/native setup.
   version:
     name: Update release PR
     needs: [validate, plan]
     if: needs.plan.outputs.mode == 'version'
+    # Both write jobs share one lock; validation and planning remain parallel.
+    concurrency:
+      group: release-${{ github.ref }}
+      # Preserve all waiting writers: validation can finish out of commit order.
+      # A stale late finisher must not replace the newest pending release job.
+      queue: max
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -50,6 +64,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
@@ -66,17 +81,39 @@ jobs:
           if (!release) throw new Error('No planned release found for @idux/charts')
           appendFileSync(process.env.GITHUB_OUTPUT, `title=chore(release): v${release.newVersion}\n`)
           NODE
+      # Validation may finish out of order. Check main immediately before
+      # writing, while holding the release lock, and keep the validated checkout.
+      - name: Check release is still current
+        id: current
+        shell: bash
+        run: |
+          latest=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo 'release=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'release=false' >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping superseded release $GITHUB_SHA; main is now $latest."
+          fi
       - uses: changesets/action/version@v2.1.2
+        if: steps.current.outputs.release == 'true'
         with:
           github-token: ${{ secrets.RELEASE_GITHUB_TOKEN || github.token }}
           script: pnpm run version:release
           commit-message: ${{ steps.release-title.outputs.title }}
           pr-title: ${{ steps.release-title.outputs.title }}
 
+  # Publish only a validated checkout; build:lib does not execute node-canvas.
   publish:
     name: Publish to npm
     needs: [validate, plan]
     if: needs.plan.outputs.mode == 'publish'
+    # Both write jobs share one lock; validation and planning remain parallel.
+    concurrency:
+      group: release-${{ github.ref }}
+      # Preserve all waiting writers: validation can finish out of commit order.
+      # A stale late finisher must not replace the newest pending release job.
+      queue: max
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: npm
@@ -87,11 +124,28 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - run: pnpm build:lib
+      # Validation may finish out of order. Check main immediately before
+      # writing, while holding the release lock, and keep the validated checkout.
+      - name: Check release is still current
+        id: current
+        shell: bash
+        run: |
+          latest=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          if [ "$latest" = "$GITHUB_SHA" ]; then
+            echo 'release=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'release=false' >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping superseded release $GITHUB_SHA; main is now $latest."
+          fi
       - uses: changesets/action/publish@v2.1.2
+        if: steps.current.outputs.release == 'true'
         id: publish
         with:
           script: pnpm run publish

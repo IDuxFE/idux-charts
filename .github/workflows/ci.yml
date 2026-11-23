@@ -1,3 +1,9 @@
+# Validate PR merge refs, feature pushes and release commits using the same checks.
+# Release calls this workflow for main; main is excluded from the direct push trigger.
+# Required CI result aggregates every check and verifies browser partition receipts.
+# Keep Darwin visual baselines, consumer coverage and existing retry budgets intact.
+# Matrices have no max-parallel cap; available runner capacity controls actual starts.
+
 name: CI
 
 on:
@@ -22,12 +28,13 @@ permissions:
   contents: read
 
 # Superseded PR/feature pushes need not consume the scarce macOS runners.
-# Reusable validation on main remains part of the non-cancelling release flow.
+# Each main run validates its own SHA independently of other release runs.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/main') }}
 
 jobs:
+  # jsdom unit tests need canvas; this is the only validation job retaining native setup.
   checks:
     name: Checks
     runs-on: ubuntu-latest
@@ -48,21 +55,8 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  # Queue WebKit immediately; it must not wait for the shared asset producer.
-  # The other browsers are created only after browser-build completes.
-  webkit-tests:
-    name: Browser tests (webkit, random third)
-    runs-on: macos-15-intel
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/browser-tests
-        with:
-          browser: webkit
-          prebuilt: 'false'
-
+  # All browsers consume the same build and select disjoint cases from one run seed.
+  # Keep macOS for reviewed screenshot baselines; array order is not runner priority.
   browser-tests:
     name: Browser tests (${{ matrix.browser }}, random third)
     runs-on: macos-15-intel
@@ -71,15 +65,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [firefox, chromium]
+        browser: [webkit, firefox, chromium]
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: ./.github/actions/browser-tests
+      - name: Setup browser workspace
+        uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
+      - name: Download shared browser fixtures
+        uses: actions/download-artifact@v8
+        with:
+          name: browser-build
+          path: .
+      - name: Install browser and system dependencies
+        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - name: Run browser partition (including retries)
+        env:
+          IDUX_E2E_PREBUILT: '1'
+        run: pnpm test:e2e:ci ${{ matrix.browser }}
+      - name: Report browser tests
+        if: ${{ !cancelled() }}
+        uses: ./.github/actions/browser-reports
         with:
           browser: ${{ matrix.browser }}
 
+  # Build site + chart fixture once; no browser or canvas execution occurs here.
+  # Upload hidden files too because production output can include Pages metadata.
   browser-build:
     name: Build browser fixtures
     runs-on: ubuntu-latest
@@ -89,6 +102,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - run: pnpm build:site
       - run: pnpm exec vite build --config e2e/fixture/vite.config.ts
       - uses: actions/upload-artifact@v7
@@ -102,6 +117,9 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  # Real tarball consumers verify Vue 2.6/3 integration and collect runtime coverage.
+  # Only the root workspace skips scripts; prepare-playgrounds installs each consumer
+  # normally so vue-demi/esbuild hooks still run in its own dependency environment.
   playground-tests:
     name: Playground (${{ matrix.vue }})
     env:
@@ -117,9 +135,12 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       # Build and pack once per isolated runner, then install only its consumer.
       - run: pnpm playgrounds:prepare ${{ matrix.vue }}
-      - run: pnpm --dir playgrounds/${{ matrix.vue }} exec playwright install --with-deps chromium
+      - name: Install Playground browser
+        run: node scripts/ci-timing.mjs "Install Playground Chromium" pnpm --dir playgrounds/${{ matrix.vue }} exec playwright install --with-deps chromium
       - run: pnpm --dir playgrounds/${{ matrix.vue }} test:e2e
       - name: Summarize playground tests
         if: ${{ !cancelled() }}
@@ -144,6 +165,8 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Merge Linux unit counters with both macOS consumers using original-source maps.
+  # Run IDs prevent reading artifacts from unrelated runs; both Vue results are required.
   combined-coverage:
     name: Combined coverage
     needs: [checks, playground-tests]
@@ -191,6 +214,9 @@ jobs:
           disable_search: true
           fail_ci_if_error: true
 
+  # Build published packages, then typecheck/run each pinned consumer independently.
+  # Root installs skip canvas, but test-declarations installs consumer vue-demi normally.
+  # Synchronize supported pairs with scripts/test-declarations.mjs when adding versions.
   compatibility:
     name: Compatibility (Vue ${{ matrix.vue }}, ECharts ${{ matrix.echarts }})
     runs-on: ubuntu-latest
@@ -210,11 +236,15 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build:lib
       # --runtime also checks packed declarations; avoid testing them twice.
       - run: pnpm test:declarations --runtime
 
+  # Domain and project-subpath deployments need distinct builds (Vite embeds SITE_BASE).
+  # Keep both paths: passing the domain case does not validate subpath asset resolution.
   pages-smoke:
     name: Documentation (${{ matrix.deployment }})
     runs-on: ubuntu-latest
@@ -240,6 +270,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+        with:
+          install-scripts: 'false'
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm exec playwright test ${{ matrix.tests }} --project=chromium
       - name: Summarize documentation tests
@@ -256,6 +288,8 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Always report one required gate, even after failure/cancellation of a dependency.
+  # Successful jobs alone are insufficient: receipts must prove every case ran once.
   ci:
     name: CI result
     if: ${{ always() }}
@@ -264,7 +298,6 @@ jobs:
         checks,
         browser-build,
         browser-tests,
-        webkit-tests,
         playground-tests,
         combined-coverage,
         compatibility,
