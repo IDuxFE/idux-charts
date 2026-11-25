@@ -153,13 +153,12 @@ export function createBulletSeries(model: BulletModel): BulletSeriesOption[] {
                   position(range.upper),
                   trackThickness,
                   getAlphaColor(range.color, 0.1),
-                  hideZero ? 0 : 1,
                 ),
               ),
             )
             const end = ranges[ranges.length - 1]!.upper
             if (position(end) !== trackEnd)
-              children.push(rect(position(end), trackEnd, trackThickness, track, hideZero ? 0 : 1))
+              children.push(rect(position(end), trackEnd, trackThickness, track))
           } else children.push(rect(x, x + width, trackThickness, track, hideZero ? 0 : 1))
           let trackIndex = 0
           children.forEach(child => {
