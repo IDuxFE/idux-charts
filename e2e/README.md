@@ -11,7 +11,7 @@ reviewed macOS screenshot baselines and their existing pixel tolerances. Vue 2
 and Vue 3 playgrounds test packed packages separately; the compatibility jobs
 also retain all five Vue/ECharts combinations.
 
-Visual baselines in `visual.spec.ts-snapshots` cover Bar, Line, Area, Pie, Radar, Gauge, LiquidFill, Map and Bullet in light/dark themes across all three browsers. Bullet includes single, grouped (with a missing measurement) and above-label layouts. The matrix uses fixed data, dimensions, SVG rendering and disabled animation; the original historical Bar/Pie baselines remain separate. Generate only missing baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "visual baseline" --update-snapshots=missing`, inspect the images, then rerun without the update flag.
+Visual baselines in `visual.spec.ts-snapshots` use representative documentation demos for Bar, Line, Area, Pie, Radar, Gauge, LiquidFill, Map and Bullet in light/dark themes across all three browsers. Gauge covers basic, status and segmented examples; Map covers status, density and routes; Bullet covers single, segmented, grouped and above-label examples. Tests preserve demo options and sizes, finish animations for stable capture, and retain the original historical Bar/Pie baselines. Generate only missing baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing`, inspect the images, then rerun without the update flag.
 
 ## Coverage and execution boundaries
 
