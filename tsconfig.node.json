@@ -7,6 +7,7 @@
     "playwright.config.*",
     "e2e/environment.ts",
     "packages/site/deployment.ts",
+    "packages/site/demoComponentsPlugin.ts",
     "packages/*/vite.config.ts"
   ],
   "compilerOptions": {

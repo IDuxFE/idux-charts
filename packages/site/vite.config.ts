@@ -1,32 +1,17 @@
 import { resolve } from 'path'
 
 import vue from '@vitejs/plugin-vue'
-import { IduxResolver } from 'unplugin-vue-components/resolvers'
-import Components from 'unplugin-vue-components/vite'
 import { defineConfig } from 'vite'
 
 import { siteDeploymentBase } from './deployment'
+import { createDemoComponentsPlugin } from './demoComponentsPlugin.ts'
 
 export default defineConfig(({ command, isPreview }) => {
   const isBuild = command === 'build'
 
   return {
     base: isBuild || isPreview ? siteDeploymentBase : '/',
-    plugins: [
-      vue({ include: [/\.(vue|md)$/] }),
-      Components({
-        include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
-        dts: true,
-        resolvers: [
-          (name: string) => {
-            return name.startsWith('Ix') && name.endsWith('Chart')
-              ? { name, from: '@idux/charts' }
-              : undefined
-          },
-          IduxResolver(),
-        ],
-      }),
-    ],
+    plugins: [vue({ include: [/\.(vue|md)$/] }), createDemoComponentsPlugin()],
     resolve: {
       alias: [
         { find: '@idux/charts', replacement: resolve(import.meta.dirname, '../charts/index.ts') },

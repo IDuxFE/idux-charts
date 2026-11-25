@@ -13,6 +13,13 @@ const legacyBar = location.search.startsWith('?legacy-bar-')
 // The legacy screenshot predates registration of the numeric demo font.
 const fontReady = legacy ? Promise.resolve() : loadDemoFont()
 fontReady.then(async () => {
+  const params = new URLSearchParams(location.search)
+  const visual = params.get('demo-visual')
+  if (visual) {
+    const { mountDemoVisual } = await import('./mountDemoVisual')
+    await mountDemoVisual(visual, params.get('theme') === 'dark')
+    return
+  }
   if (location.search.includes('long-categories')) {
     const { default: LongCategories } = await import('./LongCategories.vue')
     createApp(LongCategories).mount('#app')
