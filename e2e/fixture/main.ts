@@ -13,6 +13,11 @@ const legacyBar = location.search.startsWith('?legacy-bar-')
 // The legacy screenshot predates registration of the numeric demo font.
 const fontReady = legacy ? Promise.resolve() : loadDemoFont()
 fontReady.then(async () => {
+  if (location.search.includes('visual-matrix')) {
+    const { default: VisualMatrix } = await import('./VisualMatrix.vue')
+    createApp(VisualMatrix).mount('#app')
+    return
+  }
   if (location.search.includes('long-categories')) {
     const { default: LongCategories } = await import('./LongCategories.vue')
     createApp(LongCategories).mount('#app')
