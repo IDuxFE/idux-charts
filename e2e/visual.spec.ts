@@ -77,28 +77,58 @@ test('bar hover tooltip excludes the helper series and preserves appearance', as
   })
 })
 
-// Fixed data, dimensions and non-animated SVG isolate appearance from demo controls.
-for (const kind of [
-  'bar',
-  'line',
-  'area',
-  'pie',
-  'radar',
-  'gauge',
-  'liquid-fill',
-  'map',
-  'bullet-single',
-  'bullet-grouped',
-  'bullet-above',
+// Capture real documentation demos so sizes, layouts and themes stay representative.
+for (const [kind, demoName, title] of [
+  ['bar', 'basic', '基础柱状图-竖向'],
+  ['bar', 'above', '基础柱状图-横向上方'],
+  ['line', 'basic', '基础折线图'],
+  ['area', 'basic', '基础面积图（状态示例）'],
+  ['pie', 'basic', '实心饼图'],
+  ['radar', 'basic', '基础型'],
+  ['gauge', 'basic', '基础数值型'],
+  ['gauge', 'status', '纯状态型'],
+  ['gauge', 'segmented', '分段仪表盘'],
+  ['liquid-fill', 'basic', '基础型'],
+  ['map', 'status', '状态型'],
+  ['map', 'density', '密度型'],
+  ['map', 'lines', '飞线型'],
+  ['bullet', 'single', '单子弹图——无范围区间'],
+  ['bullet', 'segmented', '单子弹图——有范围区间'],
+  ['bullet', 'grouped', '分组子弹图——无特定范围区间'],
+  ['bullet', 'above', '分组子弹图——上方标签'],
 ]) {
   for (const theme of ['light', 'dark']) {
-    test(`${kind} ${theme} visual baseline`, async ({ page }) => {
-      await page.goto(`${fixtureBaseURL}?visual-matrix&kind=${kind}&theme=${theme}`)
-      const chart = page.locator('#app [_echarts_instance_]')
-      await expect(chart).toHaveCount(1)
+    test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await page.addInitScript(theme => localStorage.setItem('idux-charts-theme', theme), theme)
+      await page.goto(`components/${kind}`)
+      const demo = page.locator('.archive-app-demo').filter({
+        has: page.getByRole('heading', { name: `${title} #`, exact: true }),
+      })
+      const chart = demo.locator('[_echarts_instance_]').first()
       await expect(chart.locator('svg path').first()).toBeAttached()
+      await chart.scrollIntoViewIfNeeded()
       await page.mouse.move(0, 0)
-      await expect(chart).toHaveScreenshot(`${kind}-${theme}.png`, {
+      await page.evaluate(() => document.fonts.ready)
+      await chart.evaluate(element => {
+        // Resolve the demo's public chart instance through its owning Vue component.
+        let component = (element as any).__vueParentComponent
+        let instance
+        while (component && !instance) {
+          instance =
+            component.exposed?.getEChartsInstance?.() ?? component.proxy?.getEChartsInstance?.()
+          component = component.parent
+        }
+        if (!instance) throw new Error('Demo chart instance is unavailable')
+        // Finish native and custom keyframe animations at their canonical end state,
+        // including perpetual waves and route effects, without changing demo options.
+        const zr = instance.getZr()
+        zr.storage.traverse((graphic: any) => graphic.stopAnimation(undefined, true))
+        zr.flush()
+        const y = element.getBoundingClientRect().top
+        ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
+      })
+      await expect(chart).toHaveScreenshot(`demo-${kind}-${demoName}-${theme}.png`, {
         animations: 'disabled',
         maxDiffPixelRatio: 0.005,
       })
