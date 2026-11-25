@@ -4,6 +4,8 @@
 
 本地完整套件会在 Chromium、Firefox 和 WebKit 中分别运行所有用例。CI 将完整用例目录随机分成数量均衡的三组，每个浏览器执行一组，因此每次 CI 中每个用例只运行一次。新工作流运行会改变分配；重跑同一次工作流沿用原随机种子，便于复现。
 
+Chromium 任务还会固定执行中文上方标签的视觉回归，使用独立输出目录，保留随机分组的结果及执行回执。
+
 单次 CI 不代表每个用例都通过了全部三个浏览器。请保留已评审的 macOS 截图基线及现有像素容差。Vue 2、Vue 3 Playground 分别测试打包后的包，兼容性任务也保留全部五种 Vue/ECharts 组合。
 
 `visual.spec.ts-snapshots` 使用文档站实际 Demo，为 Bar、Line、Area、Pie、Radar、Gauge、LiquidFill、Map 和 Bullet 建立亮暗主题的三浏览器视觉基线。Gauge 覆盖基础、状态和分段示例，Map 覆盖状态、密度和路线，Bullet 覆盖单值、分段、分组和上方标签。测试保留 Demo 的配置与尺寸，将动画推进到结束状态后截图；原有 Bar/Pie 历史基线单独保留。使用 `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing` 只生成缺失基线，检查图片后去掉更新参数复跑。

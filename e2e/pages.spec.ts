@@ -5,6 +5,7 @@ import { siteBaseURL } from './environment'
 test('Pages fallback preserves deep links, query parameters and navigation', async ({ page }) => {
   const output = new URL('../packages/site/dist/', import.meta.url)
   const fallback = readFileSync(new URL('404.html', output), 'utf8')
+  expect(fallback).toContain('<html lang="zh-CN">')
   expect(fallback).toBe(readFileSync(new URL('index.html', output), 'utf8'))
   const domain = process.env.SITE_DOMAIN?.trim()
   if (domain) {
@@ -34,6 +35,7 @@ test('Pages fallback preserves deep links, query parameters and navigation', asy
   })
   const path = 'components/pie?source=a%26b#pages-smoke'
   await page.goto(new URL(path, siteBaseURL).href)
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN')
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeVisible()
   await expect(page).toHaveURL(new URL(path, siteBaseURL).href)
   // The route shell appears before its dynamic imports finish. Let this static

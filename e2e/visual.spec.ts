@@ -98,7 +98,7 @@ for (const [kind, demoName, title] of [
   ['bullet', 'above', '分组子弹图——上方标签'],
 ]) {
   for (const theme of ['light', 'dark']) {
-    test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }) => {
+    test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 })
       await page.addInitScript(theme => localStorage.setItem('idux-charts-theme', theme), theme)
       await page.goto(`components/${kind}`)
@@ -128,6 +128,27 @@ for (const [kind, demoName, title] of [
         const y = element.getBoundingClientRect().top
         ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
       })
+      if (kind === 'bar' && demoName === 'above' && testInfo.project.name === 'chromium') {
+        // Preserve the actual fallback-font identity for this CJK layout regression.
+        const session = await page.context().newCDPSession(page)
+        try {
+          await session.send('DOM.enable')
+          await session.send('CSS.enable')
+          const { root } = await session.send('DOM.getDocument')
+          const id = await chart.getAttribute('_echarts_instance_')
+          const { nodeId } = await session.send('DOM.querySelector', {
+            nodeId: root.nodeId,
+            selector: `[_echarts_instance_="${id}"] svg text`,
+          })
+          const fonts = await session.send('CSS.getPlatformFontsForNode', { nodeId })
+          await testInfo.attach('cjk-platform-fonts', {
+            body: JSON.stringify(fonts),
+            contentType: 'application/json',
+          })
+        } finally {
+          await session.detach()
+        }
+      }
       await expect(chart).toHaveScreenshot(`demo-${kind}-${demoName}-${theme}.png`, {
         animations: 'disabled',
         maxDiffPixelRatio: 0.005,
