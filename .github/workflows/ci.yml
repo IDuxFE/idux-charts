@@ -85,6 +85,15 @@ jobs:
         env:
           IDUX_E2E_PREBUILT: '1'
         run: pnpm test:e2e:ci ${{ matrix.browser }}
+      - name: Verify Chromium CJK label layout
+        if: ${{ matrix.browser == 'chromium' }}
+        env:
+          IDUX_E2E_PREBUILT: '1'
+          IDUX_E2E_TARGET: site
+        # Keep this known platform-sensitive regression deterministic even when
+        # the random partition assigns its catalogue entry to another browser.
+        # Separate output and list reporting preserve partition receipts/results.
+        run: pnpm exec playwright test e2e/visual.spec.ts --project=chromium --grep 'bar above light demo visual baseline' --output=test-results/cjk-visual --reporter=list
       - name: Report browser tests
         if: ${{ !cancelled() }}
         uses: ./.github/actions/browser-reports

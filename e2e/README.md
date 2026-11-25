@@ -6,6 +6,8 @@ The full local suite runs every case in Chromium, Firefox and WebKit. CI randoml
 partitions the complete catalogue into three balanced sets and assigns one set
 to each browser, so each case runs once per CI run. A new workflow run changes
 the assignment; rerunning the same workflow keeps its seed for reproduction.
+The Chromium job additionally runs the CJK above-label visual regression on every run, using separate output so partition receipts remain intact.
+
 A single CI run therefore does not check every case in every browser. Keep the
 reviewed macOS screenshot baselines and their existing pixel tolerances. Vue 2
 and Vue 3 playgrounds test packed packages separately; the compatibility jobs

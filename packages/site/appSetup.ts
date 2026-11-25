@@ -12,6 +12,9 @@ import type { MenuData, MenuProps } from '@idux/components/menu'
 import ThemeToggle from './ThemeToggle.vue'
 import './theme.css'
 
+// Match the documentation language in dev as well as the generated Pages HTML.
+document.documentElement.lang = 'zh-CN'
+
 // Archive bundles its own Vue runtime. Mount the site control as a Vue app,
 // just like Archive's demo loader, instead of mixing the two renderers.
 const ThemeControl = defineComponent({
