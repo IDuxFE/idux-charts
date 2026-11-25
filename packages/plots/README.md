@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh.md)
 
-The preset chart layer of iDux Charts, providing seven chart components and option helpers built on `@idux/charts-core`.
+The preset chart layer of iDux Charts, providing eight chart components and option helpers built on `@idux/charts-core`.
 
 For the unified entry point and shared tooltip styles, use [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.md).
 
@@ -35,6 +35,7 @@ Vue.use(VueCompositionAPI)
 | `IxPieChart`        | Pie and doughnut             |
 | `IxRadarChart`      | Radar                        |
 | `IxGaugeChart`      | Gauge                        |
+| `IxBulletChart`     | Bullet (single and grouped)  |
 | `IxMapChart`        | Map (regions, nodes, routes) |
 | `IxLiquidFillChart` | Liquid fill                  |
 
@@ -87,9 +88,9 @@ The slot does not hide or clear the underlying chart. Transparent content remain
 
 ## Configuration and themes
 
-- `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, `createLiquidFillOption`, and `createMapOption` are pure option builders.
+- `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, `createLiquidFillOption`, `createBulletOption`, and `createMapOption` are pure option builders.
 - Use Vue `provide` with `BAR_CHART_TOKEN`, `LINE_CHART_TOKEN`, or `PIE_CHART_TOKEN` to set defaults for the corresponding native and built-in layouts.
-- Category Bar, Line / Area, automatic Pie, Radar, Gauge, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`, or pass `plotTheme` explicitly to a pure option builder.
+- Category Bar, Line / Area, automatic Pie, Radar, Gauge, Bullet, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`, or pass `plotTheme` explicitly to a pure option builder.
 - Option objects merge by field and arrays replace in full. Every chart component exposes `getEChartsInstance()` on its template ref.
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point. This package does not emit CSS itself. To use these styles, install `@idux/charts` and import that stylesheet, or supply equivalent application styles.

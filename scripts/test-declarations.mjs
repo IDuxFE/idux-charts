@@ -97,25 +97,26 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN } from '@idux/charts';
 import { IxChart as Core } from '@idux/charts/core';
 import { IxBarChart as Bar } from '@idux/charts/bar';
 import { IxLineChart as Line, PLOT_THEME_TOKEN as LineTheme } from '@idux/charts/line';
 import { IxPieChart as Pie } from '@idux/charts/pie';
 import { IxRadarChart as Radar } from '@idux/charts/radar';
 import { IxGaugeChart as Gauge } from '@idux/charts/gauge';
+import { IxBulletChart as Bullet, createBulletOption } from '@idux/charts/bullet';
 import { IxLiquidFillChart as LiquidFill } from '@idux/charts/liquid-fill';
 import { IxMapChart as MapChart, registerMap, createMapNodes } from '@idux/charts/map';
 import { getInstanceByDom } from 'echarts/core';
 registerMap('consumer-map', {type: 'FeatureCollection', features: [{type: 'Feature', properties: {name: 'A'}, geometry: {type: 'Polygon', coordinates: [[[0,0], [30,0], [30,30], [0,30], [0,0]]]}}]});
-if ([Bar, Line, Pie, Radar, Gauge, LiquidFill, MapChart].some((component, index) => component !==
-    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart][index]) ||
+if ([Bar, Line, Pie, Radar, Gauge, Bullet, LiquidFill, MapChart].some((component, index) => component !==
+    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart][index]) ||
     Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN) {
   throw new Error('Modular and aggregate imports must share the same component instances');
 }
 const revision = ref(0), dark = ref(false), mounted = ref(true), slotVisible = ref(false);
 const instances = [];
-const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['bullet', IxBulletChart], ['bullet-grouped', IxBulletChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
 const root = createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
@@ -128,11 +129,19 @@ const root = createApp({setup() { return () => h('main', {}, [
       title: {text: kind + ' ' + revision.value}, animation: false, autoResize: true,
       role: 'img', 'aria-label': kind + ' chart', tabindex: 0,
       initOption: {renderer: 'svg', width: 400, height: 240},
-      setOptionOpts: {notMerge: kind !== 'area'},
+      setOptionOpts: {notMerge: !['area', 'bullet', 'bullet-grouped'].includes(kind)},
       theme: dark.value ? 'dark' : 'seer', onReady: chart => instances.push(chart),
       ...(kind === 'core' ? {xAxis: {type: 'category', data: ['A', 'B', 'C']}, yAxis: {type: 'value'}, series: [{type: 'bar', data}]} :
         kind === 'map' ? {geo: {id: 'base', map: 'consumer-map'}, series: [createMapNodes([{id: 'a', name: 'A', coordinate: [10, 10], value: data[0]}])]} :
         kind === 'radar' ? { indicator: ['A', 'B', 'C'].map(name => ({name, max: 100})), data: [{name: 'One', value: data}] } :
+        kind === 'bullet' ? {value: data[0], target: 80, barWidth: '25%', xAxis: {max: 100}, ranges: [{upper: 30}, {upper: 100}]} :
+        kind === 'bullet-grouped' ? {data: ['A','B','C','D','E'].map((name,i) => ({name, value: i === 2 ? NaN : i === 3 ? null : data[0], target: 80, missingReason: 'Offline',
+          label: i === 2 ? {show: true, formatter: params => {
+            if (params.value !== null || params.data.value !== null) throw new Error('Missing label data must be normalized');
+            return 'Offline';
+          }} : i === 3 ? {show: false} : undefined,
+        })), label:{show:true}, itemStyle:{color:params => params.dataIndex === 0 ? '#ff0000' : '#00ff00'},
+          xAxis:{max:100}, ranges: [{upper:30}, {upper:100}], dataZoom:{id:'bullet-zoom', type:'slider', yAxisIndex:0, startValue:0,endValue:1}} :
         kind === 'gauge' || kind === 'liquid-fill' ? {value: data[0]} :
         kind === 'pie' ? {data: data.map((value, i) => ({name: String(i), value}))} :
         kind === 'area' ? {categories: ['A', 'B', 'C', 'D', 'E', 'F'], area: 'striped',
@@ -166,6 +175,30 @@ window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
 const mapChart = () => getInstanceByDom(document.querySelector('[data-kind="map"] [_echarts_instance_]'));
 window.roamMap = () => mapChart().dispatchAction({type: 'geoRoam', componentType: 'geo', geoId: 'base', zoom: 2, dx: 10, dy: 10, originX: 200, originY: 120});
 window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {zoom: geo.zoom, center: geo.center};};
+const bulletChart = () => getInstanceByDom(document.querySelector('[data-kind="bullet-grouped"] [_echarts_instance_]'));
+window.invalidBullet = () => createBulletOption({xAxis: {min: 10, max: 5}}).series.length;
+window.zoomBullet = () => bulletChart().dispatchAction({type:'dataZoom', dataZoomId:'bullet-zoom', startValue:2, endValue:3});
+window.bulletTooltipColors = () => {
+  const chart = bulletChart(), option = chart.getOption(), model = chart.getModel();
+  return [0,1,2].map(index => {
+    const host = document.createElement('div');
+    host.innerHTML = option.tooltip[0].formatter(model.getSeriesByIndex(index).getDataParams(0));
+    return host.querySelector('.charts-tooltips-item-border').style.background;
+  });
+};
+window.bulletMissingLabels = () => {
+  const data = bulletChart().getModel().getSeriesByIndex(1).getData();
+  return Array.from({length:data.count()}, (_,index) => data.getItemGraphicEl(index)?.children()
+    .find(child=>child.name === 'value-label-anchor')?.getTextContent()?.style.text ?? null);
+};
+window.bulletState = () => {
+  const chart = bulletChart(), option = chart.getOption();
+  const elements = chart.getZr().storage.getDisplayList();
+  return { start: option.dataZoom[0].startValue, end: option.dataZoom[0].endValue,
+    missing: elements.filter(item => item.name === 'missing').length,
+    targets: elements.filter(item => item.name === 'target').length,
+    guides: elements.filter(item => item.name === 'range-0-boundary').length };
+};
 `,
   )
   await build({ root: app, configFile: false, logLevel: 'error' })
@@ -178,22 +211,29 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
   const browser = await chromium.launch()
   try {
     const page = await browser.newPage()
-    const errors = []
+    const errors = [],
+      warnings = []
     page.on('pageerror', error => errors.push(error.message))
     page.on('console', message => {
       if (message.type() === 'error') errors.push(message.text())
+      if (message.type() === 'warning') warnings.push(message.text())
     })
     const port = server.httpServer.address().port
     await page.goto(`http://127.0.0.1:${port}/`)
+    expect(await page.evaluate(() => window.invalidBullet())).toBe(0)
+    expect(warnings).toContain(
+      '[IxBulletChart] xAxis.max must be greater than xAxis.min (10); received 5.',
+    )
+    expect(errors, 'initial chart render errors').toEqual([])
     const state = () => page.evaluate(() => window.readCharts())
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
-      .toEqual(Array(9).fill(true))
-    expect((await state()).map(chart => chart.exposed)).toEqual(Array(9).fill(true))
-    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(9).fill(true))
+      .toEqual(Array(11).fill(true))
+    expect((await state()).map(chart => chart.exposed)).toEqual(Array(11).fill(true))
+    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(11).fill(true))
     const beforeSlots = await state()
     await page.getByTestId('slot').click()
-    await expect(page.locator('.ix-chart-overlay')).toHaveCount(9)
+    await expect(page.locator('.ix-chart-overlay')).toHaveCount(11)
     const firstSlot = await page.locator('.ix-chart-overlay button').first().elementHandle()
     expect((await state()).map(chart => chart.id)).toEqual(beforeSlots.map(chart => chart.id))
     await page.getByTestId('theme').click()
@@ -230,6 +270,17 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
         expect(value).toBeCloseTo(mapViewport.center[index], 10),
       )
     }
+    await expect
+      .poll(() => page.evaluate(() => window.bulletTooltipColors()))
+      .toEqual(Array(3).fill('rgb(255, 0, 0)'))
+    await page.evaluate(() => window.zoomBullet())
+    const bulletState = () => page.evaluate(() => window.bulletState())
+    await expect
+      .poll(bulletState)
+      .toMatchObject({ start: 2, end: 3, missing: 2, targets: 2, guides: 1 })
+    await expect
+      .poll(() => page.evaluate(() => window.bulletMissingLabels()))
+      .toEqual(['Offline', null])
     await page.getByTestId('update').click()
     await expect
       .poll(async () => (await state()).map(chart => chart.title))
@@ -241,20 +292,28 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
         'pie 1',
         'radar 1',
         'gauge 1',
+        'bullet 1',
+        'bullet-grouped 1',
         'liquid-fill 1',
         'map 1',
       ])
     await expect
       .poll(async () => (await state()).map(chart => chart.value))
-      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 0.11, 11])
+      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 11, 11, 0.11, 11])
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(1)
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await expectMapViewport()
+    await expect
+      .poll(bulletState)
+      .toMatchObject({ start: 2, end: 3, missing: 2, targets: 2, guides: 1 })
+    await expect
+      .poll(() => page.evaluate(() => window.bulletMissingLabels()))
+      .toEqual(['Offline', null])
     const before = await state()
     await page.getByTestId('theme').click()
     await expect
       .poll(async () => (await state()).map((chart, i) => !!chart.id && chart.id !== before[i].id))
-      .toEqual(Array(9).fill(true))
+      .toEqual(Array(11).fill(true))
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await expectMapViewport()
     await page.getByTestId('mount').click()
@@ -271,6 +330,8 @@ window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {z
         'pie 1',
         'radar 1',
         'gauge 1',
+        'bullet 1',
+        'bullet-grouped 1',
         'liquid-fill 1',
         'map 1',
       ])
@@ -394,6 +455,14 @@ provide(CHART_THEME_TOKEN, { darkMode: true, textStyle: { color: '#fff' } });
 provide(CHART_THEME_TOKEN, 42);
 import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps, MapChartPublicProps } from '@idux/charts';
 import type { LineChartPublicProps as ModularLineProps } from '@idux/charts/line';
+import { IxBulletChart, createBulletOption, type BulletChartPublicProps } from '@idux/charts/bullet';
+const bullet: BulletChartPublicProps = { data: [{name: 'A', value: 75, target: 85}], ranges: [{upper: 100, color: 'red'}], barWidth: '20%', color: ['blue'], name: 'Actual', xAxis: {min: 0, max: 100} };
+createBulletOption(bullet);
+// @ts-expect-error bullet values must be numeric
+const badBullet: BulletChartPublicProps = {value: '75'};
+// @ts-expect-error grouped bullet rows require a category name
+const badBulletRow: BulletChartPublicProps = {data: [{value: 20}]};
+
 const modularLine: ModularLineProps = { categories: ['A', 'B'], data: [1, 2] };
 const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
 const gauge: GaugeChartPublicProps = { value: 20, segments: [{upper: 1, color: 'red'}], plotTheme: { textColor: 'red' }, valueTextStyle: { fontSize: 24 } };
@@ -506,11 +575,12 @@ import { defineComponent } from 'vue';
 import type { VNode } from 'vue';
 import type { EChartsType } from 'echarts/core';
 ${version.startsWith('2.') ? "import Vue from 'vue'; const app = Vue;" : "import { createApp } from 'vue'; const app = createApp({});"}
-const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart] as const;
+const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart] as const;
 for (const component of chartComponents) app.use(component);
 declare const chartInstance: InstanceType<(typeof chartComponents)[number]>;
 const echartsInstance: EChartsType | undefined = chartInstance.getEChartsInstance();
 type BarProps = InstanceType<typeof IxBarChart>['$props'];
+const globalBulletProps: InstanceType<GlobalComponents['IxBulletChart']>['$props'] = {value: 30, target: 80};
 const globalProps: InstanceType<GlobalComponents['IxBarChart']>['$props'] = { autoResize: true };
 // @ts-expect-error global component props must remain typed
 const invalidGlobalProps: InstanceType<GlobalComponents['IxBarChart']>['$props'] = { autoResize: 123 };
@@ -522,6 +592,10 @@ const chartResize: Resize<typeof IxChart> = true;
 const lineResize: Resize<typeof IxLineChart> = true;
 const radarResize: Resize<typeof IxRadarChart> = true;
 const gaugeResize: Resize<typeof IxGaugeChart> = true;
+const bulletResize: Resize<typeof IxBulletChart> = true;
+// @ts-expect-error inferred component props must remain typed
+const badBulletComponent: InstanceType<typeof IxBulletChart>['$props'] = {target: '85'};
+
 const liquidResize: Resize<typeof IxLiquidFillChart> = true;
 const pieResize: Resize<typeof IxPieChart> = true;
 const pieAlign: InstanceType<typeof IxPieChart>['$props']['align'] = 'center';

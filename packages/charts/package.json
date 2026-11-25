@@ -100,6 +100,10 @@
     "./map": {
       "types": "./dist/map.d.ts",
       "import": "./dist/map.js"
+    },
+    "./bullet": {
+      "types": "./dist/bullet.d.ts",
+      "import": "./dist/bullet.js"
     }
   },
   "typesVersions": {
@@ -127,6 +131,9 @@
       ],
       "map": [
         "dist/map.d.ts"
+      ],
+      "bullet": [
+        "dist/bullet.d.ts"
       ]
     }
   }

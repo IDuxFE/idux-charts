@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供七类图表组件及配置构建工具。
+iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供八类图表组件及配置构建工具。
 
 如需统一入口及共享提示框样式，可使用 [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.zh.md)。
 
@@ -35,6 +35,7 @@ Vue.use(VueCompositionAPI)
 | `IxPieChart`        | 饼图、环形图             |
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |
+| `IxBulletChart`     | 子弹图（单值与分组）     |
 | `IxMapChart`        | 地图（区域、节点、线路） |
 | `IxLiquidFillChart` | 水波图                   |
 
@@ -87,9 +88,9 @@ ESM 项目可通过 [`@idux/charts` 的图表子入口](https://github.com/IDuxF
 
 ## 配置与主题
 
-- `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption`、`createMapOption` 提供纯配置构建函数。
+- `useBarOption`、`useLineOption`、`usePieOption` 提供组合式配置；`createRadarOption`、`createGaugeOption`、`createLiquidFillOption`、`createBulletOption`、`createMapOption` 提供纯配置构建函数。
 - `BAR_CHART_TOKEN`、`LINE_CHART_TOKEN`、`PIE_CHART_TOKEN` 通过 Vue `provide` 为对应图表的原生和内置布局提供默认配置。
-- 分类 Bar、Line / Area、自动 Pie、Radar、Gauge、LiquidFill 和 Map 支持 `plotTheme`。用 `PLOT_THEME_TOKEN` 提供响应式默认值，直接调用纯配置构建函数时传入所需的 `plotTheme`。
+- 分类 Bar、Line / Area、自动 Pie、Radar、Gauge、Bullet、LiquidFill 和 Map 支持 `plotTheme`。用 `PLOT_THEME_TOKEN` 提供响应式默认值，直接调用纯配置构建函数时传入所需的 `plotTheme`。
 - 配置对象按字段合并，数组整体替换。所有组件的模板 ref 均可调用 `getEChartsInstance()`。
 
 共享 HTML 提示框样式位于 `@idux/charts/dist/style.css`，在应用入口导入一次即可。此包自身不输出 CSS；需要这些样式时，安装 `@idux/charts` 并导入该样式文件，或由应用提供对应样式。

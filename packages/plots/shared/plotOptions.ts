@@ -1,6 +1,6 @@
 import { cloneDeep, isPlainObject, mergeWith, omit, pick } from 'lodash-es'
 
-import { replaceChartComponent, splitChartOptions } from '@idux/charts-core'
+import { convertArray, replaceChartComponent, splitChartOptions } from '@idux/charts-core'
 import type { ChartOption, ChartProps } from '@idux/charts-core'
 
 /** Merge option objects while keeping each supplied array or scalar intact. */
@@ -73,14 +73,37 @@ function removesOption(previous: unknown, next: unknown): boolean {
 }
 
 /** Built-in layouts submit snapshots. A merge is safe while it cannot retain removed options. */
-export function createPlotUpdater() {
+export function createPlotUpdater(mergeDataUpdates = false) {
   let previous: ChartProps | undefined
   return (option?: ChartProps): ChartProps | undefined => {
     const { option: snapshot } = splitChartOptions(option ?? {})
     const setOptionOpts = option?.setOptionOpts
-    const merge = setOptionOpts?.notMerge === false
-    const notMerge = !merge || removesOption(previous, snapshot)
+    const merge =
+      setOptionOpts?.notMerge === false || (mergeDataUpdates && !setOptionOpts?.notMerge)
+    // Custom plots can retain data elements while still resetting removed layout options.
+    const layout = (value: ChartProps | undefined) =>
+      mergeDataUpdates && value
+        ? {
+            ...omit(value, 'dataZoom'),
+            series: convertArray(value.series).map(series => omit(series, 'data')),
+            yAxis: convertArray(value.yAxis).map(axis => omit(axis, 'data')),
+          }
+        : value
+    const notMerge = !merge || removesOption(layout(previous), layout(snapshot))
+    const replaceZoom = mergeDataUpdates && removesOption(previous?.dataZoom, snapshot.dataZoom)
     previous = option && cloneDeep(snapshot)
-    return option && { ...option, setOptionOpts: { ...setOptionOpts, notMerge } }
+    return (
+      option && {
+        ...option,
+        ...(replaceZoom && { dataZoom: snapshot.dataZoom ?? [] }),
+        setOptionOpts: {
+          ...setOptionOpts,
+          notMerge,
+          ...(replaceZoom && {
+            replaceMerge: [...new Set([...convertArray(setOptionOpts?.replaceMerge), 'dataZoom'])],
+          }),
+        },
+      }
+    )
   }
 }

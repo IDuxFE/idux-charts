@@ -10,3 +10,5 @@ export { PLOT_THEME_TOKEN } from './shared/plotTheme'
 export type { PlotTheme, PlotTextStyle } from './shared/plotTheme'
 
 export * from './map'
+
+export * from './bullet'

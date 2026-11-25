@@ -4,6 +4,7 @@ declare module 'vue' {
     IxBarChart: (typeof import('@idux/charts-plots'))['IxBarChart']
     IxLineChart: (typeof import('@idux/charts-plots'))['IxLineChart']
     IxRadarChart: (typeof import('@idux/charts-plots'))['IxRadarChart']
+    IxBulletChart: (typeof import('@idux/charts-plots'))['IxBulletChart']
     IxGaugeChart: (typeof import('@idux/charts-plots'))['IxGaugeChart']
     IxLiquidFillChart: (typeof import('@idux/charts-plots'))['IxLiquidFillChart']
     IxMapChart: (typeof import('@idux/charts-plots'))['IxMapChart']

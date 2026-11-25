@@ -10,7 +10,17 @@ const multiChartDemos: Record<string, number> = {
   'liquid-fill/Size.vue': 3,
 }
 
-for (const chart of ['core', 'bar', 'line', 'area', 'pie', 'radar', 'gauge', 'liquid-fill']) {
+for (const chart of [
+  'core',
+  'bar',
+  'line',
+  'area',
+  'pie',
+  'radar',
+  'gauge',
+  'liquid-fill',
+  'bullet',
+]) {
   const directory = new URL(`../packages/site/src/components/${chart}/demos/`, import.meta.url)
   const demos = readdirSync(directory)
     .filter(file => file.endsWith('.vue'))
