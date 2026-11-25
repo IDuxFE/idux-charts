@@ -2,13 +2,14 @@ import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import { fixturePort, serverHost } from '../environment.ts'
+import { createDemoComponentsPlugin } from '../../packages/site/demoComponentsPlugin.ts'
 
 const fromRoot = (path: string) => fileURLToPath(new URL(`../../${path}`, import.meta.url))
 
 export default defineConfig(({ command, mode }) => ({
   root: fileURLToPath(new URL('.', import.meta.url)),
   define: { __VERSION__: JSON.stringify('test'), __DEV__: command !== 'build' },
-  plugins: [vue()],
+  plugins: [vue(), createDemoComponentsPlugin(false)],
   resolve: {
     alias: {
       '@idux/charts': fromRoot('packages/charts/index.ts'),

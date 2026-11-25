@@ -89,11 +89,12 @@ jobs:
         if: ${{ matrix.browser == 'chromium' }}
         env:
           IDUX_E2E_PREBUILT: '1'
-          IDUX_E2E_TARGET: site
+          IDUX_E2E_TARGET: fixture
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/cjk-visual/results.json
         # Keep this known platform-sensitive regression deterministic even when
         # the random partition assigns its catalogue entry to another browser.
         # Separate output and list reporting preserve partition receipts/results.
-        run: pnpm exec playwright test e2e/visual.spec.ts --project=chromium --grep 'bar above light demo visual baseline' --output=test-results/cjk-visual --reporter=list
+        run: pnpm exec playwright test e2e/visual.spec.ts --project=chromium --grep 'bar above light demo visual baseline' --output=test-results/cjk-visual --reporter=list,json
       - name: Report browser tests
         if: ${{ !cancelled() }}
         uses: ./.github/actions/browser-reports

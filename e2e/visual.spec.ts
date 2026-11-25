@@ -77,8 +77,8 @@ test('bar hover tooltip excludes the helper series and preserves appearance', as
   })
 })
 
-// Capture real documentation demos so sizes, layouts and themes stay representative.
-for (const [kind, demoName, title] of [
+// Capture real documentation demos in a consistent desktop container and site theme.
+for (const [kind, demoName] of [
   ['bar', 'basic', '基础柱状图-竖向'],
   ['bar', 'above', '基础柱状图-横向上方'],
   ['line', 'basic', '基础折线图'],
@@ -100,36 +100,22 @@ for (const [kind, demoName, title] of [
   for (const theme of ['light', 'dark']) {
     test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 })
-      await page.addInitScript(theme => localStorage.setItem('idux-charts-theme', theme), theme)
-      await page.goto(`components/${kind}`)
-      const demo = page.locator('.archive-app-demo').filter({
-        has: page.getByRole('heading', { name: `${title} #`, exact: true }),
-      })
+      await page.goto(`${fixtureBaseURL}?demo-visual=${kind}-${demoName}&theme=${theme}`)
+      const demo = page.locator('#visual-demo')
       const chart = demo.locator('[_echarts_instance_]').first()
       await expect(chart.locator('svg path').first()).toBeAttached()
       await chart.scrollIntoViewIfNeeded()
       await page.mouse.move(0, 0)
       await page.evaluate(() => document.fonts.ready)
       await chart.evaluate(element => {
-        // Resolve the demo's public chart instance through its owning Vue component.
-        let component = (element as any).__vueParentComponent
-        let instance
-        while (component && !instance) {
-          instance =
-            component.exposed?.getEChartsInstance?.() ?? component.proxy?.getEChartsInstance?.()
-          component = component.parent
-        }
-        if (!instance) throw new Error('Demo chart instance is unavailable')
         // Finish native and custom keyframe animations at their canonical end state,
         // including perpetual waves and route effects, without changing demo options.
-        const zr = instance.getZr()
-        zr.storage.traverse((graphic: any) => graphic.stopAnimation(undefined, true))
-        zr.flush()
+        window.finishDemoAnimations(element as HTMLElement)
         const y = element.getBoundingClientRect().top
         ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
       })
       if (kind === 'bar' && demoName === 'above' && testInfo.project.name === 'chromium') {
-        // Preserve the actual fallback-font identity for this CJK layout regression.
+        // Verify that CJK layout uses the pinned test font rather than a host fallback.
         const session = await page.context().newCDPSession(page)
         try {
           await session.send('DOM.enable')
@@ -141,8 +127,33 @@ for (const [kind, demoName, title] of [
             selector: `[_echarts_instance_="${id}"] svg text`,
           })
           const fonts = await session.send('CSS.getPlatformFontsForNode', { nodeId })
+          expect(fonts.fonts).toEqual([
+            expect.objectContaining({ familyName: 'ChartVisualCJK', isCustomFont: true }),
+          ])
           await testInfo.attach('cjk-platform-fonts', {
             body: JSON.stringify(fonts),
+            contentType: 'application/json',
+          })
+          const metrics = await page.evaluate(() => {
+            const context = document.createElement('canvas').getContext('2d')!
+            return ['sans-serif', 'ChartVisualCJK'].map(family => {
+              context.font = `12px ${family}`
+              return {
+                family,
+                samples: ['国', '服务器终端（200.200.1.13）'].map(text => {
+                  const measured = context.measureText(text)
+                  return {
+                    text,
+                    width: measured.width,
+                    ascent: measured.actualBoundingBoxAscent,
+                    descent: measured.actualBoundingBoxDescent,
+                  }
+                }),
+              }
+            })
+          })
+          await testInfo.attach('cjk-font-metrics', {
+            body: JSON.stringify(metrics),
             contentType: 'application/json',
           })
         } finally {
