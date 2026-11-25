@@ -76,3 +76,32 @@ test('bar hover tooltip excludes the helper series and preserves appearance', as
     maxDiffPixelRatio: 0.005,
   })
 })
+
+// Fixed data, dimensions and non-animated SVG isolate appearance from demo controls.
+for (const kind of [
+  'bar',
+  'line',
+  'area',
+  'pie',
+  'radar',
+  'gauge',
+  'liquid-fill',
+  'map',
+  'bullet-single',
+  'bullet-grouped',
+  'bullet-above',
+]) {
+  for (const theme of ['light', 'dark']) {
+    test(`${kind} ${theme} visual baseline`, async ({ page }) => {
+      await page.goto(`${fixtureBaseURL}?visual-matrix&kind=${kind}&theme=${theme}`)
+      const chart = page.locator('#app [_echarts_instance_]')
+      await expect(chart).toHaveCount(1)
+      await expect(chart.locator('svg path').first()).toBeAttached()
+      await page.mouse.move(0, 0)
+      await expect(chart).toHaveScreenshot(`${kind}-${theme}.png`, {
+        animations: 'disabled',
+        maxDiffPixelRatio: 0.005,
+      })
+    })
+  }
+}

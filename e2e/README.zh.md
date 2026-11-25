@@ -6,6 +6,8 @@
 
 单次 CI 不代表每个用例都通过了全部三个浏览器。请保留已评审的 macOS 截图基线及现有像素容差。Vue 2、Vue 3 Playground 分别测试打包后的包，兼容性任务也保留全部五种 Vue/ECharts 组合。
 
+`visual.spec.ts-snapshots` 中的视觉基线覆盖 Bar、Line、Area、Pie、Radar、Gauge、LiquidFill、Map 和 Bullet 的亮暗主题，并在三个浏览器中分别对比。Bullet 包含单值、分组（含缺失测量值）和上方标签布局。矩阵使用固定数据、尺寸、SVG 渲染并关闭动画；原有 Bar/Pie 历史基线单独保留。使用 `pnpm exec playwright test e2e/visual.spec.ts --grep "visual baseline" --update-snapshots=missing` 只生成缺失基线，人工检查图片后去掉更新参数复跑。
+
 ## 覆盖范围与执行边界
 
 | 范围       | 执行方式                                     | 保留的检查                                                                                       |
