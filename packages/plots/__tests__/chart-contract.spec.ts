@@ -12,6 +12,7 @@ import {
   LINE_CHART_TOKEN,
   IxBarChart,
   IxGaugeChart,
+  IxBulletChart,
   IxLineChart,
   IxLiquidFillChart,
   IxPieChart,
@@ -310,6 +311,7 @@ it('exposes the same instance as onReady for every chart, including after reinit
     IxPieChart,
     IxRadarChart,
     IxGaugeChart,
+    IxBulletChart,
     IxLiquidFillChart,
     IxMapChart,
   ]
@@ -409,6 +411,7 @@ it.each([
   IxPieChart,
   IxRadarChart,
   IxGaugeChart,
+  IxBulletChart,
   IxLiquidFillChart,
   IxMapChart,
 ])(
@@ -442,6 +445,7 @@ it.each([
 it.each([
   ['radar', IxRadarChart, { indicator: [{ name: 'A', max: 100 }], data: [{ value: [20] }] }],
   ['gauge', IxGaugeChart, { value: 20 }],
+  ['bullet', IxBulletChart, { value: 20, target: 80 }],
   ['liquid', IxLiquidFillChart, { value: 20 }],
   ['map', IxMapChart, {}],
 ] as const)(
@@ -472,3 +476,101 @@ it.each([
     expect(item.chart).toBe(chart)
   },
 )
+
+it('bullet updates its outer label configuration without replacing the chart', async () => {
+  const item = mountChart(IxBulletChart, {
+    layout: 'horizontal-above',
+    data: [{ name: 'A', value: 50 }],
+    label: { show: true, formatter: 'Value: {c}' },
+    animation: false,
+  })
+  const chart = item.chart
+  const text = () =>
+    chart
+      .getZr()
+      .storage.getDisplayList()
+      .filter((element: any) => element.type === 'tspan')
+      .map((element: any) => element.style.text)
+  expect(text()).toContain('Value: 50')
+  item.props.label.show = false
+  await nextTick()
+  expect(item.chart).toBe(chart)
+  expect(text()).not.toContain('Value: 50')
+  item.props.label.show = true
+  await nextTick()
+  expect(text()).toContain('Value: 50')
+  expect(chart.getDom().hasAttribute('label')).toBe(false)
+})
+
+it('bullet retains the live category window on refresh and applies explicit zoom changes', async () => {
+  const item = mountChart(IxBulletChart, {
+    data: Array.from({ length: 50 }, (_, index) => ({ name: `Row ${index}`, value: 50 })),
+    dataZoom: { type: 'slider', yAxisIndex: 0, startValue: 0, endValue: 4 },
+    xAxis: { max: 100 },
+  })
+  item.chart.dispatchAction({ type: 'dataZoom', startValue: 40, endValue: 44 })
+  item.props.data[0].value = 60
+  await nextTick()
+  expect(item.option.dataZoom[0]).toMatchObject({ startValue: 40, endValue: 44 })
+  // Restored interaction state must survive later option regenerations as well.
+  item.props.ranges = [{ upper: 100 }]
+  await nextTick()
+  expect(item.option.dataZoom[0]).toMatchObject({ startValue: 40, endValue: 44 })
+  item.props.dataZoom = { type: 'slider', yAxisIndex: 0, startValue: 10, endValue: 14 }
+  await nextTick()
+  expect(item.option.dataZoom[0]).toMatchObject({ startValue: 10, endValue: 14 })
+  item.props.data.reverse()
+  await nextTick()
+  expect(item.option.dataZoom[0]).toMatchObject({ startValue: 10, endValue: 14 })
+  delete item.props.dataZoom
+  await nextTick()
+  expect(item.option.dataZoom).toEqual([])
+})
+
+it.each([false, true])(
+  'bullet handles appended categories with a trailing window: %s',
+  async trailing => {
+    const item = mountChart(IxBulletChart, {
+      data: Array.from({ length: 10 }, (_, index) => ({ name: `Row ${index}`, value: 50 })),
+      dataZoom: { type: 'slider', yAxisIndex: 0, startValue: 0, endValue: 2 },
+    })
+    item.chart.dispatchAction({
+      type: 'dataZoom',
+      startValue: trailing ? 7 : 3,
+      endValue: trailing ? 9 : 5,
+    })
+    item.props.data.push({ name: 'Row 10', value: 60 }, { name: 'Row 11', value: 70 })
+    await nextTick()
+    expect(item.option.dataZoom[0]).toMatchObject({
+      startValue: trailing ? 9 : 3,
+      endValue: trailing ? 11 : 5,
+    })
+  },
+)
+
+it('bullet clears an invalid configuration and recovers on the same chart instance', async () => {
+  const item = mountChart(IxBulletChart, {
+    data: [{ name: 'A', value: 50, target: 80 }],
+    ranges: [{ upper: 100 }],
+    xAxis: { max: 100 },
+  })
+  const chart = item.chart
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  try {
+    item.props.ranges.push({ upper: 100 })
+    await nextTick()
+    expect(item.option.series).toEqual([])
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('ranges[1].upper'))
+    item.props.ranges.pop()
+    item.props.data[0].value = 75
+    await nextTick()
+    expect(item.chart).toBe(chart)
+    expect(item.option.series[0].data[0].value).toBe(75)
+    expect(
+      item.option.series.find((series: { id: string }) => series.id === 'bullet-ranges').data,
+    ).toHaveLength(1)
+    expect(chart.getDom().querySelector('svg path')).not.toBeNull()
+  } finally {
+    warn.mockRestore()
+  }
+})

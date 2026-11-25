@@ -33,6 +33,7 @@ Vue.use(VueCompositionAPI)
 | `IxPieChart`        | Pie and doughnut             |
 | `IxRadarChart`      | Radar                        |
 | `IxGaugeChart`      | Gauge                        |
+| `IxBulletChart`     | Bullet (single and grouped)  |
 | `IxMapChart`        | Map (regions, nodes, routes) |
 | `IxLiquidFillChart` | Liquid fill                  |
 
@@ -64,13 +65,13 @@ const option: LineChartProps = {
 
 Chart components register their required ECharts modules. Global registration is also supported: use `app.use(IxLineChart)` in Vue 3 or `Vue.use(IxLineChart)` in Vue 2.
 
-Use an ESM subpath such as `@idux/charts/line` to import one chart family and its types. The available subpaths are `bar`, `line` (including area), `pie`, `radar`, `gauge`, `liquid-fill`, and `map`. Import the base component, ECharts theme token, and shared tooltip helpers from `@idux/charts/core`. Each chart subpath also exports the plot theme token. The aggregate entry registers the full set of charts.
+Use an ESM subpath such as `@idux/charts/line` to import one chart family and its types. The available subpaths are `bar`, `line` (including area), `pie`, `radar`, `gauge`, `liquid-fill`, `bullet`, and `map`. Import the base component, ECharts theme token, and shared tooltip helpers from `@idux/charts/core`. Each chart subpath also exports the plot theme token. The aggregate entry registers the full set of charts.
 
 ## Configuration and themes
 
-- `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, `createLiquidFillOption`, and `createMapOption` are pure option builders.
+- `useBarOption`, `useLineOption`, and `usePieOption` provide composable options; `createRadarOption`, `createGaugeOption`, `createLiquidFillOption`, `createBulletOption`, and `createMapOption` are pure option builders.
 - Use Vue `provide` with `BAR_CHART_TOKEN`, `LINE_CHART_TOKEN`, or `PIE_CHART_TOKEN` to set defaults for the corresponding native and built-in layouts.
-- Category Bar, Line / Area, automatic Pie, Radar, Gauge, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`, or pass `plotTheme` explicitly to a pure option builder.
+- Category Bar, Line / Area, automatic Pie, Radar, Gauge, Bullet, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`, or pass `plotTheme` explicitly to a pure option builder.
 - Option objects merge by field and arrays replace in full. Every chart component exposes `getEChartsInstance()` on its template ref.
 
 Shared HTML tooltip styles live in `@idux/charts/dist/style.css`; import them once in the application entry point.
@@ -85,7 +86,7 @@ Chart components forward `role`, `aria-*`, `tabindex`, and `data-*` to the chart
 
 ## Loading
 
-Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge, LiquidFill, and Map select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
+Set `:loading="pending"` to show the built-in illustration and `Loading...` message without recreating the chart. Bar, Line/Area, Pie/Ring/Rose, Radar, Gauge, Bullet, LiquidFill, and Map select their illustration automatically. `IxChart` and `useChart` inspect the first series: pie or absent series types use the pie fallback; all other types use the generic illustration. Both light and dark palettes are built in.
 
 Pass an object to localize or customize the state: `:loading="pending && { text: 'Updating...', maskColor: 'transparent' }"`. Other options include `textColor`, `color` (illustration tint), `fontSize`, `fontFamily`, and `icon` (image URL or SVG source). The loading layer is DOM content; it is excluded from ECharts image exports. Native spinner options such as `showSpinner` and `spinnerRadius` no longer change the illustration.
 

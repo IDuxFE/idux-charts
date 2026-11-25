@@ -39,6 +39,7 @@ const componentNames: Record<string, string> = {
   pie: 'PieChart',
   radar: 'RadarChart',
   gauge: 'GaugeChart',
+  bullet: 'BulletChart',
   'liquid-fill': 'LiquidFillChart',
   map: 'MapChart',
 }

@@ -1,7 +1,8 @@
-import { convertArray } from '@idux/charts-core'
+import { convertArray, getAlphaColor } from '@idux/charts-core'
 import type { ChartProps } from '@idux/charts-core'
 import type { DataZoomComponentOption } from 'echarts/components'
 import { isEqual } from 'lodash-es'
+import type { PlotTheme } from './plotTheme'
 
 export function targetsCategoryZoomAxis(
   zoom: DataZoomComponentOption,
@@ -69,4 +70,44 @@ export function categoryZoomUpdate(next?: CategoryZoomConfig, previous?: Categor
         endValue: end + shift,
       }
     })
+}
+
+/** Shared slider appearance for category plots; explicit caller settings take precedence. */
+export function createCategorySlider(
+  item: DataZoomComponentOption,
+  orient: 'horizontal' | 'vertical',
+  theme: PlotTheme,
+  dark: boolean,
+  legendBottom = 0,
+): DataZoomComponentOption {
+  const color = theme.color ?? '#689FFF'
+  const secondaryText = theme.secondaryTextColor ?? '#A1A7B3'
+  return {
+    type: 'slider',
+    ...(orient === 'vertical'
+      ? { width: 16, right: 4, height: 'ph' }
+      : { height: 16, top: 'auto', bottom: legendBottom + 4 }),
+    brushSelect: false,
+    showDetail: false,
+    showDataShadow: true,
+    ...(dark
+      ? {
+          backgroundColor: theme.splitAreaColor ?? '#171A1F',
+          borderColor: theme.borderColor ?? '#3C424D',
+          fillerColor: getAlphaColor(color, 0.24),
+          handleStyle: { color: theme.textColor ?? '#C2C7D1', borderColor: color },
+          moveHandleStyle: { color },
+          dataBackground: {
+            lineStyle: { color: secondaryText },
+            areaStyle: { color: secondaryText },
+          },
+          selectedDataBackground: {
+            lineStyle: { color },
+            areaStyle: { color },
+          },
+        }
+      : {}),
+    ...item,
+    orient,
+  }
 }

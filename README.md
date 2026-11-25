@@ -78,7 +78,7 @@ See [Getting Started](packages/site/src/0-guide/GettingStarted.page.md) for more
 
 ### TypeScript prop types
 
-For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, LiquidFill, or Map) from `@idux/charts`:
+For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, Bullet, LiquidFill, or Map) from `@idux/charts`:
 
 ```ts
 import type { LineChartPublicProps } from '@idux/charts'
@@ -128,7 +128,7 @@ See our [Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md)
 
 All charts can inherit a reactive ECharts theme through `CHART_THEME_TOKEN`. Explicit `theme` props take precedence, and theme changes recreate the instance. Recreated charts restore compatible zoom ranges and legend selections. The documentation site includes a light/dark toggle, follows the system until manually selected, and remembers the selection. See the configuration guide below for coordinating ECharts and plot themes.
 
-Category Bar, Line and Area, automatic Pie, Radar, Gauge, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
+Category Bar, Line and Area, automatic Pie, Radar, Gauge, Bullet, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
 
 Before each commit, Husky runs `pnpm check:staged`: lint and formatting checks target Git-staged files only; code changes also run related unit tests and project-wide type checking (which cannot safely run per file). Failures block the commit without auto-fixing files. Documentation-only changes run formatting checks only. Run `pnpm check` for the full suite. Installing dependencies initializes the hooks automatically.
 

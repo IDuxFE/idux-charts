@@ -19,7 +19,7 @@ export interface PlotTheme {
   splitLineColor?: string
   splitAreaColor?: string
   errorColor?: string
-  /** Fill for missing categories in Bar and missing ranges in Line and Area. */
+  /** Fill for missing categories in Bar/Bullet and missing ranges in Line and Area. */
   missingBackgroundColor?: string
   fontFamily?: string
   numberFontFamily?: string

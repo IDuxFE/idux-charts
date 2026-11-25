@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest'
+import type { EChartsOption } from 'echarts'
 
 import type { ChartPublicProps as CorePublicProps } from '@idux/charts-core'
 import type {
@@ -12,6 +13,7 @@ import type {
   PlotTextStyle,
   PieSeriesStyle,
   GaugeChartPublicProps,
+  BulletChartPublicProps,
   LiquidFillChartPublicProps,
   RadarChartPublicProps,
   ChartProps,
@@ -122,4 +124,20 @@ it('retains typed theme and style contracts on every new public component', () =
   expectTypeOf<HasStringIndex<RadarChartPublicProps>>().toEqualTypeOf<false>()
   expectTypeOf<'data'>().not.toExtend<keyof PieSeriesStyle>()
   expectTypeOf<'radius'>().not.toExtend<keyof PieSeriesStyle>()
+})
+
+it('keeps bullet public props typed without a broad index', () => {
+  expectTypeOf<HasStringIndex<BulletChartPublicProps>>().toEqualTypeOf<false>()
+  expectTypeOf<BulletChartPublicProps['value']>().toEqualTypeOf<number | null | undefined>()
+  expectTypeOf<BulletChartPublicProps['label']>().toEqualTypeOf<BarChartPublicProps['label']>()
+  expectTypeOf<BulletChartPublicProps['barWidth']>().toEqualTypeOf<
+    BarChartPublicProps['barWidth']
+  >()
+  expectTypeOf<BulletChartPublicProps['color']>().toEqualTypeOf<EChartsOption['color']>()
+  expectTypeOf<
+    Extract<
+      'min' | 'max' | 'actualLabel' | 'targetLabel' | 'valueFormatter',
+      keyof BulletChartPublicProps
+    >
+  >().toEqualTypeOf<never>()
 })
