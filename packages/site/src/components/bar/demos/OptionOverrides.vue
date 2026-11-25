@@ -9,7 +9,7 @@ const data = [120, 210, 160, 290, 240]
 const overrides: BarChartProps = {
   barWidth: 14,
   color: ['#8352cc'],
-  grid: { left: 56 },
+  grid: { left: 16 },
   yAxis: { max: 500, interval: 100 },
   tooltip: useStripeBarTooltip('次'),
   xAxis: { data: categories },

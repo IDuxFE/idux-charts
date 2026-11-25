@@ -27,6 +27,8 @@ const option: BarChartProps = {
 
 支持默认插槽，公共配置和用法见<a href="./core">IxChart API</a>。
 
+横向分类标签默认最多显示 186px，短名称按实际宽度占位，超出后省略；`horizontal-above` 上方标签最多显示 280px，并随容器收紧。悬停标签可查看完整类别名，缺失值和全零场景同样支持。内置 HTML 提示框的长标题会限宽换行。可用 `yAxis.axisLabel` 覆盖标签样式，用 `yAxis.triggerEvent: false` 关闭标签全文提示。
+
 ### BarChartProps
 
 | 属性                 | 类型                                               | 分类布局行为                                                                                               |
@@ -39,6 +41,8 @@ const option: BarChartProps = {
 | `referenceLine`      | `BarReferenceLine`                                 | `{ value: number, name?: string, color?: string }`。沿数值轴的指定值绘制虚线，提供独立名称后可用图例切换。 |
 | `zeroText`           | `string`                                           | 全部数值为 0 时的可选提示。上方标签布局使用轨道表达零值。                                                  |
 | `plotTheme`          | `PlotTheme`                                        | 分类布局的色板和辅助元素颜色。                                                                             |
+
+`horizontal-above` 布局中零值不显示数值标签，分类名称和轨道保留；Tooltip 仍显示实际数值 0。
 
 默认数值标签：基础竖向柱状图显示在 `top`，基础横向（含上方分类标签布局）显示在 `right`；分组柱状图不显示；竖向堆叠柱状图在 `top` 显示当前可见系列的堆叠总数，横向堆叠柱状图在整条柱子的 `right` 显示当前可见系列的堆叠总数。可用顶层 `label` 或 `series[].label` 覆盖默认值，系列配置优先。
 
