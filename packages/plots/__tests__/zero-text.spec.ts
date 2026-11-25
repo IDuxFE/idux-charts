@@ -7,6 +7,18 @@ for (const [name, create] of [
   ['line', createCategoryLineOption],
 ] as const) {
   describe(`${name} zero text color`, () => {
+    it('does not treat an empty dataset as all-zero measurements', () => {
+      const { option } = create(
+        { categories: ['A'], zeroText: 'No activity' },
+        {},
+        { series: [{ data: [] }] },
+        600,
+        {},
+        false,
+        () => undefined,
+      )
+      expect(option.graphic).toBeUndefined()
+    })
     it.each([
       [false, undefined, '#A1A7B3'],
       [true, undefined, '#808999'],

@@ -14,6 +14,7 @@ import { barChartProps, barPlotProps, BAR_CHART_TOKEN, useBarOption } from './us
 import type { BarChartProps } from './useBarOption'
 import { usePlotDark, usePlotTheme } from '../../shared/plotTheme'
 import { useLegendWheel } from '../../shared/useLegendWheel'
+import { useCategoryLabelTooltip } from '../../shared/categoryLabel'
 import { categoryInteraction, createPlotInteraction, usePlotSize } from '../../shared/usePlotLayout'
 import { createPlotUpdater, resolvePlotInput } from '../../shared/plotOptions'
 import { plotInstanceMethods, renderPlot } from '../../shared/usePlotRender'
@@ -32,6 +33,7 @@ export default withChartProps<BarChartProps>()(
       const input = props as BarChartProps
       const series = computed(() => pick(input, barChartProps))
       const interaction = createPlotInteraction()
+      const bindCategoryLabels = useCategoryLabelTooltip()
       const legacy = useBarOption(series, reactiveAttrs, interaction.getChart)
       const defaults = inject(BAR_CHART_TOKEN, null)
       const resolved = computed(() =>
@@ -70,6 +72,7 @@ export default withChartProps<BarChartProps>()(
       const option = computed(() => withBarShadows(layout.value.option))
       const onCategoryReady = (chart: EChartsType) => {
         interaction.setChart(chart)
+        bindCategoryLabels(chart)
         const syncWidth = () => {
           const { props, attrs } = resolved.value
           syncCategoryBarWidths(chart, props, attrs, layout.value.aboveMissingRows)

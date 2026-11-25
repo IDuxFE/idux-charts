@@ -48,6 +48,29 @@ describe('category bar option', () => {
     expect(labelFor(false)).not.toHaveProperty('color')
   })
 
+  it.each(['vertical', 'horizontal', 'horizontal-above'] as const)(
+    'hides zero labels only in the above layout (%s)',
+    layout => {
+      const zero = { value: 0, label: { show: true, color: 'red' } }
+      const option = build({ series: [{ data: [0, zero, '0', 2, null, -1] }] }, layout)
+      const bar = convertArray(option.series)[0]!
+      expect(bar).toMatchObject({
+        data:
+          layout === 'horizontal-above'
+            ? [
+                { value: 0, label: { show: false } },
+                { value: 0, label: { show: false, color: 'red' } },
+                { value: '0', label: { show: false } },
+                2,
+                null,
+                -1,
+              ]
+            : [0, zero, '0', 2, null, -1],
+      })
+      expect(zero.label.show).toBe(true)
+    },
+  )
+
   it('keeps stack labels working while a theme change clears the chart model', () => {
     const { option } = createCategoryBarOption(
       { categories: ['A'] },

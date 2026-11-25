@@ -1,4 +1,4 @@
-import { targetsCategoryZoomAxis } from '../../shared/categoryZoom'
+import { createCategorySlider, targetsCategoryZoomAxis } from '../../shared/categoryZoom'
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts'
 import type { EChartsType } from 'echarts/core'
 import type { BarSeriesOption, CustomSeriesOption } from 'echarts/charts'
@@ -13,6 +13,7 @@ import {
 import type { ChartProps } from '@idux/charts-core'
 import { defaultDarkMissingBackgroundColor } from '../../shared/plotTheme'
 import { mergeCartesianGrid } from '../../shared/cartesian'
+import { categoryLabelDefaults } from '../../shared/categoryLabel'
 import { mergePlotOptions } from '../../shared/plotOptions'
 import { createPlotTooltipFormatter } from '../../shared/plotTooltip'
 import type { PlotTooltipParams } from '../../shared/plotTooltip'
@@ -150,7 +151,13 @@ export function createCategoryBarOption(
       : getVisibleBarWidth(categories, getCategoryZoom(boundZoom, horizontal, categoryInput?.id))
   const barSeries = withBarLabels(
     bars.map((bar, index) => {
-      const data = categories.map((_, i) => normalizeDataItem(bar.data?.[i]))
+      const data = categories.map((_, i) => {
+        const item = normalizeDataItem(bar.data?.[i])
+        if (!above || scalarValue(item) == null || Number(scalarValue(item)) !== 0) return item
+        return mergePlotOptions(isDataItem(item) ? item : { value: item }, {
+          label: { show: false },
+        })
+      })
       return {
         barGap: '30%',
         barMinHeight: 0,
@@ -281,24 +288,6 @@ export function createCategoryBarOption(
   } = legendVisible
     ? createCategoryLegend(legendData, legend, width, theme, dark, getChart, current.legend)
     : { legend: undefined, height: 0, pager: undefined, wheel: undefined }
-  const zoomColor = theme.color ?? '#689FFF'
-  const darkSlider = dark
-    ? {
-        backgroundColor: theme.splitAreaColor ?? '#171A1F',
-        borderColor: theme.borderColor ?? '#3C424D',
-        fillerColor: getAlphaColor(zoomColor, 0.24),
-        handleStyle: { color: theme.textColor ?? '#C2C7D1', borderColor: zoomColor },
-        moveHandleStyle: { color: zoomColor },
-        dataBackground: {
-          lineStyle: { color: secondaryText },
-          areaStyle: { color: secondaryText },
-        },
-        selectedDataBackground: {
-          lineStyle: { color: zoomColor },
-          areaStyle: { color: zoomColor },
-        },
-      }
-    : {}
   const zoom = boundZoom?.map(item => {
     if (item.type && item.type !== 'slider') return item
     const orient =
@@ -307,18 +296,7 @@ export function createCategoryBarOption(
       !targetsCategoryZoomAxis(item, 'x', xAxisInput?.id)
         ? 'vertical'
         : 'horizontal')
-    return {
-      type: 'slider' as const,
-      ...(orient === 'vertical'
-        ? { width: 16, right: 4, height: 'ph' } // Use the grid height instead of the theme's 16px slider height.
-        : { height: 16, top: 'auto', bottom: legendBottom + 4 }),
-      brushSelect: false,
-      showDetail: false,
-      showDataShadow: true,
-      ...darkSlider,
-      ...item,
-      orient,
-    }
+    return createCategorySlider(item, orient, theme, dark, legendBottom)
   })
   const bottomSlider = zoom?.some(item => item.type === 'slider' && item.orient === 'horizontal')
   const rightSlider = zoom?.some(item => item.type === 'slider' && item.orient === 'vertical')
@@ -345,10 +323,11 @@ export function createCategoryBarOption(
       : categories,
     inverse: horizontal,
     boundaryGap: true,
+    ...(horizontal ? { triggerEvent: true, tooltip: { show: false } } : {}),
     axisLabel: horizontal
       ? {
-          width: above ? Math.max(0, Math.min(280, width ? width - 36 : 280)) : 186,
-          overflow: 'truncate' as const,
+          ...categoryLabelDefaults,
+          ...(above ? { width: Math.max(0, Math.min(280, width ? width - 36 : 280)) } : {}),
           ...(above
             ? {
                 inside: true,
