@@ -63,6 +63,25 @@ async function hoverCategory(svg: Locator, name: string) {
   await hoverCategoryLabel(svg, svg.getByText(name, { exact: true }))
 }
 
+async function openBarDemo(page: Page, title: string) {
+  await page.goto('components/bar')
+  const demo = demoByTitle(page, title)
+  const body = demo.locator('.bar-demo')
+  // Bring below-the-fold charts into view before waiting for their SVG paint.
+  await body.scrollIntoViewIfNeeded()
+  const chart = body.locator('[_echarts_instance_]')
+  const svg = chart.locator('svg')
+  return {
+    demo,
+    body,
+    chart,
+    svg,
+    bars: svg.locator(barPaths),
+    above: title.endsWith('横向上方'),
+    firstLabel: svg.getByText('服务器终端（200.200.1.1）', { exact: true }),
+  }
+}
+
 for (const [title, seriesCount] of [
   ['基础柱状图-竖向', 1],
   ['基础柱状图-横向', 1],
@@ -72,26 +91,21 @@ for (const [title, seriesCount] of [
   ['堆叠柱状图-竖向', 2],
   ['堆叠柱状图-横向', 3],
 ] as const) {
-  test(`${title} fills its demo and switches through all seven states`, async ({ page }) => {
-    await page.goto('components/bar')
-    const demo = demoByTitle(page, title)
-    const body = demo.locator('.bar-demo')
-    const chart = body.locator('[_echarts_instance_]')
-    const svg = chart.locator('svg')
-    const bars = svg.locator(barPaths)
-    const width = async () => {
-      const bounds = (await svg.boundingBox())!
-      const available = (await body.boundingBox())!
-      return Math.abs(bounds.width - available.width)
-    }
+  test(`${title} renders normal and extreme data and resizes`, async ({ page }) => {
+    const { demo, svg, bars, above, firstLabel } = await openBarDemo(page, title)
+    const horizontal = title.includes('横向')
+    const width = () =>
+      svg.evaluate((element, bodySelector) => {
+        const container = element.closest(bodySelector)!
+        return Math.abs(
+          element.getBoundingClientRect().width - container.getBoundingClientRect().width,
+        )
+      }, '.bar-demo')
 
     await expect(bars).toHaveCount(5 * seriesCount)
     await expect.poll(width).toBeLessThan(1)
-    const horizontal = title.includes('横向')
     const defaultWidth = title.startsWith('分组') ? 6 : 10
     await expect.poll(() => thickness(bars, horizontal)).toBeCloseTo(defaultWidth)
-    const above = title.endsWith('横向上方')
-    const firstLabel = svg.getByText('服务器终端（200.200.1.1）', { exact: true })
     if (above) {
       await expect.poll(() => aboveLabelGap(firstLabel, bars.first())).toBeCloseTo(5, 0)
     }
@@ -130,11 +144,23 @@ for (const [title, seriesCount] of [
         }),
       )
       .toBe(5 * seriesCount)
-    const instance = await chart.getAttribute('_echarts_instance_')
 
     await selectState(demo, '极限场景')
     await expect(bars).toHaveCount((horizontal ? 5 : 10) * seriesCount)
     await expect.poll(() => thickness(bars, horizontal)).toBeCloseTo(horizontal ? defaultWidth : 6)
+    await selectState(demo, '正常')
+    await expect(bars).toHaveCount(5 * seriesCount)
+    await page.setViewportSize({ width: 480, height: 800 })
+    await expect.poll(width).toBeLessThan(1)
+    expect((await svg.boundingBox())!.width).toBeLessThan(480)
+    expect((await svg.boundingBox())!.height).toBe(300)
+  })
+
+  test(`${title} handles zero, missing, reference, loading and empty states`, async ({ page }) => {
+    const { demo, body, chart, svg, bars, above, firstLabel } = await openBarDemo(page, title)
+    await expect(bars).toHaveCount(5 * seriesCount)
+    const instance = await chart.getAttribute('_echarts_instance_')
+
     await selectState(demo, '全部值为 0')
     if (above) {
       await expect(svg.locator(trackPaths)).toHaveCount(5)
@@ -182,10 +208,6 @@ for (const [title, seriesCount] of [
     await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
     await selectState(demo, '正常')
     await expect(bars).toHaveCount(5 * seriesCount)
-    await page.setViewportSize({ width: 480, height: 800 })
-    await expect.poll(width).toBeLessThan(1)
-    expect((await svg.boundingBox())!.width).toBeLessThan(480)
-    expect((await svg.boundingBox())!.height).toBe(300)
   })
 }
 
