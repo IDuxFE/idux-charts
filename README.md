@@ -76,6 +76,8 @@ For ESM builds, import individual chart families from subpaths such as `@idux/ch
 
 See [Getting Started](packages/site/src/0-guide/GettingStarted.page.md) for more details.
 
+See [software design](docs/design/README.md) for architecture and component decisions.
+
 ### TypeScript prop types
 
 For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, Bullet, WordCloud, LiquidFill, or Map) from `@idux/charts`:
@@ -118,7 +120,7 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](CONTRIBUTING.md)
 
 > If you're new to posting issues, we ask that you read [_How To Ask Questions The Smart Way_](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Ask a Question in Open Source Community](https://github.com/seajs/seajs/issues/545) and [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
-WordCloudChart provides text, rectangular tag and bubble layouts with native ECharts configuration. See the [word cloud guide](docs/word-cloud.en.md).
+WordCloudChart provides text, rectangular tag and bubble layouts with native ECharts configuration. See the [word cloud API](packages/site/src/components/word-cloud/API.md).
 
 See our [Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md). Maintainer setup for coverage, dependency updates, and security scanning is documented in [Open source integrations](.github/OPEN_SOURCE.md).
 

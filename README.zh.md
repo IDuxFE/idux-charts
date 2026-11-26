@@ -134,7 +134,9 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 
 推送前，Husky 会运行全仓库 lint 并强制重新执行完整的 TypeScript 检查。任一检查失败都会阻止推送。
 
-词云图支持文字、矩形标签和圆形气泡布局，沿用原生 ECharts 配置，详见 [API](packages/site/src/components/word-cloud/API.md) 和 [指南](packages/site/src/components/word-cloud/Design.md)。
+词云图支持文字、矩形标签和圆形气泡布局，沿用原生 ECharts 配置，详见 [API](packages/site/src/components/word-cloud/API.md)。
+
+整体架构与各组件的实现取舍见[软件设计](docs/design/README.md)。
 
 ## 贡献者
 
