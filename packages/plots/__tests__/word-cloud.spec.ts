@@ -989,3 +989,43 @@ it('clears saved selection when replacing generated series', () => {
     chart.dispose()
   }
 })
+
+it('preserves input order for equal-priority nodes with identical IDs', () => {
+  const node: CloudNode = {
+    id: 'same',
+    index: 0,
+    value: 1,
+    circle: false,
+    body: { x: -10, y: -10, width: 20, height: 20 },
+    bounds: { x: -10, y: -10, width: 20, height: 20 },
+    labels: [],
+  }
+  const placed = layoutCloud(
+    [node, { ...node, index: 1 }],
+    { x: 0, y: 0, width: 200, height: 200 },
+    4,
+    0,
+  )
+  expect(placed.map(item => item.index)).toEqual([0, 1])
+  expect(cloudNodesCollide(placed[0]!, placed[1]!, 4, 0)).toBe(false)
+})
+
+it.each([
+  {},
+  { selected: [] },
+  { selected: [{ seriesIndex: 0, dataType: 'edge', dataIndex: [0] }] },
+])('clears node selection when the native event has no matching node indices (%j)', event => {
+  const selection = createWordCloudSelection()
+  const cloud = () => createWordCloudOption({ data: [{ id: 'a', name: 'Word', value: 1 }] })
+  const initial = cloud()
+  ;(initial.series as any[])[0].data[0].selected = true
+  selection.apply(initial)
+  const chart = { getOption: () => initial, dispatchAction: vi.fn(), on: vi.fn() }
+  selection.bind(chart as any)
+  expect(chart.dispatchAction).toHaveBeenCalledWith(
+    { type: 'select', batch: [{ seriesIndex: 0, dataType: 'node', dataIndex: 0 }] },
+    { silent: true },
+  )
+  chart.on.mock.calls[0]![1](event)
+  expect((selection.apply(cloud()).series as any[])[0].data[0].selected).toBe(false)
+})

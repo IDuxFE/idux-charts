@@ -155,11 +155,12 @@ export function layoutCloud(nodes: CloudNode[], frame: Box, gap: number, overlap
         node.rect && overlap > 0
           ? [...nearby].filter(other => other.rect && cloudBackgroundsOverlap(candidate, other))
           : []
+      // Every nearby node has a count assigned before insertion into the spatial index.
       // Limit each rectangle to two overlapping neighbors to avoid dense stacks.
-      if (partners.length > 2 || partners.some(other => (overlapCounts.get(other) ?? 0) >= 2))
+      if (partners.length > 2 || partners.some(other => overlapCounts.get(other)! >= 2))
         return false
       overlapCounts.set(candidate, partners.length)
-      for (const other of partners) overlapCounts.set(other, (overlapCounts.get(other) ?? 0) + 1)
+      for (const other of partners) overlapCounts.set(other, overlapCounts.get(other)! + 1)
       placed.push(candidate)
       if (!bucketKeys) oversized.push(candidate)
       for (const key of bucketKeys ?? []) {
