@@ -11,3 +11,5 @@ uv run --with fonttools==4.68.0 python e2e/fixture/fonts/subset.py /path/to/Noto
 ```
 
 The subset includes supported characters from documentation examples and chart sources, plus ASCII and the CJK height-measurement character used by ZRender. Review regenerated snapshots in all three browsers.
+
+The subset also includes the WordCloud demo glyphs. When extending the visual catalogue, regenerate the subset from the pinned source, verify the actual font through Chromium's platform-font check, and compare existing baselines without updating them. WordCloud's five static examples have 30 light/dark screenshots across the three supported browsers.

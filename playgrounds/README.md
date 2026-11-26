@@ -84,3 +84,9 @@ The theme page also exercises `CHART_THEME_TOKEN`: mutate a provided ECharts the
 Root E2E uses four local workers (two in CI), with independent tests within each file running in parallel. Both playgrounds use two workers each. `pnpm test:playgrounds` builds and packs the library once, installs both apps concurrently, then runs their suites concurrently on separate ports. To prepare only one app, run `pnpm playgrounds:prepare vue2` or `vue3`. Override root concurrency with `pnpm test:e2e --workers=2` on smaller machines. Do not launch multiple root E2E commands in the same checkout: they share build output, preview ports, and report directories. CI shards use isolated runners.
 
 Map lifecycle, geo viewport preservation, aggregate/subpath exports, and helper types are covered by the separate packed-consumer matrix: after `pnpm build:lib`, run `pnpm test:declarations --runtime`. It includes Vue 2.6/2.7/3 and ECharts 5/6; the playground pages above do not include a Map demo.
+
+## Word cloud lifecycle and coverage
+
+Open `/?word-cloud` in either app for the same text, rectangular and bubble fixture. The shared regression checks packed subpath imports, real SVG nodes, selection after data reordering and theme recreation, continuous motion, loading, disposal and remounting. A second case sends actual SVG clicks and checks native tooltips, category filtering and invalid-size recovery. Both cases run in the normal playground CI suites and contribute to combined coverage.
+
+Run `pnpm test:coverage:all` to collect fresh unit and both instrumented consumer results, then merge them into `coverage/combined/`. Unit coverage remains separately available in `coverage/index.html`; a merged report does not replace declaration compatibility or visual baseline checks.

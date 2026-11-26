@@ -30,6 +30,11 @@ const modules = import.meta.glob<{ default: Component }>([
   '../../packages/site/src/components/bullet/demos/Segmented.vue',
   '../../packages/site/src/components/bullet/demos/Grouped.vue',
   '../../packages/site/src/components/bullet/demos/GroupedAbove.vue',
+  '../../packages/site/src/components/word-cloud/demos/Basic.vue',
+  '../../packages/site/src/components/word-cloud/demos/Tags.vue',
+  '../../packages/site/src/components/word-cloud/demos/Bubbles.vue',
+  '../../packages/site/src/components/word-cloud/demos/Search.vue',
+  '../../packages/site/src/components/word-cloud/demos/CustomRect.vue',
 ])
 const demoPaths: Record<string, string> = {
   'bar-basic': '../../packages/site/src/components/bar/demos/BasicVertical.vue',
@@ -49,6 +54,11 @@ const demoPaths: Record<string, string> = {
   'bullet-segmented': '../../packages/site/src/components/bullet/demos/Segmented.vue',
   'bullet-grouped': '../../packages/site/src/components/bullet/demos/Grouped.vue',
   'bullet-above': '../../packages/site/src/components/bullet/demos/GroupedAbove.vue',
+  'word-cloud-text': '../../packages/site/src/components/word-cloud/demos/Basic.vue',
+  'word-cloud-rect': '../../packages/site/src/components/word-cloud/demos/Tags.vue',
+  'word-cloud-circle': '../../packages/site/src/components/word-cloud/demos/Bubbles.vue',
+  'word-cloud-search': '../../packages/site/src/components/word-cloud/demos/Search.vue',
+  'word-cloud-overlap': '../../packages/site/src/components/word-cloud/demos/CustomRect.vue',
 }
 
 export async function mountDemoVisual(key: string, dark: boolean) {

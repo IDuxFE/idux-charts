@@ -1,4 +1,4 @@
-import { cloneDeep, isPlainObject, mergeWith, omit, pick } from 'lodash-es'
+import { cloneDeep, isEqual, isPlainObject, mergeWith, omit, pick } from 'lodash-es'
 
 import { convertArray, replaceChartComponent, splitChartOptions } from '@idux/charts-core'
 import type { ChartOption, ChartProps } from '@idux/charts-core'
@@ -73,7 +73,7 @@ function removesOption(previous: unknown, next: unknown): boolean {
 }
 
 /** Built-in layouts submit snapshots. A merge is safe while it cannot retain removed options. */
-export function createPlotUpdater(mergeDataUpdates = false) {
+export function createPlotUpdater(mergeDataUpdates = false, resetOnDataIdentityChange = false) {
   let previous: ChartProps | undefined
   return (option?: ChartProps): ChartProps | undefined => {
     const { option: snapshot } = splitChartOptions(option ?? {})
@@ -89,7 +89,19 @@ export function createPlotUpdater(mergeDataUpdates = false) {
             yAxis: convertArray(value.yAxis).map(axis => omit(axis, 'data')),
           }
         : value
-    const notMerge = !merge || removesOption(layout(previous), layout(snapshot))
+    // Native selection caches can retain old raw indices after an item moves.
+    // Opt in where a plot restores selection itself; weight-only updates still merge.
+    const identities = (value: ChartProps | undefined) =>
+      convertArray(value?.series).map(series =>
+        Array.isArray(series.data)
+          ? series.data.map(item =>
+              item && typeof item === 'object' ? pick(item, 'id', 'name', 'selected') : undefined,
+            )
+          : undefined,
+      )
+    const identityChanged =
+      resetOnDataIdentityChange && !isEqual(identities(previous), identities(snapshot))
+    const notMerge = !merge || identityChanged || removesOption(layout(previous), layout(snapshot))
     const replaceZoom = mergeDataUpdates && removesOption(previous?.dataZoom, snapshot.dataZoom)
     previous = option && cloneDeep(snapshot)
     return (

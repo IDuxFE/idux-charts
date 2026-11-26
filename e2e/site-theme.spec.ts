@@ -46,9 +46,18 @@ test('system theme changes apply until a manual choice is made', async ({ page }
 for (const route of [
   '0-guide/Introdoction.page.md',
   '0-guide/GettingStarted.page.md',
-  ...['core', 'pie', 'bar', 'line', 'area', 'radar', 'gauge', 'liquid-fill', 'map'].map(
-    name => `components/${name}`,
-  ),
+  ...[
+    'core',
+    'pie',
+    'bar',
+    'line',
+    'area',
+    'radar',
+    'gauge',
+    'liquid-fill',
+    'map',
+    'word-cloud',
+  ].map(name => `components/${name}`),
 ]) {
   test(`dark theme renders content and restores light colors on ${route}`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' })
@@ -61,7 +70,15 @@ for (const route of [
     if (route.startsWith('components/')) {
       const charts = page.locator('[_echarts_instance_]')
       await expect(charts.first()).toBeVisible()
-      const texts = charts.first().locator('svg text')
+      // Text clouds intentionally use palette colors; tag labels use theme text tokens.
+      const surface =
+        route === 'components/word-cloud'
+          ? page
+              .locator('.archive-app-demo')
+              .filter({ has: page.getByRole('heading', { name: /^分类矩形标签/ }) })
+              .locator('[_echarts_instance_]')
+          : charts.first()
+      const texts = surface.locator('svg text')
       await expect
         .poll(() =>
           texts.evaluateAll(nodes =>

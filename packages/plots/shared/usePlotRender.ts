@@ -59,6 +59,7 @@ interface PlotRenderSettings {
   onReady?: (chart: EChartsType) => void
   loadingIcon?: string | (() => string)
   mergeDataUpdates?: boolean
+  resetOnDataIdentityChange?: boolean
   categoryLabelTooltip?: boolean
   zoomConfig?: (input: ChartProps) => CategoryZoomConfig | undefined
 }
@@ -73,6 +74,7 @@ export function usePlotRender(
     onReady: onPlotReady,
     loadingIcon,
     mergeDataUpdates = false,
+    resetOnDataIdentityChange = false,
     categoryLabelTooltip = false,
     zoomConfig,
   } = typeof settings === 'string' ? { loadingIcon: settings } : settings
@@ -80,7 +82,7 @@ export function usePlotRender(
   const theme = usePlotTheme(
     () => (props().plotTheme ?? attrs.value.plotTheme) as PlotTheme | undefined,
   )
-  const update = createPlotUpdater(mergeDataUpdates)
+  const update = createPlotUpdater(mergeDataUpdates, resetOnDataIdentityChange)
   const interaction = createPlotInteraction()
   const bindCategoryLabels = useCategoryLabelTooltip()
   let previousInput: ChartProps | undefined

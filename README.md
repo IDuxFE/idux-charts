@@ -78,7 +78,7 @@ See [Getting Started](packages/site/src/0-guide/GettingStarted.page.md) for more
 
 ### TypeScript prop types
 
-For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, Bullet, LiquidFill, or Map) from `@idux/charts`:
+For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, Bullet, WordCloud, LiquidFill, or Map) from `@idux/charts`:
 
 ```ts
 import type { LineChartPublicProps } from '@idux/charts'
@@ -118,6 +118,8 @@ We welcome all contributions. Please read our [CONTRIBUTING.md](CONTRIBUTING.md)
 
 > If you're new to posting issues, we ask that you read [_How To Ask Questions The Smart Way_](http://www.catb.org/~esr/faqs/smart-questions.html) (**This guide does not provide actual support services for this project!**), [How to Ask a Question in Open Source Community](https://github.com/seajs/seajs/issues/545) and [How to Report Bugs Effectively](http://www.chiark.greenend.org.uk/~sgtatham/bugs.html) prior to posting. Well written bug reports help us help you!
 
+WordCloudChart provides text, rectangular tag and bubble layouts with native ECharts configuration. See the [word cloud guide](docs/word-cloud.en.md).
+
 See our [Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md). Maintainer setup for coverage, dependency updates, and security scanning is documented in [Open source integrations](.github/OPEN_SOURCE.md).
 
 ## ☀️ License
@@ -128,7 +130,7 @@ See our [Code of Conduct](CODE_OF_CONDUCT.md) and [security policy](SECURITY.md)
 
 All charts can inherit a reactive ECharts theme through `CHART_THEME_TOKEN`. Explicit `theme` props take precedence, and theme changes recreate the instance. Recreated charts restore compatible zoom ranges and legend selections. The documentation site includes a light/dark toggle, follows the system until manually selected, and remembers the selection. See the configuration guide below for coordinating ECharts and plot themes.
 
-Category Bar, Line and Area, automatic Pie, Radar, Gauge, Bullet, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
+Category Bar, Line and Area, automatic Pie, Radar, Gauge, Bullet, WordCloud, LiquidFill, and Map support `plotTheme`. Provide reactive defaults with `PLOT_THEME_TOKEN`. Chart component refs expose `getEChartsInstance()`. See the [configuration guide](packages/site/src/0-guide/GettingStarted.page.md) for option merging, background colors, and upgrade notes. Open either [compatibility playground](playgrounds/README.md) at `/?theme` to try theme switching.
 
 Before each commit, Husky runs `pnpm check:staged`: lint and formatting checks target Git-staged files only; code changes also run related unit tests and project-wide type checking (which cannot safely run per file). Failures block the commit without auto-fixing files. Documentation-only changes run formatting checks only. Run `pnpm check` for the full suite. Installing dependencies initializes the hooks automatically.
 

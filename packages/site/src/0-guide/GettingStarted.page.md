@@ -42,7 +42,7 @@ const data = [123, 324, 156]
 
 导入图表组件时会注册该组件内置的 ECharts 模块。Vue 3 可在 `<script setup>` 中直接使用，或通过 `app.use(IxLineChart)` 全局注册。Vue 2 可用 `components: { IxLineChart }` 局部注册，或通过 `Vue.use(IxLineChart)` 全局注册。`app.component` 和 `Vue.component` 也可以用于全局注册。
 
-使用 ESM 构建时，可以通过子入口按需导入组件及其类型。例如，将折线图的导入改为 `import { IxLineChart, type LineChartProps } from '@idux/charts/line'`。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge` 、`liquid-fill`、`bullet` 和 `map`。总入口会注册全套图表模块。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。
+使用 ESM 构建时，可以通过子入口按需导入组件及其类型。例如，将折线图的导入改为 `import { IxLineChart, type LineChartProps } from '@idux/charts/line'`。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge` 、`liquid-fill`、`bullet`、`word-cloud` 和 `map`。总入口会注册全套图表模块。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。
 
 ## 加载状态
 
@@ -52,10 +52,10 @@ const data = [123, 324, 156]
 
 ## 应用主题
 
-| 配置                             | 用途                                                                                                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `theme` / `CHART_THEME_TOKEN`    | ECharts 初始化主题。优先级为组件 `theme` → 注入主题 → 内置 `seer`。变更主题会重建实例并再次触发 `onReady`。缩放和图例配置兼容时沿用用户状态，新的显式配置优先。                            |
-| `plotTheme` / `PLOT_THEME_TOKEN` | 分类柱状图、分类折线图和面积图、饼图自动布局、雷达图、仪表盘、水波图及地图的视觉默认值。各图表按需使用字段。局部字段覆盖注入值，`undefined` 继承，色板数组整体替换。更新该配置会保留实例。 |
+| 配置                             | 用途                                                                                                                                                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme` / `CHART_THEME_TOKEN`    | ECharts 初始化主题。优先级为组件 `theme` → 注入主题 → 内置 `seer`。变更主题会重建实例并再次触发 `onReady`。缩放和图例配置兼容时沿用用户状态，新的显式配置优先。                                            |
+| `plotTheme` / `PLOT_THEME_TOKEN` | 分类柱状图、分类折线图和面积图、饼图自动布局、雷达图、仪表盘、子弹图、词云图、水波图及地图的视觉默认值。各图表按需使用字段。局部字段覆盖注入值，`undefined` 继承，色板数组整体替换。更新该配置会保留实例。 |
 
 在图表的父组件 `setup` 中提供响应式主题。Vue 2.6 从 `@vue/composition-api` 导入组合式 API。
 
@@ -84,7 +84,7 @@ provide(
 )
 ```
 
-组件可用 `:plot-theme="{ textColor: '#eeeeee' }"` 覆盖所用字段。独立调用 `createRadarOption`、`createGaugeOption` 、`createLiquidFillOption` 或 `createMapOption` 时，请直接传入 `plotTheme`。
+组件可用 `:plot-theme="{ textColor: '#eeeeee' }"` 覆盖所用字段。独立调用 `createRadarOption`、`createGaugeOption`、`createLiquidFillOption`、`createBulletOption`、`createWordCloudOption` 或 `createMapOption` 时，请直接传入 `plotTheme`。
 
 | `PlotTheme` 字段                       | 用途                                                 |
 | -------------------------------------- | ---------------------------------------------------- |
@@ -100,6 +100,10 @@ provide(
 ## 绘制地图
 
 先用 `registerMap(name, geoJSON)` 注册应用提供的几何，再通过 `geo: { map: name }` 指定底图。`series` 可组合 `createMapNodes`、`createMapLines` 的结果与手写的原生系列；`geo.regions` 可用 `createMapRegions` 生成。地图没有 `mode` 属性，也不内置几何或数据请求。完整示例和数据校验见<a href="../components/map">地图 API</a>。
+
+## 绘制词云
+
+从 `@idux/charts/word-cloud` 导入 `IxWordCloudChart`，传入 `{ id, name, value }[]`；通过 `shape` 选择文字、矩形标签或圆形气泡。`0` 是有效权重，建议提供稳定 id；拥挤时优先保留高权重项。使用 `motion` 开启持续漂浮，`animation: false` 同时关闭原生过渡与漂浮。词云的 `categories` 是原生 graph 分类，不是柱状图与折线图的轴分类；内置布局不使用 dataset 或 dataZoom。完整尺寸、状态与避让约定见<a href="../components/word-cloud">词云 API 与指南</a>。
 
 ## 自定义提示框
 

@@ -1,3 +1,5 @@
+import { IxWordCloudChart } from '@idux/charts/word-cloud'
+import { createWordCloudFixture } from '../../testing/word-cloud.js'
 import { createSlotsFixture } from '../../testing/slots.js'
 import Theme from './theme.js'
 import Basic from './basic.js'
@@ -143,12 +145,15 @@ const Slots = createSlotsFixture(undefined, coreSlots ? IxChart : IxBarChart, tr
   native: coreSlots,
   initialMode: new URLSearchParams(location.search).has('initially-absent') ? 'absent' : 'element',
 })
+const WordCloud = createWordCloudFixture(undefined, IxWordCloudChart, true)
 new Vue(
-  location.search.includes('slots')
-    ? Slots
-    : location.search.includes('theme')
-      ? Theme
-      : location.search.includes('basic')
-        ? Basic
-        : App,
+  location.search.includes('word-cloud')
+    ? WordCloud
+    : location.search.includes('slots')
+      ? Slots
+      : location.search.includes('theme')
+        ? Theme
+        : location.search.includes('basic')
+          ? Basic
+          : App,
 ).$mount('#app')

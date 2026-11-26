@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh.md)
 
-The preset chart layer of iDux Charts, providing eight chart components and option helpers built on `@idux/charts-core`.
+The preset chart layer of iDux Charts, providing nine chart components and option helpers built on `@idux/charts-core`.
 
 For the unified entry point and shared tooltip styles, use [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.md).
 
@@ -28,18 +28,21 @@ Vue.use(VueCompositionAPI)
 
 ## Chart components
 
-| Component           | Chart                        |
-| ------------------- | ---------------------------- |
-| `IxBarChart`        | Bar                          |
-| `IxLineChart`       | Line and area                |
-| `IxPieChart`        | Pie and doughnut             |
-| `IxRadarChart`      | Radar                        |
-| `IxGaugeChart`      | Gauge                        |
-| `IxBulletChart`     | Bullet (single and grouped)  |
-| `IxMapChart`        | Map (regions, nodes, routes) |
-| `IxLiquidFillChart` | Liquid fill                  |
+| Component           | Chart                            |
+| ------------------- | -------------------------------- |
+| `IxBarChart`        | Bar                              |
+| `IxLineChart`       | Line and area                    |
+| `IxPieChart`        | Pie and doughnut                 |
+| `IxRadarChart`      | Radar                            |
+| `IxGaugeChart`      | Gauge                            |
+| `IxBulletChart`     | Bullet (single and grouped)      |
+| `IxWordCloudChart`  | Word cloud (text, tags, bubbles) |
+| `IxMapChart`        | Map (regions, nodes, routes)     |
+| `IxLiquidFillChart` | Liquid fill                      |
 
 Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Compose native `geo`, `series`, and `visualMap` options; optional `createMapRegions`, `createMapNodes`, `createMapLines`, and `createMapVisualMap` helpers return ordinary ECharts configuration. There is no `mode` prop. Geometry assets are managed by the application and excluded from the library bundle. Use `validateMapData({ nodes, routes, regions })` to inspect invalid coordinates, unresolved endpoints, and duplicate identities before generating options.
+
+Word cloud layouts use native graph nodes and preserve scalar weights, category styles, selection and common chart controls. See the [English guide](../../docs/word-cloud.en.md) for sizing, optional motion and collision boundaries.
 
 ## Quick start
 

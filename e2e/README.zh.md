@@ -8,7 +8,7 @@ Chromium 任务还会固定执行中文上方标签的视觉回归，使用独�
 
 单次 CI 不代表每个用例都通过了全部三个浏览器。请保留已评审的 macOS 截图基线及现有像素容差。Vue 2、Vue 3 Playground 分别测试打包后的包，兼容性任务也保留全部五种 Vue/ECharts 组合。
 
-`visual.spec.ts-snapshots` 使用文档站实际 Demo，为 Bar、Line、Area、Pie、Radar、Gauge、LiquidFill、Map 和 Bullet 建立亮暗主题的三浏览器视觉基线。Gauge 覆盖基础、状态和分段示例，Map 覆盖状态、密度和路线，Bullet 覆盖单值、分段、分组和上方标签。测试夹具直接导入实际 Demo 组件与站点主题配置，保留 Demo 配置及组件自身的尺寸规则，使用固定 974px 桌面容器，仅在夹具中通过公开主题接口提供固定的 OFL 中文字体，避免宿主字体度量差异；组件默认字体行为不变。将动画推进到结束状态后截图；原有 Bar/Pie 历史基线单独保留。使用 `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing` 只生成缺失基线，检查图片后去掉更新参数复跑。
+`visual.spec.ts-snapshots` 使用文档站实际 Demo，为 Bar、Line、Area、Pie、Radar、Gauge、LiquidFill、Map、Bullet 和 WordCloud 建立亮暗主题的三浏览器视觉基线。Gauge 覆盖基础、状态和分段示例，Map 覆盖状态、密度和路线，Bullet 覆盖单值、分段、分组和上方标签。测试夹具直接导入实际 Demo 组件与站点主题配置，保留 Demo 配置及组件自身的尺寸规则，使用固定 974px 桌面容器，仅在夹具中通过公开主题接口提供固定的 OFL 中文字体，避免宿主字体度量差异；组件默认字体行为不变。将动画推进到结束状态后截图；原有 Bar/Pie 历史基线单独保留。使用 `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing` 只生成缺失基线，检查图片后去掉更新参数复跑。
 
 ## 覆盖范围与执行边界
 
@@ -16,7 +16,7 @@ Chromium 任务还会固定执行中文上方标签的视觉回归，使用独�
 | ---------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | 图表尺寸   | 每种渲染器和 CSS 场景独立测试                | SVG、Canvas 下的全部 17 种布局、尺寸变化、可见性和实例身份                                       |
 | 玫瑰图高亮 | 每种对齐与形状共用页面，通过具名步骤检查模式 | 全部 9 种对齐 × 2 种形状 × 4 种模式、全部四个扇区、从数据项回到默认状态，以及每种模式下的 resize |
-| 空状态插槽 | 每个具名示例独立测试                         | 全部 29 个示例、完整示例数量、覆盖层几何、重新加载与正常恢复、实例身份                           |
+| 空状态插槽 | 每个具名示例独立测试                         | 全部 32 个示例、完整示例数量、覆盖层几何、重新加载与正常恢复、实例身份                           |
 | 柱图图例   | 分开检查图例目录、换行和分页交互             | 顺序、总数、换行、分页、缩放、选择、滚轮传递和 resize 锚点                                       |
 | 站点渲染   | 每次断言轮询读取一次 DOM 快照                | 全部源码示例、预期图表数量、可见性，以及已渲染的路径或 Canvas                                    |
 | 外观       | 现有截图及同浏览器参考图比较                 | 全部已评审基线、像素检查和 tooltip 样式断言                                                      |
@@ -95,3 +95,11 @@ IDUX_E2E_SEED=12345 pnpm test:e2e:ci chromium
 ```
 
 添加 `--plan-only` 可仅检查并验证分配，不启动浏览器。
+
+## 词云视觉与交互回归
+
+`visual.spec.ts-snapshots/demo-word-cloud-*.png` 提供 30 张经过检查的 macOS 基线：文字、矩形标签、气泡、搜索高亮和重叠矩形，分别覆盖明暗主题及 Chromium、Firefox、WebKit。fixture 导入实际文档示例；截图前启用减少动态效果并结束原生入场动画，不修改发布组件行为。固定 CJK 字体补齐示例汉字，Chromium 额外检查实际使用的字体。
+
+仅生成缺失基线：`pnpm exec playwright test e2e/visual.spec.ts --grep "word-cloud .* demo visual baseline" --update-snapshots=missing`。检查图片后去掉更新参数重跑，既有基线应保持不变。
+
+词云功能用例覆盖真实鼠标悬停暂停/恢复、减少动态效果、选中、图例筛选、搜索位置稳定，以及加载和空状态恢复。通用示例渲染、主题和空插槽清单也包含词云；Vue 2/3 打包消费测试通过真实 SVG 点击验证 Tooltip、分类筛选与非法尺寸恢复，并参与浏览器覆盖率合并。
