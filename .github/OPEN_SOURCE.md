@@ -69,3 +69,5 @@ Check for a compatible fix before accepting a vulnerability exception; dependenc
 | `vscode-textmate`                   | `6.0.0`   | Quality warning; retained Shiki integration                                                                                                                                            |
 
 These are version-specific maintenance records, not proof of current console state. FOSSA quality warnings do not support all-version auto-ignore; changing Stale Package Prevention changes the shared policy's enforcement. See [FOSSA quality issue guidance](https://docs.fossa.com/docs/quality/reviewing-quality-issues).
+
+Keep the root `@types/node` dependency pinned to the recorded Node 22 baseline. Fresh CI installs generate an untracked lockfile, and a caret range can resolve a different patch version outside the selected-version exception. Review the CLI project's exception when intentionally updating this pin; keep license and vulnerability checks enabled.
