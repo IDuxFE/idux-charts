@@ -1,3 +1,10 @@
+/**
+ * Smoke-test packed word-cloud entries in isolated Vue/ECharts consumer applications.
+ * Called by test-declarations.mjs with --runtime; exports smokeWordCloud(app).
+ * Writes a fixture into the supplied app directory, then builds and previews it.
+ * Uses Chromium to check entry identity, shapes, updates, interactions, themes,
+ * animation and remounting; closes the owned browser and preview server afterward.
+ */
 import { writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { build, preview } from 'vite'
