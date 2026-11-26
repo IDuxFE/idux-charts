@@ -13,7 +13,7 @@ reviewed macOS screenshot baselines and their existing pixel tolerances. Vue 2
 and Vue 3 playgrounds test packed packages separately; the compatibility jobs
 also retain all five Vue/ECharts combinations.
 
-Visual baselines in `visual.spec.ts-snapshots` use representative documentation demos for Bar, Line, Area, Pie, Radar, Gauge, LiquidFill, Map and Bullet in light/dark themes across all three browsers. Gauge covers basic, status and segmented examples; Map covers status, density and routes; Bullet covers single, segmented, grouped and above-label examples. A fixture imports the actual demo components and site theme setup, preserving demo options and component sizing rules inside a fixed 974px desktop container. Only this fixture supplies a pinned OFL CJK font through the public theme providers to avoid host font metric drift; published components keep their default font behavior. Tests finish animations for stable capture, and retain the original historical Bar/Pie baselines. Generate only missing baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing`, inspect the images, then rerun without the update flag.
+Visual baselines in `visual.spec.ts-snapshots` use representative documentation demos for Bar, Line, Area, Pie, Radar, Gauge, LiquidFill, Map, Bullet and WordCloud in light/dark themes across all three browsers. Gauge covers basic, status and segmented examples; Map covers status, density and routes; Bullet covers single, segmented, grouped and above-label examples. A fixture imports the actual demo components and site theme setup, preserving demo options and component sizing rules inside a fixed 974px desktop container. Only this fixture supplies a pinned OFL CJK font through the public theme providers to avoid host font metric drift; published components keep their default font behavior. Tests finish animations for stable capture, and retain the original historical Bar/Pie baselines. Generate only missing baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "demo visual baseline" --update-snapshots=missing`, inspect the images, then rerun without the update flag.
 
 ## Coverage and execution boundaries
 
@@ -21,7 +21,7 @@ Visual baselines in `visual.spec.ts-snapshots` use representative documentation 
 | ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | Chart sizing       | One test per renderer and CSS scenario                       | All 17 layouts in SVG and Canvas, resize, visibility and instance identity                                   |
 | Rose emphasis      | One page per alignment and shape, named steps per mode       | All 9 alignments × 2 shapes × 4 modes, all four sectors, item-to-default transition and resize in every mode |
-| Empty slots        | One test per named demo                                      | All 29 demos, complete demo counts, overlay geometry, reload/normal recovery and instance identity           |
+| Empty slots        | One test per named demo                                      | All 32 demos, complete demo counts, overlay geometry, reload/normal recovery and instance identity           |
 | Bar legends        | Separate catalogue, wrapping and paginated interaction tests | Ordering, totals, wrapping, paging, zoom, selection, wheel propagation and resize anchors                    |
 | Site rendering     | One DOM snapshot per assertion poll                          | Every source demo, expected chart counts, visibility and rendered paths/Canvas                               |
 | Appearance         | Existing screenshots and same-browser reference comparisons  | All reviewed baselines, pixel checks and tooltip style assertions                                            |
@@ -160,3 +160,11 @@ IDUX_E2E_SEED=12345 pnpm test:e2e:ci chromium
 ```
 
 Add `--plan-only` to inspect and verify the selection without starting browsers.
+
+## Word cloud visual and interaction regression
+
+`visual.spec.ts-snapshots/demo-word-cloud-*.png` contains 30 reviewed macOS baselines: text, rectangular tags, bubbles, search highlights and overlapping rectangles, each in light/dark themes for Chromium, Firefox and WebKit. The fixture imports actual documentation demos. Word cloud screenshots emulate reduced motion before mounting, then finish native entry animations; the published component behavior is unchanged. The fixed CJK font includes the new example glyphs, and Chromium checks the actual platform font.
+
+Generate only missing word cloud baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "word-cloud .* demo visual baseline" --update-snapshots=missing`. Inspect each image, then rerun without the update option. Existing baselines must remain unchanged.
+
+`word-cloud.spec.ts` also checks actual pointer hover/pause/resume, reduced motion, selection, legend filtering, search layout stability and loading/empty recovery. The general demo-render, theme and empty-slot catalogues include WordCloud. Packed Vue 2/3 consumers exercise actual SVG clicks, tooltips, category filtering and invalid-size recovery, contributing browser coverage in addition to the lifecycle case.

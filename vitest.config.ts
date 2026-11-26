@@ -30,6 +30,14 @@ export default mergeConfig(
         ],
         reporter: ['text', 'html', 'lcov', 'json-summary', 'json'],
         reportsDirectory: './coverage',
+        thresholds: {
+          'packages/plots/word-cloud/src/**': {
+            statements: 99,
+            branches: 97,
+            functions: 100,
+            lines: 100,
+          },
+        },
       },
     },
   }),

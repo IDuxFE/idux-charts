@@ -84,3 +84,9 @@ PLAYWRIGHT_DOWNLOAD_HOST=https://registry.npmmirror.com/-/binary/playwright pnpm
 根 E2E 本地使用 4 个 worker，CI 每个分片使用 2 个 worker，同一文件内的独立用例也并行运行。两个 playground 各使用 2 个 worker。`pnpm test:playgrounds` 只构建、打包一次库，并行安装两个应用，再使用独立端口并行执行测试。可通过 `pnpm playgrounds:prepare vue2` 或 `vue3` 只准备一个应用。资源较少时可用 `pnpm test:e2e --workers=2` 降低并发。不要在同一 checkout 同时启动多个根 E2E 命令，它们共享构建目录、预览端口和报告目录；CI 分片使用独立 runner。
 
 地图生命周期、geo 视角保留、总入口／子入口导出和生成函数类型由独立打包消费端矩阵覆盖：执行 `pnpm build:lib` 后运行 `pnpm test:declarations --runtime`。矩阵包含 Vue 2.6／2.7／3 及 ECharts 5／6；上述 playground 页面未包含地图示例。
+
+## 词云交互与覆盖率
+
+两个应用都可打开 `/?word-cloud`。共享 fixture 从真实打包子入口加载三种形态，覆盖数据重排后的选择索引、主题重建、持续运动、loading、销毁和重挂载；另一个场景通过实际 SVG 鼠标点击验证 Tooltip、图例过滤及非法尺寸恢复。Vue 2/3 各运行两项词云回归，并纳入正常 CI 与覆盖率合并。
+
+`pnpm test:coverage:all` 生成单测和两个独立消费应用的覆盖率，并输出 `coverage/combined/`；单测报告仍保留在 `coverage/`。视觉快照检查、声明兼容矩阵与覆盖率互相补充。

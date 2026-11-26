@@ -20,6 +20,7 @@ for (const chart of [
   'gauge',
   'liquid-fill',
   'bullet',
+  'word-cloud',
 ]) {
   const directory = new URL(`../packages/site/src/components/${chart}/demos/`, import.meta.url)
   const demos = readdirSync(directory)

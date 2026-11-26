@@ -22,6 +22,7 @@ for (const [kind, titles] of [
   ['gauge', ['基础数值型', '纯状态型', '分段仪表盘']],
   ['liquid-fill', ['基础型']],
   ['map', ['状态型', '密度型', '飞线型']],
+  ['word-cloud', ['文字词云', '分类矩形标签', '气泡云']],
 ] as const) {
   for (const title of titles) {
     test(`${kind} ${title} empty slot fills the chart and preserves its instance`, async ({
@@ -56,7 +57,11 @@ for (const [kind, titles] of [
       if (await retry.count()) {
         await reloadDemo(demo)
       } else {
-        await expect(empty).toContainText('未配置数据源，请先配置采集任务')
+        await expect(empty).toContainText(
+          kind === 'word-cloud'
+            ? '暂无词云数据，请调整筛选条件或检查数据源'
+            : '未配置数据源，请先配置采集任务',
+        )
         await demo.getByText('正常', { exact: true }).click()
       }
       await expect(overlay).toHaveCount(0)

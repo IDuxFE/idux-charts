@@ -7,7 +7,7 @@
 import { resolve } from 'node:path'
 import type { LibraryOptions } from 'vite'
 
-const plots = ['bar', 'line', 'pie', 'radar', 'gauge', 'liquid-fill', 'map', 'bullet']
+const plots = ['bar', 'line', 'pie', 'radar', 'gauge', 'liquid-fill', 'map', 'bullet', 'word-cloud']
 
 /** plotSuffix distinguishes plots' <name>/index.ts from charts' <name>.ts wrappers. */
 export function chartEntries(

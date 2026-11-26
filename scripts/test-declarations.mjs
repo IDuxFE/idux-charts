@@ -18,6 +18,7 @@ import { chromium, expect } from '@playwright/test'
 import { build, preview } from 'vite'
 
 import { normalizeChartDeclarations } from '../build/declarations.ts'
+import { smokeWordCloud } from './word-cloud-consumer.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const work = mkdtempSync(join(tmpdir(), 'idux-chart-declarations-'))
@@ -447,6 +448,22 @@ createApp({
 }
 
 const adapterConsumer = `
+import { IxWordCloudChart, createWordCloudOption, type WordCloudChartPublicProps, type WordCloudMotion } from '@idux/charts/word-cloud';
+const cloudMotion: WordCloudMotion = {amplitude:12,duration:6000,pauseOnHover:true};
+const movingCloud: WordCloudChartPublicProps = {motion:cloudMotion,animation:true};
+createWordCloudOption(movingCloud);
+// @ts-expect-error native animation retains its boolean contract
+const invalidCloudAnimation: WordCloudChartPublicProps = {animation:{duration:6000}};
+// @ts-expect-error continuous motion amplitude uses pixel numbers
+const invalidCloudMotion: WordCloudChartPublicProps = {motion:{amplitude:'4px'}};
+const cloud: WordCloudChartPublicProps = {shape: 'rect', title:null, plotTheme:{palette:['#123456']}, data: [{id:'a',name:'Analysis',value:1,category:'Risk',selected:true}], categories:[{name:'Risk'}], label:{formatter:'{b} {c}'}, symbolSize:value=>[100,32], selectedMode:'multiple', gap:8};
+createWordCloudOption(cloud);
+// @ts-expect-error cloud weights must be numeric
+const invalidCloudValue: WordCloudChartPublicProps = {data:[{name:'A',value:'1'}]};
+// @ts-expect-error shapes are a finite union
+const invalidCloudShape: WordCloudChartPublicProps = {shape:'star'};
+// @ts-expect-error public props reject misspelled options
+const invalidCloudField: WordCloudChartPublicProps = {hoverColor:'red'};
 import { provide, ref } from 'vue-demi';
 import { CHART_THEME_TOKEN, type ChartTheme } from '@idux/charts';
 provide(CHART_THEME_TOKEN, ref<ChartTheme>('dark'));
@@ -593,6 +610,10 @@ const lineResize: Resize<typeof IxLineChart> = true;
 const radarResize: Resize<typeof IxRadarChart> = true;
 const gaugeResize: Resize<typeof IxGaugeChart> = true;
 const bulletResize: Resize<typeof IxBulletChart> = true;
+const cloudResize: Resize<typeof IxWordCloudChart> = true;
+const globalCloudProps: InstanceType<GlobalComponents['IxWordCloudChart']>['$props'] = {shape:'circle',title:null,plotTheme:{palette:['#123456']},data:[{name:'A',value:1}]};
+// @ts-expect-error cloud component props must remain typed
+const invalidCloudComponent: InstanceType<typeof IxWordCloudChart>['$props'] = {shape:'star'};
 // @ts-expect-error inferred component props must remain typed
 const badBulletComponent: InstanceType<typeof IxBulletChart>['$props'] = {target: '85'};
 
@@ -654,6 +675,7 @@ defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxPieChart, Ix
   if (process.argv.includes('--runtime')) {
     await smokeRuntime(app)
     await smokeHooks(app)
+    await smokeWordCloud(app)
     await checkLineBundle(app)
     console.log(
       `PASS Vue ${version} / ECharts ${echartsVersion}: packed JS render/update/theme/unmount/remount and composable-only tree shaking`,

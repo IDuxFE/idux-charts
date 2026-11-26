@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供八类图表组件及配置构建工具。
+iDux Charts 的预设图表层，基于 `@idux/charts-core` 提供九类图表组件及配置构建工具。
 
 如需统一入口及共享提示框样式，可使用 [`@idux/charts`](https://github.com/IDuxFE/idux-charts/blob/main/packages/charts/README.zh.md)。
 
@@ -36,10 +36,13 @@ Vue.use(VueCompositionAPI)
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |
 | `IxBulletChart`     | 子弹图（单值与分组）     |
+| `IxWordCloudChart`  | 词云（文字、标签、气泡） |
 | `IxMapChart`        | 地图（区域、节点、线路） |
 | `IxLiquidFillChart` | 水波图                   |
 
 渲染 `IxMapChart` 前通过 `registerMap(name, geoJSON)` 注册几何数据。地图由原生 `geo`、`series`、`visualMap` 组合，不使用 `mode` 属性。可选的 `createMapRegions`、`createMapNodes`、`createMapLines`、`createMapVisualMap` 返回普通 ECharts 配置。几何由应用管理，不打入组件包；`validateMapData({ nodes, routes, regions })` 可提前检查无效坐标、缺失端点和重复标识。
+
+词云使用原生 graph 节点，保留标量权重、分类样式、选中与公共控制配置；尺寸、可选漂浮和避让边界见 [词云 API](../site/src/components/word-cloud/API.md)。
 
 ## 快速上手
 

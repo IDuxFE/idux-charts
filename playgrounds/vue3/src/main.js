@@ -1,3 +1,5 @@
+import { IxWordCloudChart } from '@idux/charts/word-cloud'
+import { createWordCloudFixture } from '../../testing/word-cloud.js'
 import { createSlotsFixture } from '../../testing/slots.js'
 import Theme from './theme.js'
 import Basic from './basic.js'
@@ -124,12 +126,15 @@ window.chartState = () =>
     }
   })
 const Slots = createSlotsFixture(h, IxBarChart, false)
+const WordCloud = createWordCloudFixture(h, IxWordCloudChart, false)
 createApp(
-  location.search.includes('slots')
-    ? Slots
-    : location.search.includes('theme')
-      ? Theme
-      : location.search.includes('basic')
-        ? Basic
-        : App,
+  location.search.includes('word-cloud')
+    ? WordCloud
+    : location.search.includes('slots')
+      ? Slots
+      : location.search.includes('theme')
+        ? Theme
+        : location.search.includes('basic')
+          ? Basic
+          : App,
 ).mount('#app')

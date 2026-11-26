@@ -104,6 +104,10 @@
     "./bullet": {
       "types": "./dist/bullet.d.ts",
       "import": "./dist/bullet.js"
+    },
+    "./word-cloud": {
+      "types": "./dist/word-cloud.d.ts",
+      "import": "./dist/word-cloud.js"
     }
   },
   "typesVersions": {
@@ -134,6 +138,9 @@
       ],
       "bullet": [
         "dist/bullet.d.ts"
+      ],
+      "word-cloud": [
+        "dist/word-cloud.d.ts"
       ]
     }
   }

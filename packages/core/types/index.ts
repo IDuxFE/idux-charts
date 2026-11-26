@@ -8,6 +8,7 @@ import type {
   RadarSeriesOption,
   GaugeSeriesOption,
   CustomSeriesOption,
+  GraphSeriesOption,
 } from 'echarts/charts'
 import type {
   GeoComponentOption,
@@ -126,6 +127,7 @@ export type ChartOption = BaseChartOption<
   | RadarSeriesOption
   | GaugeSeriesOption
   | CustomSeriesOption
+  | GraphSeriesOption
   | BarSeriesOption
   | PieSeriesOption
   | LineSeriesOption

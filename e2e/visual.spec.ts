@@ -96,10 +96,17 @@ for (const [kind, demoName] of [
   ['bullet', 'segmented', '单子弹图——有范围区间'],
   ['bullet', 'grouped', '分组子弹图——无特定范围区间'],
   ['bullet', 'above', '分组子弹图——上方标签'],
+  ['word-cloud', 'text', '文字词云'],
+  ['word-cloud', 'rect', '分类矩形标签'],
+  ['word-cloud', 'circle', '气泡云'],
+  ['word-cloud', 'search', '搜索高亮'],
+  ['word-cloud', 'overlap', '自定义矩形样式'],
 ]) {
   for (const theme of ['light', 'dark']) {
     test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }, testInfo) => {
       await page.setViewportSize({ width: 1280, height: 900 })
+      // Exercise the real reduced-motion policy instead of capturing a floating phase.
+      if (kind === 'word-cloud') await page.emulateMedia({ reducedMotion: 'reduce' })
       await page.goto(`${fixtureBaseURL}?demo-visual=${kind}-${demoName}&theme=${theme}`)
       const demo = page.locator('#visual-demo')
       const chart = demo.locator('[_echarts_instance_]').first()
@@ -114,7 +121,10 @@ for (const [kind, demoName] of [
         const y = element.getBoundingClientRect().top
         ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
       })
-      if (kind === 'bar' && demoName === 'above' && testInfo.project.name === 'chromium') {
+      if (
+        (kind === 'word-cloud' || (kind === 'bar' && demoName === 'above')) &&
+        testInfo.project.name === 'chromium'
+      ) {
         // Verify that CJK layout uses the pinned test font rather than a host fallback.
         const session = await page.context().newCDPSession(page)
         try {

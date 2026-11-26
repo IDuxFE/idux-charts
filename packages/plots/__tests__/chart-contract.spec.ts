@@ -13,6 +13,7 @@ import {
   IxBarChart,
   IxGaugeChart,
   IxBulletChart,
+  IxWordCloudChart,
   IxLineChart,
   IxLiquidFillChart,
   IxPieChart,
@@ -312,6 +313,7 @@ it('exposes the same instance as onReady for every chart, including after reinit
     IxRadarChart,
     IxGaugeChart,
     IxBulletChart,
+    IxWordCloudChart,
     IxLiquidFillChart,
     IxMapChart,
   ]
@@ -412,6 +414,7 @@ it.each([
   IxRadarChart,
   IxGaugeChart,
   IxBulletChart,
+  IxWordCloudChart,
   IxLiquidFillChart,
   IxMapChart,
 ])(

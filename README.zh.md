@@ -78,7 +78,7 @@ ESM 项目可从 `@idux/charts/line` 等子入口按需导入图表，从 `@idux
 
 ### TypeScript 属性类型
 
-二次封装和 Vue 2.6 类型适配可使用 `ChartPublicProps` 或对应图表的 `*ChartPublicProps`（Bar、Line、Pie、Radar、Gauge、Bullet、LiquidFill、Map），从 `@idux/charts` 导入：
+二次封装和 Vue 2.6 类型适配可使用 `ChartPublicProps` 或对应图表的 `*ChartPublicProps`（Bar、Line、Pie、Radar、Gauge、Bullet、WordCloud、LiquidFill、Map），从 `@idux/charts` 导入：
 
 ```ts
 import type { LineChartPublicProps } from '@idux/charts'
@@ -128,11 +128,13 @@ CI 检查、Changesets 和自动发布配置见 [CI 与发布指南](.github/REL
 
 所有图表可通过 `CHART_THEME_TOKEN` 继承响应式 ECharts 主题；显式 `theme` 属性优先，主题变化会重建实例。重建时会恢复兼容的缩放范围和图例选择。文档站支持明暗切换，首次跟随系统，手动选择后保存偏好。ECharts 与图形主题的联动方式见下面的配置指南。
 
-分类柱状图、分类折线图和面积图、自动饼图、雷达图、仪表盘、水波图及地图支持 `plotTheme`，可通过 `PLOT_THEME_TOKEN` 注入响应式默认值。组件的模板 ref 提供 `getEChartsInstance()`。配置合并规则、背景色属性和升级注意事项见[配置指南](packages/site/src/0-guide/GettingStarted.page.md)。两个[兼容性 playground](playgrounds/README.zh.md) 均可通过 `/?theme` 体验主题切换。
+分类柱状图、分类折线图和面积图、自动饼图、雷达图、仪表盘、子弹图、词云图、水波图及地图支持 `plotTheme`，可通过 `PLOT_THEME_TOKEN` 注入响应式默认值。组件的模板 ref 提供 `getEChartsInstance()`。配置合并规则、背景色属性和升级注意事项见[配置指南](packages/site/src/0-guide/GettingStarted.page.md)。两个[兼容性 playground](playgrounds/README.zh.md) 均可通过 `/?theme` 体验主题切换。
 
 提交前会通过 Husky 自动执行 `pnpm check:staged`：lint 和格式检查仅针对 Git 暂存文件，代码变更运行相关单元测试及项目类型检查（类型检查不能安全地按单文件执行）。检查失败会阻止提交，不会自动修复文件。纯文档变更只检查格式。可手动运行 `pnpm check` 执行完整检查；安装依赖时会自动初始化 hooks。
 
 推送前，Husky 会运行全仓库 lint 并强制重新执行完整的 TypeScript 检查。任一检查失败都会阻止推送。
+
+词云图支持文字、矩形标签和圆形气泡布局，沿用原生 ECharts 配置，详见 [API](packages/site/src/components/word-cloud/API.md) 和 [指南](packages/site/src/components/word-cloud/Design.md)。
 
 ## 贡献者
 
