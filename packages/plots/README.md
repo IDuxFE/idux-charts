@@ -42,7 +42,7 @@ Vue.use(VueCompositionAPI)
 
 Register geometry with `registerMap(name, geoJSON)` before rendering `IxMapChart`. Compose native `geo`, `series`, and `visualMap` options; optional `createMapRegions`, `createMapNodes`, `createMapLines`, and `createMapVisualMap` helpers return ordinary ECharts configuration. There is no `mode` prop. Geometry assets are managed by the application and excluded from the library bundle. Use `validateMapData({ nodes, routes, regions })` to inspect invalid coordinates, unresolved endpoints, and duplicate identities before generating options.
 
-Word cloud layouts use native graph nodes and preserve scalar weights, category styles, selection and common chart controls. See the [English guide](../../docs/word-cloud.en.md) for sizing, optional motion and collision boundaries.
+Word cloud layouts use native graph nodes and preserve scalar weights, category styles, selection and common chart controls. See the [component API](https://charts.idux.site/components/word-cloud) for sizing, optional motion and collision boundaries.
 
 ## Quick start
 

@@ -101,7 +101,7 @@ export default defineConfig({
           const files = readdirSync(file)
 
           tabs = files
-            .filter(file => file.endsWith('.md'))
+            .filter(tab => tab.endsWith('.md') && readFileSync(resolve(file, tab), 'utf-8').trim())
             .map(tab => {
               const src = resolve(file, tab)
               const meta = _getMdMeta(src)

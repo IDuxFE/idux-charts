@@ -42,7 +42,7 @@ Vue.use(VueCompositionAPI)
 
 渲染 `IxMapChart` 前通过 `registerMap(name, geoJSON)` 注册几何数据。地图由原生 `geo`、`series`、`visualMap` 组合，不使用 `mode` 属性。可选的 `createMapRegions`、`createMapNodes`、`createMapLines`、`createMapVisualMap` 返回普通 ECharts 配置。几何由应用管理，不打入组件包；`validateMapData({ nodes, routes, regions })` 可提前检查无效坐标、缺失端点和重复标识。
 
-词云使用原生 graph 节点，保留标量权重、分类样式、选中与公共控制配置；尺寸、可选漂浮和避让边界见 [词云 API](../site/src/components/word-cloud/API.md)。
+词云使用原生 graph 节点，保留标量权重、分类样式、选中与公共控制配置；尺寸、可选漂浮和避让边界见 [词云 API](https://charts.idux.site/components/word-cloud)。
 
 ## 快速上手
 
