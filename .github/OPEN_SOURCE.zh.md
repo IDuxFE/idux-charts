@@ -69,3 +69,5 @@
 | `vscode-textmate`                   | `6.0.0`   | 质量提醒；现有 Shiki 集成要求                                                                                  |
 
 以上为具体版本的维护记录，不代表控制台当前状态。FOSSA 质量提醒不支持所有版本自动忽略；调整 Stale Package Prevention 会影响共用该策略的依赖。参见 [FOSSA 质量问题说明](https://docs.fossa.com/docs/quality/reviewing-quality-issues)。
+
+根目录的 `@types/node` 依赖固定到记录中的 Node 22 基线。CI 全新安装时会生成未跟踪的锁文件，使用 `^` 范围可能解析到不在指定版本例外中的其他补丁版本。后续主动升级该固定版本时，应复核 CLI 项目的例外，并继续启用许可证与漏洞检查。
