@@ -111,3 +111,35 @@ test('shows runner errors even when no test could start', () => {
   expect(summary).toContain('webServer refused')
   expect(output).not.toContain('::warning title=Flaky browser tests')
 })
+
+test('lists every slow attempt with precise durations and separate retry totals', () => {
+  const { summary } = summarize({
+    suites: [
+      {
+        title: 'timings',
+        specs: [
+          ...Array.from({ length: 12 }, (_, index) => ({
+            title: `slow ${index}`,
+            tests: [{ projectName: 'firefox', results: [{ duration: 10_001 + index }] }],
+          })),
+          { title: 'exact threshold', tests: [{ results: [{ duration: 10_000 }] }] },
+          {
+            title: 'fast attempts with a slow total',
+            tests: [{ results: [{ duration: 6000 }, { duration: 7000 }] }],
+          },
+          {
+            title: 'slow retry',
+            tests: [{ projectName: 'webkit', results: [{ duration: 8000 }, { duration: 10_039 }] }],
+          },
+        ],
+      },
+    ],
+  })
+  const allSlow = summary
+    .split('### All tests with an attempt over 10 seconds')[1]!
+    .split('### Slowest tests')[0]!
+  expect(allSlow.match(/\| firefox \|/g)).toHaveLength(12)
+  expect(allSlow).toContain('| webkit | timings › slow retry | 8.000s | 10.039s | 18.039s | 1 |')
+  expect(allSlow).not.toContain('exact threshold')
+  expect(allSlow).not.toContain('fast attempts with a slow total')
+})
