@@ -5,7 +5,7 @@
  * so reporting remains diagnostic and cannot silently conceal flaky execution.
  */
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,12 +17,18 @@ afterEach(() => {
   for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true })
 })
 
-function summarize(report?: object) {
+function summarize(report?: object, startups: object[] = []) {
   const directory = mkdtempSync(join(tmpdir(), 'idux-e2e-summary-'))
   directories.push(directory)
   const input = join(directory, 'results.json')
   const summary = join(directory, 'summary.md')
   if (report) writeFileSync(input, JSON.stringify(report))
+  if (startups.length) {
+    mkdirSync(join(directory, 'browser-startup'))
+    startups.forEach((startup, index) =>
+      writeFileSync(join(directory, 'browser-startup', `${index}.json`), JSON.stringify(startup)),
+    )
+  }
   const output = execFileSync(process.execPath, [script, input], {
     encoding: 'utf8',
     env: { ...process.env, GITHUB_STEP_SUMMARY: summary },
@@ -142,4 +148,19 @@ test('lists every slow attempt with precise durations and separate retry totals'
   expect(allSlow).toContain('| webkit | timings › slow retry | 8.000s | 10.039s | 18.039s | 1 |')
   expect(allSlow).not.toContain('exact threshold')
   expect(allSlow).not.toContain('fast attempts with a slow total')
+})
+
+test('discloses empty-page engine setup separately while retaining overall elapsed time', () => {
+  const { summary } = summarize(
+    {
+      stats: { expected: 1, duration: 20_345 },
+      suites: [{ specs: [{ title: 'application', tests: [{ results: [{ duration: 8000 }] }] }] }],
+    },
+    [{ project: 'firefox', worker: 0, duration: 12_345 }],
+  )
+  expect(summary).toContain('Browser engine preparation (empty page, included in elapsed)')
+  expect(summary).toContain('| firefox | 0 | 12.345s |')
+  expect(summary).toContain('20.3s |')
+  expect(summary).not.toContain('### All tests with an attempt over 10 seconds')
+  expect(summary).toContain('|  | application | 8.0s |')
 })

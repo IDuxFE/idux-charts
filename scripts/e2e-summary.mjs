@@ -4,7 +4,8 @@
  * Prints counts, first-attempt failures, retries and slowest cases; appends a CI summary.
  * A missing report is diagnostic, not proof of success; the test step owns exit status.
  */
-import { appendFileSync, existsSync, readFileSync } from 'node:fs'
+import { appendFileSync, existsSync, readFileSync, readdirSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
 
 const reportPath = process.argv[2]
 if (!reportPath) throw new Error('Expected a Playwright JSON report path')
@@ -51,6 +52,33 @@ if (!existsSync(reportPath)) {
     String(text ?? '')
       .replaceAll('|', '\\|')
       .replaceAll('\n', ' ')
+  // Empty-page engine initialization is reported separately, never silently
+  // discarded. Overall runner elapsed time above includes this worker setup.
+  const startupDirectories = new Set([
+    join(dirname(resolve(reportPath)), 'browser-startup'),
+    ...(report.config?.projects ?? []).map(project => join(project.outputDir, 'browser-startup')),
+  ])
+  const startups = [...startupDirectories].flatMap(directory =>
+    existsSync(directory)
+      ? readdirSync(directory)
+          .filter(file => file.endsWith('.json'))
+          .map(file => JSON.parse(readFileSync(join(directory, file), 'utf8')))
+      : [],
+  )
+  if (startups.length) {
+    lines.push(
+      '### Browser engine preparation (empty page, included in elapsed)',
+      '',
+      '| Project | Worker | Duration |',
+      '| --- | ---: | ---: |',
+    )
+    for (const startup of startups) {
+      lines.push(
+        `| ${escape(startup.project)} | ${startup.worker} | ${(startup.duration / 1000).toFixed(3)}s |`,
+      )
+    }
+    lines.push('')
+  }
   if (report.errors?.length) {
     lines.push('### Runner errors', '')
     for (const error of report.errors) lines.push(`- ${escape(error.message ?? error.stack)}`)
