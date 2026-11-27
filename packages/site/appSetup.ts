@@ -10,6 +10,7 @@ import {
 import { IxMenu } from '@idux/archive-app/components'
 import type { MenuData, MenuProps } from '@idux/components/menu'
 import ThemeToggle from './ThemeToggle.vue'
+import { renderPageHeader } from './PageHeader'
 import './theme.css'
 
 // Match the documentation language in dev as well as the generated Pages HTML.
@@ -93,6 +94,7 @@ function renderSiderMenu(menuProps: MenuProps) {
 
 export default {
   renderers: {
+    pageHeader: renderPageHeader,
     layoutSiderContent: renderSiderMenu,
     layoutSiderFooter: () => h(ThemeControl),
     layoutHeaderExtra: () => h(ThemeControl),
