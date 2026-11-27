@@ -27,7 +27,7 @@ test('documentation API and design tabs preserve query parameters through reload
   await expect(page.getByRole('heading', { name: 'IxPieChart', exact: true })).toBeHidden()
 })
 
-test('documentation tab history survives reload and restores the demo route', async ({ page }) => {
+test('documentation tab history survives reload and back/forward navigation', async ({ page }) => {
   await page.goto('components/pie?source=a%26b#tab-state')
   const demos = page.getByRole('radio', { name: '示例', exact: true })
   const api = page.getByRole('radio', { name: 'API', exact: true })
@@ -43,7 +43,22 @@ test('documentation tab history survives reload and restores the demo route', as
   await expect(api).toBeChecked()
   await page.goForward()
   await expect(design).toBeChecked()
+})
 
+test('documentation demos restore after browser history and reload', async ({ page }) => {
+  // Keep real history traversal immediately before demo restoration. The other
+  // history case covers reload before traversal, without combining both reloads.
+  await page.goto('components/pie?source=a%26b&tab=api#tab-state')
+  const demos = page.getByRole('radio', { name: '示例', exact: true })
+  const api = page.getByRole('radio', { name: 'API', exact: true })
+  const design = page.getByRole('radio', { name: '设计指南', exact: true })
+  await expect(api).toBeChecked()
+  await design.click()
+  await expect(design).toBeChecked()
+  await page.goBack()
+  await expect(api).toBeChecked()
+  await page.goForward()
+  await expect(design).toBeChecked()
   await demos.click()
   await expect(page).toHaveURL(/components\/pie\?source=a%26b#tab-state$/)
   await expect(demos).toBeChecked()

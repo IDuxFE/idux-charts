@@ -47,6 +47,10 @@ reduced motion; native zoom, loading covers, stale responses and theme changes
 during transitions retain normal animations. A `test.step` does not create a new
 timeout budget; all tests keep the existing 30-second timeout.
 
+Tab history uses overlapping chains: reload → back → forward, and back → forward
+→ demos → reload. This retains both restoration boundaries without putting two
+reloads and all history traversal into one long case.
+
 ## Stable interaction rules
 
 - Scroll a persistent chart/SVG container before resolving its children. ECharts
@@ -108,9 +112,9 @@ complete three-browser regression in one run.
 selects servers, not tests. Without these variables, local commands build both
 assets as before.
 
-Chromium and Firefox are capped at one worker per project to avoid concurrent
-fresh-page setup and SVG memory contention. The Playground CI configurations also
-use one worker; WebKit retains its existing worker budget. Keep browser projects separate when comparing per-browser CI timings.
+Each browser is capped at one worker per project to avoid concurrent fresh-page
+setup and SVG memory contention. The Playground CI configurations also use one
+worker. Keep browser projects separate when comparing per-browser CI timings.
 
 Chromium/Firefox workers first create and close an isolated `about:blank` page to
 initialize the engine. This loads no application, fonts or demos. Each test still

@@ -34,11 +34,11 @@ export default defineConfig({
     trace: isCI ? 'on-first-retry' : 'retain-on-failure',
   },
   projects: [
-    // Chromium/Firefox fresh-page setup competes for memory on CI. Keep their
-    // per-project cap in local runs too; WebKit retains the global worker budget.
+    // Fresh-page setup and SVG rendering compete for memory on CI. Keep the
+    // same per-browser cap in local runs so slow cases remain reproducible.
     { name: 'chromium', workers: 1, use: { ...devices['Desktop Chrome'] } },
     { name: 'firefox', workers: 1, use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'webkit', workers: 1, use: { ...devices['Desktop Safari'] } },
   ],
   webServer: [
     ...(target === 'fixture'
