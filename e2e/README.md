@@ -168,3 +168,16 @@ Add `--plan-only` to inspect and verify the selection without starting browsers.
 Generate only missing word cloud baselines with `pnpm exec playwright test e2e/visual.spec.ts --grep "word-cloud .* demo visual baseline" --update-snapshots=missing`. Inspect each image, then rerun without the update option. Existing baselines must remain unchanged.
 
 `word-cloud.spec.ts` also checks actual pointer hover/pause/resume, reduced motion, selection, legend filtering, search layout stability and loading/empty recovery. The general demo-render, theme and empty-slot catalogues include WordCloud. Packed Vue 2/3 consumers exercise actual SVG clicks, tooltips, category filtering and invalid-size recovery, contributing browser coverage in addition to the lifecycle case.
+
+## Map geometry, values and visual regression
+
+`map-demo-drilldown.spec.ts` verifies actual region/pin clicks, cascader synchronization, municipality grouping, missing boundaries and stale-response handling. It also records native camera zooms while the optional transition helper switches maps.
+
+`map-demo-controls.spec.ts` checks the real site's loading, empty-state recovery and navigation. `map-demo-state.spec.ts` mounts the actual documentation demos in the fixture and switches each through both China and world maps. It checks the live geo model's region names, matches every configured region to the geometry, reads normal and zero values through real pointer tooltips, compares rendered fills, distinguishes missing density data from zero and verifies restoration. Status node values and route metrics are checked in the live chart option as well.
+
+The map visual matrix covers status, density and lines in both geographic scopes and both themes, for Chromium, Firefox and WebKit (36 snapshots). The original default-scope snapshot names remain unchanged; alternate scopes include `china` or `world` in the filename. Generate only missing baselines, inspect the images, then rerun without snapshot updates:
+
+```sh
+IDUX_E2E_TARGET=fixture pnpm exec playwright test e2e/visual.spec.ts --grep 'map (status|density|lines)' --update-snapshots=missing
+IDUX_E2E_TARGET=fixture pnpm exec playwright test e2e/map-demo-state.spec.ts e2e/visual.spec.ts --grep 'map (status|density|lines)'
+```

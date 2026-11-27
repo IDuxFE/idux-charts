@@ -17,6 +17,7 @@ GeoJSON 的获取、授权、坐标系与注册由应用管理，不进入组件
 | [mapValidation.ts](../../packages/plots/map/src/mapValidation.ts)     | 坐标、重复身份、路线引用与诊断位置       |
 | [mapDefaults.ts](../../packages/plots/map/src/mapDefaults.ts)         | 默认分段与样式约定                       |
 | [mapStyle.ts](../../packages/plots/map/src/mapStyle.ts)               | 图钉、悬停及颜色辅助                     |
+| [mapTransition.ts](../../packages/plots/map/src/mapTransition.ts)     | 可选视角过渡、画布淡化、取消与资源清理   |
 | [types.ts](../../packages/plots/map/src/types.ts)                     | 领域输入与原生配置的公开边界             |
 
 helpers 返回标准 ECharts 配置，可与其他原生系列组合，不要求把整个应用绑定到 Map 组件。调用方提供本次完整输入，数据与主题更新时重新生成；helper 不维护全局站点注册表。
@@ -34,5 +35,7 @@ ECharts 6 的底图布局使用边界与 preserveAspect，旧版本使用 layout
 ## 扩展与验证
 
 新地图效果优先新增可组合的 helper 或直接原生 series；只有多个效果确实共享领域知识时才扩充公共模型。不能把示例附带的中国／世界资产和本地化名称硬编码成组件运行时依赖。
+
+`createMapTransition` 将原生视角缩放、画布淡入淡出和取消清理封装为可选控制器。应用先准备并注册边界，再用 `run('drilldown' | 'back', update)` 提交新配置；helper 不识别行政树或发起请求。新调用取消旧过渡，卸载时 `dispose()` 清理监听、定时器和遮罩；已提交的业务状态不回滚。过渡结束恢复调用方的动画设置，系统减少动态效果时直接更新。组件默认行为和原生 option 接口不增加下钻状态。
 
 [helper 测试](../../packages/plots/__tests__/map-helpers.spec.ts)、[数据校验](../../packages/plots/__tests__/map-validation.spec.ts)、[组件测试](../../packages/plots/__tests__/map-component.spec.ts)及[兼容测试](../../packages/plots/__tests__/map-compatibility.spec.ts)保护引用、样式、视口和版本边界。几何注册、缩放拖动和路线动画需要实际浏览器验证。

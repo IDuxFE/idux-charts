@@ -8,6 +8,8 @@ import { getInstanceByDom } from 'echarts/core'
 declare global {
   interface Window {
     finishDemoAnimations(element: HTMLElement): void
+    getDemoChart: typeof getInstanceByDom
+    setDemoTheme(dark: boolean): void
   }
 }
 
@@ -24,6 +26,7 @@ const modules = import.meta.glob<{ default: Component }>([
   '../../packages/site/src/components/gauge/demos/Segmented.vue',
   '../../packages/site/src/components/liquid-fill/demos/Basic.vue',
   '../../packages/site/src/components/map/demos/Status.vue',
+  '../../packages/site/src/components/map/demos/Drilldown.vue',
   '../../packages/site/src/components/map/demos/Density.vue',
   '../../packages/site/src/components/map/demos/Lines.vue',
   '../../packages/site/src/components/bullet/demos/Basic.vue',
@@ -48,6 +51,7 @@ const demoPaths: Record<string, string> = {
   'gauge-segmented': '../../packages/site/src/components/gauge/demos/Segmented.vue',
   'liquid-fill-basic': '../../packages/site/src/components/liquid-fill/demos/Basic.vue',
   'map-status': '../../packages/site/src/components/map/demos/Status.vue',
+  'map-drilldown': '../../packages/site/src/components/map/demos/Drilldown.vue',
   'map-density': '../../packages/site/src/components/map/demos/Density.vue',
   'map-lines': '../../packages/site/src/components/map/demos/Lines.vue',
   'bullet-single': '../../packages/site/src/components/bullet/demos/Basic.vue',
@@ -69,6 +73,10 @@ export async function mountDemoVisual(key: string, dark: boolean) {
   // Load before mount so ECharts measures with the same bytes on every host.
   const font = new FontFace('ChartVisualCJK', `url("${fontURL}")`)
   document.fonts.add(await font.load())
+  window.getDemoChart = getInstanceByDom
+  window.setDemoTheme = dark => {
+    siteTheme.value = dark ? 'dark' : 'light'
+  }
   window.finishDemoAnimations = element => {
     const instance = getInstanceByDom(element)
     if (!instance) throw new Error('Demo chart instance is unavailable')

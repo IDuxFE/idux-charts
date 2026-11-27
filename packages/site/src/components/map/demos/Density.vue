@@ -10,41 +10,32 @@ import {
   createMapVisualMap,
   type MapRegionItem,
 } from '@idux/charts'
-import china from '../assets/china.json'
-// 世界地图来源：https://echarts.apache.org/examples/data/asset/geo/world.json
-import world from '../assets/world.json'
+import china from '@idux/geo-areas/geojson/china.json'
+import world from '@idux/geo-areas/geojson/world.json'
 
 // 注册 GeoJSON 地图边界；名称必须与模板中的 map 一致。通常在应用初始化时注册一次。
 registerMap('china', china as Parameters<typeof registerMap>[1])
 registerMap('world', world as Parameters<typeof registerMap>[1])
 
-const worldNames = {
-  'United States': '美国',
-  Australia: '澳大利亚',
-  Peru: '秘鲁',
-  Kazakhstan: '哈萨克斯坦',
-  China: '中国',
-}
-
 // 仅为部分区域提供数据；未列出的区域显示缺失底色，value: 0 的区域仍使用零值色阶。
 const chinaDensity: MapRegionItem[] = Object.entries({
-  北京: 920,
-  河北: 180,
-  山西: 0,
-  内蒙古: 240,
-  黑龙江: 300,
-  上海: 860,
-  江苏: 780,
-  浙江: 650,
-  福建: 580,
-  山东: 620,
-  湖北: 460,
-  广东: 720,
-  四川: 560,
-  云南: 450,
-  甘肃: 90,
-  青海: 0,
-  新疆: 267,
+  北京市: 920,
+  河北省: 180,
+  山西省: 0,
+  内蒙古自治区: 240,
+  黑龙江省: 300,
+  上海市: 860,
+  江苏省: 780,
+  浙江省: 650,
+  福建省: 580,
+  山东省: 620,
+  湖北省: 460,
+  广东省: 720,
+  四川省: 560,
+  云南省: 450,
+  甘肃省: 90,
+  青海省: 0,
+  新疆维吾尔自治区: 267,
 }).map(([name, value]) => ({ region: name, value }))
 
 const worldDensity: MapRegionItem[] = Object.entries({
@@ -53,26 +44,26 @@ const worldDensity: MapRegionItem[] = Object.entries({
   秘鲁: 720,
   哈萨克斯坦: 550,
   中国: 1670,
-  Canada: 0,
-  Brazil: 610,
-  Colombia: 890,
-  Bolivia: 120,
-  'United Kingdom': 860,
-  France: 580,
-  Germany: 720,
-  Norway: 0,
-  Russia: 0,
-  'Saudi Arabia': 420,
-  Iran: 160,
-  Egypt: 310,
-  'South Africa': 690,
-  Kenya: 180,
-  Morocco: 0,
-  India: 180,
-  Japan: 760,
-  Mongolia: 0,
-  Indonesia: 320,
-  'New Zealand': 630,
+  加拿大: 0,
+  巴西: 610,
+  哥伦比亚: 890,
+  玻利维亚: 120,
+  英国: 860,
+  法国: 580,
+  德国: 720,
+  挪威: 0,
+  俄罗斯: 0,
+  沙特阿拉伯: 420,
+  伊朗: 160,
+  埃及: 310,
+  南非: 690,
+  肯尼亚: 180,
+  摩洛哥: 0,
+  印度: 180,
+  日本: 760,
+  蒙古: 0,
+  印度尼西亚: 320,
+  新西兰: 630,
 }).map(([name, value]) => ({ region: name, value }))
 
 // 内置蓝色色阶同样由 createMapPieces 根据阈值自动生成，无需手写区间和图例文案。
@@ -123,7 +114,6 @@ const geo = computed(() => ({
   emphasis: {
     label: { show: scope.value === 'china', color: unref(plotTheme).textColor ?? '#1C4EFF' },
   },
-  ...(scope.value === 'world' ? { nameMap: worldNames } : {}),
   regions: createMapRegions(
     (scope.value === 'china' ? chinaDensity : worldDensity).map(item =>
       isZero.value ? { ...item, value: 0 } : item,

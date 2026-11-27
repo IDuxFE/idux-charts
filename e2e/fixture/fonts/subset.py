@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,6 +23,14 @@ for package in ("site", "core", "plots"):
         ):
             continue
         characters.update(path.read_text())
+# Province labels are supplied by the site dependency, including regions without sample data.
+china_map = subprocess.check_output(
+    ["node", "-p", "require.resolve('@idux/geo-areas/geojson/china.json')"],
+    cwd=root / "packages/site",
+    text=True,
+).strip()
+for feature in json.loads(Path(china_map).read_text())["features"]:
+    characters.update(feature["properties"]["name"])
 font = TTFont(source, recalcTimestamp=False)
 characters.intersection_update(chr(code) for code in font.getBestCmap())
 options = subset.Options()

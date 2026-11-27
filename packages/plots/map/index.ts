@@ -27,6 +27,12 @@ export {
   createMapVisualMap,
 } from './src/createMapOption'
 export { validateMapData } from './src/mapValidation'
+export { createMapTransition } from './src/mapTransition'
+export type {
+  MapTransition,
+  MapTransitionDirection,
+  MapTransitionOptions,
+} from './src/mapTransition'
 export type {
   MapChartProps,
   MapChartPublicProps,

@@ -8,6 +8,8 @@ title: API
 
 从 `@idux/charts` 或 `@idux/charts/map` 导入组件、注册函数、生成函数和类型。应用先同步注册 GeoJSON；组件不内置、请求或转换地图几何数据。
 
+地图边界等行政地理数据优先使用 `@idux/geo-areas`，由应用单独安装：`pnpm add @idux/geo-areas`。完整用法、数据覆盖和来源说明见 [geo-areas 官网](https://iduxfe.github.io/geo-areas/)。
+
 ```ts
 import {
   IxMapChart,
@@ -17,16 +19,16 @@ import {
   createMapRegions,
   type MapNodeItem,
 } from '@idux/charts/map'
-import geometry from './my-map.json'
+import geometry from '@idux/geo-areas/geojson/china.json'
 
-registerMap('my-map', geometry)
+registerMap('china', geometry as Parameters<typeof registerMap>[1])
 const nodes: MapNodeItem[] = [
   { id: 'sz', name: '深圳站点', coordinate: [114.06, 22.55], value: 160 },
   { id: 'bj', name: '北京站点', coordinate: [116.46, 39.92], value: 180 },
 ]
 const geo = {
-  map: 'my-map',
-  regions: createMapRegions([{ region: '广东', value: 260, color: '#98C6FF' }], {
+  map: 'china',
+  regions: createMapRegions([{ region: '广东省', value: 260, color: '#98C6FF' }], {
     metricName: '区域资产',
     unit: '台',
   }),
@@ -51,6 +53,8 @@ const series = [
 ```vue
 <IxMapChart :geo="geo" :series="series" style="height: 480px" />
 ```
+
+世界地图可导入 `@idux/geo-areas/geojson/world.json`。区域名必须与 GeoJSON 的 `properties.name` 匹配：包内中国地图使用 `北京市`、`广东省` 等全称，世界地图使用中文名称。异步加载地图时，先完成加载和注册再渲染图表。
 
 | 属性                   | 类型              | 默认值       | 说明                                                  |
 | ---------------------- | ----------------- | ------------ | ----------------------------------------------------- |
@@ -178,6 +182,42 @@ const visualMap = createMapVisualMap(defaultMapPieces)
 所有生成函数默认使用第一个 geo。多底图场景可使用原生 geo 数组及系列 geoIndex。坐标必须与几何使用同一坐标系，组件不进行坐标转换。世界地图通过 geo.nameMap 本地化，运行时切换底图前须完成注册。
 
 底图默认带轻微边缘阴影，使用 plotTheme.mapShadowColor 调整颜色，或通过 geo.itemStyle.shadowBlur / shadowOffsetY 覆盖。需要平面区域统计图时可将二者设为 0。状态数据图例可用 createMapVisualMap 配合 inverse: true 和自定义 pieces.label，按输入顺序在图内左下角竖排展示。
+
+### createMapTransition(getChart, options?)
+
+可选的地图切换 helper，通过 ECharts 原生视角动画和画布内淡入淡出衔接两张地图。常规调用只需指定 `'drilldown'`（下钻）或 `'back'`（返回），缩放幅度和缓动由 helper 处理。
+
+```ts
+import { nextTick, onBeforeUnmount, ref } from 'vue'
+import {
+  createMapTransition,
+  type ChartInstanceMethods,
+  type MapTransitionDirection,
+} from '@idux/charts'
+
+const mapChart = ref<ChartInstanceMethods>()
+const geo = ref({ map: 'china' })
+const transition = createMapTransition(() => mapChart.value?.getEChartsInstance())
+
+// nextMap 的边界须先加载并 registerMap；回调只提交准备好的配置和业务数据。
+function switchMap(direction: MapTransitionDirection, nextMap: string) {
+  return transition.run(direction, async () => {
+    geo.value = { map: nextMap }
+    await nextTick() // 等待组件将新配置应用到 ECharts。
+  })
+}
+
+// switchMap('drilldown', 'guangdong') / switchMap('back', 'china')
+onBeforeUnmount(() => transition.dispose())
+```
+
+模板使用 `<IxMapChart ref="mapChart" :geo="geo" />`。同一次回调可同时更新 `series`、`visualMap` 等数据。helper 不加载或注册地图、不判断行政层级，也不修改级联选择值；刷新同一张地图的数据可直接更新配置。
+
+`run(direction, update)` 返回 `Promise<boolean>`：完成返回 `true`，被新调用、`cancel()`、`dispose()` 或图表实例更换取消时返回 `false`。取消会清理遮罩、监听和定时器，并恢复当前阶段开始前的视角，避免连续切换叠加临时缩放；已经开始的 `update` 不回滚，业务异步请求应在调用前完成并自行处理过期响应。回调或 ECharts 更新失败时 Promise 拒绝，资源仍会清理。
+
+`cancel()` 中断当前过渡；`dispose()` 在卸载时调用，释放资源并停用后续调用。没有图表实例或首个 `geo` 时直接执行更新，支持首次挂载。helper 操作第一个 `geo`，保留新地图配置的最终缩放和动画设置。
+
+`MapTransitionOptions` 可选：`duration` 为每个阶段的时长，默认 `480ms`；`backgroundColor` 为过渡遮罩颜色，默认采用图表背景或最近的非透明容器背景。`duration: 0`、关闭全局或当前 `geo` 的 `animation`、系统启用减少动态效果时直接更新。过渡结束恢复调用方的全局及 `geo` 动画配置，遮罩随图表尺寸调整。默认配置即可使用，无需手工配置缩放倍数、淡入淡出或缓动。
 
 ### 交互状态与数据诊断
 

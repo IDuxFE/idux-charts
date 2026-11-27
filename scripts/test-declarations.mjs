@@ -98,7 +98,7 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN, createMapTransition as aggregateTransition } from '@idux/charts';
 import { IxChart as Core } from '@idux/charts/core';
 import { IxBarChart as Bar } from '@idux/charts/bar';
 import { IxLineChart as Line, PLOT_THEME_TOKEN as LineTheme } from '@idux/charts/line';
@@ -107,12 +107,12 @@ import { IxRadarChart as Radar } from '@idux/charts/radar';
 import { IxGaugeChart as Gauge } from '@idux/charts/gauge';
 import { IxBulletChart as Bullet, createBulletOption } from '@idux/charts/bullet';
 import { IxLiquidFillChart as LiquidFill } from '@idux/charts/liquid-fill';
-import { IxMapChart as MapChart, registerMap, createMapNodes } from '@idux/charts/map';
+import { IxMapChart as MapChart, registerMap, createMapNodes, createMapTransition } from '@idux/charts/map';
 import { getInstanceByDom } from 'echarts/core';
 registerMap('consumer-map', {type: 'FeatureCollection', features: [{type: 'Feature', properties: {name: 'A'}, geometry: {type: 'Polygon', coordinates: [[[0,0], [30,0], [30,30], [0,30], [0,0]]]}}]});
 if ([Bar, Line, Pie, Radar, Gauge, Bullet, LiquidFill, MapChart].some((component, index) => component !==
     [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart][index]) ||
-    Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN) {
+    Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN || aggregateTransition !== createMapTransition) {
   throw new Error('Modular and aggregate imports must share the same component instances');
 }
 const revision = ref(0), dark = ref(false), mounted = ref(true), slotVisible = ref(false);
@@ -174,6 +174,19 @@ window.showAreaGap = () => areaChart().dispatchAction({type: 'showTip', seriesIn
 window.zoomArea = () => areaChart().dispatchAction({type: 'dataZoom', dataZoomId: 'area-zoom', start: 0, end: 80});
 window.areaZoom = () => areaChart().getOption().dataZoom[0].end;
 const mapChart = () => getInstanceByDom(document.querySelector('[data-kind="map"] [_echarts_instance_]'));
+window.transitionMap = async () => {
+  const chart = mapChart(), original = chart.getOption();
+  const transition = createMapTransition(() => chart, {duration: 1});
+  chart.setOption({animation: true, geo: {animation: true}});
+  try {
+    const completed = await transition.run('drilldown', () => chart.setOption({geo: {zoom: 1.3, center: [12, 12]}}));
+    const {zoom, center} = chart.getOption().geo[0];
+    return {completed, viewport: {zoom, center}};
+  } finally {
+    transition.dispose();
+    chart.setOption({animation: original.animation, geo: {animation: original.geo[0].animation, zoom: original.geo[0].zoom, center: original.geo[0].center}});
+  }
+};
 window.roamMap = () => mapChart().dispatchAction({type: 'geoRoam', componentType: 'geo', geoId: 'base', zoom: 2, dx: 10, dy: 10, originX: 200, originY: 120});
 window.mapViewport = () => {const geo = mapChart().getOption().geo[0]; return {zoom: geo.zoom, center: geo.center};};
 const bulletChart = () => getInstanceByDom(document.querySelector('[data-kind="bullet-grouped"] [_echarts_instance_]'));
@@ -261,6 +274,10 @@ window.bulletState = () => {
     await page.evaluate(() => window.zoomArea())
     const areaZoom = await page.evaluate(() => window.areaZoom())
     expect(areaZoom).toBeLessThan(100)
+    expect(await page.evaluate(() => window.transitionMap())).toEqual({
+      completed: true,
+      viewport: { zoom: 1.3, center: [12, 12] },
+    })
     await page.evaluate(() => window.roamMap())
     const mapViewport = await page.evaluate(() => window.mapViewport())
     expect(mapViewport.zoom).toBeCloseTo(2, 10)
@@ -491,7 +508,14 @@ const badMode: PieChartPublicProps = { layoutMode: 'custom' };
 const badSeriesStyle: PieChartPublicProps = { seriesStyle: { radius: 100 } };
 // @ts-expect-error text sizing uses numeric pixels
 const badTextStyle: GaugeChartPublicProps = { valueTextStyle: { fontSize: 'big' } };
-import { createMapLines, validateMapData, type MapNodeItem } from '@idux/charts/map';
+import { createMapLines, validateMapData, createMapTransition, type MapNodeItem, type MapTransition, type MapTransitionDirection } from '@idux/charts/map';
+const transition: MapTransition = createMapTransition(() => undefined, {duration: 0});
+const direction: MapTransitionDirection = 'drilldown';
+const completed: Promise<boolean> = transition.run(direction, async () => {});
+transition.cancel();
+transition.dispose();
+// @ts-expect-error transition directions are a finite union
+transition.run('sideways', () => {});
 const map: MapChartPublicProps = {geo: {map: 'consumer-map'}, series: []};
 const mapNodes: MapNodeItem[] = [{id: 'a', name: 'A', coordinate: [0, 0]}];
 createMapLines([{source: 'a', target: 'a'}], {nodes: mapNodes});

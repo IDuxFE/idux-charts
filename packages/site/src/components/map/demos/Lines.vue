@@ -10,9 +10,8 @@ import {
   createMapNodes,
   createMapLines,
 } from '@idux/charts'
-import china from '../assets/china.json'
-// 世界地图来源：https://echarts.apache.org/examples/data/asset/geo/world.json
-import world from '../assets/world.json'
+import china from '@idux/geo-areas/geojson/china.json'
+import world from '@idux/geo-areas/geojson/world.json'
 
 // 注册 GeoJSON 地图边界；名称必须与模板中的 map 一致。通常在应用初始化时注册一次。
 registerMap('china', china as Parameters<typeof registerMap>[1])
