@@ -71,6 +71,29 @@ if (!existsSync(reportPath)) {
     }
     lines.push('')
   }
+  const slow = tests
+    .map(test => ({
+      ...test,
+      first: test.attempts[0]?.duration ?? 0,
+      longest: Math.max(0, ...test.attempts.map(result => result.duration ?? 0)),
+      total: test.attempts.reduce((sum, result) => sum + (result.duration ?? 0), 0),
+    }))
+    .filter(test => test.longest > 10_000)
+    .sort((a, b) => b.longest - a.longest)
+  if (slow.length) {
+    lines.push(
+      '### All tests with an attempt over 10 seconds',
+      '',
+      '| Project | Test | First attempt | Longest attempt | Total attempts | Retries |',
+      '| --- | --- | ---: | ---: | ---: | ---: |',
+    )
+    for (const test of slow) {
+      lines.push(
+        `| ${escape(test.project)} | ${escape(test.title)} | ${(test.first / 1000).toFixed(3)}s | ${(test.longest / 1000).toFixed(3)}s | ${(test.total / 1000).toFixed(3)}s | ${Math.max(0, test.attempts.length - 1)} |`,
+      )
+    }
+    lines.push('')
+  }
   lines.push(
     '### Slowest tests (including retries)',
     '',
