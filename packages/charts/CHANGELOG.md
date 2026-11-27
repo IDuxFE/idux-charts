@@ -1,5 +1,59 @@
 # @idux/charts
 
+## 1.7.0
+
+### Minor Changes
+
+- 2d1086a: Add `IxBulletChart` and `createBulletOption` for comparing actual values, targets, and qualitative ranges.
+
+  - Import the component, option builder, and public types from `@idux/charts`, `@idux/charts/bullet`, or `@idux/charts-plots`. Include Vue global-component declarations for `IxBulletChart`.
+  - Use `value` and `target` for a single indicator, or supply `data` for grouped rows. Supplying `data` selects grouped mode even for an empty array or a single row. Support `horizontal` and `horizontal-above` grouped layouts, with full-name tooltips for truncated categories.
+  - Configure qualitative ranges with increasing numeric `upper` bounds, optional colors and labels, and an explicit scale through `xAxis.min` / `xAxis.max`. Keep actual bars, tracks, target markers, and range guides aligned with native axis direction and bar widths.
+  - Distinguish valid zero values from missing measurements. Missing actual values use a missing-data background while valid targets remain visible. `zeroText` is opt-in; the above-label layout suppresses zero-value labels while retaining tracks and targets.
+  - Support native bar labels, formatters, styles, emphasis, selection, marks, and tooltip overrides. Preserve the grouped zoom window during data refreshes, and follow appended categories when the current window is at the end.
+  - Integrate reactive plot themes, light/dark loading illustrations, default overlay slots, and the shared chart lifecycle. Export `getLinearColor` and `getLinearColors` through the aggregate plots entry for matching custom gradients.
+
+  Range bounds use measurement units rather than normalized ratios. Invalid scales or ranges emit actionable diagnostics and clear generated series. The built-in layout uses a horizontal value axis and vertical category axis; supply native `series` to replace the generated series for other arrangements. Add API guidance and single/grouped examples for Vue 2 and Vue 3 consumers.
+
+- 2d1086a: Add `createMapTransition(getChart, options?)` for animated map drilldown and return navigation.
+
+  - Export the helper and `MapTransition`, `MapTransitionDirection`, and `MapTransitionOptions` types from the aggregate chart entries and `@idux/charts/map`.
+  - Use `run('drilldown' | 'back', update)` to commit prepared map and data changes between native camera transitions and a canvas fade. Await reactive rendering inside `update`; each phase defaults to 480ms, and the cover follows chart resizing and the effective background.
+  - Return a completion boolean, cancel superseded runs, and expose `cancel()` and `dispose()` for application lifecycle cleanup. Remove temporary covers, listeners, and timers, and restore phase viewport and animation settings on cancellation or failure. Reject callback/update failures without leaving transition resources behind.
+  - Apply changes directly when the chart or first `geo` is unavailable, duration is zero, animation is disabled, or reduced motion is requested. Preserve the new map's final camera and animation settings after a completed transition.
+  - Add a China province/city drilldown demo with lazy-loaded boundaries from `@idux/geo-areas`, and refresh world density/status and China route examples with geometry from the same package, updated attribution, and API guidance.
+
+  The helper operates on the first `geo`. Load and register geometry and finish asynchronous requests before starting a transition; application code owns hierarchy, navigation, and stale-response handling. Cancellation does not roll back an `update` that has already started. Dispose the helper on unmount. The geometry dependency belongs to the documentation site and is not added to the published chart packages.
+
+- 2d1086a: Add `IxWordCloudChart` and `createWordCloudOption`, built on native ECharts graph series without an additional word-cloud plugin.
+
+  - Export the component, builder, public props, data-item, shape, and motion types from `@idux/charts`, `@idux/charts/word-cloud`, and `@idux/charts-plots`. Add Vue global-component declarations and include `GraphSeriesOption` in the core `ChartOption` series union.
+  - Render weighted horizontal text, rectangular tags, or circles with configurable `sizeRange`, `gap`, and rectangular background `overlap`. Measure labels and state geometry, prioritize higher weights in crowded containers, and omit items that do not fit without silently shrinking explicit sizes.
+  - Support native categories, palettes, labels, item styles, tooltips, emphasis, selection, and graph-node events. Keep event indices tied to the original input. Preserve selection by stable item identity and retain positions for appearance-only changes; remeasure after container or asynchronous font changes.
+  - Add opt-in floating `motion`, with amplitude, axis ratio, duration, and pause-on-hover controls. Reserve movement space and respect reduced-motion preferences and disabled animation. Native entry/update transitions remain separately configurable.
+  - Integrate reactive plot themes, light/dark loading illustrations, default overlay slots, and shared instance methods. Add examples for text, tags, circles, motion, search highlighting, and native options.
+
+  Use finite non-negative weights and non-empty names; zero is valid. Invalid items are skipped, invalid layout settings or duplicate explicit IDs clear generated series, and invalid motion settings disable floating. Empty or unplaceable data leaves an empty canvas for caller-provided slot content. Native selection uses names, so duplicate names share selection; provide distinct names when independent selection is required.
+
+  The built-in layout supports horizontal labels rather than pixel-level glyph packing, image masks, arbitrary outlines, or force layouts. It does not support dataset/encode, axes, dataZoom, links, dragging, or roaming. `createWordCloudOption` requires the extensions registered by the component entry; direct builder consumers should resize after fonts load. Supplying native `series` replaces all generated series.
+
+### Patch Changes
+
+- 2d1086a: Improve horizontal category labels and zero-value presentation in built-in Bar layouts.
+
+  - Show full category names on label hover, including rows with missing or all-zero measurements. Keep default truncation within the category label width, escape HTML label content, and support native rich-text tooltips. Honor custom axis tooltips and allow opting out with `yAxis.triggerEvent: false`.
+  - Constrain shared HTML tooltip titles and category text to the viewport and wrap long names, with an 18px title line height. Import `@idux/charts/dist/style.css` to apply these shared tooltip styles.
+  - In `horizontal-above`, hide numeric labels for zero values and suppress the central all-zero message so the category rows remain readable. Preserve missing-value styling and the existing `zeroText` behavior in other category layouts.
+
+  The same category-label tooltip behavior is available in the new grouped Bullet chart. Update API guidance and add regression coverage for long labels, missing values, all-zero data, and tooltip overrides.
+
+- Updated dependencies [2d1086a]
+- Updated dependencies [2d1086a]
+- Updated dependencies [2d1086a]
+- Updated dependencies [2d1086a]
+  - @idux/charts-plots@1.7.0
+  - @idux/charts-core@1.7.0
+
 ## 1.6.1
 
 ### Patch Changes
