@@ -578,27 +578,31 @@ test('bar legend paging preserves zoom, selection and wheel behavior', async ({ 
   const { svg, years, labels, arrows } = await openPagedLegend(page)
 
   // Each row starts at the same column positions, including labels of different lengths.
-  const layout = await labels.evaluateAll(nodes => {
-    const rows = new Map<number, { text: string; x: number }[]>()
-    for (const node of nodes) {
-      const { x, y } = node.getBoundingClientRect()
-      const row = Math.round(y)
-      const items = rows.get(row) ?? []
-      items.push({ text: node.textContent ?? '', x })
-      rows.set(row, items)
+  let secondRow: { text: string; x: number }[] = []
+  await expect(async () => {
+    const layout = await labels.evaluateAll(nodes => {
+      const rows = new Map<number, { text: string; x: number }[]>()
+      for (const node of nodes) {
+        const { x, y } = node.getBoundingClientRect()
+        const row = Math.round(y)
+        const items = rows.get(row) ?? []
+        items.push({ text: node.textContent ?? '', x })
+        rows.set(row, items)
+      }
+      return [...rows.values()]
+    })
+    expect(layout).toHaveLength(2)
+    const firstRow = layout[0]!
+    secondRow = layout[1]!
+    expect(firstRow!.length).toBeGreaterThan(2)
+    expect(secondRow).toHaveLength(firstRow!.length)
+    for (const [index, item] of firstRow!.entries()) {
+      expect(item.x).toBeCloseTo(secondRow![index]!.x)
+      if (index > 1) {
+        expect(item.x - firstRow![index - 1]!.x).toBeCloseTo(firstRow![1]!.x - firstRow![0]!.x)
+      }
     }
-    return [...rows.values()]
-  })
-  expect(layout).toHaveLength(2)
-  const [firstRow, secondRow] = layout
-  expect(firstRow!.length).toBeGreaterThan(2)
-  expect(secondRow).toHaveLength(firstRow!.length)
-  for (const [index, item] of firstRow!.entries()) {
-    expect(item.x).toBeCloseTo(secondRow![index]!.x)
-    if (index > 1) {
-      expect(item.x - firstRow![index - 1]!.x).toBeCloseTo(firstRow![1]!.x - firstRow![0]!.x)
-    }
-  }
+  }).toPass({ timeout: 5000 })
 
   const first = svg.getByText('服务器', { exact: true })
   const activeFill = await first.getAttribute('fill')
