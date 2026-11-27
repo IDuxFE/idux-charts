@@ -99,6 +99,8 @@ provide(
 
 ## 绘制地图
 
+地图边界等行政地理数据优先使用 [`@idux/geo-areas`](https://iduxfe.github.io/geo-areas/)，由应用单独安装：`pnpm add @idux/geo-areas`。图表库不内置地图数据；完整用法、数据覆盖和来源说明请直接查看 [geo-areas 官网](https://iduxfe.github.io/geo-areas/)。
+
 先用 `registerMap(name, geoJSON)` 注册应用提供的几何，再通过 `geo: { map: name }` 指定底图。`series` 可组合 `createMapNodes`、`createMapLines` 的结果与手写的原生系列；`geo.regions` 可用 `createMapRegions` 生成。地图没有 `mode` 属性，也不内置几何或数据请求。完整示例和数据校验见<a href="../components/map">地图 API</a>。
 
 ## 绘制词云

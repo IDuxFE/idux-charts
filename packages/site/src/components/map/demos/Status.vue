@@ -13,30 +13,21 @@ import {
   createMapRegions,
   createMapVisualMap,
 } from '@idux/charts'
-import china from '../assets/china.json'
-// 世界地图来源：https://echarts.apache.org/examples/data/asset/geo/world.json
-import world from '../assets/world.json'
+import china from '@idux/geo-areas/geojson/china.json'
+import world from '@idux/geo-areas/geojson/world.json'
 
 // 注册 GeoJSON 地图边界；名称必须与模板中的 map 一致。通常在应用初始化时注册一次。
 registerMap('china', china as Parameters<typeof registerMap>[1])
 registerMap('world', world as Parameters<typeof registerMap>[1])
 
-const worldNames = {
-  'United States': '美国',
-  Australia: '澳大利亚',
-  Peru: '秘鲁',
-  Kazakhstan: '哈萨克斯坦',
-  China: '中国',
-}
-
 type StatusLocation = Omit<MapNodeItem, 'id'> & { region?: string }
 
 const chinaStatus: StatusLocation[] = [
-  { name: '北京三里屯', region: '北京', coordinate: [116.46, 39.92], value: 770 },
-  { name: '上海BFC', region: '上海', coordinate: [121.48, 31.22], value: 666 },
-  { name: '深圳华润中心', region: '广东', coordinate: [114.06, 22.55], value: 332 },
-  { name: '长沙IFS', region: '湖南', coordinate: [112.98, 28.19], value: 222 },
-  { name: '成都太古里', region: '四川', coordinate: [104.06, 30.67], value: 112 },
+  { name: '北京三里屯', region: '北京市', coordinate: [116.46, 39.92], value: 770 },
+  { name: '上海BFC', region: '上海市', coordinate: [121.48, 31.22], value: 666 },
+  { name: '深圳华润中心', region: '广东省', coordinate: [114.06, 22.55], value: 332 },
+  { name: '长沙IFS', region: '湖南省', coordinate: [112.98, 28.19], value: 222 },
+  { name: '成都太古里', region: '四川省', coordinate: [104.06, 30.67], value: 112 },
 ]
 
 const worldStatus: StatusLocation[] = [
@@ -100,9 +91,7 @@ const geo = computed(() => ({
         { name: params.name ?? '', value: '-', color: unref(plotTheme).color ?? '#4089FF' },
       ]),
   },
-  // nameMap 将 GeoJSON 的英文区域名映射到中文，regions.region 使用映射后的名称。
   emphasis: { label: { show: true, color: unref(plotTheme).textColor ?? '#1C4EFF' } },
-  ...(scope.value === 'world' ? { nameMap: worldNames } : {}),
   regions: createMapRegions(
     data.value.map(item => ({
       region: item.region ?? item.name,

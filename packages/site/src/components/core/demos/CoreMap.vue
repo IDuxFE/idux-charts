@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { registerMap, type ChartProps } from '@idux/charts'
-import china from '../../map/assets/china.json'
+import china from '@idux/geo-areas/geojson/china.json'
 
 // 注册地图边界，名称与 series.map 保持一致。
 registerMap('china', china as Parameters<typeof registerMap>[1])
@@ -15,9 +15,9 @@ const option: ChartProps = {
       map: 'china',
       name: '资产数量',
       data: [
-        { name: '广东', value: 260 },
-        { name: '北京', value: 180 },
-        { name: '四川', value: 100 },
+        { name: '广东省', value: 260 },
+        { name: '北京市', value: 180 },
+        { name: '四川省', value: 100 },
       ],
     },
   ],

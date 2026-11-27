@@ -103,3 +103,16 @@ IDUX_E2E_SEED=12345 pnpm test:e2e:ci chromium
 仅生成缺失基线：`pnpm exec playwright test e2e/visual.spec.ts --grep "word-cloud .* demo visual baseline" --update-snapshots=missing`。检查图片后去掉更新参数重跑，既有基线应保持不变。
 
 词云功能用例覆盖真实鼠标悬停暂停/恢复、减少动态效果、选中、图例筛选、搜索位置稳定，以及加载和空状态恢复。通用示例渲染、主题和空插槽清单也包含词云；Vue 2/3 打包消费测试通过真实 SVG 点击验证 Tooltip、分类筛选与非法尺寸恢复，并参与浏览器覆盖率合并。
+
+## 地图几何、数值与视觉回归
+
+`map-demo-drilldown.spec.ts` 验证真实区域／标记点击、级联选择联动、直辖市分组、缺少边界及过期响应处理，并记录可选过渡 helper 切换地图时的原生视角缩放。
+
+`map-demo-controls.spec.ts` 验证真实站点的加载、空状态恢复及导航。`map-demo-state.spec.ts` 在 fixture 中挂载实际文档示例，每个示例均切换中国与世界地图，检查实时 geo 模型的区域名称、所有业务区域与底图的匹配情况、真实鼠标悬停显示的正常值与零值、实际填色变化、缺失密度数据与零值的区别，以及恢复正常后的数据。状态图的节点值和飞线图的线路指标也通过实时图表配置验证。
+
+地图视觉矩阵覆盖状态、密度、飞线三类示例的中国与世界范围、深浅主题及 Chromium、Firefox、WebKit，共 36 张截图。原有默认范围的截图名称保持不变，另一范围的文件名包含 `china` 或 `world`。仅生成缺失基线，检查图片后再关闭基线更新复跑：
+
+```sh
+IDUX_E2E_TARGET=fixture pnpm exec playwright test e2e/visual.spec.ts --grep 'map (status|density|lines)' --update-snapshots=missing
+IDUX_E2E_TARGET=fixture pnpm exec playwright test e2e/map-demo-state.spec.ts e2e/visual.spec.ts --grep 'map (status|density|lines)'
+```

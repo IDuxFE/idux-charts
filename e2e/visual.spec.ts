@@ -1,5 +1,6 @@
 import { test, expect, hoverCategory } from './helpers'
 import { fixtureBaseURL } from './environment'
+import { expectMapGeometry, selectMapControl } from './mapDemoHelpers'
 
 for (const [chart, title, snapshot, fixture] of [
   ['bar', '简单的鼠标经过显示条纹', 'bar-striped.png', 'legacy-bar-stripe'],
@@ -103,77 +104,111 @@ for (const [kind, demoName] of [
   ['word-cloud', 'overlap', '自定义矩形样式'],
 ]) {
   for (const theme of ['light', 'dark']) {
-    test(`${kind} ${demoName} ${theme} demo visual baseline`, async ({ page }, testInfo) => {
-      await page.setViewportSize({ width: 1280, height: 900 })
-      // Exercise the real reduced-motion policy instead of capturing a floating phase.
-      if (kind === 'word-cloud') await page.emulateMedia({ reducedMotion: 'reduce' })
-      await page.goto(`${fixtureBaseURL}?demo-visual=${kind}-${demoName}&theme=${theme}`)
-      const demo = page.locator('#visual-demo')
-      const chart = demo.locator('[_echarts_instance_]').first()
-      await expect(chart.locator('svg path').first()).toBeAttached()
-      await chart.scrollIntoViewIfNeeded()
-      await page.mouse.move(0, 0)
-      await page.evaluate(() => document.fonts.ready)
-      await chart.evaluate(element => {
-        // Finish native and custom keyframe animations at their canonical end state,
-        // including perpetual waves and route effects, without changing demo options.
-        window.finishDemoAnimations(element as HTMLElement)
-        const y = element.getBoundingClientRect().top
-        ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
-      })
-      if (
-        (kind === 'word-cloud' || (kind === 'bar' && demoName === 'above')) &&
-        testInfo.project.name === 'chromium'
-      ) {
-        // Verify that CJK layout uses the pinned test font rather than a host fallback.
-        const session = await page.context().newCDPSession(page)
-        try {
-          await session.send('DOM.enable')
-          await session.send('CSS.enable')
-          const { root } = await session.send('DOM.getDocument')
-          const id = await chart.getAttribute('_echarts_instance_')
-          const { nodeId } = await session.send('DOM.querySelector', {
-            nodeId: root.nodeId,
-            selector: `[_echarts_instance_="${id}"] svg text`,
-          })
-          const fonts = await session.send('CSS.getPlatformFontsForNode', { nodeId })
-          expect(fonts.fonts).toEqual([
-            expect.objectContaining({ familyName: 'ChartVisualCJK', isCustomFont: true }),
-          ])
-          await testInfo.attach('cjk-platform-fonts', {
-            body: JSON.stringify(fonts),
-            contentType: 'application/json',
-          })
-          const metrics = await page.evaluate(() => {
-            const context = document.createElement('canvas').getContext('2d')!
-            return ['sans-serif', 'ChartVisualCJK'].map(family => {
-              context.font = `12px ${family}`
-              return {
-                family,
-                samples: ['国', '服务器终端（200.200.1.13）'].map(text => {
-                  const measured = context.measureText(text)
-                  return {
-                    text,
-                    width: measured.width,
-                    ascent: measured.actualBoundingBoxAscent,
-                    descent: measured.actualBoundingBoxDescent,
-                  }
-                }),
-              }
-            })
-          })
-          await testInfo.attach('cjk-font-metrics', {
-            body: JSON.stringify(metrics),
-            contentType: 'application/json',
-          })
-        } finally {
-          await session.detach()
+    const scopes: ('china' | 'world' | undefined)[] =
+      kind === 'map'
+        ? demoName === 'lines'
+          ? ['world', 'china']
+          : ['china', 'world']
+        : [undefined]
+    for (const [scopeIndex, scope] of scopes.entries()) {
+      const variant = scopeIndex === 0 ? '' : `${scope} `
+      test(`${kind} ${demoName} ${variant}${theme} demo visual baseline`, async ({
+        page,
+      }, testInfo) => {
+        await page.setViewportSize({ width: 1280, height: 900 })
+        // Exercise the real reduced-motion policy instead of capturing a floating phase.
+        if (kind === 'word-cloud') await page.emulateMedia({ reducedMotion: 'reduce' })
+        await page.goto(`${fixtureBaseURL}?demo-visual=${kind}-${demoName}&theme=${theme}`)
+        const demo = page.locator('#visual-demo')
+        const chart = demo.locator('[_echarts_instance_]').first()
+        await expect(chart.locator('svg path').first()).toBeAttached()
+        if (scope) {
+          await selectMapControl(demo, '地图范围', scope === 'china' ? '中国地图' : '世界地图')
+          await expectMapGeometry(chart, scope)
         }
-      }
-      await expect(chart).toHaveScreenshot(`demo-${kind}-${demoName}-${theme}.png`, {
-        animations: 'disabled',
-        maxDiffPixelRatio: 0.005,
+        await chart.scrollIntoViewIfNeeded()
+        await page.mouse.move(0, 0)
+        await page.evaluate(() => document.fonts.ready)
+        await chart.evaluate(element => {
+          // Finish native and custom keyframe animations at their canonical end state,
+          // including perpetual waves and route effects, without changing demo options.
+          window.finishDemoAnimations(element as HTMLElement)
+          const y = element.getBoundingClientRect().top
+          ;(element as HTMLElement).style.transform = `translateY(${Math.round(y) - y}px)`
+        })
+        if (
+          (kind === 'word-cloud' ||
+            (kind === 'bar' && demoName === 'above') ||
+            (kind === 'map' && demoName === 'density' && scope === 'china')) &&
+          testInfo.project.name === 'chromium'
+        ) {
+          // Verify that CJK layout uses the pinned test font rather than a host fallback.
+          const session = await page.context().newCDPSession(page)
+          try {
+            await session.send('DOM.enable')
+            await session.send('CSS.enable')
+            const { root } = await session.send('DOM.getDocument')
+            const id = await chart.getAttribute('_echarts_instance_')
+            const provinceLabels = kind === 'map'
+            if (provinceLabels) {
+              const probes = chart.locator('svg text').filter({
+                hasText: /^(新疆维吾尔自治区|广西壮族自治区|香港特别行政区)$/,
+              })
+              await expect(probes).toHaveCount(3)
+              await probes.evaluateAll(elements =>
+                elements.forEach(element => element.setAttribute('data-font-probe', '')),
+              )
+            }
+            const { nodeIds } = await session.send('DOM.querySelectorAll', {
+              nodeId: root.nodeId,
+              selector: `[_echarts_instance_="${id}"] svg text${provinceLabels ? '[data-font-probe]' : ''}`,
+            })
+            const fonts = []
+            for (const nodeId of provinceLabels ? nodeIds : nodeIds.slice(0, 1)) {
+              const actual = await session.send('CSS.getPlatformFontsForNode', { nodeId })
+              expect(actual.fonts).toEqual([
+                expect.objectContaining({ familyName: 'ChartVisualCJK', isCustomFont: true }),
+              ])
+              fonts.push(actual)
+            }
+            await testInfo.attach('cjk-platform-fonts', {
+              body: JSON.stringify(fonts),
+              contentType: 'application/json',
+            })
+            const metrics = await page.evaluate(() => {
+              const context = document.createElement('canvas').getContext('2d')!
+              return ['sans-serif', 'ChartVisualCJK'].map(family => {
+                context.font = `12px ${family}`
+                return {
+                  family,
+                  samples: ['国', '服务器终端（200.200.1.13）'].map(text => {
+                    const measured = context.measureText(text)
+                    return {
+                      text,
+                      width: measured.width,
+                      ascent: measured.actualBoundingBoxAscent,
+                      descent: measured.actualBoundingBoxDescent,
+                    }
+                  }),
+                }
+              })
+            })
+            await testInfo.attach('cjk-font-metrics', {
+              body: JSON.stringify(metrics),
+              contentType: 'application/json',
+            })
+          } finally {
+            await session.detach()
+          }
+        }
+        await expect(chart).toHaveScreenshot(
+          `demo-${kind}-${demoName}-${scopeIndex === 0 ? '' : `${scope}-`}${theme}.png`,
+          {
+            animations: 'disabled',
+            maxDiffPixelRatio: 0.005,
+          },
+        )
       })
-    })
+    }
   }
 }

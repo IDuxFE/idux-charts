@@ -31,6 +31,7 @@
     "@idux/cdk": "^2.11.0",
     "@idux/charts": "workspace:*",
     "@idux/components": "^2.11.0",
+    "@idux/geo-areas": "^0.1.0",
     "@idux/pro": "^2.11.0",
     "echarts": "^6.1.0",
     "lodash-es": "^4.18.1",

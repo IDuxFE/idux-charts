@@ -25,3 +25,5 @@ overrides:
   '@mdit-vue/shared@<2.1.4': 2.1.4
   '@mdit-vue/types@<2.1.4': 2.1.4
   '@types/markdown-it@<14.2.0': 14.2.0
+minimumReleaseAgeExclude:
+  - '@idux/geo-areas'

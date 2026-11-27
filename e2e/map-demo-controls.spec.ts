@@ -1,16 +1,5 @@
-import type { Locator } from '@playwright/test'
 import { test, expect, reloadDemo } from './helpers'
-
-async function select(demo: Locator, group: string, name: string) {
-  const label = demo
-    .locator(`[aria-label="${group}"]`)
-    .locator('label')
-    .filter({
-      has: demo.page().getByText(name, { exact: true }),
-    })
-  await label.click()
-  await expect(label.getByRole('radio')).toBeChecked()
-}
+import { selectMapControl as select } from './mapDemoHelpers'
 
 for (const title of ['状态型', '密度型', '飞线型']) {
   test(`${title} switches geometry and data states without stale loading or blank maps`, async ({
