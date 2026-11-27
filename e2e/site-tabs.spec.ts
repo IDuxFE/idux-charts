@@ -1,4 +1,9 @@
+import { readdirSync } from 'node:fs'
 import { test, expect } from './helpers'
+
+const coreDemoCount = readdirSync(
+  new URL('../packages/site/src/components/core/demos/', import.meta.url),
+).filter(file => file.endsWith('.vue')).length
 
 test('documentation API and design tabs preserve query parameters through reload', async ({
   page,
@@ -52,20 +57,39 @@ test('tab deep links reset correctly across component navigation', async ({ page
   await expect(page.getByRole('radio', { name: '设计指南', exact: true })).toBeChecked()
 
   const components = page.getByRole('menuitem', { name: '组件', exact: true })
-  // A deep link can already expand its route's group; clicking again would collapse it.
-  if ((await components.getAttribute('aria-expanded')) !== 'true') await components.click()
+  // Hover the actual label: the menuitem includes its overlay, so its bounding
+  // box centre need not land on the element that handles pointer entry.
+  await components.getByText('组件', { exact: true }).hover()
   await expect(components).toHaveAttribute('aria-expanded', 'true')
   await page.getByRole('menuitem', { name: '基础组件', exact: true }).click()
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeChecked()
   await expect(page).toHaveURL(/components\/core$/)
 })
 
-test('unavailable and unknown tab deep links fall back to demos', async ({ page }) => {
+test('an unavailable design tab falls back to rendered core demos and allows API selection', async ({
+  page,
+}) => {
   await page.goto('components/core?tab=design')
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeChecked()
+  expect(coreDemoCount).toBeGreaterThan(0)
+  // Archive loads each real demo asynchronously. Do not switch tabs while its
+  // Vue application is still mounting into the outgoing content container.
+  await expect
+    .poll(() =>
+      page
+        .locator('[_echarts_instance_]')
+        .evaluateAll(
+          charts => charts.filter(chart => chart.querySelector('svg path, canvas')).length,
+        ),
+    )
+    .toBe(coreDemoCount)
   await page.getByRole('radio', { name: 'API', exact: true }).click()
   await expect(page).toHaveURL(/components\/core\?tab=api$/)
+  await expect(page.getByRole('heading', { name: 'IxChart', exact: true })).toBeVisible()
+})
 
+test('an unknown tab falls back to rendered pie demos', async ({ page }) => {
   await page.goto('components/pie?tab=unknown')
   await expect(page.getByRole('radio', { name: '示例', exact: true })).toBeChecked()
+  await expect(page.locator('[_echarts_instance_] svg').first()).toBeVisible()
 })

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
-import { test, expect } from '@playwright/test'
+import { test, expect } from './browserTest'
 import { siteBaseURL } from './environment'
 
 test('Pages fallback preserves deep links, query parameters and navigation', async ({ page }) => {

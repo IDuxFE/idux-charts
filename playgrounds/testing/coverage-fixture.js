@@ -1,10 +1,18 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import { prepareBrowser } from '../../e2e/browserStartup.ts'
 
 /** Keep each test's counters separate so parallel workers never overwrite them. */
 export function createCoverageTest(base) {
   return base.extend({
+    browserStartup: [
+      async ({ browser, browserName }, use, workerInfo) => {
+        await prepareBrowser(browser, browserName, workerInfo)
+        await use()
+      },
+      { scope: 'worker', auto: true },
+    ],
     page: async ({ page }, use, testInfo) => {
       if (process.env.CHARTS_COVERAGE !== '1') return use(page)
       const project = testInfo.config.rootDir.includes('/vue2/') ? 'vue2' : 'vue3'

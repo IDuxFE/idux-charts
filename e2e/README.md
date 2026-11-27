@@ -112,6 +112,13 @@ Chromium and Firefox are capped at one worker per project to avoid concurrent
 fresh-page setup and SVG memory contention. The Playground CI configurations also
 use one worker; WebKit retains its existing worker budget. Keep browser projects separate when comparing per-browser CI timings.
 
+Chromium/Firefox workers first create and close an isolated `about:blank` page to
+initialize the engine. This loads no application, fonts or demos. Each test still
+gets a fresh context and page, and measures all application loading and interaction.
+Engine preparation uses the existing timeout budget and is recorded separately in
+the job summary; overall runner elapsed time includes it. This makes startup cost
+visible instead of attributing it to whichever case happens to run first.
+
 Existing retry budgets remain unchanged: two in CI for the main suite and one
 for playgrounds, with no local retries by default. Do not increase retries,
 timeouts or image tolerances to hide a failure. `scripts/e2e-summary.mjs` lists

@@ -1,4 +1,5 @@
-import { test as base, expect, type Locator } from '@playwright/test'
+import type { Locator } from '@playwright/test'
+import { test as base, expect } from './browserTest'
 
 export const test = base.extend<{ browserErrors: void }>({
   browserErrors: [
