@@ -71,6 +71,9 @@ jobs:
       - name: Read planned release version
         id: release-title
         run: |
+          # SHA checkout leaves no local main for Changesets' baseBranch lookup.
+          # Restore it at the validated SHA, without following a newer remote main.
+          git checkout -B main "$GITHUB_SHA"
           pnpm exec changeset status --output "$RUNNER_TEMP/release-plan.json"
           node --input-type=module <<'NODE'
           import { appendFileSync, readFileSync } from 'node:fs'
