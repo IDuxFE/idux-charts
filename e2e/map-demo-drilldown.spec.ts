@@ -55,8 +55,19 @@ async function clickMapArea(chart: Locator, name: string, marker = false) {
         .getComponent('geo')
         .coordinateSystem.getRegion(name)
       // Find an interior point clear of the pins, which can overlap nearby regions at national scale.
-      for (let y = 8; y < box.height - 8; y += 4) {
-        for (let x = 8; x < box.width - 8; x += 4) {
+      // Keep the same screen grid and real polygon/hit checks, but skip the
+      // thousands of points outside this region's projected bounding rectangle.
+      const bounds = region.getBoundingRect()
+      const corners = [
+        [bounds.x, bounds.y],
+        [bounds.x + bounds.width, bounds.y + bounds.height],
+      ].map(coordinate => instance.convertToPixel({ geoIndex: 0 }, coordinate))
+      const left = Math.max(8, Math.ceil(Math.min(corners[0]![0]!, corners[1]![0]!) / 4) * 4)
+      const top = Math.max(8, Math.ceil(Math.min(corners[0]![1]!, corners[1]![1]!) / 4) * 4)
+      const right = Math.min(box.width - 8, Math.max(corners[0]![0]!, corners[1]![0]!) + 4)
+      const bottom = Math.min(box.height - 8, Math.max(corners[0]![1]!, corners[1]![1]!) + 4)
+      for (let y = top; y < bottom; y += 4) {
+        for (let x = left; x < right; x += 4) {
           if (
             ![
               [-2, 0],

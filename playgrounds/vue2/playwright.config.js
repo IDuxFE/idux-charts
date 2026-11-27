@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: './e2e',
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   fullyParallel: true,
-  workers: process.env.CI ? 2 : 4,
+  workers: process.env.CI ? 1 : 4,
   reporter: [
     ['list'],
     ['html', { open: 'never' }],

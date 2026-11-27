@@ -40,7 +40,8 @@ site theme controls and complete-page layout still run against the site. Visual
 fixtures keep their fixed container, pinned CJK font and existing baselines.
 
 Data states and loading/empty recovery have separate tests, each preserving its
-own instance checks. Legend paging/selection/wheel behavior, resize anchors and
+own instance checks. Packaged pie cases use a dedicated HTML entry that imports
+the same Basic component without unrelated playground modules. Legend paging/selection/wheel behavior, resize anchors and
 tooltip columns are separate regressions. Map geometry/data tests locally request
 reduced motion; native zoom, loading covers, stale responses and theme changes
 during transitions retain normal animations. A `test.step` does not create a new
@@ -107,9 +108,9 @@ complete three-browser regression in one run.
 selects servers, not tests. Without these variables, local commands build both
 assets as before.
 
-Firefox is capped at one worker per project to avoid concurrent browser/page
-setup and SVG memory contention. Chromium and WebKit retain their existing worker
-budgets. Keep browser projects separate when comparing per-browser CI timings.
+Chromium and Firefox are capped at one worker per project to avoid concurrent
+fresh-page setup and SVG memory contention. The Playground CI configurations also
+use one worker; WebKit retains its existing worker budget. Keep browser projects separate when comparing per-browser CI timings.
 
 Existing retry budgets remain unchanged: two in CI for the main suite and one
 for playgrounds, with no local retries by default. Do not increase retries,

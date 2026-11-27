@@ -1,4 +1,4 @@
-import { test, expect, hoverPieSector, hoverSvg, clickSvg } from './helpers'
+import { test, expect, hoverPieSector, hoverSvg, clickSvg, pressSliderKeys } from './helpers'
 
 const heading = (title: string) => new RegExp(`^${title}\\s*#?\\s*$`)
 
@@ -129,10 +129,12 @@ test('multi-column legend updates default row spacing when category count change
     [3, 20],
     [12, 16],
   ] as const) {
-    while (current !== count) {
-      await slider.press(current > count ? 'ArrowLeft' : 'ArrowRight')
-      current += current > count ? -1 : 1
-    }
+    await pressSliderKeys(
+      slider,
+      current > count ? 'ArrowLeft' : 'ArrowRight',
+      Math.abs(current - count),
+    )
+    current = count
     await expect(block).toContainText(`${count} 个分类`)
     await expect(async () => {
       const first = await chart
@@ -155,7 +157,7 @@ test('multi-column legend paging icons align with the values', async ({ page }) 
   const block = page.locator('.archive-app-demo').filter({
     has: page.getByRole('heading', { name: heading('多列图例') }),
   })
-  for (let i = 0; i < 8; i++) await block.getByRole('slider').press('ArrowRight')
+  await pressSliderKeys(block.getByRole('slider'), 'ArrowRight', 8)
   await expect(block).toContainText('20 个分类')
   const chart = block.locator('[_echarts_instance_]')
   await chart.scrollIntoViewIfNeeded()
@@ -197,9 +199,9 @@ test('single-column legend shares compact paging controls and pages both ways', 
     has: page.getByRole('heading', { name: heading('形态与自适应') }),
   })
   const width = block.getByRole('group', { name: '宽度', exact: true }).getByRole('slider')
-  for (let i = 0; i < 7; i++) await width.press('ArrowLeft')
+  await pressSliderKeys(width, 'ArrowLeft', 7)
   const height = block.getByRole('group', { name: '高度', exact: true }).getByRole('slider')
-  for (let i = 0; i < 4; i++) await height.press('ArrowRight')
+  await pressSliderKeys(height, 'ArrowRight', 4)
   await block.getByRole('button', { name: '业务标题', exact: true }).click()
   await block.getByText('环图', { exact: true }).click()
   await block.getByText('30 项', { exact: true }).click()
