@@ -32,6 +32,20 @@ Tests with continuous transitions intentionally keep related operations on the
 same chart. Splitting unrelated scenarios must not replace instance-preservation
 or cancellation checks with fresh-page assertions.
 
+`demoFixtures.ts` mounts one real documentation component through
+`demo.html?demo=...`, with site setup, the normal demo font and responsive sizing.
+Bar controls, multi-row legends, Bullet keyboards and Map controls use this entry
+to avoid initializing every chart on a documentation page. Catalogue, navigation,
+site theme controls and complete-page layout still run against the site. Visual
+fixtures keep their fixed container, pinned CJK font and existing baselines.
+
+Data states and loading/empty recovery have separate tests, each preserving its
+own instance checks. Legend paging/selection/wheel behavior, resize anchors and
+tooltip columns are separate regressions. Map geometry/data tests locally request
+reduced motion; native zoom, loading covers, stale responses and theme changes
+during transitions retain normal animations. A `test.step` does not create a new
+timeout budget; all tests keep the existing 30-second timeout.
+
 ## Stable interaction rules
 
 - Scroll a persistent chart/SVG container before resolving its children. ECharts
@@ -93,11 +107,17 @@ complete three-browser regression in one run.
 selects servers, not tests. Without these variables, local commands build both
 assets as before.
 
+Firefox is capped at one worker per project to avoid concurrent browser/page
+setup and SVG memory contention. Chromium and WebKit retain their existing worker
+budgets. Keep browser projects separate when comparing per-browser CI timings.
+
 Existing retry budgets remain unchanged: two in CI for the main suite and one
 for playgrounds, with no local retries by default. Do not increase retries,
 timeouts or image tolerances to hide a failure. `scripts/e2e-summary.mjs` lists
 first-attempt failures, flaky tests, attempt counts and slow tests in the Actions
-job summary; a retry success also emits a warning. HTML, JSON, traces and failure
+job summary; a retry success also emits a warning. An uncapped table lists every
+test with an attempt over 10 seconds, with first/longest attempt durations, total
+attempt time and retry count. HTML, JSON, traces and failure
 screenshots remain downloadable artifacts.
 
 The pnpm store cache avoids downloading unchanged packages, but the repository's

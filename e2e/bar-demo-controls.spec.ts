@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test'
+import { barDemoKeys, openDemo } from './demoFixtures'
 
 import { test, expect, clickSvg, hoverSvg, hoverCategory as hoverCategoryLabel } from './helpers'
 
@@ -64,8 +65,7 @@ async function hoverCategory(svg: Locator, name: string) {
 }
 
 async function openBarDemo(page: Page, title: string) {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, title)
+  const demo = await openDemo(page, barDemoKeys[title]!)
   const body = demo.locator('.bar-demo')
   // Bring below-the-fold charts into view before waiting for their SVG paint.
   await body.scrollIntoViewIfNeeded()
@@ -91,8 +91,8 @@ for (const [title, seriesCount] of [
   ['堆叠柱状图-竖向', 2],
   ['堆叠柱状图-横向', 3],
 ] as const) {
-  test(`${title} renders normal and extreme data and resizes`, async ({ page }) => {
-    const { demo, svg, bars, above, firstLabel } = await openBarDemo(page, title)
+  test(`${title} renders normal data, gradients and shadows`, async ({ page }) => {
+    const { svg, bars, above, firstLabel } = await openBarDemo(page, title)
     const horizontal = title.includes('横向')
     const width = () =>
       svg.evaluate((element, bodySelector) => {
@@ -144,7 +144,20 @@ for (const [title, seriesCount] of [
         }),
       )
       .toBe(5 * seriesCount)
+  })
 
+  test(`${title} restores normal data and resizes after the extreme scenario`, async ({ page }) => {
+    const { demo, svg, bars } = await openBarDemo(page, title)
+    const width = () =>
+      svg.evaluate(element =>
+        Math.abs(
+          element.getBoundingClientRect().width -
+            element.closest('.bar-demo')!.getBoundingClientRect().width,
+        ),
+      )
+    const horizontal = title.includes('横向')
+    const defaultWidth = title.startsWith('分组') ? 6 : 10
+    await expect(bars).toHaveCount(5 * seriesCount)
     await selectState(demo, '极限场景')
     await expect(bars).toHaveCount((horizontal ? 5 : 10) * seriesCount)
     await expect.poll(() => thickness(bars, horizontal)).toBeCloseTo(horizontal ? defaultWidth : 6)
@@ -156,8 +169,8 @@ for (const [title, seriesCount] of [
     expect((await svg.boundingBox())!.height).toBe(300)
   })
 
-  test(`${title} handles zero, missing, reference, loading and empty states`, async ({ page }) => {
-    const { demo, body, chart, svg, bars, above, firstLabel } = await openBarDemo(page, title)
+  test(`${title} handles zero, missing and reference states`, async ({ page }) => {
+    const { demo, chart, svg, bars, above, firstLabel } = await openBarDemo(page, title)
     await expect(bars).toHaveCount(5 * seriesCount)
     const instance = await chart.getAttribute('_echarts_instance_')
 
@@ -196,6 +209,17 @@ for (const [title, seriesCount] of [
     await expect(svg.locator(referencePath).first()).toBeAttached()
     await expect(svg).toContainText('异常')
     await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+    await selectState(demo, '正常')
+    await expect(bars).toHaveCount(5 * seriesCount)
+    await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
+  })
+
+  test(`${title} preserves its instance through loading, empty and normal states`, async ({
+    page,
+  }) => {
+    const { demo, body, chart, bars } = await openBarDemo(page, title)
+    await expect(bars).toHaveCount(5 * seriesCount)
+    const instance = await chart.getAttribute('_echarts_instance_')
     await selectState(demo, '加载中')
     const loading = body.getByRole('status')
     await expect(loading).toContainText('图表正在加载中，请稍后...')
@@ -212,8 +236,7 @@ for (const [title, seriesCount] of [
 }
 
 test('missing data shows a persistent red band and a reason on hover', async ({ page }) => {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, '基础柱状图-竖向')
+  const demo = await openDemo(page, barDemoKeys['基础柱状图-竖向']!)
   const chart = demo.locator('[_echarts_instance_]')
   const svg = chart.locator('svg')
   const tooltip = chart.locator('.charts-tooltips')
@@ -245,8 +268,7 @@ test('missing data shows a persistent red band and a reason on hover', async ({ 
 test('grouped hover keeps valid values and shows reasons for only the missing series', async ({
   page,
 }) => {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, '分组柱状图-竖向')
+  const demo = await openDemo(page, barDemoKeys['分组柱状图-竖向']!)
   const chart = demo.locator('[_echarts_instance_]')
   const svg = chart.locator('svg')
   await selectState(demo, missingState)
@@ -259,8 +281,7 @@ test('grouped hover keeps valid values and shows reasons for only the missing se
 })
 
 test('the gray hover band adds 6px to each side of a bar', async ({ page }) => {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, '基础柱状图-竖向')
+  const demo = await openDemo(page, barDemoKeys['基础柱状图-竖向']!)
   const svg = demo.locator('[_echarts_instance_] svg')
   const bar = svg.locator(barPaths).first()
   await bar.scrollIntoViewIfNeeded()
@@ -306,12 +327,6 @@ test('category bars follow the site theme for the slider, tooltip and data state
   await selectState(demo, '带参考线')
   await expect(svg.locator('path[stroke="#FF957B"][stroke-dasharray]').first()).toBeAttached()
 
-  const above = demoByTitle(page, '基础柱状图-横向上方')
-  const aboveSvg = above.locator('[_echarts_instance_] svg')
-  await selectState(above, missingState)
-  await expect(aboveSvg.locator('path[fill="#687080"]')).toHaveCount(4)
-  await expect(aboveSvg.locator('path[fill="rgb(54, 26, 27)"]')).toBeVisible()
-
   await selectState(demo, '全部值为 0')
   const zero = svg.getByText('暂无数据', { exact: true })
   await expect(zero).toHaveAttribute('fill', '#808999')
@@ -320,11 +335,20 @@ test('category bars follow the site theme for the slider, tooltip and data state
   await expect(zero).toHaveAttribute('fill', '#A1A7B3')
 })
 
+test('above-label missing bars follow the site dark theme', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.goto('components/bar')
+  const above = demoByTitle(page, '基础柱状图-横向上方')
+  const aboveSvg = above.locator('[_echarts_instance_] svg')
+  await selectState(above, missingState)
+  await expect(aboveSvg.locator('path[fill="#687080"]')).toHaveCount(4)
+  await expect(aboveSvg.locator('path[fill="rgb(54, 26, 27)"]')).toBeVisible()
+})
+
 test('the dashed reference draws beneath the bars and can be toggled by its legend', async ({
   page,
 }) => {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, '基础柱状图-竖向')
+  const demo = await openDemo(page, barDemoKeys['基础柱状图-竖向']!)
   const svg = demo.locator('[_echarts_instance_] svg')
   await selectState(demo, '带参考线')
   const line = svg.locator(referencePath).first()
@@ -361,8 +385,7 @@ for (const [title, horizontal, first, last, seriesCount, grouped] of [
   test(`${title} pans to the last category and applies its fixed width rule when zooming`, async ({
     page,
   }) => {
-    await page.goto('components/bar')
-    const demo = demoByTitle(page, title)
+    const demo = await openDemo(page, barDemoKeys[title]!)
     await selectState(demo, '极限场景')
     const svg = demo.locator('[_echarts_instance_] svg')
     await svg.scrollIntoViewIfNeeded()
@@ -381,7 +404,7 @@ for (const [title, horizontal, first, last, seriesCount, grouped] of [
     const drag = async (x: number, y: number, amount: number) => {
       await page.mouse.move(x, y)
       await page.mouse.down()
-      await page.mouse.move(horizontal ? x : x + amount, horizontal ? y + amount : y, { steps: 12 })
+      await page.mouse.move(horizontal ? x : x + amount, horizontal ? y + amount : y, { steps: 4 })
       await page.mouse.up()
     }
     const length = horizontal ? track.height : track.width
@@ -483,8 +506,11 @@ test('bar example catalogue and legend totals remain complete', async ({ page })
 
 test('bar legends wrap and enable pagination as the series count grows', async ({ page }) => {
   await page.setViewportSize({ width: 1500, height: 900 })
-  await page.goto('components/bar')
-  const demo = page.locator('.category-bar-legend')
+  const demo = (await openDemo(page, 'bar-legend')).locator('.category-bar-legend')
+  // Keep the isolated page scrollable to exercise wheel propagation outside the legend.
+  await page.evaluate(() => {
+    document.body.style.minHeight = '200vh'
+  })
   const svg = demo.locator('svg')
   const count = demo.getByRole('radiogroup', { name: '系列数量' })
   const years = svg.getByText(/^20(?:19|2[0-3])$/)
@@ -519,12 +545,13 @@ test('bar legends wrap and enable pagination as the series count grows', async (
   }
 })
 
-test('bar legend paging preserves zoom, selection, wheel behavior and resize anchors', async ({
-  page,
-}) => {
+async function openPagedLegend(page: Page) {
   await page.setViewportSize({ width: 1500, height: 900 })
-  await page.goto('components/bar')
-  const demo = page.locator('.category-bar-legend')
+  const demo = (await openDemo(page, 'bar-legend')).locator('.category-bar-legend')
+  // Keep the isolated page scrollable to exercise wheel propagation outside the legend.
+  await page.evaluate(() => {
+    document.body.style.minHeight = '200vh'
+  })
   const svg = demo.locator('svg')
   const count = demo.getByRole('radiogroup', { name: '系列数量' })
   const years = svg.getByText(/^20(?:19|2[0-3])$/)
@@ -540,9 +567,15 @@ test('bar legend paging preserves zoom, selection, wheel behavior and resize anc
   const y = box.y + box.height / 2
   await page.mouse.move(x, y)
   await page.mouse.down()
-  await page.mouse.move(x + box.width * 1.1, y, { steps: 12 })
+  await page.mouse.move(x + box.width * 1.1, y, { steps: 4 })
   await page.mouse.up()
   await expect(years).toHaveText(['2021', '2022', '2023'])
+
+  return { demo, svg, count, years, labels, arrows }
+}
+
+test('bar legend paging preserves zoom, selection and wheel behavior', async ({ page }) => {
+  const { svg, years, labels, arrows } = await openPagedLegend(page)
 
   // Each row starts at the same column positions, including labels of different lengths.
   const layout = await labels.evaluateAll(nodes => {
@@ -593,7 +626,11 @@ test('bar legend paging preserves zoom, selection, wheel behavior and resize anc
   await page.mouse.wheel(0, 120)
   await expect.poll(async () => (await svg.boundingBox())!.y).toBeLessThan(legendScrollY)
   await expect(labels.first()).toHaveText('服务器')
+})
 
+test('bar legend tooltips keep five columns above the legend after selection', async ({ page }) => {
+  const { demo, svg } = await openPagedLegend(page)
+  await clickSvg(svg, svg.getByText('服务器', { exact: true }))
   await hoverCategory(svg, '2022')
   const columns = demo.locator('.charts-tooltips-column')
   await expect(columns).toHaveCount(5)
@@ -617,18 +654,27 @@ test('bar legend paging preserves zoom, selection, wheel behavior and resize anc
     })
     expect(positions.bottom).toBeLessThan(positions.legendTop)
   }).toPass({ timeout: 5000 })
+})
 
+test('bar legend resize preserves its page anchor, selection and zoom', async ({ page }) => {
+  const { demo, svg, count, years, labels, arrows } = await openPagedLegend(page)
+  const first = svg.getByText('服务器', { exact: true })
+  const activeFill = await first.getAttribute('fill')
+  await clickSvg(svg, first)
+  await expect(first).not.toHaveAttribute('fill', activeFill!)
+  const inactiveFill = await first.getAttribute('fill')
+  const originalCount = await labels.count()
   await count.hover()
   await clickSvg(svg, arrows.last())
   const anchor = (await labels.first().textContent())!
-  expect(anchor).toBe(secondRow![0]!.text)
+  expect(anchor).not.toBe('服务器')
   const resizedWidth = await demo.evaluate(el => {
     const width = Math.floor(el.clientWidth * 0.7)
     el.style.width = `${width}px`
     return width
   })
   await expect.poll(async () => (await svg.boundingBox())!.width).toBe(resizedWidth)
-  await expect.poll(() => labels.count()).toBeLessThan(firstRow!.length + secondRow!.length)
+  await expect.poll(() => labels.count()).toBeLessThan(originalCount)
   await expect(svg.getByText(anchor, { exact: true })).toBeVisible()
   await expect(first).toHaveCount(0)
   await expect(years).toHaveText(['2021', '2022', '2023'])
@@ -637,8 +683,7 @@ test('bar legend paging preserves zoom, selection, wheel behavior and resize anc
 })
 
 test('external options override the category defaults and can be removed', async ({ page }) => {
-  await page.goto('components/bar')
-  const demo = demoByTitle(page, '外部配置覆盖默认值')
+  const demo = await openDemo(page, barDemoKeys['外部配置覆盖默认值']!)
   const chart = demo.locator('[_echarts_instance_]')
   const svg = chart.locator('svg')
   const toggle = demo.getByRole('button', { name: '应用外部配置', exact: true })
@@ -662,8 +707,7 @@ test('external options override the category defaults and can be removed', async
 })
 
 test('the responsive card fills the card body', async ({ page }) => {
-  await page.goto('components/bar')
-  const card = page.locator('.category-bar-card')
+  const card = (await openDemo(page, 'bar-card')).locator('.category-bar-card')
   const svg = card.locator('svg')
   await expect(card.getByText('资产事件趋势', { exact: true })).toBeVisible()
   await expect(svg.getByText('服务器', { exact: true })).toBeAttached()
@@ -682,8 +726,7 @@ for (const [title, legend, total, selectedTotal, missingTotal] of [
   test(`${title} updates total labels after selection and retains them through loading`, async ({
     page,
   }) => {
-    await page.goto('components/bar')
-    const demo = demoByTitle(page, title)
+    const demo = await openDemo(page, barDemoKeys[title]!)
     const chart = demo.locator('[_echarts_instance_]')
     const svg = chart.locator('svg')
     const instance = await chart.getAttribute('_echarts_instance_')

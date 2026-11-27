@@ -1,18 +1,20 @@
 import { test, expect, reloadDemo } from './helpers'
-import { selectMapControl as select } from './mapDemoHelpers'
+import { selectMapControl as select, expectMapGeometry } from './mapDemoHelpers'
+import { openDemo } from './demoFixtures'
 
-for (const title of ['状态型', '密度型', '飞线型']) {
-  test(`${title} switches geometry and data states without stale loading or blank maps`, async ({
-    page,
-  }) => {
-    await page.goto('components/map')
-    const demo = page.locator('.archive-app-demo').filter({
-      has: page.getByRole('heading', { name: new RegExp(`^${title}\\s*#?\\s*$`), level: 3 }),
-    })
-    const chart = demo.locator('[_echarts_instance_]')
-    const svg = chart.locator('svg')
-    await expect(svg).toBeVisible()
-    for (const scope of ['世界地图', '中国地图']) {
+for (const [title, key] of [
+  ['状态型', 'map-status'],
+  ['密度型', 'map-density'],
+  ['飞线型', 'map-lines'],
+] as const) {
+  for (const scope of ['世界地图', '中国地图']) {
+    test(`${title} recovers data states on ${scope} without replacing its instance`, async ({
+      page,
+    }) => {
+      const demo = await openDemo(page, key)
+      const chart = demo.locator('[_echarts_instance_]')
+      const svg = chart.locator('svg')
+      await expect(svg).toBeVisible()
       await select(demo, '地图范围', scope)
       await expect.poll(() => svg.locator('path').count()).toBeGreaterThan(20)
       await select(demo, '数据状态', '数值为 0')
@@ -35,8 +37,12 @@ for (const title of ['状态型', '密度型', '飞线型']) {
       await expect(svg).toBeVisible()
       await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
       await expect(chart).toHaveAttribute('_echarts_instance_', instance!)
-    }
-  })
+      await select(demo, '地图范围', scope === '世界地图' ? '中国地图' : '世界地图')
+      await expectMapGeometry(chart, scope === '世界地图' ? 'china' : 'world')
+      await expect(chart.locator('.ix-chart-loading')).toHaveCount(0)
+      await expect(chart.locator('.ix-chart-overlay .ix-empty')).toHaveCount(0)
+    })
+  }
 }
 
 test('core map example renders and component menu labels preserve navigation', async ({ page }) => {

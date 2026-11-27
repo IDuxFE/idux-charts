@@ -1,6 +1,6 @@
 import { test, expect } from '../fixture.js'
 
-test('automatic pie supports resize, shrinking, missing and empty data', async ({ page }) => {
+test('automatic pie supports alignment and resize', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   await page.goto('/?basic')
@@ -33,6 +33,19 @@ test('automatic pie supports resize, shrinking, missing and empty data', async (
       return s.center[1] + s.radius
     })
     .toBe(180)
+  expect(errors).toEqual([])
+})
+
+test('automatic pie restores zero, missing and empty data after resize', async ({ page }) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/?basic')
+  const state = () => page.evaluate(() => window.basicPieState())
+  await expect.poll(async () => (await state())?.option.series[2].radius).toBe(60)
+  // Preserve the original resize-to-data transition on this same chart.
+  await page.getByRole('button', { name: 'Align', exact: true }).click()
+  await page.getByRole('button', { name: 'Resize', exact: true }).click()
+  await expect.poll(async () => (await state()).width).toBe(600)
   await page.getByRole('button', { name: 'Zero', exact: true }).click()
   await expect.poll(async () => (await state()).option.series[2].data.length).toBe(3)
   await expect.poll(async () => (await state()).option.series[1].data[0].value).toBe(1)

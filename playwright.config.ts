@@ -35,7 +35,9 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    // Concurrent Firefox processes inflate fresh-page/SVG setup under memory
+    // pressure. Keep its per-project cap in local runs and single-browser CI jobs.
+    { name: 'firefox', workers: 1, use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: [

@@ -15,10 +15,11 @@ declare global {
 
 // Demo templates are checked by the site project; load their real modules here.
 const modules = import.meta.glob<{ default: Component }>([
-  '../../packages/site/src/components/bar/demos/BasicVertical.vue',
-  '../../packages/site/src/components/bar/demos/BasicHorizontalAbove.vue',
+  '../../packages/site/src/components/bar/demos/*.vue',
   '../../packages/site/src/components/line/demos/BasicTrend.vue',
+  '../../packages/site/src/components/line/demos/TrendLegendRows.vue',
   '../../packages/site/src/components/area/demos/BasicAreaTrend.vue',
+  '../../packages/site/src/components/area/demos/AreaTrendLegendRows.vue',
   '../../packages/site/src/components/pie/demos/Basic.vue',
   '../../packages/site/src/components/radar/demos/Basic.vue',
   '../../packages/site/src/components/gauge/demos/Basic.vue',
@@ -33,6 +34,7 @@ const modules = import.meta.glob<{ default: Component }>([
   '../../packages/site/src/components/bullet/demos/Segmented.vue',
   '../../packages/site/src/components/bullet/demos/Grouped.vue',
   '../../packages/site/src/components/bullet/demos/GroupedAbove.vue',
+  '../../packages/site/src/components/bullet/demos/GroupedSegmented.vue',
   '../../packages/site/src/components/word-cloud/demos/Basic.vue',
   '../../packages/site/src/components/word-cloud/demos/Tags.vue',
   '../../packages/site/src/components/word-cloud/demos/Bubbles.vue',
@@ -41,9 +43,19 @@ const modules = import.meta.glob<{ default: Component }>([
 ])
 const demoPaths: Record<string, string> = {
   'bar-basic': '../../packages/site/src/components/bar/demos/BasicVertical.vue',
+  'bar-horizontal': '../../packages/site/src/components/bar/demos/BasicHorizontal.vue',
   'bar-above': '../../packages/site/src/components/bar/demos/BasicHorizontalAbove.vue',
+  'bar-grouped-vertical': '../../packages/site/src/components/bar/demos/GroupedVertical.vue',
+  'bar-grouped-horizontal': '../../packages/site/src/components/bar/demos/GroupedHorizontal.vue',
+  'bar-stacked-vertical': '../../packages/site/src/components/bar/demos/StackedVertical.vue',
+  'bar-stacked-horizontal': '../../packages/site/src/components/bar/demos/StackedHorizontal.vue',
+  'bar-legend': '../../packages/site/src/components/bar/demos/LegendRows.vue',
+  'bar-options': '../../packages/site/src/components/bar/demos/OptionOverrides.vue',
+  'bar-card': '../../packages/site/src/components/bar/demos/Card.vue',
   'line-basic': '../../packages/site/src/components/line/demos/BasicTrend.vue',
+  'line-legend': '../../packages/site/src/components/line/demos/TrendLegendRows.vue',
   'area-basic': '../../packages/site/src/components/area/demos/BasicAreaTrend.vue',
+  'area-legend': '../../packages/site/src/components/area/demos/AreaTrendLegendRows.vue',
   'pie-basic': '../../packages/site/src/components/pie/demos/Basic.vue',
   'radar-basic': '../../packages/site/src/components/radar/demos/Basic.vue',
   'gauge-basic': '../../packages/site/src/components/gauge/demos/Basic.vue',
@@ -57,6 +69,8 @@ const demoPaths: Record<string, string> = {
   'bullet-single': '../../packages/site/src/components/bullet/demos/Basic.vue',
   'bullet-segmented': '../../packages/site/src/components/bullet/demos/Segmented.vue',
   'bullet-grouped': '../../packages/site/src/components/bullet/demos/Grouped.vue',
+  'bullet-grouped-segmented':
+    '../../packages/site/src/components/bullet/demos/GroupedSegmented.vue',
   'bullet-above': '../../packages/site/src/components/bullet/demos/GroupedAbove.vue',
   'word-cloud-text': '../../packages/site/src/components/word-cloud/demos/Basic.vue',
   'word-cloud-rect': '../../packages/site/src/components/word-cloud/demos/Tags.vue',
@@ -65,14 +79,16 @@ const demoPaths: Record<string, string> = {
   'word-cloud-overlap': '../../packages/site/src/components/word-cloud/demos/CustomRect.vue',
 }
 
-export async function mountDemoVisual(key: string, dark: boolean) {
+export async function mountDemoVisual(key: string, dark: boolean, visual = true) {
   const path = demoPaths[key]
   const load = path ? modules[path] : undefined
   if (!load) throw new Error(`Unknown visual demo: ${key}`)
   // Font files and explicit theme injection are confined to this test entry.
   // Load before mount so ECharts measures with the same bytes on every host.
-  const font = new FontFace('ChartVisualCJK', `url("${fontURL}")`)
-  document.fonts.add(await font.load())
+  if (visual) {
+    const font = new FontFace('ChartVisualCJK', `url("${fontURL}")`)
+    document.fonts.add(await font.load())
+  }
   window.getDemoChart = getInstanceByDom
   window.setDemoTheme = dark => {
     siteTheme.value = dark ? 'dark' : 'light'
@@ -94,27 +110,31 @@ export async function mountDemoVisual(key: string, dark: boolean) {
         h(
           'div',
           {
-            id: 'visual-demo',
-            style: { width: '974px', margin: '24px', fontFamily: 'ChartVisualCJK' },
+            id: visual ? 'visual-demo' : 'behavior-demo',
+            style: visual
+              ? { width: '974px', margin: '24px', fontFamily: 'ChartVisualCJK' }
+              : { maxWidth: '974px', margin: '24px' },
           },
           [h(Demo)],
         ),
       ]),
   })
   setup.setupApp!(app)
-  app.provide(
-    CHART_THEME_TOKEN,
-    computed(() => ({
-      ...(typeof chartTheme.value === 'string' ? seerTheme : chartTheme.value),
-      textStyle: {
-        ...(typeof chartTheme.value === 'string' ? seerTheme : chartTheme.value).textStyle,
-        fontFamily: 'ChartVisualCJK',
-      },
-    })),
-  )
-  app.provide(
-    PLOT_THEME_TOKEN,
-    computed(() => ({ ...plotTheme.value, fontFamily: 'ChartVisualCJK' })),
-  )
+  if (visual)
+    app.provide(
+      CHART_THEME_TOKEN,
+      computed(() => ({
+        ...(typeof chartTheme.value === 'string' ? seerTheme : chartTheme.value),
+        textStyle: {
+          ...(typeof chartTheme.value === 'string' ? seerTheme : chartTheme.value).textStyle,
+          fontFamily: 'ChartVisualCJK',
+        },
+      })),
+    )
+  if (visual)
+    app.provide(
+      PLOT_THEME_TOKEN,
+      computed(() => ({ ...plotTheme.value, fontFamily: 'ChartVisualCJK' })),
+    )
   app.mount('#app')
 }
