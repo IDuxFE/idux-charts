@@ -1,9 +1,10 @@
 import { test, expect } from './helpers'
+import { openDemo } from './demoFixtures'
 
 for (const demo of [
-  { title: '单子弹图——有范围区间', label: 'bullet-range-label', lower: 30, upper: 60, max: 100 },
+  { key: 'bullet-segmented', label: 'bullet-range-label', lower: 30, upper: 60, max: 100 },
   {
-    title: '分组子弹图——有特定范围区间',
+    key: 'bullet-grouped-segmented',
     label: 'bullet-grouped-range-label',
     lower: 50,
     upper: 100,
@@ -12,10 +13,7 @@ for (const demo of [
 ]) {
   for (const boundary of ['minimum', 'maximum', 'collision'] as const) {
     test(`bullet ${demo.label} keeps valid intervals at ${boundary}`, async ({ page }) => {
-      await page.goto('components/bullet', { waitUntil: 'domcontentloaded' })
-      const block = page.locator('.archive-app-demo').filter({
-        has: page.getByRole('heading', { name: new RegExp(`^${demo.title}\\s*#?\\s*$`) }),
-      })
+      const block = await openDemo(page, demo.key)
       const chart = block.locator('[_echarts_instance_]')
       await expect(chart.locator('svg path').first()).toBeAttached()
       const instance = await chart.getAttribute('_echarts_instance_')
@@ -29,7 +27,9 @@ for (const demo of [
         : boundary === 'maximum'
           ? demo.max - demo.upper + 1
           : demo.upper - demo.lower
-      for (let step = 0; step < steps; step++) await thumb.press(key)
+      await thumb.focus()
+      await expect(thumb).toBeFocused()
+      for (let step = 0; step < steps; step++) await page.keyboard.press(key)
       const description = block.getByText(/待提升：0–/)
       await expect
         .poll(async () => {
@@ -54,17 +54,14 @@ for (const demo of [
   }
 }
 
-for (const title of [
-  '单子弹图——无范围区间',
-  '单子弹图——有范围区间',
-  '分组子弹图——无特定范围区间',
-  '分组子弹图——有特定范围区间',
+for (const [title, key] of [
+  ['单子弹图——无范围区间', 'bullet-single'],
+  ['单子弹图——有范围区间', 'bullet-segmented'],
+  ['分组子弹图——无特定范围区间', 'bullet-grouped'],
+  ['分组子弹图——有特定范围区间', 'bullet-grouped-segmented'],
 ]) {
   test(`bullet ${title} uses caller-provided zero text`, async ({ page }) => {
-    await page.goto('components/bullet', { waitUntil: 'domcontentloaded' })
-    const demo = page.locator('.archive-app-demo').filter({
-      has: page.getByRole('heading', { name: new RegExp(`^${title}\\s*#?\\s*$`) }),
-    })
+    const demo = await openDemo(page, key!)
     const chart = demo.locator('[_echarts_instance_]')
     const zeroText = chart.locator('svg text').filter({ hasText: /^暂无数据$/ })
     await expect(chart.locator('svg path').first()).toBeAttached()

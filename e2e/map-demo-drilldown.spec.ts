@@ -81,9 +81,7 @@ async function clickMapArea(chart: Locator, name: string, marker = false) {
   await chart.page().mouse.click(point.x, point.y)
 }
 
-test('map drilldown links region and marker clicks with the cascader and regenerates status data', async ({
-  page,
-}) => {
+test('map drilldown animates region clicks and return navigation', async ({ page }) => {
   await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
   const chart = await expectArea(page, '100000', '全国')
   const camera = await chart.evaluateHandle(element => {
@@ -116,27 +114,7 @@ test('map drilldown links region and marker clicks with the cascader and regener
   await page.locator('.ix-cascader').click()
   await clickMapArea(chart, '广东省')
   await expectArea(page, '440000', '广东省')
-  const marker = await chart.evaluate(element => {
-    const option = window.getDemoChart(element as HTMLElement)!.getOption() as any
-    const { id, name } = option.series[0].data[0]
-    return { id: id as string, name: name as string }
-  })
-  await clickMapArea(chart, marker.name, true)
-  await expectArea(page, marker.id, marker.name)
-  await selectArea(page, '深圳市')
-  await expectArea(page, '440300', '深圳市')
-  const before = (await readMapState(chart))!.series[0]!.data
-  await page.getByRole('button', { name: '重新生成数据' }).click()
-  await expect.poll(async () => (await readMapState(chart))!.series[0]!.data).not.toEqual(before)
-  await clickMapArea(chart, '南山区')
-  await expectArea(page, '440305', '南山区')
-  expect((await readMapState(chart))!.regionNames).toEqual(['南山区'])
-  await expect(page.getByText('已到区县级，可通过级联选择查看其他地区。')).toBeVisible()
   await page.getByRole('button', { name: '返回上级' }).click()
-  await expectArea(page, '440300', '深圳市')
-  await selectArea(page, '浙江省')
-  await expectArea(page, '330000', '浙江省')
-  await page.getByRole('button', { name: '返回全国' }).click()
   await expectArea(page, '100000', '全国')
   await expect(page.getByRole('button', { name: '返回上级' })).toBeDisabled()
   const zooms = await camera.evaluate(({ zooms }) => [...zooms])
@@ -146,80 +124,128 @@ test('map drilldown links region and marker clicks with the cascader and regener
   await camera.dispose()
 })
 
-test('map drilldown handles municipality groups, alternate district codes and missing boundaries', async ({
-  page,
-}) => {
-  await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
-  await expectArea(page, '100000', '全国')
-  await selectArea(page, '东城区')
-  const chart = await expectArea(page, '110101', '东城区')
-  expect((await readMapState(chart))!.regionNames).toEqual(['东城区'])
-  await page.getByRole('button', { name: '返回上级' }).click()
-  await expectArea(page, '110000', '北京市')
-  await expect(page.locator('[aria-label="当前区域"]')).toHaveText('全国 / 北京市')
-  expect((await readMapState(chart))!.regionNames).toContain('海淀区')
-  await page.getByRole('button', { name: '返回上级' }).click()
-  await expectArea(page, '100000', '全国')
-  await selectArea(page, '香港岛')
-  await expectArea(page, '810100', '香港岛')
-  await clickMapArea(chart, '中西区')
-  await expectArea(page, '810101', '中西区')
-  expect((await readMapState(chart))!.regionNames).toEqual(['中西区'])
-  await selectArea(page, '台北市')
-  await expect(page.getByText('该地区暂无可用地图边界，请选择其他地区')).toBeVisible()
-  await expect(page.locator('[aria-label="当前区域"]')).toContainText('台北市')
-  await expect(chart).toHaveCount(1)
-  const emptyOverlay = page.locator('.map-drilldown-chart .ix-chart-overlay .ix-empty')
-  await expect(emptyOverlay).toBeVisible()
-  await page.getByRole('button', { name: '返回全国' }).click()
-  await expectArea(page, '100000', '全国')
-  await expect(emptyOverlay).toHaveCount(0)
-})
+test.describe('map drilldown geometry and data', () => {
+  test.use({ reducedMotion: 'reduce' })
 
-for (const [provinceCode, provinceName, districtCode, districtName] of [
-  ['110000', '北京市', '110101', '东城区'],
-  ['120000', '天津市', '120101', '和平区'],
-  ['310000', '上海市', '310101', '黄浦区'],
-  ['500000', '重庆市', '500103', '渝中区'],
-  ['500000', '重庆市', '500229', '城口县'],
-] as const) {
-  test(`map drilldown skips municipality groups for ${provinceName} ${districtName}`, async ({
+  test('map drilldown links real marker clicks with the cascader', async ({ page }) => {
+    await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
+    const chart = await expectArea(page, '100000', '全国')
+    await selectArea(page, '广东省')
+    await expectArea(page, '440000', '广东省')
+    const marker = await chart.evaluate(element => {
+      const option = window.getDemoChart(element as HTMLElement)!.getOption() as any
+      const { id, name } = option.series[0].data[0]
+      return { id: id as string, name: name as string }
+    })
+    await clickMapArea(chart, marker.name, true)
+    await expectArea(page, marker.id, marker.name)
+  })
+
+  test('map drilldown regenerates status data and navigates between districts and provinces', async ({
+    page,
+  }) => {
+    await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
+    const chart = await expectArea(page, '100000', '全国')
+    await selectArea(page, '深圳市')
+    await expectArea(page, '440300', '深圳市')
+    const before = (await readMapState(chart))!.series[0]!.data
+    await page.getByRole('button', { name: '重新生成数据' }).click()
+    await expect.poll(async () => (await readMapState(chart))!.series[0]!.data).not.toEqual(before)
+    await clickMapArea(chart, '南山区')
+    await expectArea(page, '440305', '南山区')
+    expect((await readMapState(chart))!.regionNames).toEqual(['南山区'])
+    await expect(page.getByText('已到区县级，可通过级联选择查看其他地区。')).toBeVisible()
+    await page.getByRole('button', { name: '返回上级' }).click()
+    await expectArea(page, '440300', '深圳市')
+    await selectArea(page, '浙江省')
+    await expectArea(page, '330000', '浙江省')
+    await page.getByRole('button', { name: '返回全国' }).click()
+    await expectArea(page, '100000', '全国')
+    await expect(page.getByRole('button', { name: '返回上级' })).toBeDisabled()
+  })
+
+  test('map drilldown restores municipality geometry after direct district selection', async ({
     page,
   }) => {
     await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
     await expectArea(page, '100000', '全国')
-    await selectArea(page, provinceName)
-    await expectArea(page, provinceCode, provinceName)
-    const path = `全国 / ${provinceName} / ${districtName}`
-
-    // The cascader must expose the district directly below the municipality as well.
-    await page.locator('.ix-cascader').click()
-    await page.locator('.ix-cascader-option[aria-label="全国"]').hover()
-    await page.locator(`.ix-cascader-option[aria-label="全国 / ${provinceName}"]`).hover()
-    const district = page
-      .locator('.ix-cascader-option')
-      .filter({ hasText: new RegExp(`^${districtName}$`) })
-    await expect(district).toHaveAttribute('aria-label', path)
-    await expect(
-      page.locator(`.ix-cascader-option[aria-label="全国 / ${provinceName} / ${provinceName}"]`),
-    ).toHaveCount(0)
-    if (provinceCode === '500000') {
-      await expect(
-        page.locator('.ix-cascader-option[aria-label="全国 / 重庆市 / 县"]'),
-      ).toHaveCount(0)
-    }
-    await district.click()
-    await expectArea(page, districtCode, districtName)
-    await expect(page.locator('[aria-label="当前区域"]')).toHaveText(path)
-    await expect(page.locator('.ix-cascader .ix-selector-item-label')).toHaveText(path)
-
+    await selectArea(page, '东城区')
+    const chart = await expectArea(page, '110101', '东城区')
+    expect((await readMapState(chart))!.regionNames).toEqual(['东城区'])
     await page.getByRole('button', { name: '返回上级' }).click()
-    await expectArea(page, provinceCode, provinceName)
-    await expect(page.locator('[aria-label="当前区域"]')).toHaveText(`全国 / ${provinceName}`)
+    await expectArea(page, '110000', '北京市')
+    await expect(page.locator('[aria-label="当前区域"]')).toHaveText('全国 / 北京市')
+    expect((await readMapState(chart))!.regionNames).toContain('海淀区')
     await page.getByRole('button', { name: '返回上级' }).click()
     await expectArea(page, '100000', '全国')
   })
-}
+
+  test('map drilldown resolves alternate district codes and recovers from missing boundaries', async ({
+    page,
+  }) => {
+    await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
+    const chart = await expectArea(page, '100000', '全国')
+    await selectArea(page, '香港岛')
+    await expectArea(page, '810100', '香港岛')
+    await clickMapArea(chart, '中西区')
+    await expectArea(page, '810101', '中西区')
+    expect((await readMapState(chart))!.regionNames).toEqual(['中西区'])
+    await selectArea(page, '台北市')
+    await expect(page.getByText('该地区暂无可用地图边界，请选择其他地区')).toBeVisible()
+    await expect(page.locator('[aria-label="当前区域"]')).toContainText('台北市')
+    await expect(chart).toHaveCount(1)
+    const emptyOverlay = page.locator('.map-drilldown-chart .ix-chart-overlay .ix-empty')
+    await expect(emptyOverlay).toBeVisible()
+    await page.getByRole('button', { name: '返回全国' }).click()
+    await expectArea(page, '100000', '全国')
+    await expect(emptyOverlay).toHaveCount(0)
+  })
+
+  for (const [provinceCode, provinceName, districtCode, districtName] of [
+    ['110000', '北京市', '110101', '东城区'],
+    ['120000', '天津市', '120101', '和平区'],
+    ['310000', '上海市', '310101', '黄浦区'],
+    ['500000', '重庆市', '500103', '渝中区'],
+    ['500000', '重庆市', '500229', '城口县'],
+  ] as const) {
+    test(`map drilldown skips municipality groups for ${provinceName} ${districtName}`, async ({
+      page,
+    }) => {
+      await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
+      await expectArea(page, '100000', '全国')
+      await selectArea(page, provinceName)
+      await expectArea(page, provinceCode, provinceName)
+      const path = `全国 / ${provinceName} / ${districtName}`
+
+      // The cascader must expose the district directly below the municipality as well.
+      await page.locator('.ix-cascader').click()
+      await page.locator('.ix-cascader-option[aria-label="全国"]').hover()
+      await page.locator(`.ix-cascader-option[aria-label="全国 / ${provinceName}"]`).hover()
+      const district = page
+        .locator('.ix-cascader-option')
+        .filter({ hasText: new RegExp(`^${districtName}$`) })
+      await expect(district).toHaveAttribute('aria-label', path)
+      await expect(
+        page.locator(`.ix-cascader-option[aria-label="全国 / ${provinceName} / ${provinceName}"]`),
+      ).toHaveCount(0)
+      if (provinceCode === '500000') {
+        await expect(
+          page.locator('.ix-cascader-option[aria-label="全国 / 重庆市 / 县"]'),
+        ).toHaveCount(0)
+      }
+      await district.click()
+      await expectArea(page, districtCode, districtName)
+      await expect(page.locator('[aria-label="当前区域"]')).toHaveText(path)
+      await expect(page.locator('.ix-cascader .ix-selector-item-label')).toHaveText(path)
+
+      await page.getByRole('button', { name: '返回上级' }).click()
+      await expectArea(page, provinceCode, provinceName)
+      await expect(page.locator('[aria-label="当前区域"]')).toHaveText(`全国 / ${provinceName}`)
+      await page.getByRole('button', { name: '返回上级' }).click()
+      await expectArea(page, '100000', '全国')
+    })
+  }
+})
 
 test('map drilldown keeps a slow request covered until the destination map is ready', async ({
   page,
