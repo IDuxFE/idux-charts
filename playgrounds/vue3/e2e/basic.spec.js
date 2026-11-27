@@ -3,7 +3,7 @@ import { test, expect } from '../fixture.js'
 test('automatic pie supports alignment and resize', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
-  await page.goto('/?basic')
+  await page.goto('/basic.html')
   const state = () => page.evaluate(() => window.basicPieState())
   await expect.poll(async () => (await state())?.option.title[0].show).toBe(false)
   await expect.poll(async () => (await state()).option.series[2].radius).toBe(60)
@@ -39,7 +39,7 @@ test('automatic pie supports alignment and resize', async ({ page }) => {
 test('automatic pie restores zero, missing and empty data after resize', async ({ page }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
-  await page.goto('/?basic')
+  await page.goto('/basic.html')
   const state = () => page.evaluate(() => window.basicPieState())
   await expect.poll(async () => (await state())?.option.series[2].radius).toBe(60)
   // Preserve the original resize-to-data transition on this same chart.
@@ -62,7 +62,7 @@ test('packaged ring owns its graphics and preserves interaction on presentation 
 }) => {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
-  await page.goto('/?basic')
+  await page.goto('/basic.html')
   const state = () => page.evaluate(() => window.basicPieState())
   await expect.poll(async () => (await state())?.option.series.length).toBe(3)
   const id = (await state()).id

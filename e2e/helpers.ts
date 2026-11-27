@@ -16,6 +16,14 @@ export const test = base.extend<{ browserErrors: void }>({
 })
 export { expect }
 
+// Send every real key event while avoiding repeated resolution of a complex
+// slider locator. Value assertions at the call site still verify the full range.
+export async function pressSliderKeys(slider: Locator, key: string, count: number) {
+  await slider.focus()
+  await expect(slider).toBeFocused()
+  for (let index = 0; index < count; index++) await slider.page().keyboard.press(key)
+}
+
 export async function expectFillsContainer(container: Locator, childSelector: string) {
   await expect(container.locator(childSelector)).toBeVisible()
   await expect(async () => {

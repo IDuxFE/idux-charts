@@ -1,4 +1,4 @@
-import { test, expect } from './helpers'
+import { test, expect, pressSliderKeys } from './helpers'
 import { openDemo } from './demoFixtures'
 
 for (const demo of [
@@ -27,9 +27,7 @@ for (const demo of [
         : boundary === 'maximum'
           ? demo.max - demo.upper + 1
           : demo.upper - demo.lower
-      await thumb.focus()
-      await expect(thumb).toBeFocused()
-      for (let step = 0; step < steps; step++) await page.keyboard.press(key)
+      await pressSliderKeys(thumb, key, steps)
       const description = block.getByText(/待提升：0–/)
       await expect
         .poll(async () => {
