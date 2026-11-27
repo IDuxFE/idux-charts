@@ -51,7 +51,7 @@ Linux 的 browser-build 任务统一构建站点和 fixture，随后 WebKit、Fi
 
 `IDUX_E2E_PREBUILT=1` 用于本地重复检查时复用显式构建的产物。`IDUX_E2E_TARGET=site` 可在部署冒烟任务中跳过不用的 fixture 服务；`fixture` 则在只测试 fixture 时跳过站点服务。该变量只选择启动哪些服务，不筛选测试。未设置这些变量时，本地命令仍会构建两套产物。
 
-Chromium 和 Firefox 每个项目限制为一个 worker，Playground 的 CI 配置也使用一个 worker，避免首批页面初始化和 SVG 的内存竞争；WebKit 保留现有 worker 预算。比较单浏览器 CI 耗时时，应分别运行各浏览器项目。
+每个浏览器项目限制为一个 worker，Playground 的 CI 配置也使用一个 worker，避免首批页面初始化和 SVG 的内存竞争。比较单浏览器 CI 耗时时，应分别运行各浏览器项目。页签历史分别保留“重载→后退→前进”和“后退→前进→示例→重载”两条有重叠的操作链，避免把两个重载和所有历史跳转放进单个长用例。
 
 Chromium/Firefox 的 worker 会先创建并关闭独立的 `about:blank` 页面，只初始化浏览器引擎，不加载应用、字体或示例。每个用例仍使用全新的上下文和页面，应用加载与交互全部计入用例耗时。引擎准备沿用现有超时预算，在任务摘要中单独记录，总耗时仍包含它，避免把一次性启动成本归到随机排在首位的用例。
 
