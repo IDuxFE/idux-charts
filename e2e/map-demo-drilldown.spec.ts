@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { JSHandle, Locator, Page } from '@playwright/test'
 import { test, expect } from './helpers'
 import { fixtureBaseURL } from './environment'
 import { readMapState } from './mapDemoHelpers'
@@ -220,6 +220,51 @@ for (const [provinceCode, provinceName, districtCode, districtName] of [
     await expectArea(page, '100000', '全国')
   })
 }
+
+test('map drilldown keeps a slow request covered until the destination map is ready', async ({
+  page,
+}) => {
+  await page.goto(`${fixtureBaseURL}?demo-visual=map-drilldown`)
+  const chart = await expectArea(page, '100000', '全国')
+  let release!: () => void
+  const held = new Promise<void>(resolve => {
+    release = resolve
+  })
+  await page.route(/\/440000[.-].*\.js/, async route => {
+    await held
+    await route.continue()
+  })
+  let recording: JSHandle<{ frames: string[]; stop: () => void }> | undefined
+  try {
+    await clickMapArea(chart, '广东省')
+    await expect(page.locator('.map-drilldown-chart .ix-chart-loading')).toBeVisible()
+    recording = await chart.evaluateHandle(element => {
+      const instance = window.getDemoChart(element as HTMLElement)!
+      const frames: string[] = []
+      let frame: number
+      const record = () => {
+        if (!element.querySelector('.ix-chart-loading')) {
+          frames.push((instance.getOption() as any).geo[0].map as string)
+        }
+        frame = requestAnimationFrame(record)
+      }
+      frame = requestAnimationFrame(record)
+      return { frames, stop: () => cancelAnimationFrame(frame) }
+    })
+    release()
+    await expectArea(page, '440000', '广东省')
+    const frames = await recording.evaluate(({ frames }) => frames)
+    expect(frames.length).toBeGreaterThan(0)
+    expect(new Set(frames)).toEqual(new Set(['drilldown-440000']))
+  } finally {
+    release()
+    if (recording) {
+      await recording.evaluate(({ stop }) => stop())
+      await recording.dispose()
+    }
+    await page.unrouteAll({ behavior: 'wait' })
+  }
+})
 
 test('map drilldown ignores an older map response after selecting another region', async ({
   page,

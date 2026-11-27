@@ -119,7 +119,7 @@ watch(
     const area = selectedArea.value
     transitioning.value = !!view.value
     // 缓存命中时直接衔接动画，避免加载遮罩出现一帧后立即消失。
-    loading.value = !view.value
+    loading.value = loading.value || !view.value
     if (view.value) {
       loadingTimer = setTimeout(() => {
         if (id === requestId) loading.value = true
@@ -131,7 +131,6 @@ watch(
       const geometry = await loadAreaMap(area)
       if (id !== requestId) return
       clearLoadingTimer()
-      loading.value = false
       if (!geometry) {
         view.value = undefined
         return
@@ -164,6 +163,9 @@ watch(
       }
       const applyMap = async () => {
         view.value = nextView
+        await nextTick()
+        // 慢请求已显示遮罩时，等新地图应用后再关闭，避免旧地图在退场阶段闪回。
+        if (id === requestId) loading.value = false
         await nextTick()
       }
       if (changesMap) {
