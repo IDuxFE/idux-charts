@@ -28,12 +28,11 @@ test('documentation API and design tabs preserve query parameters through reload
 })
 
 test('documentation tab history survives reload and back/forward navigation', async ({ page }) => {
-  await page.goto('components/pie?source=a%26b#tab-state')
-  const demos = page.getByRole('radio', { name: '示例', exact: true })
+  // Demo → API selection is covered above. History needs API/design content,
+  // so use its real deep link instead of initializing the full demo catalogue.
+  await page.goto('components/pie?source=a%26b&tab=api#tab-state')
   const api = page.getByRole('radio', { name: 'API', exact: true })
   const design = page.getByRole('radio', { name: '设计指南', exact: true })
-  await expect(demos).toBeChecked()
-  await api.click()
   await expect(api).toBeChecked()
   await design.click()
   await expect(design).toBeChecked()
