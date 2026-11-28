@@ -1,5 +1,12 @@
 # @idux/charts-plots
 
+## 1.8.1
+
+### Patch Changes
+
+- f7ff5c3: Fix Vue 2 Area chart default slots failing to display content when the normal slot is initially empty.
+- @idux/charts-core@1.8.1
+
 ## 1.8.0
 
 ### Minor Changes
