@@ -3,7 +3,7 @@ export function createSlotsFixture(
   renderNode,
   Chart,
   isVue2,
-  { native = false, initialMode = 'element' } = {},
+  { native = false, initialMode = 'element', normalSlot = false } = {},
 ) {
   return {
     data: () => ({ mode: initialMode, dark: false, readyCount: 0 }),
@@ -16,6 +16,7 @@ export function createSlotsFixture(
           height: chart?.getHeight(),
           readyCount: this.readyCount,
           areaFill: !!chart?.getOption()?.series?.[0]?.areaStyle,
+          ...(normalSlot ? { data: chart?.getOption()?.series?.[0]?.data ?? [] } : {}),
         }
       }
     },
@@ -47,7 +48,7 @@ export function createSlotsFixture(
             }
           : {}),
         categories: ['A', 'B'],
-        data: [10, 20],
+        data: normalSlot && this.mode === 'element' ? [] : [10, 20],
         animation: false,
         theme: this.dark ? 'dark' : 'seer',
         onReady: () => {
@@ -73,9 +74,9 @@ export function createSlotsFixture(
         h(
           Chart,
           isVue2
-            ? { attrs: props, style, ref: 'chart', scopedSlots: slots }
+            ? { attrs: props, style, ref: 'chart', ...(normalSlot ? {} : { scopedSlots: slots }) }
             : { ...props, style, ref: 'chart' },
-          isVue2 ? undefined : slots,
+          isVue2 ? (normalSlot ? (slots.default?.() ?? [this._e()]) : undefined) : slots,
         ),
       ])
     },
