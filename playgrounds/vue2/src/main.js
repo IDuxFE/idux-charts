@@ -6,7 +6,7 @@ import Basic from './basic.js'
 import Vue from 'vue'
 import CompositionAPI from '@vue/composition-api'
 Vue.use(CompositionAPI)
-import { IxBarChart, IxChart, IxLineChart, IxPieChart, version } from '@idux/charts'
+import { IxBarChart, IxAreaChart, IxChart, IxLineChart, IxPieChart, version } from '@idux/charts'
 import { getInstanceByDom, use } from 'echarts/core'
 import { GraphicComponent } from 'echarts/components'
 use([GraphicComponent])
@@ -141,6 +141,7 @@ window.chartState = () =>
     }
   })
 const coreSlots = location.search.includes('core-slots')
+const AreaSlots = createSlotsFixture(null, IxAreaChart, true)
 const Slots = createSlotsFixture(undefined, coreSlots ? IxChart : IxBarChart, true, {
   native: coreSlots,
   initialMode: new URLSearchParams(location.search).has('initially-absent') ? 'absent' : 'element',
@@ -150,7 +151,9 @@ new Vue(
   location.search.includes('word-cloud')
     ? WordCloud
     : location.search.includes('slots')
-      ? Slots
+      ? location.search.includes('area')
+        ? AreaSlots
+        : Slots
       : location.search.includes('theme')
         ? Theme
         : location.search.includes('basic')

@@ -78,7 +78,7 @@ ESM 项目可从 `@idux/charts/line` 等子入口按需导入图表，从 `@idux
 
 ### TypeScript 属性类型
 
-二次封装和 Vue 2.6 类型适配可使用 `ChartPublicProps` 或对应图表的 `*ChartPublicProps`（Bar、Line、Pie、Radar、Gauge、Bullet、WordCloud、LiquidFill、Map），从 `@idux/charts` 导入：
+二次封装和 Vue 2.6 类型适配可使用 `ChartPublicProps` 或对应图表的 `*ChartPublicProps`（Bar、Line、Area、Pie、Radar、Gauge、Bullet、WordCloud、LiquidFill、Map），从 `@idux/charts` 导入：
 
 ```ts
 import type { LineChartPublicProps } from '@idux/charts'

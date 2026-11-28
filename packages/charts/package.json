@@ -108,6 +108,10 @@
     "./word-cloud": {
       "types": "./dist/word-cloud.d.ts",
       "import": "./dist/word-cloud.js"
+    },
+    "./area": {
+      "types": "./dist/area.d.ts",
+      "import": "./dist/area.js"
     }
   },
   "typesVersions": {
@@ -141,6 +145,9 @@
       ],
       "word-cloud": [
         "dist/word-cloud.d.ts"
+      ],
+      "area": [
+        "dist/area.d.ts"
       ]
     }
   }

@@ -32,6 +32,7 @@ Vue.use(VueCompositionAPI)
 | ------------------- | -------------------------------- |
 | `IxBarChart`        | Bar                              |
 | `IxLineChart`       | Line and area                    |
+| `IxAreaChart`       | Area                             |
 | `IxPieChart`        | Pie and doughnut                 |
 | `IxRadarChart`      | Radar                            |
 | `IxGaugeChart`      | Gauge                            |

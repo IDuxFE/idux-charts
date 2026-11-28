@@ -15,3 +15,5 @@ export * from './map'
 export * from './bullet'
 
 export * from './word-cloud'
+
+export * from './area'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { LineChartProps } from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 import { IxRadioGroup } from '@idux/components/radio'
 
 const count = ref(3)
@@ -43,7 +43,7 @@ const moreSeries = Array.from({ length: 50 - series.length }, (_, index) => ({
 }))
 const allSeries = [...series, ...moreSeries]
 
-const option = computed<LineChartProps>(() => ({
+const option = computed<AreaChartProps>(() => ({
   categories,
   series: allSeries.slice(0, count.value),
   area: 'striped',
@@ -73,7 +73,7 @@ const option = computed<LineChartProps>(() => ({
       :data-source="counts"
       style="margin-bottom: 16px"
     />
-    <IxLineChart v-bind="option" style="width: 100%; height: 320px" />
+    <IxAreaChart v-bind="option" style="width: 100%; height: 320px" />
   </div>
 </template>
 

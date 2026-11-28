@@ -78,7 +78,7 @@ async function clickData(page: Page) {
   await page.mouse.click(currentPoint.x, currentPoint.y)
 }
 
-for (const kind of ['bar', 'line', 'pie']) {
+for (const kind of ['bar', 'line', 'area', 'pie']) {
   test.describe(`${kind} browser behavior`, () => {
     test.beforeEach(async ({ page }) => open(page, kind))
 

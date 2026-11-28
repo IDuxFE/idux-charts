@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LineChartProps } from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 
 const categories = Array.from({ length: 15 }, (_, index) =>
   new Date(Date.UTC(2026, 6, 1, index * 12)).toISOString().slice(5, 16).replace('T', ' '),
@@ -36,7 +36,7 @@ const series = [
 const latest = new Map(series.map(({ name, data }) => [name, data.at(-1) ?? 0]))
 const total = [...latest.values()].reduce((sum, value) => sum + value, 0)
 
-const option: LineChartProps = {
+const option: AreaChartProps = {
   categories,
   series,
   area: 'striped',
@@ -65,7 +65,7 @@ const option: LineChartProps = {
 
 <template>
   <div style="width: 100%">
-    <IxLineChart v-bind="option" style="width: 100%; height: 320px" />
+    <IxAreaChart v-bind="option" style="width: 100%; height: 320px" />
   </div>
 </template>
 

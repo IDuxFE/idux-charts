@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { IxBarChart, IxLineChart, IxPieChart, useTooltipsFormatter } from '@idux/charts'
-import type { LineChartProps } from '@idux/charts'
+import {
+  IxBarChart,
+  IxLineChart,
+  IxAreaChart,
+  IxPieChart,
+  useTooltipsFormatter,
+} from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 import type { EChartsType } from 'echarts/core'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 
 use(CanvasRenderer)
 const requestedKind = new URLSearchParams(location.search).get('kind')
-const kind = requestedKind === 'pie' || requestedKind === 'line' ? requestedKind : 'bar'
+const kind =
+  requestedKind === 'pie' || requestedKind === 'line' || requestedKind === 'area'
+    ? requestedKind
+    : 'bar'
 const categoryArea = requestedKind === 'category-area'
 const component = categoryArea
-  ? IxLineChart
-  : { bar: IxBarChart, line: IxLineChart, pie: IxPieChart }[kind]
+  ? IxAreaChart
+  : { bar: IxBarChart, line: IxLineChart, area: IxAreaChart, pie: IxPieChart }[kind]
 const data = ref([20, 40, 60])
 const areaSeriesCount = ref(2)
 const areaSeries = [
@@ -41,7 +50,7 @@ const legendChange = ref('')
 const instances: EChartsType[] = []
 const lastInstance = () => instances.at(-1)!
 
-const categoryAreaOption = computed<LineChartProps>(() => ({
+const categoryAreaOption = computed<AreaChartProps>(() => ({
   animation: false,
   categories: ['A', 'B', 'C', 'D'],
   area: 'striped',

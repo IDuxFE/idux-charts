@@ -98,10 +98,11 @@ async function smokeRuntime(app) {
     join(app, 'main.js'),
     `
 import { createApp, h, ref, isVue2 } from 'vue-demi';
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN, createMapTransition as aggregateTransition } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart, PLOT_THEME_TOKEN, createMapTransition as aggregateTransition } from '@idux/charts';
 import { IxChart as Core } from '@idux/charts/core';
 import { IxBarChart as Bar } from '@idux/charts/bar';
 import { IxLineChart as Line, PLOT_THEME_TOKEN as LineTheme } from '@idux/charts/line';
+import { IxAreaChart as Area, PLOT_THEME_TOKEN as AreaTheme } from '@idux/charts/area';
 import { IxPieChart as Pie } from '@idux/charts/pie';
 import { IxRadarChart as Radar } from '@idux/charts/radar';
 import { IxGaugeChart as Gauge } from '@idux/charts/gauge';
@@ -110,14 +111,14 @@ import { IxLiquidFillChart as LiquidFill } from '@idux/charts/liquid-fill';
 import { IxMapChart as MapChart, registerMap, createMapNodes, createMapTransition } from '@idux/charts/map';
 import { getInstanceByDom } from 'echarts/core';
 registerMap('consumer-map', {type: 'FeatureCollection', features: [{type: 'Feature', properties: {name: 'A'}, geometry: {type: 'Polygon', coordinates: [[[0,0], [30,0], [30,30], [0,30], [0,0]]]}}]});
-if ([Bar, Line, Pie, Radar, Gauge, Bullet, LiquidFill, MapChart].some((component, index) => component !==
-    [IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart][index]) ||
-    Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN || aggregateTransition !== createMapTransition) {
+if ([Bar, Line, Area, Pie, Radar, Gauge, Bullet, LiquidFill, MapChart].some((component, index) => component !==
+    [IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart][index]) ||
+    Core !== IxChart || LineTheme !== PLOT_THEME_TOKEN || AreaTheme !== PLOT_THEME_TOKEN || aggregateTransition !== createMapTransition) {
   throw new Error('Modular and aggregate imports must share the same component instances');
 }
 const revision = ref(0), dark = ref(false), mounted = ref(true), slotVisible = ref(false);
 const instances = [];
-const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxLineChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['bullet', IxBulletChart], ['bullet-grouped', IxBulletChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
+const kinds = [['core', IxChart], ['bar', IxBarChart], ['line', IxLineChart], ['area', IxAreaChart], ['area-default', IxAreaChart], ['pie', IxPieChart], ['radar', IxRadarChart], ['gauge', IxGaugeChart], ['bullet', IxBulletChart], ['bullet-grouped', IxBulletChart], ['liquid-fill', IxLiquidFillChart], ['map', IxMapChart]];
 const button = (id, action) => h('button', isVue2 ? { attrs: {'data-testid': id}, on: {click: action} } : {'data-testid': id, onClick: action}, id);
 const root = createApp({setup() { return () => h('main', {}, [
   button('update', () => revision.value++),
@@ -162,7 +163,7 @@ const root = createApp({setup() { return () => h('main', {}, [
 window.readCharts = () => Array.from(document.querySelectorAll('[data-kind]')).map(section => {
   const el = section.querySelector('[_echarts_instance_]');
   const chart = el && getInstanceByDom(el), option = chart?.getOption(), data = option?.series?.[0]?.data?.[0];
-  return {id: chart?.id, title: option?.title?.[0]?.text, value: section.dataset.kind === 'map' ? data?.value?.[2] : Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart, domAttrs: el?.getAttribute('role') === 'img' && el?.getAttribute('aria-label') === section.dataset.kind + ' chart' && el?.getAttribute('tabindex') === '0' && option?.role === undefined};
+  return {kind: section.dataset.kind, filled: !!option?.series?.[0]?.areaStyle, id: chart?.id, title: option?.title?.[0]?.text, value: section.dataset.kind === 'map' ? data?.value?.[2] : Array.isArray(data) ? data[0] : typeof data === 'object' ? (Array.isArray(data.value) ? data.value[0] : data.value) : data, paths: el?.querySelectorAll('svg path').length || 0, exposed: root.$refs[section.dataset.kind]?.getEChartsInstance() === chart, domAttrs: el?.getAttribute('role') === 'img' && el?.getAttribute('aria-label') === section.dataset.kind + ' chart' && el?.getAttribute('tabindex') === '0' && option?.role === undefined};
 });
 window.allDisposed = () => instances.length > 0 && instances.every(chart => chart.isDisposed());
 const areaChart = () => {
@@ -242,12 +243,13 @@ window.bulletState = () => {
     const state = () => page.evaluate(() => window.readCharts())
     await expect
       .poll(async () => (await state()).map(chart => chart.paths > 0))
-      .toEqual(Array(11).fill(true))
-    expect((await state()).map(chart => chart.exposed)).toEqual(Array(11).fill(true))
-    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(11).fill(true))
+      .toEqual(Array(12).fill(true))
+    expect((await state()).map(chart => chart.exposed)).toEqual(Array(12).fill(true))
+    expect((await state()).map(chart => chart.domAttrs)).toEqual(Array(12).fill(true))
+    expect((await state()).find(chart => chart.kind === 'area-default').filled).toBe(true)
     const beforeSlots = await state()
     await page.getByTestId('slot').click()
-    await expect(page.locator('.ix-chart-overlay')).toHaveCount(11)
+    await expect(page.locator('.ix-chart-overlay')).toHaveCount(12)
     const firstSlot = await page.locator('.ix-chart-overlay button').first().elementHandle()
     expect((await state()).map(chart => chart.id)).toEqual(beforeSlots.map(chart => chart.id))
     await page.getByTestId('theme').click()
@@ -307,6 +309,7 @@ window.bulletState = () => {
         'bar 1',
         'line 1',
         'area 1',
+        'area-default 1',
         'pie 1',
         'radar 1',
         'gauge 1',
@@ -317,7 +320,7 @@ window.bulletState = () => {
       ])
     await expect
       .poll(async () => (await state()).map(chart => chart.value))
-      .toEqual([11, 11, 11, 11, 11, 11, 0.11, 11, 11, 0.11, 11])
+      .toEqual([11, 11, 11, 11, 11, 11, 11, 0.11, 11, 11, 0.11, 11])
     await expect.poll(() => page.evaluate(() => window.areaSeriesCount())).toBe(1)
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await expectMapViewport()
@@ -331,7 +334,7 @@ window.bulletState = () => {
     await page.getByTestId('theme').click()
     await expect
       .poll(async () => (await state()).map((chart, i) => !!chart.id && chart.id !== before[i].id))
-      .toEqual(Array(11).fill(true))
+      .toEqual(Array(12).fill(true))
     expect(await page.evaluate(() => window.areaZoom())).toBe(areaZoom)
     await expectMapViewport()
     await page.getByTestId('mount').click()
@@ -345,6 +348,7 @@ window.bulletState = () => {
         'bar 1',
         'line 1',
         'area 1',
+        'area-default 1',
         'pie 1',
         'radar 1',
         'gauge 1',
@@ -369,10 +373,11 @@ async function checkLineBundle(app) {
   const sizes = {}
   for (const [label, path, imports] of [
     ['line', '@idux/charts/line', 'IxLineChart'],
+    ['area', '@idux/charts/area', 'IxAreaChart'],
     [
       'all',
       '@idux/charts',
-      'IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart',
+      'IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart',
     ],
   ]) {
     writeFileSync(
@@ -394,7 +399,7 @@ createApp({render: () => h('div', [${imports}].map(component => h(component)))})
     const size = chunks.reduce((bytes, chunk) => bytes + gzipSync(chunk.code).length, 0)
     sizes[label] = size
     console.log(`Bundle ${label}: ${(size / 1024).toFixed(1)} KiB gzip (JS including Vue)`)
-    if (label === 'line') {
+    if (label === 'line' || label === 'area') {
       const modules = chunks.flatMap(chunk => Object.keys(chunk.modules))
       assert.ok(modules.some(id => id.endsWith('/echarts/lib/chart/line/install.js')))
       assert.deepEqual(
@@ -404,6 +409,7 @@ createApp({render: () => h('div', [${imports}].map(component => h(component)))})
       )
     }
   }
+  assert.ok(sizes.area < sizes.all, 'The area subpath must produce a smaller JS bundle')
   assert.ok(sizes.line < sizes.all, 'The line subpath must produce a smaller JS bundle')
 }
 
@@ -488,6 +494,8 @@ provide(CHART_THEME_TOKEN, { darkMode: true, textStyle: { color: '#fff' } });
 // @ts-expect-error themes must be names or objects, not numbers
 provide(CHART_THEME_TOKEN, 42);
 import type { ChartPublicProps, BarChartPublicProps, LineChartPublicProps, PieChartPublicProps, RadarChartPublicProps, GaugeChartPublicProps, LiquidFillChartPublicProps, MapChartPublicProps } from '@idux/charts';
+import type { AreaChartProps, AreaChartPublicProps, AreaChartDataItem } from '@idux/charts';
+import type { AreaChartProps as ModularAreaProps, AreaChartPublicProps as ModularAreaPublicProps, AreaChartDataItem as ModularAreaDataItem } from '@idux/charts/area';
 import type { LineChartPublicProps as ModularLineProps } from '@idux/charts/line';
 import { IxBulletChart, createBulletOption, type BulletChartPublicProps } from '@idux/charts/bullet';
 const bullet: BulletChartPublicProps = { data: [{name: 'A', value: 75, target: 85}], ranges: [{upper: 100, color: 'red'}], barWidth: '20%', color: ['blue'], name: 'Actual', xAxis: {min: 0, max: 100} };
@@ -497,6 +505,16 @@ const badBullet: BulletChartPublicProps = {value: '75'};
 // @ts-expect-error grouped bullet rows require a category name
 const badBulletRow: BulletChartPublicProps = {data: [{value: 20}]};
 
+const areaItem: AreaChartDataItem = {missingReason: 'Offline'};
+const modularAreaItem: ModularAreaDataItem = areaItem;
+const area: AreaChartProps = {categories: ['A'], data: [areaItem], area: 'striped'};
+const publicArea: AreaChartPublicProps = area;
+const modularArea: ModularAreaProps = publicArea;
+const modularPublicArea: ModularAreaPublicProps = publicArea;
+// @ts-expect-error Area public types preserve the fill union
+const badAreaFill: AreaChartPublicProps = {area: 'solid'};
+// @ts-expect-error Area props preserve numeric data
+const badAreaData: AreaChartPublicProps = {data: [true]};
 const modularLine: ModularLineProps = { categories: ['A', 'B'], data: [1, 2] };
 const radar: RadarChartPublicProps = { indicator: [{name: 'A', max: 100}], data: [{name: 'One', value: [25]}], area: true };
 const gauge: GaugeChartPublicProps = { value: 20, segments: [{upper: 1, color: 'red'}], plotTheme: { textColor: 'red' }, valueTextStyle: { fontSize: 24 } };
@@ -608,7 +626,7 @@ for (const [version, echartsVersion, adapter] of selectedTargets) {
   const consumer = adapter
     ? adapterConsumer
     : `${adapterConsumer}
-import { IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart } from '@idux/charts';
+import { IxChart, IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxRadarChart, IxGaugeChart, IxLiquidFillChart, IxMapChart } from '@idux/charts';
 import '@idux/charts/types';
 import type { GlobalComponents } from 'vue';
 import Fixture from './inferred-fixture';
@@ -616,7 +634,7 @@ import { defineComponent } from 'vue';
 import type { VNode } from 'vue';
 import type { EChartsType } from 'echarts/core';
 ${version.startsWith('2.') ? "import Vue from 'vue'; const app = Vue;" : "import { createApp } from 'vue'; const app = createApp({});"}
-const chartComponents = [IxChart, IxBarChart, IxLineChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart] as const;
+const chartComponents = [IxChart, IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxRadarChart, IxGaugeChart, IxBulletChart, IxLiquidFillChart, IxMapChart] as const;
 for (const component of chartComponents) app.use(component);
 declare const chartInstance: InstanceType<(typeof chartComponents)[number]>;
 const echartsInstance: EChartsType | undefined = chartInstance.getEChartsInstance();
@@ -631,6 +649,13 @@ const bad: BarProps = { autoResize: 123 };
 type Resize<C extends new (...args: any[]) => any> = InstanceType<C>['$props']['autoResize'];
 const chartResize: Resize<typeof IxChart> = true;
 const lineResize: Resize<typeof IxLineChart> = true;
+const areaResize: Resize<typeof IxAreaChart> = true;
+const areaFill: InstanceType<typeof IxAreaChart>['$props']['area'] = 'striped';
+// @ts-expect-error Area component fill must preserve the finite union
+const badAreaComponentFill: InstanceType<typeof IxAreaChart>['$props']['area'] = 'solid';
+const globalArea: InstanceType<GlobalComponents['IxAreaChart']>['$props'] = {categories:['A'],data:[1]};
+// @ts-expect-error Area component resize remains boolean
+const badAreaResize: Resize<typeof IxAreaChart> = 'yes';
 const radarResize: Resize<typeof IxRadarChart> = true;
 const gaugeResize: Resize<typeof IxGaugeChart> = true;
 const bulletResize: Resize<typeof IxBulletChart> = true;
@@ -688,7 +713,7 @@ const doubled: number = instance.doubled;
 instance.increment(1);
 // @ts-expect-error inferred method parameters must remain numeric
 instance.increment('wrong');
-defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxPieChart, IxChart } });
+defineComponent({ components: { Fixture, IxBarChart, IxLineChart, IxAreaChart, IxPieChart, IxChart } });
 `
   const entry = join(app, 'consumer.ts')
   writeFileSync(entry, consumer)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { LineChartProps } from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 import { IxEmpty } from '@idux/components/empty'
 import { addIconDefinitions, Empty } from '@idux/components/icon'
 import { IxRadio, IxRadioGroup } from '@idux/components/radio'
@@ -90,7 +90,7 @@ const samples = [
   },
 ]
 
-const option = computed<LineChartProps>(() => ({
+const option = computed<AreaChartProps>(() => ({
   categories,
   series: samples.map(({ data, ...series }) => {
     const recent = Array.from({ length: recentCount }, (_, index) => {
@@ -156,7 +156,7 @@ const option = computed<LineChartProps>(() => ({
     </IxRadioGroup>
     <p class="trend-description">{{ description }}</p>
     <div class="trend-chart">
-      <IxLineChart
+      <IxAreaChart
         :loading="selected === 'loading' && { text: '图表正在加载中，请稍后...' }"
         v-bind="option"
         style="width: 100%; height: 100%"
@@ -167,7 +167,7 @@ const option = computed<LineChartProps>(() => ({
           simple
           description="未配置数据源，请先配置采集任务"
         />
-      </IxLineChart>
+      </IxAreaChart>
     </div>
   </div>
 </template>

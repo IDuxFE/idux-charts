@@ -6,6 +6,7 @@ import {
   useReactiveAttrs,
   IxBarChart,
   IxLineChart,
+  IxAreaChart,
   IxPieChart,
   IxRadarChart,
   IxGaugeChart,
@@ -65,8 +66,8 @@ const cases = [
   },
   {
     name: 'area',
-    component: IxLineChart,
-    props: { categories: ['A', 'B'], data: [20, 30], area: true },
+    component: IxAreaChart,
+    props: { categories: ['A', 'B'], data: [20, 30] },
   },
   { name: 'liquid', component: IxLiquidFillChart, props: { value: 40, waveAnimation: false } },
   {
