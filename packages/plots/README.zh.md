@@ -32,6 +32,7 @@ Vue.use(VueCompositionAPI)
 | ------------------- | ------------------------ |
 | `IxBarChart`        | 柱状图                   |
 | `IxLineChart`       | 折线图、面积图           |
+| `IxAreaChart`       | 面积图                   |
 | `IxPieChart`        | 饼图、环形图             |
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |

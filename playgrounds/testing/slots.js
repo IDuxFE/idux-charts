@@ -15,6 +15,7 @@ export function createSlotsFixture(
           width: chart?.getWidth(),
           height: chart?.getHeight(),
           readyCount: this.readyCount,
+          areaFill: !!chart?.getOption()?.series?.[0]?.areaStyle,
         }
       }
     },

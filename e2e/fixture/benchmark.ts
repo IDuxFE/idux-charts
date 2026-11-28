@@ -1,5 +1,5 @@
 import { createApp, h, nextTick, shallowRef } from 'vue'
-import { IxLineChart } from '@idux/charts'
+import { IxLineChart, IxAreaChart } from '@idux/charts'
 import type { LineChartProps } from '@idux/charts'
 import type { EChartsType } from 'echarts/core'
 
@@ -39,7 +39,7 @@ async function runChartBenchmark(workload: Workload, points: number, repetitions
     let chart: EChartsType | undefined
     const app = createApp({
       setup: () => () =>
-        h(IxLineChart, {
+        h(stacked ? IxAreaChart : IxLineChart, {
           categories,
           series: data.value,
           ...(stacked && { area: 'striped' }),

@@ -12,6 +12,7 @@ import { init } from 'echarts/core'
 import { IxChart } from '../../core/components'
 import Bar from '../bar/src/Bar'
 import Line from '../line/src/Line'
+import Area from '../area/src/Area'
 import Pie from '../pie/src/Pie'
 import Radar from '../radar/src/Radar'
 import Gauge from '../gauge/src/Gauge'
@@ -60,6 +61,7 @@ for (const [name, component] of [
   ['core', IxChart],
   ['bar', Bar],
   ['line', Line],
+  ['area', Area],
   ['pie', Pie],
   ['radar', Radar],
   ['gauge', Gauge],
@@ -297,6 +299,7 @@ it.each([
     'bar/loading-horizontal.svg',
   ],
   ['line', Line, { data: [1] }, 'line/loading-line.svg'],
+  ['area alias', Area, { data: [1] }, 'line/loading-area.svg'],
   ['area', Line, { data: [1], areaStyle: {} }, 'line/loading-area.svg'],
   ['area from series', Line, { series: [{ data: [1], areaStyle: {} }] }, 'line/loading-area.svg'],
   ['radar', Radar, { indicator: [{ name: 'A', max: 100 }], data: [] }, 'radar/loading.svg'],
@@ -330,6 +333,7 @@ it.each([
 )
 
 it.each([
+  ['area alias', Area, { data: [1] }, 'line/loading-area.svg'],
   ['area', Line, { data: [1], areaStyle: {} }, 'line/loading-area.svg'],
   [
     'ring',
@@ -386,6 +390,7 @@ it.each([
   ['core', IxChart],
   ['bar', Bar],
   ['line', Line],
+  ['area', Area],
   ['pie', Pie],
   ['radar', Radar],
   ['gauge', Gauge],
@@ -447,3 +452,54 @@ it.each([
     expect(instances[1].dispose).not.toHaveBeenCalled()
   },
 )
+
+it('area defaults to fill in native and category modes and forwards its instance API', async () => {
+  const attrs = reactive<Record<string, any>>({ data: [1, 2] })
+  let area: any
+  wrappers.push(
+    mount(
+      defineComponent({
+        setup: () => () =>
+          h(Area, {
+            ...attrs,
+            ref: value => {
+              area = value
+            },
+          }),
+      }),
+    ),
+  )
+  await nextTick()
+  const option = () => instances.at(-1)!.setOption.mock.lastCall![0]
+  expect(option().series[0].areaStyle).toEqual({})
+  expect(area.getEChartsInstance()).toBe(instances[0])
+  attrs.categories = ['A', 'B']
+  await nextTick()
+  expect(option().series[0].areaStyle.color.type).toBe('linear')
+  attrs.area = 'striped'
+  await nextTick()
+  expect(option().series[0].areaStyle).toBeDefined()
+  attrs.area = false
+  await nextTick()
+  expect(option().series[0].areaStyle).toBeUndefined()
+  delete attrs.area
+  await nextTick()
+  expect(option().series[0].areaStyle.color.type).toBe('linear')
+})
+
+it('area retains its native fill when optional styles are undefined and respects explicit styles', async () => {
+  const attrs = reactive<Record<string, any>>({ data: [1, 2], areaStyle: undefined })
+  wrappers.push(mount(defineComponent({ setup: () => () => h(Area, attrs) })))
+  await nextTick()
+  const option = () => instances.at(-1)!.setOption.mock.lastCall![0]
+  expect(option().series[0].areaStyle).toEqual({})
+  attrs.areaStyle = { color: '#123456', opacity: 0.4 }
+  await nextTick()
+  expect(option().series[0].areaStyle).toMatchObject(attrs.areaStyle)
+  attrs.areaStyle = undefined
+  await nextTick()
+  expect(option().series[0].areaStyle).toEqual({})
+  attrs.area = false
+  await nextTick()
+  expect(option().series[0].areaStyle).toBeUndefined()
+})

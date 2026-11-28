@@ -4,7 +4,7 @@
 
 ## 共享实现与模式边界
 
-面积图由折线的 area / areaStyle 能力实现，没有独立的 Area 系列实现和发布入口。[Line.ts](../../packages/plots/line/src/Line.ts)协调历史原生路径与分类路径，分类模式由 `categories !== undefined` 选择。没有 categories 时保留[useLineOption](../../packages/plots/line/src/useLineOption.ts)的原生配置兼容。
+面积图由折线的 area / areaStyle 能力实现，`IxAreaChart` 是默认开启填充的轻量入口，内部直接渲染 `IxLineChart`，共用其实现。[Line.ts](../../packages/plots/line/src/Line.ts)协调历史原生路径与分类路径，分类模式由 `categories !== undefined` 选择。没有 categories 时保留[useLineOption](../../packages/plots/line/src/useLineOption.ts)的原生配置兼容。
 
 分类轴的采样槽等距排列。实际时间间隔不均且需要表达其距离时，调用方使用原生时间轴；组件不会根据业务时间自动重新解释 categories。
 
@@ -36,7 +36,7 @@
 
 普通数据刷新保留符合恢复条件的图例／缩放状态；显式相关配置变化接管状态。空、全零、缺失、loading 和插槽是不同状态，不能通过共用一条“无数据”分支抹平。
 
-原生 processor 时序和线／面积路径结构是主要升级风险。新增插值或缺报样式时，同时核对多系列混合缺报、connectNulls、堆叠和缩放；新增独立 Area 组件必须先证明存在不同于 Line 的领域职责。
+原生 processor 时序和线／面积路径结构是主要升级风险。新增插值或缺报样式时，同时核对多系列混合缺报、connectNulls、堆叠和缩放。
 
 ## 验证入口
 

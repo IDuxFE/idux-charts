@@ -30,6 +30,7 @@ Vue.use(VueCompositionAPI)
 | ------------------- | ------------------------ |
 | `IxBarChart`        | 柱状图                   |
 | `IxLineChart`       | 折线图、面积图           |
+| `IxAreaChart`       | 面积图                   |
 | `IxPieChart`        | 饼图、环形图             |
 | `IxRadarChart`      | 雷达图                   |
 | `IxGaugeChart`      | 仪表盘                   |
@@ -65,7 +66,7 @@ const option: LineChartProps = {
 
 图表组件会注册自身所需的 ECharts 模块。组件也支持全局注册：Vue 3 使用 `app.use(IxLineChart)`，Vue 2 使用 `Vue.use(IxLineChart)`。
 
-ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及类型。支持 `bar`、`line`（含面积图）、`pie`、`radar`、`gauge`、`liquid-fill`、`bullet`、`word-cloud` 和 `map`。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。总入口会注册全套图表模块。
+ESM 项目可通过 `@idux/charts/line` 等子入口导入单个图表系列及类型。支持 `bar`、`line`、`area`、`pie`、`radar`、`gauge`、`liquid-fill`、`bullet`、`word-cloud` 和 `map`。基础组件、ECharts 主题 token 和共享 Tooltip 工具可从 `@idux/charts/core` 导入，图形主题 token 从各图表子入口导入。总入口会注册全套图表模块。
 
 ## 配置与主题
 

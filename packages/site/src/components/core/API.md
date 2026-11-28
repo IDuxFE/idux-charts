@@ -130,7 +130,7 @@ Gauge 和 LiquidFill 的角色文字样式使用 `PlotTextStyle`，支持 `color
 
 图表在生成配置时按字段合并对象，数组由优先级更高的配置整体替换。组件属性覆盖图表注入默认值。Radar、Gauge、LiquidFill 和 Map 的显式 `series` 整体替换生成系列。图表各自负责内置布局所需的轴、数据和辅助图形。分类 Bar、Line / Area 在数据清空时移除旧系列及辅助图形。
 
-`IxChart` 与 Bar、Line、Pie 的原生模式沿用 ECharts 的默认合并策略。内置布局默认使用 `notMerge: true`。显式传入 `notMerge: false` 时，安全的更新沿用 ECharts 合并。移除配置时会应用完整配置以清理旧状态。分类 Bar、Line 和 Area 在缩放与图例配置未变时会保留用户选择，自动 Pie 和 Radar 在图例选择配置及名称未变时会保留图例选择。
+`IxChart` 与 Bar、Line、Area、Pie 的原生模式沿用 ECharts 的默认合并策略。内置布局默认使用 `notMerge: true`。显式传入 `notMerge: false` 时，安全的更新沿用 ECharts 合并。移除配置时会应用完整配置以清理旧状态。分类 Bar、Line 和 Area 在缩放与图例配置未变时会保留用户选择，自动 Pie 和 Radar 在图例选择配置及名称未变时会保留图例选择。
 
 地图的视角保留和重置规则见<a href="./map">Map API 的「交互状态与数据诊断」</a>。
 

@@ -15,6 +15,7 @@ import {
   IxBulletChart,
   IxWordCloudChart,
   IxLineChart,
+  IxAreaChart,
   IxLiquidFillChart,
   IxPieChart,
   IxRadarChart,
@@ -94,7 +95,9 @@ it('clears a native title without touching the remaining chart option', async ()
 it.each([
   ['bar', IxBarChart, undefined],
   ['line', IxLineChart, undefined],
-  ['area', IxLineChart, 'striped'],
+  ['area', IxAreaChart, 'striped'],
+  ['area default', IxAreaChart, undefined],
+  ['legacy area', IxLineChart, 'striped'],
 ] as const)(
   '%s preserves zoom and selection on data refresh and removes stale series',
   async (_, component, area) => {
@@ -149,6 +152,7 @@ it('mounts Radar before dimensions are ready and applies partial native override
 it.each([
   [IxBarChart, BAR_CHART_TOKEN],
   [IxLineChart, LINE_CHART_TOKEN],
+  [IxAreaChart, LINE_CHART_TOKEN],
 ] as const)(
   'uses chart defaults in both modes and reserves category labels for categories',
   (component, token) => {
@@ -309,6 +313,7 @@ it('exposes the same instance as onReady for every chart, including after reinit
     IxChart,
     IxBarChart,
     IxLineChart,
+    IxAreaChart,
     IxPieChart,
     IxRadarChart,
     IxGaugeChart,
@@ -332,7 +337,7 @@ it('exposes the same instance as onReady for every chart, including after reinit
 it.each([
   ['bar', IxBarChart, { layout: 'horizontal' }],
   ['line', IxLineChart, {}],
-  ['stacked area', IxLineChart, { area: 'striped', stack: 'total' }],
+  ['stacked area', IxAreaChart, { area: 'striped', stack: 'total' }],
 ] as const)(
   '%s keeps a historical window and follows the latest edge on append',
   async (_, component, extra) => {
@@ -373,7 +378,7 @@ it.each([
   },
 )
 
-it.each([IxChart, IxLineChart])(
+it.each([IxChart, IxLineChart, IxAreaChart])(
   'restores zoom and legend state on theme changes',
   async component => {
     const categories = ['A', 'B', 'C', 'D', 'E']
@@ -410,6 +415,7 @@ it.each([
   IxChart,
   IxBarChart,
   IxLineChart,
+  IxAreaChart,
   IxPieChart,
   IxRadarChart,
   IxGaugeChart,
@@ -576,4 +582,10 @@ it('bullet clears an invalid configuration and recovers on the same chart instan
   } finally {
     warn.mockRestore()
   }
+})
+
+it('registers the Area alias under its own component name', () => {
+  const component = vi.fn()
+  IxAreaChart.install({ component })
+  expect(component).toHaveBeenCalledExactlyOnceWith('IxAreaChart', IxAreaChart)
 })

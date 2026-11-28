@@ -2,6 +2,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     IxChart: (typeof import('@idux/charts-core'))['IxChart']
     IxBarChart: (typeof import('@idux/charts-plots'))['IxBarChart']
+    IxAreaChart: (typeof import('@idux/charts-plots'))['IxAreaChart']
     IxLineChart: (typeof import('@idux/charts-plots'))['IxLineChart']
     IxRadarChart: (typeof import('@idux/charts-plots'))['IxRadarChart']
     IxWordCloudChart: (typeof import('@idux/charts-plots'))['IxWordCloudChart']

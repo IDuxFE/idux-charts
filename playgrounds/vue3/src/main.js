@@ -4,7 +4,7 @@ import { createSlotsFixture } from '../../testing/slots.js'
 import Theme from './theme.js'
 import Basic from './basic.js'
 import { createApp, h } from 'vue'
-import { IxBarChart, IxLineChart, IxPieChart, version } from '@idux/charts'
+import { IxBarChart, IxAreaChart, IxLineChart, IxPieChart, version } from '@idux/charts'
 import { getInstanceByDom, use } from 'echarts/core'
 import { GraphicComponent } from 'echarts/components'
 use([GraphicComponent])
@@ -125,13 +125,16 @@ window.chartState = () =>
       background: option?.backgroundColor,
     }
   })
+const AreaSlots = createSlotsFixture(h, IxAreaChart, false)
 const Slots = createSlotsFixture(h, IxBarChart, false)
 const WordCloud = createWordCloudFixture(h, IxWordCloudChart, false)
 createApp(
   location.search.includes('word-cloud')
     ? WordCloud
     : location.search.includes('slots')
-      ? Slots
+      ? location.search.includes('area')
+        ? AreaSlots
+        : Slots
       : location.search.includes('theme')
         ? Theme
         : location.search.includes('basic')

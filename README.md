@@ -80,7 +80,7 @@ See [software design](docs/design/README.md) for architecture and component deci
 
 ### TypeScript prop types
 
-For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Pie, Radar, Gauge, Bullet, WordCloud, LiquidFill, or Map) from `@idux/charts`:
+For component wrappers and Vue 2.6 type adapters, import `ChartPublicProps` or the corresponding `*ChartPublicProps` alias (Bar, Line, Area, Pie, Radar, Gauge, Bullet, WordCloud, LiquidFill, or Map) from `@idux/charts`:
 
 ```ts
 import type { LineChartPublicProps } from '@idux/charts'

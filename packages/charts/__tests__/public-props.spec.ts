@@ -21,6 +21,10 @@ import type {
   BarChartProps,
   BarChartPublicProps,
   LineChartProps,
+  AreaChartProps,
+  AreaChartPublicProps,
+  AreaChartDataItem,
+  LineChartDataItem,
   LineChartPublicProps,
   PieChartProps,
   PieChartAlign,
@@ -31,6 +35,11 @@ type HasStringIndex<Props> = string extends keyof Props ? true : false
 type HasNumberIndex<Props> = number extends keyof Props ? true : false
 
 describe('public chart prop types', () => {
+  it('exports Area aliases for the shared Line configuration', () => {
+    expectTypeOf<AreaChartProps>().toEqualTypeOf<LineChartProps>()
+    expectTypeOf<AreaChartPublicProps>().toEqualTypeOf<LineChartPublicProps>()
+    expectTypeOf<AreaChartDataItem>().toEqualTypeOf<LineChartDataItem>()
+  })
   it('exports each public type through the owning package and the umbrella package', () => {
     expectTypeOf<ChartPublicProps>().toEqualTypeOf<CorePublicProps>()
     expectTypeOf<BarChartPublicProps>().toEqualTypeOf<PlotBarPublicProps>()

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { useLinearGradient, getAlphaColor } from '@idux/charts'
-import type { LineChartProps } from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 
 const data = [123, 324, 156, 244, 188, 287, 216]
 
-const lineOption: LineChartProps = {
+const lineOption: AreaChartProps = {
   name: '访问次数',
   smooth: true,
   lineStyle: {
@@ -26,7 +26,7 @@ const lineOption: LineChartProps = {
 }
 </script>
 <template>
-  <IxLineChart
+  <IxAreaChart
     class="area-shadow-chart"
     style="width: 100%; height: 300px"
     :data="data"

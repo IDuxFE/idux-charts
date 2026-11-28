@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LineChartProps } from '@idux/charts'
+import type { AreaChartProps } from '@idux/charts'
 import { IxCard } from '@idux/components/card'
 import { IxHeader } from '@idux/components/header'
 
@@ -14,7 +14,7 @@ const series = [
   },
 ]
 
-const option: LineChartProps = {
+const option: AreaChartProps = {
   categories,
   series,
   area: 'striped',
@@ -39,7 +39,7 @@ const option: LineChartProps = {
     <template #header>
       <IxHeader title="近七天趋势" size="sm" />
     </template>
-    <IxLineChart v-bind="option" style="width: 100%; height: 300px" />
+    <IxAreaChart v-bind="option" style="width: 100%; height: 300px" />
   </IxCard>
 </template>
 
