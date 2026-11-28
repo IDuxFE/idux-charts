@@ -1,5 +1,17 @@
 # @idux/charts
 
+## 1.8.0
+
+### Minor Changes
+
+- c722ad6: Add IxAreaChart as a lightweight Line chart wrapper with area fill enabled by default, Area type aliases, and an @idux/charts/area entry.
+
+### Patch Changes
+
+- Updated dependencies [c722ad6]
+  - @idux/charts-plots@1.8.0
+  - @idux/charts-core@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes
