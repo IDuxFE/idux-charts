@@ -16,6 +16,8 @@ export default withChartProps<LineChartProps>()(
     },
     methods: plotInstanceMethods,
     setup(props, context) {
+      // Keep a slot function even when Vue 2 initially omits an empty normal slot.
+      const slots = { default: () => context.slots.default?.() }
       return () => {
         const area = props.area ?? true
         return h(
@@ -31,9 +33,9 @@ export default withChartProps<LineChartProps>()(
               (context as PlotContext).listeners,
             ),
             ref: 'chart',
-            ...(isVue2 ? { scopedSlots: context.slots } : {}),
+            ...(isVue2 ? { scopedSlots: slots } : {}),
           },
-          isVue2 ? undefined : context.slots,
+          isVue2 ? undefined : slots,
         )
       }
     },

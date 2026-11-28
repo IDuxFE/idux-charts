@@ -141,7 +141,10 @@ window.chartState = () =>
     }
   })
 const coreSlots = location.search.includes('core-slots')
-const AreaSlots = createSlotsFixture(null, IxAreaChart, true)
+const AreaSlots = createSlotsFixture(null, IxAreaChart, true, {
+  normalSlot: new URLSearchParams(location.search).has('normal-slot'),
+  initialMode: new URLSearchParams(location.search).has('initially-absent') ? 'absent' : 'element',
+})
 const Slots = createSlotsFixture(undefined, coreSlots ? IxChart : IxBarChart, true, {
   native: coreSlots,
   initialMode: new URLSearchParams(location.search).has('initially-absent') ? 'absent' : 'element',

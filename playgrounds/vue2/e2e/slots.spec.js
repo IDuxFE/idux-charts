@@ -74,3 +74,30 @@ for (const kind of ['bar', 'area']) {
     await expect(page.locator('.ix-chart-overlay')).toHaveCount(0)
   })
 }
+
+test('area normal default slot starts empty and survives normal → empty → normal cycles', async ({
+  page,
+}) => {
+  const errors = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/?slots&area&normal-slot&initially-absent')
+  await expect(page.locator('.ix-chart-canvas svg')).toBeVisible()
+  await expect(page.locator('.ix-chart-overlay')).toHaveCount(0)
+  const state = () => page.evaluate(() => window.slotFixtureState())
+  const before = await state()
+  expect(before).toMatchObject({ width: 400, height: 240, readyCount: 1, areaFill: true })
+  expect(before.id).toEqual(expect.any(String))
+  expect(before.data).toHaveLength(2)
+  for (let index = 0; index < 3; index++) {
+    await page.getByRole('button', { name: 'Show content', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible()
+    await expect.poll(async () => (await state()).data).toEqual([])
+    // Empty data clears the series, including its areaStyle.
+    expect(await state()).toEqual({ ...before, data: [], areaFill: false })
+    await page.getByRole('button', { name: 'Remove slot', exact: true }).click()
+    await expect(page.locator('.ix-chart-overlay')).toHaveCount(0)
+    await expect.poll(state).toEqual(before)
+    await expect(page.locator('.ix-chart-canvas svg')).toBeVisible()
+  }
+  expect(errors).toEqual([])
+})
